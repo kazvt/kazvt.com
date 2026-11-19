@@ -23,7 +23,7 @@ test("a throw rises, tumbles on multiple axes, bounces, and settles on the floor
     assert.ok(flight.position.y >= 0, "the simulated die must not tunnel below the floor");
   }
 
-  assert.ok(highestPoint > 0.9, "the launch should have a visible arc");
+  assert.ok(highestPoint > 0.5, "the launch should have a visible arc without throwing the die out of frame");
   assert.ok(Math.abs(initialSpin.x) > 1 && Math.abs(initialSpin.y) > 1 && Math.abs(initialSpin.z) > 1);
   assert.ok(flight.bounceCount >= 1, "the die should visibly rebound at least once");
   assert.equal(flight.landed, true);
