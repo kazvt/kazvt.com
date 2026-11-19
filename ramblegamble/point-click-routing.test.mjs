@@ -25,6 +25,10 @@ test("clicks outside the scene machines do nothing", () => {
   assert.equal(resolvePointClick("background", ""), "");
 });
 
+test("the dice-framed doorway opens dice mode directly", () => {
+  assert.equal(resolvePointClick("dice-door"), "open-dice");
+});
+
 test("screen-edge navigation resolves to fixed left, right, and back zones", () => {
   assert.equal(resolvePointClickZone({ x: 10, y: 250, width: 1280, height: 720 }), "left");
   assert.equal(resolvePointClickZone({ x: 1270, y: 250, width: 1280, height: 720 }), "right");

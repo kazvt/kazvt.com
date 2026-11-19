@@ -8,7 +8,7 @@
     <link rel="canonical" href="https://kazvt.com/rg/">
     <title>Ramble Gamble - kazvt</title>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
-    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=arial-override-20261119-v1">
+    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=dice-mode-20261119-v1">
     <link rel="stylesheet" href="/ramblegamble/host-console.css?v=trivia-game-feedback-20261119-v3">
     <script type="importmap">
       {
@@ -18,7 +18,8 @@
         }
       }
     </script>
-  <script type="module" src="/ramblegamble/ramblegamble.js?v=dice-doorway-opening-20261119-v2"></script>
+    <script type="module" src="/ramblegamble/ramblegamble.js?v=dice-mode-door-20261119-v1"></script>
+    <script type="module" src="/ramblegamble/dice-mode.js?v=dice-mode-20261119-v1"></script>
     <script type="module" src="/ramblegamble/trivia-ui.js?v=trivia-answer-modes-20261119-v3"></script>
   </head>
   <body class="ramble-page" data-theme="p2">
@@ -31,6 +32,39 @@
       <p class="rg-result" id="rg-result" hidden></p>
       <div class="rg-loading" id="rg-loading">Loading the 3D preview...</div>
     </main>
+
+    <dialog class="rg-dice-dialog" id="rg-dice-dialog" aria-labelledby="rg-dice-title">
+      <iframe class="rg-dice-liquid" id="rg-dice-liquid" title="Full-screen liquid animation" aria-hidden="true" tabindex="-1"></iframe>
+      <canvas class="rg-dice-canvas" id="rg-dice-canvas" aria-hidden="true"></canvas>
+      <div class="rg-dice-shell">
+        <header class="rg-dice-header">
+          <div>
+            <p class="rg-dice-kicker">KAZVT ARCADE</p>
+            <h1 id="rg-dice-title">DICE TABLE</h1>
+          </div>
+          <button class="rg-dice-return" id="rg-dice-return" type="button">BACK TO THE ROOM</button>
+        </header>
+        <div class="rg-dice-layout">
+          <section class="rg-die-picker rg-die-picker-left" aria-labelledby="rg-die-left-title">
+            <h2 id="rg-die-left-title">LEFT DIE</h2>
+            <div class="rg-die-faces" id="rg-die-left-faces"></div>
+          </section>
+          <section class="rg-dice-center" aria-label="Dice roll controls">
+            <div class="rg-dice-status" id="rg-dice-status" role="status" aria-live="polite">SET THE FACES, THEN ROLL</div>
+            <div class="rg-dice-outcomes" aria-live="polite" aria-label="Last roll results">
+              <span id="rg-dice-outcome-left">LEFT: -</span>
+              <span id="rg-dice-outcome-right">RIGHT: -</span>
+            </div>
+            <button class="rg-dice-roll" id="rg-dice-roll" type="button" disabled>ROLL BOTH DICE</button>
+            <p class="rg-dice-help">Click any face card to cycle its berry.</p>
+          </section>
+          <section class="rg-die-picker rg-die-picker-right" aria-labelledby="rg-die-right-title">
+            <h2 id="rg-die-right-title">RIGHT DIE</h2>
+            <div class="rg-die-faces" id="rg-die-right-faces"></div>
+          </section>
+        </div>
+      </div>
+    </dialog>
 
     <dialog class="rg-console" id="rg-console" aria-labelledby="rg-console-title">
       <div class="rg-console-frame">
