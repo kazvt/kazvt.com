@@ -1,8 +1,8 @@
 export const DICE_ASSET_CYCLE = Object.freeze([
-  Object.freeze({ id: "blank", label: "Blank" }),
-  Object.freeze({ id: "erinberry", label: "Erinberry" }),
-  Object.freeze({ id: "faroeberry", label: "Faroeberry" }),
-  Object.freeze({ id: "kazberry", label: "Kazberry" }),
+  Object.freeze({ id: "blank", label: "Blank", imageSrc: null }),
+  Object.freeze({ id: "erinberry", label: "Erinberry", imageSrc: "/ramblegamble/assets/berries/erinberry.png" }),
+  Object.freeze({ id: "faroeberry", label: "Faroeberry", imageSrc: "/ramblegamble/assets/berries/faroeberry.png" }),
+  Object.freeze({ id: "kazberry", label: "Kazberry", imageSrc: "/ramblegamble/assets/berries/kazberry.png" }),
 ]);
 
 export const DICE_FACE_ORDER = Object.freeze([
