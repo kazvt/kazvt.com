@@ -1453,7 +1453,7 @@ import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from ".
     const canvas = document.createElement("canvas");
     canvas.className = "rg-draw-canvas";
     canvas.width = 700;
-    canvas.height = 420;
+    canvas.height = 700;
     canvas.setAttribute("aria-label", "Drawing surface. Draw in red over the image.");
     wrapper.append(canvas);
     stageItems.append(wrapper);
@@ -1463,9 +1463,11 @@ import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from ".
     context.lineCap = "round";
     context.lineJoin = "round";
     const stored = drawingData.get(currentRound + ":" + currentDifficulty) || content.drawing;
+    let restored = !stored;
     if (stored) {
       const image = new Image();
-      image.onload = () => context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      image.onload = () => { context.drawImage(image, 0, 0, canvas.width, canvas.height); restored = true; };
+      image.onerror = () => { restored = true; };
       image.src = stored;
     }
     let drawing = false;
@@ -1474,8 +1476,9 @@ import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from ".
       return { x: (event.clientX - rect.left) * (canvas.width / rect.width), y: (event.clientY - rect.top) * (canvas.height / rect.height) };
     };
     canvas.addEventListener("pointerdown", (event) => {
+      if (!restored || !event.isPrimary || (event.button != null && event.button !== 0)) return;
       drawing = true;
-      canvas.setPointerCapture(event.pointerId);
+      try { canvas.setPointerCapture(event.pointerId); } catch { /* Pointer capture can fail if a device cancels immediately. */ }
       const p = point(event);
       context.beginPath();
       context.moveTo(p.x, p.y);
@@ -1486,13 +1489,15 @@ import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from ".
       context.lineTo(p.x, p.y);
       context.stroke();
     });
-    canvas.addEventListener("pointerup", () => {
+    const finishDrawing = () => {
       if (!drawing) return;
       drawing = false;
       const data = canvas.toDataURL("image/png");
       drawingData.set(currentRound + ":" + currentDifficulty, data);
       writeLevelField("drawing", data);
-    });
+    };
+    canvas.addEventListener("pointerup", finishDrawing);
+    canvas.addEventListener("pointercancel", finishDrawing);
     const clear = document.createElement("button");
     clear.type = "button";
     clear.className = "rg-stage-button";
@@ -1580,7 +1585,8 @@ import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from ".
       answerArea.hidden = true;
       return;
     }
-    if (isChoiceMode(format.mode)) renderChoiceStage(format, content);
+    if (format.mode === "number-grid") renderNumberGrid(content);
+    else if (isChoiceMode(format.mode)) renderChoiceStage(format, content);
     else if (format.mode === "short-answer") renderShortAnswer();
     else if (format.mode === "timeline") renderTimeline(format, content);
     else if (format.mode === "categorize-images") renderCategorize(format, content);
