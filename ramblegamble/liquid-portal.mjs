@@ -26,7 +26,7 @@ export const LIQUID_PORTAL_WIDTH = 512;
 export const LIQUID_PORTAL_HEIGHT = 1024;
 
 function formatCssNumber(value) {
-  const rounded = Number(value.toFixed(10));
+  const rounded = Number(value.toFixed(15));
   return String(Object.is(rounded, -0) ? 0 : rounded);
 }
 
