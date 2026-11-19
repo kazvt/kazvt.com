@@ -14,25 +14,8 @@ export const DICE_FACE_ORDER = Object.freeze([
   Object.freeze({ id: "right", label: "RIGHT", normal: Object.freeze([1, 0, 0]), rotation: Object.freeze([0, Math.PI / 2, 0]) }),
 ]);
 
-const ASSET_IDS = new Set(DICE_ASSET_CYCLE.map(({ id }) => id));
-
 export function nextDiceAsset(current) {
   const currentIndex = DICE_ASSET_CYCLE.findIndex(({ id }) => id === current);
   if (currentIndex < 0) return DICE_ASSET_CYCLE[0];
   return DICE_ASSET_CYCLE[(currentIndex + 1 + DICE_ASSET_CYCLE.length) % DICE_ASSET_CYCLE.length];
-}
-
-export function chooseDiceOutcome(assignments, random = Math.random) {
-  if (!Array.isArray(assignments) || assignments.length !== DICE_FACE_ORDER.length) {
-    throw new TypeError("A die needs exactly six configured face assets.");
-  }
-  if (!assignments.every((asset) => ASSET_IDS.has(asset))) {
-    throw new TypeError("A die face uses an unknown berry asset.");
-  }
-  const sample = random();
-  if (!Number.isFinite(sample) || sample < 0 || sample > 1) {
-    throw new RangeError("The random sample must be between zero and one.");
-  }
-  const index = Math.min(DICE_FACE_ORDER.length - 1, Math.floor(sample * DICE_FACE_ORDER.length));
-  return Object.freeze({ index, face: DICE_FACE_ORDER[index], asset: assignments[index] });
 }
