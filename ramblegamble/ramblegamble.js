@@ -7,6 +7,7 @@ import {
 } from "./point-click-routing.js?v=dice-door-focus-20261119-v1";
 import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
 import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-door-wall-target-20261120-v1";
+import { subscribePointScores } from "./points-store.mjs?v=points-console-20261120-v1";
 
 (() => {
   "use strict";
@@ -18,6 +19,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   const billboardLayer = document.getElementById("rg-billboard-layer");
   const gameCursor = document.getElementById("rg-game-cursor");
   const gameCursorImage = document.getElementById("rg-game-cursor-image");
+  const pointsHud = document.getElementById("rg-points-hud");
   const loading = document.getElementById("rg-loading");
   const result = document.getElementById("rg-result");
   const readyScreen = document.getElementById("rg-ready-screen");
@@ -1495,6 +1497,17 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     const playback = cheerSound.play();
     if (playback?.catch) playback.catch((error) => console.warn("Cheer sound could not play:", error));
   }
+
+  subscribePointScores((scores) => {
+    if (!pointsHud) return;
+    pointsHud.replaceChildren();
+    for (const name of ["faroe", "erin", "kaz"]) {
+      const score = document.createElement("span");
+      score.textContent = `${name.toUpperCase()} ${scores[name]}`;
+      pointsHud.append(score);
+    }
+    pointsHud.hidden = !Object.values(scores).some((score) => score > 0);
+  });
 
   function pointClickAt(clientX, clientY) {
     if (!gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen || cameraTransition) return;

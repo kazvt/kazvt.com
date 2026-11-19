@@ -85,6 +85,27 @@ body.ramble-page *::after {
   opacity: 0;
 }
 
+.rg-points-hud {
+  position: absolute;
+  z-index: 4;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid color-mix(in srgb, var(--ink) 72%, transparent);
+  color: var(--ink);
+  background: color-mix(in srgb, var(--paper) 86%, transparent);
+  box-shadow: 2px 2px 0 color-mix(in srgb, var(--blue) 70%, transparent);
+  font-size: clamp(10px, 1.2vw, 13px);
+  font-weight: 800;
+  letter-spacing: .04em;
+  pointer-events: none;
+}
+.rg-points-hud[hidden],
+.rg-preview.is-menu .rg-points-hud { display: none; }
+.rg-points-hud span { padding: 3px 5px; white-space: nowrap; }
+
 .rg-billboard {
   position: absolute;
   top: 0;

@@ -2,6 +2,15 @@ export const RG_CONTESTANTS = Object.freeze(["faroe", "erin", "kaz"]);
 
 const STORAGE_KEY = "ramblegamble.points.v1";
 const CHANNEL_NAME = "ramblegamble.points.v1";
+let sharedChannel = null;
+
+function getChannel() {
+  if (sharedChannel) return sharedChannel;
+  if (typeof BroadcastChannel === "undefined") return null;
+  try { sharedChannel = new BroadcastChannel(CHANNEL_NAME); }
+  catch { sharedChannel = null; }
+  return sharedChannel;
+}
 
 function emptyScores() {
   return Object.fromEntries(RG_CONTESTANTS.map((name) => [name, 0]));
@@ -33,13 +42,7 @@ export function writePointScores(value) {
   } catch {
     persisted = false;
   }
-  try {
-    const channel = new BroadcastChannel(CHANNEL_NAME);
-    channel.postMessage({ type: "scores", scores });
-    channel.close();
-  } catch {
-    // The storage event is the fallback for browsers without BroadcastChannel.
-  }
+  getChannel()?.postMessage({ type: "scores", scores });
   return { scores, persisted };
 }
 
@@ -57,19 +60,15 @@ export function subscribePointScores(onChange) {
     try { publish(JSON.parse(event.newValue || "{}")); }
     catch { publish(emptyScores()); }
   };
-  let channel = null;
-  try {
-    channel = new BroadcastChannel(CHANNEL_NAME);
-    channel.addEventListener("message", (event) => {
-      if (event.data?.type === "scores") publish(event.data.scores);
-    });
-  } catch {
-    channel = null;
-  }
+  const channel = getChannel();
+  const onMessage = (event) => {
+    if (event.data?.type === "scores") publish(event.data.scores);
+  };
+  channel?.addEventListener("message", onMessage);
   window.addEventListener("storage", onStorage);
   publish(readPointScores());
   return () => {
     window.removeEventListener("storage", onStorage);
-    channel?.close();
+    channel?.removeEventListener("message", onMessage);
   };
 }
