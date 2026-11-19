@@ -20,6 +20,15 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   const gameCursorImage = document.getElementById("rg-game-cursor-image");
   const loading = document.getElementById("rg-loading");
   const result = document.getElementById("rg-result");
+  const readyScreen = document.getElementById("rg-ready-screen");
+  const goButton = document.getElementById("rg-go");
+  const pauseMenu = document.getElementById("rg-pause-menu");
+  const menuMarquee = document.getElementById("rg-marquee-video");
+  const playButton = document.getElementById("rg-play");
+  const controlsOpenButton = document.getElementById("rg-controls-open");
+  const consoleOpenButton = document.getElementById("rg-console-open");
+  const controlsDialog = document.getElementById("rg-controls-dialog");
+  const controlsCloseButton = document.getElementById("rg-controls-close");
   const cheerSound = new Audio("/ramblegamble/assets/sfx/cheer.ogg?v=audience-applause-2");
   cheerSound.preload = "auto";
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -99,6 +108,8 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   let leverMotion = null;
   const pickQuestion = createQuestionPicker();
   let playing = false;
+  let gameStarted = false;
+  let pauseMenuOpen = false;
   let sceneReady = false;
   let diceModeOpen = false;
   let diceModeVisibility = null;
@@ -222,12 +233,19 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     createSkybox();
 
     rouletteRig = new THREE.Group();
+    rouletteRig.visible = !pauseMenuOpen;
     scene.add(rouletteRig);
 
     slotRig = new THREE.Group();
+    slotRig.visible = !pauseMenuOpen;
     slotRig.rotation.y = Math.PI;
     scene.add(slotRig);
 
+    resizeObserver = new ResizeObserver(fitCamera);
+    resizeObserver.observe(preview);
+    window.addEventListener("resize", fitCamera, { passive: true });
+    fitCamera();
+    if (!document.hidden && !animationFrame) animationFrame = requestAnimationFrame(animate);
   }
 
   function createSkybox() {
@@ -510,7 +528,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   }
 
   function fitCamera() {
-    if (!camera || !renderer || !sceneReady) return;
+    if (!camera || !renderer) return;
     const width = Math.max(1, preview.clientWidth);
     const height = Math.max(1, preview.clientHeight);
     const aspect = width / height;
@@ -518,6 +536,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     camera.updateProjectionMatrix();
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
     renderer.setSize(width, height, false);
+    if (!sceneReady) return;
 
     const pose = getCameraPoseForView(currentView, aspect);
     if (!pose) return;
