@@ -14,7 +14,7 @@ test("console commands inspect and add only the fixed contestants", () => {
 test("console rejects unsafe totals and malformed commands", () => {
   assert.equal(parsePointsCommand("points add kaz 0").action, "error");
   assert.equal(parsePointsCommand("points add kaz -1").action, "error");
-  assert.equal(parsePointsCommand("points set erin 1000001").action, "error");
+  assert.equal(parsePointsCommand("points set erin 9007199254740992").action, "error");
   assert.equal(parsePointsCommand("points set erin 0").action, "set");
   assert.deepEqual(parsePointsCommand("points reset"), { action: "reset", name: null });
   assert.deepEqual(parsePointsCommand("points reset @kaz"), { action: "reset", name: "kaz" });

@@ -10,7 +10,7 @@ function parseName(value) {
 function parseWholeNumber(value, { positive = false } = {}) {
   if (!/^\d+$/.test(String(value ?? ""))) return null;
   const number = Number(value);
-  if (!Number.isSafeInteger(number) || number > 1000000 || (positive && number < 1)) return null;
+  if (!Number.isSafeInteger(number) || (positive && number < 1)) return null;
   return number;
 }
 
