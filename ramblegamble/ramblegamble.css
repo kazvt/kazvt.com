@@ -76,6 +76,13 @@ body.ramble-page *::after {
   inset: 0;
   overflow: hidden;
   pointer-events: none;
+  opacity: 1;
+  transition: opacity 320ms ease;
+  will-change: opacity;
+}
+
+.rg-billboard-layer.rg-billboards-fading {
+  opacity: 0;
 }
 
 .rg-billboard {
@@ -258,6 +265,18 @@ body.ramble-page *::after {
   color: var(--ink);
   background: transparent;
   font-family: Arial, Helvetica, sans-serif !important;
+  opacity: 0;
+  transition: opacity 320ms ease;
+}
+
+.rg-dice-dialog[open] {
+  opacity: 1;
+}
+
+.rg-dice-dialog[open].rg-dice-entering,
+.rg-dice-dialog[open].rg-dice-exiting {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .rg-dice-dialog::backdrop {
@@ -559,6 +578,11 @@ body.ramble-page *::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .rg-billboard-layer,
+  .rg-dice-dialog {
+    transition-duration: .01ms;
+  }
+
   .rg-die-face-button,
   .rg-dice-return,
   .rg-dice-roll {
