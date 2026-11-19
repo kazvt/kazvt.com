@@ -60,7 +60,7 @@ function normalizeMode(value) {
 function normalizeSelectionRule(value) {
   const raw = String(value ?? "").trim().toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ");
   if (/^(?:all|both|all correct|all answers|require all|select all|every|every correct answer|all of them|multiple)$/.test(raw) || /\b(?:require|select|choose)\s+all\b|\b(?:both|every)\s+(?:correct\s+)?(?:answers?|options?|choices?)\b/.test(raw)) return "all";
-  if (/^(?:any|one|one correct answer|any one|either|single|at least one|one of them)$/.test(raw) || /\b(?:any one|one of|either|at least one)\b/.test(raw)) return "any";
+  if (/^(?:any|one|one correct answer|any one|either|single|at least one|one of them)$/.test(raw) || /\b(?:any one|one of|either|at least one|only one|just one)\b/.test(raw) || /\b(?:identify|choose|select|accept)\s+one\s+(?:correct\s+)?(?:answer|option|choice)\b/.test(raw)) return "any";
   return "";
 }
 
@@ -348,7 +348,7 @@ function parseQuestionObjects(questions) {
 }
 
 function normalizeAnswerObjects(value) {
-  if (Array.isArray(value)) return value.map((entry) => typeof entry === "string" ? entry.trim() : safeString(entry?.text ?? entry?.label ?? entry?.answer).trim()).filter(Boolean);
+  if (Array.isArray(value)) return value.map((entry) => typeof entry === "string" ? entry.trim() : Number.isInteger(entry) ? String(entry) : safeString(entry?.text ?? entry?.label ?? entry?.answer).trim()).filter(Boolean);
   if (typeof value === "string") return splitLooseList(value);
   return value == null ? [] : [safeString(value).trim()].filter(Boolean);
 }
