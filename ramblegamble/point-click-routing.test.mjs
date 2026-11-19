@@ -40,9 +40,12 @@ test("clicks outside the scene machines do nothing", () => {
   assert.equal(resolvePointClick("background", ""), "");
 });
 
-test("the dice-framed doorway opens dice mode directly", () => {
-  assert.equal(resolvePointClick("dice-door"), "open-dice");
-  assert.equal(resolvePointClickAction({ machine: "dice-door" }), "open-dice");
+test("D and the first doorway click focus the dice door; clicking it again opens dice mode", () => {
+  assert.equal(resolveArcadeShortcut("d"), "dice-door");
+  assert.equal(resolvePointClick("dice-door"), "focus-dice-door");
+  assert.equal(resolvePointClick("dice-door", "", true), "open-dice");
+  assert.equal(resolvePointClickAction({ machine: "dice-door" }), "focus-dice-door");
+  assert.equal(resolvePointClickAction({ machine: "dice-door", focused: true }), "open-dice");
 });
 
 test("screen-edge navigation resolves to fixed left, right, and back zones", () => {

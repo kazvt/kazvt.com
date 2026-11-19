@@ -3,14 +3,14 @@ const ROULETTE_MENU_PARTS = new Set(["center", "rim"]);
 export function resolveArcadeShortcut(key) {
   const shortcut = String(key || "").toLowerCase();
   if (shortcut === "1" || shortcut === "p") return "participants";
-  if (shortcut === "d") return "dice";
+  if (shortcut === "d") return "dice-door";
   if (shortcut === "4" || shortcut === "h") return "host";
   if (shortcut === "c") return "cheer";
   return "";
 }
 
-export function resolvePointClick(machine, part = "") {
-  if (machine === "dice-door") return "open-dice";
+export function resolvePointClick(machine, part = "", focused = false) {
+  if (machine === "dice-door") return focused ? "open-dice" : "focus-dice-door";
   if (machine === "roulette") return ROULETTE_MENU_PARTS.has(part) ? "open-trivia" : "spin-wheel";
   if (machine === "slot") return part === "arm" ? "pull-lever" : "open-slots";
   return "";
@@ -35,7 +35,7 @@ export function resolvePointClickAction({ zone = "", machine = "", part = "", fo
   if (machine === "host") return focused ? "" : "focus-host";
   if (machine === "contestant") return focused ? "" : "focus-contestants";
   if ((machine === "roulette" || machine === "slot") && !focused) return `focus-${machine}`;
-  return resolvePointClick(machine, part);
+  return resolvePointClick(machine, part, focused);
 }
 
 export function resolvePointClickCursor({ zone = "", actionable = false } = {}) {
