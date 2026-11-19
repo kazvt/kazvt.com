@@ -1,4 +1,4 @@
-import { RG_CONTESTANTS } from "./points-store.mjs";
+import { RG_CONTESTANTS } from "./points-store.mjs?v=points-console-20261120-v1";
 
 export const POINTS_HELP = "help · clear · points [faroe|erin|kaz] · points add <name> [amount] · points set <name> <total> · points reset [name]";
 
