@@ -4,4 +4,4 @@
 
 The ZIP identifies the recordings as by rubberduck, from OpenGameArt's [100 CC0 SFX pack](https://opengameart.org/content/100-cc0-sfx), under [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). The sound cues and sample metadata are in the supplied `scene.json`, `foley-cues.csv`, and `foley-sources.json`.
 
-The poster is a still frame extracted from the supplied animation with the matte keyed out. The transparent video and poster reveal the existing scene sky; browsers without video alpha use the screen-blend fallback so the matte does not simply become a solid panel.
+`ramble-gamble-marquee-poster.png` is the fully assembled frame with its matte keyed out, used as the reduced-motion still. `ramble-gamble-marquee-first-frame.png` is the transparent opening frame used while the video becomes ready, avoiding a flash of the finished logo before its entrance animation. The transparent video and images reveal the existing scene sky; browsers without video alpha use the screen-blend fallback so the matte does not simply become a solid panel.
