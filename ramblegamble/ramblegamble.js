@@ -67,9 +67,11 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   });
   const SKY_CONFIG = Object.freeze({
     radius: 260,
-    starCount: 420,
+    // One instanced draw keeps a denser, full-sky field inexpensive to render.
+    starCount: 1800,
     topColor: "#100818",
-    horizonColor: "#b9a0cf",
+    // A blue-violet lavender, avoiding the dusty pink cast of the old horizon.
+    horizonColor: "#865fd0",
   });
   const BILLBOARD_SOURCES = [
     { id: "faroe", label: "Faroe", source: "https://reactive.fugi.tech/basic/489548166316949513" },
@@ -355,15 +357,19 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   }
 
   function createPixelShootingStarTexture() {
-    const width = 24;
+    const width = 40;
     const height = 8;
     const pixels = new Uint8Array(width * height * 4);
     for (let y = 0; y < height; y += 1) {
       for (let x = 0; x < width; x += 1) {
-        const headDistance = ((x - 19) / 3.4) ** 2 + ((y - 3.5) / 2.5) ** 2;
+        const headX = width - 7;
+        const headDistance = ((x - headX) / 4.1) ** 2 + ((y - 3.5) / 2.5) ** 2;
         let alpha = headDistance <= 1 ? 255 : 0;
-        if ((y === 3 || y === 4) && x < 20) {
-          alpha = Math.max(alpha, Math.round(175 * (1 - x / 23)));
+        const tailStrength = x / headX;
+        if ((y === 3 || y === 4) && x < headX) {
+          alpha = Math.max(alpha, Math.round(175 * (0.12 + 0.88 * tailStrength)));
+        } else if (x < headX && (y === 2 || y === 5) && (x * 3 + y * 5) % 9 === 0) {
+          alpha = Math.max(alpha, Math.round(112 * (0.12 + 0.88 * tailStrength)));
         }
         if (alpha === 0) continue;
         const offset = (y * width + x) * 4;
@@ -383,7 +389,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   }
 
   function createShootingStars() {
-    const count = 3;
+    const count = 4;
     const shootingMaterial = new THREE.MeshBasicMaterial({
       map: createPixelShootingStarTexture(),
       color: 0xffffff,
@@ -405,29 +411,29 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
       start: null,
       end: null,
       startedAt: 0,
-      duration: 900,
-      nextAt: performance.now() + 5200 + index * 6000 + nextSkyRandom() * 1200,
+      duration: 3000,
+      nextAt: performance.now() + 2600 + index * 2600 + nextSkyRandom() * 1600,
       active: false,
-      angle: (nextSkyRandom() - 0.5) * 0.48 - 0.30,
-      tint: new THREE.Color("#fff0de"),
+      angle: 0,
+      length: 88,
+      thickness: 8,
+      tint: new THREE.Color(["#fff0de", "#e9e2ff", "#dce8ff"][index % 3]),
     }));
   }
 
   function initializeSkyStars() {
     if (skyStarsInitialized || !camera || !skyStars) return;
-    camera.updateMatrixWorld(true);
-    const forward = camera.getWorldDirection(new THREE.Vector3());
-    const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0).normalize();
-    const viewUp = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1).normalize();
-    const horizontalRange = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect * 1.45;
-
     for (const star of skyStars) {
-      const horizontal = (nextSkyRandom() * 2 - 1) * horizontalRange;
-      const vertical = 0.02 + nextSkyRandom() * 0.36;
-      star.direction = forward.clone()
-        .addScaledVector(right, horizontal)
-        .addScaledVector(viewUp, vertical)
-        .normalize();
+      // Uniformly distribute directions over the whole dome, rather than
+      // placing stars in a camera-relative strip above the view center.
+      const vertical = nextSkyRandom() * 2 - 1;
+      const azimuth = nextSkyRandom() * Math.PI * 2;
+      const horizontal = Math.sqrt(1 - vertical * vertical);
+      star.direction = new THREE.Vector3(
+        Math.cos(azimuth) * horizontal,
+        vertical,
+        Math.sin(azimuth) * horizontal,
+      );
     }
     skyStarsInitialized = true;
   }
@@ -438,19 +444,27 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0).normalize();
     const viewUp = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1).normalize();
     const horizontalRange = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect;
+    const verticalRange = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    const horizontalStart = (nextSkyRandom() * 2 - 1) * horizontalRange * 0.76;
+    const verticalStart = (nextSkyRandom() * 2 - 1) * verticalRange * 0.72;
     const start = forward
-      .addScaledVector(right, (nextSkyRandom() * 2 - 1) * horizontalRange * 0.78)
-      .addScaledVector(viewUp, 0.30 + nextSkyRandom() * 0.08)
+      .addScaledVector(right, horizontalStart)
+      .addScaledVector(viewUp, verticalStart)
       .normalize();
     const travelDirection = nextSkyRandom() < 0.5 ? -1 : 1;
+    const horizontalTravel = travelDirection * (0.15 + nextSkyRandom() * 0.22);
+    const verticalTravel = (nextSkyRandom() < 0.72 ? -1 : 1) * (0.035 + nextSkyRandom() * 0.13);
     const end = start.clone()
-      .addScaledVector(right, travelDirection * (0.08 + nextSkyRandom() * 0.12))
-      .addScaledVector(viewUp, -(0.025 + nextSkyRandom() * 0.05))
+      .addScaledVector(right, horizontalTravel)
+      .addScaledVector(viewUp, verticalTravel)
       .normalize();
     return {
       start: start.multiplyScalar(SKY_CONFIG.radius - 2),
       end: end.multiplyScalar(SKY_CONFIG.radius - 2),
-      angle: travelDirection > 0 ? -0.30 : Math.PI + 0.30,
+      angle: Math.atan2(verticalTravel, horizontalTravel),
+      length: 78 + nextSkyRandom() * 72,
+      thickness: 7 + nextSkyRandom() * 4,
+      tint: new THREE.Color(["#fff0dc", "#e9e1ff", "#dae5ff"][Math.floor(nextSkyRandom() * 3)]),
     };
   }
 
@@ -501,8 +515,11 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
         star.start = path.start;
         star.end = path.end;
         star.angle = path.angle;
+        star.length = path.length;
+        star.thickness = path.thickness;
+        star.tint = path.tint;
         star.startedAt = time;
-        star.duration = 1050 + nextSkyRandom() * 450;
+        star.duration = 2600 + nextSkyRandom() * 1500;
         star.active = true;
       }
 
@@ -515,18 +532,22 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
       }
 
       const progress = Math.min(1, (time - star.startedAt) / star.duration);
-      const eased = progress * progress * (3 - 2 * progress);
+      // Start with a quick dart, then ease into a softer disappearing tail.
+      const eased = 1 - (1 - progress) ** 2.1;
       position.lerpVectors(star.start, star.end, eased);
       roll.setFromAxisAngle(worldZ, star.angle);
       rotation.copy(pixelQuaternion).multiply(roll);
-      const fade = Math.sin(progress * Math.PI) * 0.88;
-      scale.set(48 * worldPerPixel, 8 * worldPerPixel, 1);
+      const fadeIn = Math.min(1, progress / 0.08);
+      const fadeOut = 1 - Math.max(0, (progress - 0.64) / 0.36);
+      const glint = 0.92 + 0.08 * Math.sin(progress * Math.PI * 5);
+      const fade = fadeIn * fadeOut * glint * 0.9;
+      scale.set(star.length * worldPerPixel, star.thickness * worldPerPixel, 1);
       matrix.compose(position, rotation, scale);
       skyShootingStarsMesh.setMatrixAt(star.index, matrix);
       skyShootingStarsMesh.setColorAt(star.index, color.copy(star.tint).multiplyScalar(fade));
       if (progress >= 1) {
         star.active = false;
-        star.nextAt = time + 14500 + nextSkyRandom() * 16500;
+        star.nextAt = time + 14000 + nextSkyRandom() * 14000;
       }
     }
     skyShootingStarsMesh.instanceMatrix.needsUpdate = true;
