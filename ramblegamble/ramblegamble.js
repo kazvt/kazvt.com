@@ -1283,7 +1283,10 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   }
 
   function updatePointer(event) {
-    if (event.pointerType === "touch" || !camera || event.buttons) return;
+    if (!gameStarted || pauseMenuOpen || event.pointerType === "touch" || !camera || event.buttons) {
+      hideGameCursor();
+      return;
+    }
     const rect = preview.getBoundingClientRect();
     const zone = resolvePointClickZone({
       x: event.clientX - rect.left,
@@ -1342,6 +1345,61 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     gameCursor.hidden = true;
   }
 
+  function setMenuSceneVisibility(visible) {
+    for (const object of [stageModel, rouletteRig, slotRig]) {
+      if (object) object.visible = visible;
+    }
+    billboardLayer.style.visibility = visible ? "" : "hidden";
+  }
+
+  function showPauseMenu() {
+    if (pauseMenuOpen) return;
+    gameStarted = false;
+    pauseMenuOpen = true;
+    setMenuSceneVisibility(false);
+    preview.classList.add("is-menu");
+    readyScreen.hidden = true;
+    pauseMenu.hidden = false;
+    loading.classList.add("is-hidden");
+    result.hidden = true;
+    hideGameCursor();
+
+    menuMarquee.pause();
+    try { menuMarquee.currentTime = 0; } catch {}
+    if (!reducedMotion.matches) {
+      const playback = menuMarquee.play();
+      if (playback?.catch) playback.catch((error) => console.warn("Marquee animation could not play:", error));
+    }
+    playButton.focus({ preventScroll: true });
+  }
+
+  function startGame() {
+    if (!pauseMenuOpen) return;
+    pauseMenuOpen = false;
+    gameStarted = true;
+    pauseMenu.hidden = true;
+    preview.classList.remove("is-menu");
+    setMenuSceneVisibility(true);
+    menuMarquee.pause();
+    try { menuMarquee.currentTime = 0; } catch {}
+    canvas.focus({ preventScroll: true });
+  }
+
+  goButton.addEventListener("click", showPauseMenu);
+  playButton.addEventListener("click", startGame);
+  controlsOpenButton.addEventListener("click", () => {
+    if (typeof controlsDialog.showModal === "function") controlsDialog.showModal();
+    else controlsDialog.setAttribute("open", "");
+  });
+  controlsCloseButton.addEventListener("click", () => controlsDialog.close());
+  controlsDialog.addEventListener("click", (event) => {
+    if (event.target === controlsDialog) controlsDialog.close();
+  });
+  consoleOpenButton.addEventListener("click", () => {
+    window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "arcade" } }));
+  });
+  goButton.focus({ preventScroll: true });
+
   function playCheer() {
     cheerSound.pause();
     cheerSound.currentTime = 0;
@@ -1350,7 +1408,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   }
 
   function pointClickAt(clientX, clientY) {
-    if (!camera || !sceneReady || diceModeOpen) return;
+    if (!gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen) return;
     const rect = preview.getBoundingClientRect();
     const zone = resolvePointClickZone({
       x: clientX - rect.left,
@@ -1435,7 +1493,14 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     if (event.altKey || event.ctrlKey || event.metaKey) return;
     if (document.querySelector("dialog[open]")) return;
     if (event.target instanceof Element && event.target.closest("input, textarea, select, [contenteditable='true']")) return;
+    if (!gameStarted || pauseMenuOpen) return;
     const key = event.key.toLowerCase();
+    if (key === "escape") {
+      if (canGoBack()) goBack();
+      else showPauseMenu();
+      event.preventDefault();
+      return;
+    }
     const shortcut = resolveArcadeShortcut(key);
     if (shortcut === "participants") transitionToView({ kind: "contestants" });
     else if (shortcut === "dice") window.dispatchEvent(new CustomEvent("rg:open-dice-mode"));
@@ -1447,7 +1512,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     else if (key === "3") transitionToView({ kind: "roulette" });
     else if (key === "arrowleft") setLookDirection(-1);
     else if (key === "arrowright") setLookDirection(1);
-    else if (key === "arrowdown" || key === "escape" || key === "backspace") goBack();
+    else if (key === "arrowdown" || key === "backspace") goBack();
     else if (key === "enter" || key === " ") {
       const bounds = canvas.getBoundingClientRect();
       pointClickAt(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2);
