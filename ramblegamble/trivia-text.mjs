@@ -583,6 +583,8 @@ function parseHumanText(input) {
     if (/\b(?:no|without|not)\s+(?:multiple[ -]?choice|mcq|mc)\b|\bshort[ -]?answer\b|\bfree[ -]?(?:response|text)\b/.test(value)) block.noMultipleChoice = true;
     const mode = normalizeMode(value.replace(/[\[\](){}]/g, "").replace(/^(?:mode|type|format)\s*[:=]?\s*/, ""));
     if (mode) block.fields.mode = mode;
+    const selectionRule = normalizeSelectionRule(value.replace(/[\[\](){}]/g, ""));
+    if (selectionRule) block.fields.selectionRule = selectionRule;
   }
 
   function flushRound() {
@@ -597,6 +599,7 @@ function parseHumanText(input) {
       optionCount: Number.isFinite(Number(base.optionCount)) ? Number(base.optionCount) : defaults.optionCount,
       acceptedAnswers: [], options: [], items: [], pairs: [], categories: ["Group 1", "Group 2", "Group 3"],
       videoUrl: "", numberValue: 0, numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
+      selectionRule: "any", requiredCorrectCount: 0, numberCode: "",
     };
     if (Array.isArray(base.acceptedAnswers)) state.acceptedAnswers = [...base.acceptedAnswers];
     const sharedQuestion = current.question || base.question || "";
@@ -664,7 +667,8 @@ function parseHumanText(input) {
         options: clone(state.options), items: clone(state.items), pairs: clone(state.pairs), categories: clone(state.categories),
         videoUrl: state.videoUrl, numberValue: state.numberValue, numberVisible: state.numberVisible,
         imageVisible: state.imageVisible, backgroundImage: state.backgroundImage, drawing: state.drawing,
-        assignments: clone(state.assignments),
+        assignments: clone(state.assignments), selectionRule: state.selectionRule,
+        requiredCorrectCount: state.requiredCorrectCount, numberCode: state.numberCode,
       };
     }
     rounds[id] = levels;
@@ -794,6 +798,20 @@ function parseHumanText(input) {
         pendingList = "";
       } else if (name === "number") {
         if (current) ensureLevel(currentLevel).fields.numberValue = finiteOr(value, 0);
+        pendingList = "";
+      } else if (name === "selectionrule") {
+        if (current) {
+          const selectionRule = normalizeSelectionRule(value);
+          if (selectionRule) ensureLevel(currentLevel).fields.selectionRule = selectionRule;
+          else warnings.push(`Line ${lineIndex + 1}: use “any” or “all” for the answer selection rule.`);
+        }
+        pendingList = "";
+      } else if (name === "requiredcorrectcount") {
+        const count = Number(value);
+        if (current && Number.isFinite(count)) ensureLevel(currentLevel).fields.requiredCorrectCount = Math.max(0, Math.min(24, Math.trunc(count)));
+        pendingList = "";
+      } else if (name === "numbercode") {
+        if (current) ensureLevel(currentLevel).fields.numberCode = value.replace(/\D/g, "").slice(0, 4);
         pendingList = "";
       } else if (name === "additive") {
         if (current) ensureLevel(currentLevel).additive = /^(?:true|yes|on|add|append|plus)$/i.test(value);
