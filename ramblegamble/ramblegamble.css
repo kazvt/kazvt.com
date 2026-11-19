@@ -66,6 +66,32 @@ body.ramble-page *::after {
   outline-offset: -4px;
 }
 
+.rg-liquid-portal-layer {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.rg-liquid-portal-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 512px;
+  height: 1024px;
+  padding: 0;
+  border: 0;
+  opacity: 1;
+  background: #031f16;
+  filter: none;
+  mix-blend-mode: normal;
+  pointer-events: none;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
 .rg-preview.has-game-cursor #rg-canvas {
   cursor: none;
 }

@@ -8,7 +8,7 @@
     <link rel="canonical" href="https://kazvt.com/rg/">
     <title>Ramble Gamble - kazvt</title>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
-    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=marquee-visible-sign-palette-20261120-v1">
+    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=liquid-door-portal-20261120-v1">
     <link rel="stylesheet" href="/ramblegamble/host-console.css?v=berry-image-menu-20261120-v1">
     <script type="importmap">
       {
@@ -19,13 +19,25 @@
         }
       }
     </script>
-    <script type="module" src="/ramblegamble/ramblegamble.js?v=marquee-visible-sign-palette-20261120-v1"></script>
+    <script type="module" src="/ramblegamble/ramblegamble.js?v=liquid-door-portal-20261120-v1"></script>
     <script type="module" src="/ramblegamble/dice-mode.js?v=dice-berry-hyphen-20261120-v2"></script>
     <script type="module" src="/ramblegamble/trivia-ui.js?v=berry-image-menu-20261120-v1"></script>
   </head>
   <body class="ramble-page" data-theme="p2">
     <main class="rg-preview" id="rg-preview">
       <canvas id="rg-canvas" tabindex="0" aria-label="Fixed-view point-and-click arcade. Click the contestant or host seats, slot machine, roulette wheel, or dice-framed door to interact. Click the dice door once to approach it, then click it again to enter Dice. Use the left and right screen edges to look around, and the bottom edge, Down, or Backspace to return to the parent view. Escape opens the pause menu. Keyboard: 1 or P participants, 2 slots, 3 roulette, D approaches the dice door, 4 or H host, C cheer, Left and Right look, Enter or Space activate, R spin, S pull lever."></canvas>
+      <div class="rg-liquid-portal-layer" id="rg-liquid-portal-layer" aria-hidden="true" hidden>
+        <iframe
+          class="rg-liquid-portal-frame"
+          id="rg-liquid-portal-frame"
+          title=""
+          width="512"
+          height="1024"
+          tabindex="-1"
+          sandbox="allow-scripts allow-same-origin"
+          referrerpolicy="same-origin"
+        ></iframe>
+      </div>
       <div class="rg-billboard-layer" id="rg-billboard-layer" aria-label="Host and contestant browser-source billboards"></div>
       <div class="rg-game-cursor" id="rg-game-cursor" aria-hidden="true" hidden>
         <img id="rg-game-cursor-image" alt="" draggable="false">
