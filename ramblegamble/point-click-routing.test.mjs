@@ -27,6 +27,7 @@ test("clicks outside the scene machines do nothing", () => {
 
 test("the dice-framed doorway opens dice mode directly", () => {
   assert.equal(resolvePointClick("dice-door"), "open-dice");
+  assert.equal(resolvePointClickAction({ machine: "dice-door" }), "open-dice");
 });
 
 test("screen-edge navigation resolves to fixed left, right, and back zones", () => {

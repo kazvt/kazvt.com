@@ -229,13 +229,18 @@ import {
       if (dieState.group) dieState.group.scale.setScalar(compact ? 0.78 : 1);
     }
     camera.updateProjectionMatrix();
+    if (isOpen && !rolling && scene) renderer.render(scene, camera);
   }
 
   function cryptoRandomUnit() {
     if (!window.crypto?.getRandomValues) return Math.random();
+    const range = 0x100000000;
+    const limit = Math.floor(range / DICE_FACE_ORDER.length) * DICE_FACE_ORDER.length;
     const sample = new Uint32Array(1);
-    window.crypto.getRandomValues(sample);
-    return sample[0] / 0x100000000;
+    do {
+      window.crypto.getRandomValues(sample);
+    } while (sample[0] >= limit);
+    return sample[0] / limit;
   }
 
   function startRoll() {
@@ -294,11 +299,11 @@ import {
     if (!isOpen || !renderer || !scene || !camera) return;
     updateRoll(time);
     renderer.render(scene, camera);
-    frame = requestAnimationFrame(render);
+    if (rolling) frame = requestAnimationFrame(render);
   }
 
   function ensureRenderLoop() {
-    if (isOpen && !frame) frame = requestAnimationFrame(render);
+    if (isOpen && !document.hidden && !frame) frame = requestAnimationFrame(render);
   }
 
   async function loadDiceModel() {
