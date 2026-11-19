@@ -13,7 +13,7 @@ export function decodeTriviaBytes(buffer) {
 const ROUND_FIELDS = new Set([
   "question", "subtitle", "promptImage", "promptAsset", "mode", "optionCount", "acceptedAnswers",
   "options", "items", "pairs", "categories", "videoUrl", "numberValue", "numberVisible",
-  "imageVisible", "backgroundImage", "drawing", "assignments",
+  "imageVisible", "backgroundImage", "drawing", "assignments", "selectionRule", "requiredCorrectCount", "numberCode",
 ]);
 
 const MODE_ALIASES = new Map([
@@ -55,6 +55,13 @@ function normalizeMode(value) {
   if (MODE_NAMES[raw]) return raw;
   if (MODE_NAMES[raw.replaceAll(" ", "-")]) return raw.replaceAll(" ", "-");
   return MODE_ALIASES.get(raw) || "";
+}
+
+function normalizeSelectionRule(value) {
+  const raw = String(value ?? "").trim().toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ");
+  if (/^(?:all|both|all correct|all answers|require all|select all|every|every correct answer|all of them|multiple)$/.test(raw)) return "all";
+  if (/^(?:any|one|one correct answer|any one|either|single|at least one|one of them)$/.test(raw)) return "any";
+  return "";
 }
 
 function normalizeId(value) {
@@ -107,6 +114,14 @@ function sanitizeRoundDrafts(value) {
           draft[field] = item === true;
         } else if (field === "numberValue") {
           draft.numberValue = finiteOr(item, 0);
+        } else if (field === "selectionRule") {
+          const rule = normalizeSelectionRule(item);
+          if (rule) draft.selectionRule = rule;
+        } else if (field === "requiredCorrectCount") {
+          const count = Number(item);
+          if (Number.isFinite(count)) draft.requiredCorrectCount = Math.max(0, Math.min(24, Math.trunc(count)));
+        } else if (field === "numberCode") {
+          draft.numberCode = safeString(item).replace(/\D/g, "").slice(0, 4);
         }
       }
       levels[level] = draft;
