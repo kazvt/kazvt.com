@@ -1080,6 +1080,7 @@ import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from ".
           else selected.add(index);
           button.setAttribute("aria-pressed", String(selected.has(index)));
           progress.textContent = selectionProgress(selected.size, content.requiredCorrectCount, correctIndexes.length);
+          setAnswerStatus("", "neutral");
         } else {
           $$(".rg-answer-option", stageItems).forEach((other) => other.setAttribute("aria-pressed", "false"));
           button.setAttribute("aria-pressed", "true");
@@ -1159,6 +1160,7 @@ import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from ".
 
     const form = document.createElement("form");
     form.className = "rg-number-guess-form";
+    form.noValidate = true;
     const input = document.createElement("input");
     input.type = "text";
     input.id = "rg-number-guess";
