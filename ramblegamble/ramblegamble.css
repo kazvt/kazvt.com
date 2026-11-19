@@ -639,6 +639,9 @@ body.ramble-page *::after {
   aspect-ratio: 2 / 1;
   object-fit: contain;
   image-rendering: pixelated;
+}
+
+.rg-marquee-video.rg-marquee-matte {
   mix-blend-mode: screen;
 }
 
