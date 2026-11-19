@@ -142,7 +142,7 @@ export function createDicePhysicsWorld(CANNON) {
   world.solver.iterations = 18;
   world.solver.tolerance = 0.001;
   world.defaultContactMaterial.friction = 0.2;
-  world.defaultContactMaterial.restitution = 0.45;
+  world.defaultContactMaterial.restitution = 0.65;
   world.defaultContactMaterial.contactEquationStiffness = 1e7;
   world.defaultContactMaterial.contactEquationRelaxation = 3;
   world.defaultContactMaterial.frictionEquationStiffness = 1e7;
