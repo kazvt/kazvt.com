@@ -8,7 +8,7 @@
     <link rel="canonical" href="https://kazvt.com/rg/">
     <title>Ramble Gamble - kazvt</title>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
-    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=dice-minimal-layout-20261120-v4">
+    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=original-marquee-logo-20261120-v1">
     <link rel="stylesheet" href="/ramblegamble/host-console.css?v=trivia-empty-stage-20261119-v1">
     <script type="importmap">
       {
@@ -18,7 +18,7 @@
         }
       }
     </script>
-    <script type="module" src="/ramblegamble/ramblegamble.js?v=violet-fullsky-meteors-20261120-v1"></script>
+    <script type="module" src="/ramblegamble/ramblegamble.js?v=original-marquee-logo-20261120-v1"></script>
     <script type="module" src="/ramblegamble/dice-mode.js?v=dice-minimal-ui-20261120-v1"></script>
     <script type="module" src="/ramblegamble/trivia-ui.js?v=trivia-empty-stage-20261119-v1"></script>
   </head>
@@ -43,7 +43,7 @@
     <section class="rg-pause-menu" id="rg-pause-menu" aria-label="Pause menu" hidden>
       <div class="rg-pause-stack">
         <video
-          class="rg-marquee-visual rg-marquee-video"
+          class="rg-marquee-visual rg-marquee-video rg-marquee-audio"
           id="rg-marquee-video"
           poster="/ramblegamble/assets/marquee/ramble-gamble-marquee-first-frame.png"
           preload="auto"
@@ -54,9 +54,9 @@
           <source src="/ramblegamble/assets/marquee/ramble-gamble-marquee.mp4" type="video/mp4">
         </video>
         <img
-          class="rg-marquee-visual rg-marquee-still"
+          class="rg-marquee-visual rg-marquee-logo"
           id="rg-marquee-still"
-          src="/ramblegamble/assets/marquee/ramble-gamble-marquee-poster.png"
+          src="/ramblegamble/assets/provided/sign.png?v=original-scene-wordmark-20261120-v1"
           alt=""
           aria-hidden="true"
           hidden

@@ -683,6 +683,53 @@ body.ramble-page *::after {
   image-rendering: pixelated;
 }
 
+.rg-marquee-audio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  max-height: none;
+  aspect-ratio: auto;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.rg-marquee-logo {
+  width: min(86vw, 570px);
+  height: auto;
+  max-height: 30dvh;
+  aspect-ratio: auto;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.rg-marquee-animated .rg-marquee-logo {
+  animation: rg-original-wordmark-arrive 2.2s cubic-bezier(.2, .74, .18, 1) both;
+}
+
+@keyframes rg-original-wordmark-arrive {
+  0% {
+    opacity: 0;
+    transform: translateY(-15px) scale(.94);
+  }
+  32% {
+    opacity: .72;
+    transform: translateY(3px) scale(1.015);
+  }
+  48% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+  66% {
+    transform: translateY(1px);
+  }
+  82%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .rg-marquee-visual[hidden] {
   display: none !important;
 }
@@ -784,6 +831,10 @@ body.ramble-page *::after {
     max-height: 30dvh;
   }
 
+  .rg-marquee-logo {
+    width: min(72vw, 480px);
+  }
+
   .rg-pause-stack {
     gap: 8px;
   }
@@ -795,6 +846,12 @@ body.ramble-page *::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .rg-marquee-animated .rg-marquee-logo {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
   .rg-menu-button {
     transition: none;
   }

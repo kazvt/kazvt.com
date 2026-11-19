@@ -33,6 +33,8 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   const cheerSound = new Audio("/ramblegamble/assets/sfx/cheer.ogg?v=audience-applause-2");
   cheerSound.preload = "auto";
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  // Keep the supplied marquee cue, but play it at one fifth of its current level.
+  menuMarquee.volume = Math.max(0, Math.min(1, menuMarquee.volume * 0.2));
   const FORCED_THEME = "p2";
   const ROULETTE_PART_NAMES = new Set(["center", "wheel", "rim", "ball"]);
   const SLOT_PART_NAMES = new Set(["machine", "arm", "button1", "button2", "button3", "button4", "button5"]);
@@ -1406,7 +1408,8 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   function updateMarqueeMotionPreference() {
     const useStill = reducedMotion.matches || marqueeVideoUnavailable;
     menuMarquee.hidden = useStill;
-    marqueeStill.hidden = !useStill;
+    marqueeStill.hidden = false;
+    pauseMenu.classList.toggle("rg-marquee-animated", !useStill && pauseMenuOpen);
     menuMarquee.preload = useStill ? "none" : "auto";
     if (useStill) {
       menuMarquee.pause();
@@ -1467,6 +1470,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     pauseMenuOpen = false;
     gameStarted = true;
     pauseMenu.hidden = true;
+    pauseMenu.classList.remove("rg-marquee-animated");
     preview.classList.remove("is-menu");
     setMenuSceneVisibility(true);
     menuMarquee.pause();
