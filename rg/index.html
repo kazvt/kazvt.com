@@ -8,8 +8,8 @@
     <link rel="canonical" href="https://kazvt.com/rg/">
     <title>Ramble Gamble - kazvt</title>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
-    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=original-marquee-logo-20261120-v2">
-    <link rel="stylesheet" href="/ramblegamble/host-console.css?v=trivia-empty-stage-20261119-v1">
+    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=dice-berry-face-art-20261120-v1">
+    <link rel="stylesheet" href="/ramblegamble/host-console.css?v=berry-image-menu-20261120-v1">
     <script type="importmap">
       {
         "imports": {
@@ -20,8 +20,8 @@
       }
     </script>
     <script type="module" src="/ramblegamble/ramblegamble.js?v=original-marquee-logo-20261120-v1"></script>
-    <script type="module" src="/ramblegamble/dice-mode.js?v=dice-rigid-body-throw-20261120-v1"></script>
-    <script type="module" src="/ramblegamble/trivia-ui.js?v=trivia-empty-stage-20261119-v1"></script>
+    <script type="module" src="/ramblegamble/dice-mode.js?v=dice-berry-face-art-20261120-v1"></script>
+    <script type="module" src="/ramblegamble/trivia-ui.js?v=berry-image-menu-20261120-v1"></script>
   </head>
   <body class="ramble-page" data-theme="p2">
     <main class="rg-preview" id="rg-preview">
@@ -65,7 +65,6 @@
         <nav class="rg-pause-actions" aria-label="Pause menu actions">
           <button class="rg-menu-button" id="rg-play" type="button">PLAY!</button>
           <button class="rg-menu-button" id="rg-controls-open" type="button">CONTROLS!</button>
-          <button class="rg-menu-button" id="rg-console-open" type="button">CONSOLE!</button>
         </nav>
       </div>
     </section>
@@ -145,9 +144,9 @@
             <div class="rg-slot-config">
               <fieldset class="rg-control-group"><legend>1. Pick a berry</legend>
                 <div class="rg-berry-picker" role="group" aria-label="Choose berry to place">
-                  <button class="rg-berry-choice" type="button" data-berry="kazberry" aria-pressed="true"><span class="rg-berry-letter" aria-hidden="true">K</span><span>Kazberry</span></button>
-                  <button class="rg-berry-choice" type="button" data-berry="faroeberry" aria-pressed="false"><span class="rg-berry-letter" aria-hidden="true">F</span><span>Faroeberry</span></button>
-                  <button class="rg-berry-choice" type="button" data-berry="erinberry" aria-pressed="false"><span class="rg-berry-letter" aria-hidden="true">E</span><span>Erinberry</span></button>
+                  <button class="rg-berry-choice" type="button" data-berry="kazberry" aria-label="Kazberry" aria-pressed="true"><img class="rg-berry-choice-image" src="/ramblegamble/assets/berries/kazberry.png" alt="" aria-hidden="true" draggable="false"></button>
+                  <button class="rg-berry-choice" type="button" data-berry="faroeberry" aria-label="Faroeberry" aria-pressed="false"><img class="rg-berry-choice-image" src="/ramblegamble/assets/berries/faroeberry.png" alt="" aria-hidden="true" draggable="false"></button>
+                  <button class="rg-berry-choice" type="button" data-berry="erinberry" aria-label="Erinberry" aria-pressed="false"><img class="rg-berry-choice-image" src="/ramblegamble/assets/berries/erinberry.png" alt="" aria-hidden="true" draggable="false"></button>
                 </div>
               </fieldset>
               <fieldset class="rg-control-group"><legend>2. Choose placement</legend>

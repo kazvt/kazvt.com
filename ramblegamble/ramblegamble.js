@@ -27,7 +27,6 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   const marqueeStill = document.getElementById("rg-marquee-still");
   const playButton = document.getElementById("rg-play");
   const controlsOpenButton = document.getElementById("rg-controls-open");
-  const consoleOpenButton = document.getElementById("rg-console-open");
   const controlsDialog = document.getElementById("rg-controls-dialog");
   const controlsCloseButton = document.getElementById("rg-controls-close");
   const cheerSound = new Audio("/ramblegamble/assets/sfx/cheer.ogg?v=audience-applause-2");
@@ -1487,9 +1486,6 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   controlsCloseButton.addEventListener("click", () => controlsDialog.close());
   controlsDialog.addEventListener("click", (event) => {
     if (event.target === controlsDialog) controlsDialog.close();
-  });
-  consoleOpenButton.addEventListener("click", () => {
-    window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "arcade" } }));
   });
   goButton.focus({ preventScroll: true });
 

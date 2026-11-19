@@ -185,7 +185,7 @@ import {
         side: THREE.DoubleSide,
         toneMapped: false,
       });
-      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1.34, 1.34), material);
+      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1.98, 1.98), material);
       const [x, y, z] = face.normal;
       mesh.position.set(x * decalOffset, y * decalOffset, z * decalOffset);
       mesh.rotation.set(...face.rotation);

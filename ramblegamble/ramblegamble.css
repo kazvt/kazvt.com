@@ -412,7 +412,7 @@ body.ramble-page *::after {
   min-width: 0;
   min-height: 0;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr);
   align-content: center;
   align-items: center;
   justify-items: center;
@@ -445,13 +445,17 @@ body.ramble-page *::after {
 }
 
 .rg-die-face-value {
-  width: 100%;
-  overflow: hidden;
-  font-size: clamp(8px, .74vw, 10px);
-  font-weight: 900;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: block;
+  width: 88%;
+  max-height: 88%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  image-rendering: pixelated;
 }
+.rg-die-face-value[hidden] { display: none; }
+.rg-dice-result { display: inline-flex; align-items: center; gap: 5px; vertical-align: middle; }
+.rg-dice-result-image { width: 24px; height: 24px; object-fit: cover; image-rendering: pixelated; vertical-align: middle; }
+.rg-dice-result-blank { display: inline-block; width: 22px; height: 22px; border: 1px solid currentColor; vertical-align: middle; }
 
 .rg-dice-center {
   display: flex;
@@ -555,9 +559,7 @@ body.ramble-page *::after {
     font-size: clamp(6px, 1.6vw, 8px);
   }
 
-  .rg-die-face-value {
-    font-size: clamp(7px, 1.8vw, 9px);
-  }
+  .rg-die-face-value { width: 88%; }
 
   .rg-dice-center {
     gap: 5px;

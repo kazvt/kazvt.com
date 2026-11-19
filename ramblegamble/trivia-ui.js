@@ -499,7 +499,7 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
     $("#rg-slot-count").textContent = filled + (filled === 1 ? " BERRY" : " BERRIES") + " / 15";
     $("#rg-slot-help").textContent = placementMode === "blank"
       ? "Click a square to clear that space."
-      : "Click a square to fill its whole " + placementMode + " with " + berryNames[selectedBerry] + ".";
+      : "Click a square to fill its whole " + placementMode + " with the selected berry.";
   }
 
   function renderGrid() {
@@ -513,7 +513,19 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
       cell.className = "rg-slot-cell" + (berry ? " is-filled" : "");
       cell.dataset.index = String(index);
       cell.setAttribute("aria-label", "Row " + (row + 1) + ", column " + (column + 1) + ": " + (berry ? berryNames[berry] : "blank"));
-      cell.innerHTML = '<span class="rg-slot-cell-index">' + String(index + 1).padStart(2, "0") + "</span>" + (berry ? esc(berryNames[berry]) : "");
+      const cellIndex = document.createElement("span");
+      cellIndex.className = "rg-slot-cell-index";
+      cellIndex.textContent = String(index + 1).padStart(2, "0");
+      cell.append(cellIndex);
+      if (berry) {
+        const image = document.createElement("img");
+        image.className = "rg-slot-cell-berry";
+        image.src = "/ramblegamble/assets/berries/" + berry + ".png";
+        image.alt = "";
+        image.setAttribute("aria-hidden", "true");
+        image.draggable = false;
+        cell.append(image);
+      }
       cell.addEventListener("click", () => applyGridAction(index));
       board.append(cell);
     });
@@ -532,7 +544,7 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
     persistGrid();
     renderGrid();
     $("[data-index='" + index + "']", $("#rg-slot-board"))?.focus();
-    const changed = placementMode === "blank" ? "Square cleared." : berryNames[selectedBerry] + " placed in the " + placementMode + ".";
+    const changed = placementMode === "blank" ? "Square cleared." : "Selected berry placed in the " + placementMode + ".";
     $("#rg-arcade-status").textContent = changed;
   }
 
