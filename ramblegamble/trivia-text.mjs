@@ -386,7 +386,7 @@ function parseDelimited(text) {
   const headerless = questionColumn < 0;
   if (headerless && rows[0].length < 2) return null;
   if (headerless) { questionColumn = 0; answerColumn = 1; }
-  const recognizedMetadata = header.some((name) => ["mode", "type", "template", "difficulty", "level", "tier", "selection rule", "answer selection", "selection mode", "correct selection", "required correct count", "required selections", "number code", "secret number", "target number"].includes(name));
+  const recognizedMetadata = header.some((name) => ["mode", "type", "template", "difficulty", "level", "tier", "selection rule", "answer selection", "answer selection rule", "selection mode", "correct selection", "required correct count", "required selections", "number code", "secret number", "target number"].includes(name));
   if (answerColumn < 0 && !optionColumns.length && !recognizedMetadata) return null;
   const dataIndexes = headerless ? {} : indexes;
 
@@ -412,7 +412,7 @@ function parseDelimited(text) {
     const accepted = isAcceptedColumn ? rawAnswers : splitLooseList(getColumn(row, dataIndexes, ["accepted answers", "accepted answer"]));
     const correctValues = splitLooseList(getColumn(row, dataIndexes, ["correct", "correct answer", "answer key", "correct answers", "correct option", "correct choice"]));
     const mode = normalizeMode(getColumn(row, dataIndexes, ["mode", "type", "template"])) || (options.length > 1 ? "choice-text" : "short-answer");
-    const selectionRule = normalizeSelectionRule(getColumn(row, dataIndexes, ["selection rule", "answer selection", "selection mode", "correct selection", "answer rule", "multi select"]));
+    const selectionRule = normalizeSelectionRule(getColumn(row, dataIndexes, ["selection rule", "answer selection", "answer selection rule", "selection mode", "correct selection", "answer rule", "multi select"]));
     const requiredCorrectCount = Number(getColumn(row, dataIndexes, ["required correct count", "required selections", "correct count", "select count"]));
     const numberCode = getColumn(row, dataIndexes, ["number code", "secret number", "target number", "wordle code"]).replace(/\D/g, "").slice(0, 4);
     const optionObjects = options.map((label) => ({ label, image: "", asset: "", correct: false }));
