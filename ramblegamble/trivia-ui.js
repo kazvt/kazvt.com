@@ -1061,7 +1061,11 @@ import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from ".
     stageItems.style.setProperty("--rg-choice-columns", String(columns || 2));
     const options = padOptions(content.options, count);
     const multiSelect = content.selectionRule === "all";
+    const correctIndexes = options.flatMap((option, index) => option.correct ? [index] : []);
     const selected = new Set();
+    const progress = document.createElement("p");
+    progress.className = "rg-selection-progress";
+    progress.setAttribute("aria-live", "polite");
     options.forEach((option, index) => {
       const button = document.createElement("button");
       button.type = "button";
@@ -1090,10 +1094,6 @@ import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from ".
       stageItems.append(button);
     });
     if (multiSelect) {
-      const correctIndexes = options.flatMap((option, index) => option.correct ? [index] : []);
-      const progress = document.createElement("p");
-      progress.className = "rg-selection-progress";
-      progress.setAttribute("aria-live", "polite");
       progress.textContent = selectionProgress(0, content.requiredCorrectCount, correctIndexes.length);
       const submit = document.createElement("button");
       submit.type = "button";
