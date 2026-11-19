@@ -386,7 +386,8 @@ function parseDelimited(text) {
   const headerless = questionColumn < 0;
   if (headerless && rows[0].length < 2) return null;
   if (headerless) { questionColumn = 0; answerColumn = 1; }
-  if (answerColumn < 0 && !optionColumns.length) return null;
+  const recognizedMetadata = header.some((name) => ["mode", "type", "template", "difficulty", "level", "tier", "selection rule", "answer selection", "selection mode", "correct selection", "required correct count", "required selections", "number code", "secret number", "target number"].includes(name));
+  if (answerColumn < 0 && !optionColumns.length && !recognizedMetadata) return null;
   const dataIndexes = headerless ? {} : indexes;
 
   const warnings = [];
@@ -995,6 +996,7 @@ function isLabeledAnswer(line) { return /^\s*(?:option|choice|answer)\s+[A-Za-z0
 
 function parseAnswerLine(value) {
   let text = String(value || "").trim();
+  text = text.replace(/^\s*(?:[-*+•‣▪◦–—]\s+|\d+\s*[.)]\s+|[A-Za-z]\s*[.)]\s+)/, "");
   let correct = false;
   if (/^\[\s*[xX✓✔]\s*\]\s*/.test(text) || /^(?:✓|✔)\s*/.test(text)) { correct = true; text = text.replace(/^\[\s*[xX✓✔]\s*\]\s*|^(?:✓|✔)\s*/, ""); }
   if (/\s*(?:\[(?:correct|right|x|✓|✔)\]|\((?:correct|right|✓|✔)\)|\*\*?)\s*$/i.test(text)) {
@@ -1002,7 +1004,7 @@ function parseAnswerLine(value) {
     text = text.replace(/\s*(?:\[(?:correct|right|x|✓|✔)\]|\((?:correct|right|✓|✔)\)|\*\*?)\s*$/i, "");
   }
   text = text.replace(/^\s*(?:option|choice|answer)\s+[A-Za-z0-9]+\s*[:.)-]\s*/i, "");
-  text = text.replace(/^\s*(?:[-*+•‣▪◦–—]\s+|\[\s*[xX✓✔ ]\s*\]\s*|\d+\s*[.)]\s+|[A-Za-z]\s*[.)]\s+)/, "");
+  text = text.replace(/^\s*(?:\[\s*[xX✓✔ ]\s*\]\s*|[-*+•‣▪◦–—]\s+|\d+\s*[.)]\s+|[A-Za-z]\s*[.)]\s+)/, "");
   return { text: text.trim(), image: "", correct };
 }
 
