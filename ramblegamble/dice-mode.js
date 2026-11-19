@@ -31,8 +31,8 @@ import {
     kazberry: "#b38cff",
   });
   const dieStates = [
-    { side: "left", assignments: Array(6).fill("blank"), group: null, stickers: [], body: null, baseHalfExtents: null },
-    { side: "right", assignments: Array(6).fill("blank"), group: null, stickers: [], body: null, baseHalfExtents: null },
+    { side: "left", assignments: Array(6).fill("blank"), group: null, stickers: [], body: null, baseHalfExtents: null, throwOrigin: null },
+    { side: "right", assignments: Array(6).fill("blank"), group: null, stickers: [], body: null, baseHalfExtents: null, throwOrigin: null },
   ];
   let renderer = null;
   let scene = null;
@@ -246,7 +246,9 @@ import {
         body.previousPosition.x += shift;
         body.interpolatedPosition.x += shift;
         const scale = group.scale.x;
-        resizeDiceBody(CANNON, body, dieState.baseHalfExtents.map((extent) => extent * scale));
+        const halfExtents = dieState.baseHalfExtents.map((extent) => extent * scale);
+        resizeDiceBody(body, halfExtents);
+        dieState.throwOrigin = [group.position.x, halfExtents[1], group.position.z];
         group.position.set(body.position.x, body.position.y, body.position.z);
       }
     }
@@ -292,7 +294,7 @@ import {
       const { body, group } = dieState;
       const lane = index === 0 ? -1 : 1;
       const launch = createDiceThrow({
-        restPosition: [body.position.x, body.position.y, body.position.z],
+        restPosition: dieState.throwOrigin || [body.position.x, body.position.y, body.position.z],
         lane,
         random: cryptoRandomUnit,
         reducedMotion: reducedMotion.matches,
@@ -318,7 +320,13 @@ import {
       group.quaternion.set(orientation.x, orientation.y, orientation.z, orientation.w);
     }
 
-    if (activeRolls.every(({ body }) => body.sleepState === CANNON.Body.SLEEPING)) setRollResults();
+    if (activeRolls.every(({ body }) => body.sleepState === CANNON.Body.SLEEPING)) {
+      for (const { body, group } of activeRolls) {
+        group.position.set(body.position.x, body.position.y, body.position.z);
+        group.quaternion.set(body.quaternion.x, body.quaternion.y, body.quaternion.z, body.quaternion.w);
+      }
+      setRollResults();
+    }
   }
 
   function render(time) {
@@ -367,6 +375,7 @@ import {
         const halfExtents = baseHalfExtents.map((extent) => extent * dieState.group.scale.x);
         const initialPosition = [dieState.group.position.x, halfExtents[1], dieState.group.position.z];
         dieState.group.position.set(...initialPosition);
+        dieState.throwOrigin = [...initialPosition];
         dieState.body = createDiceBody(CANNON, physicsWorld, halfExtents, initialPosition);
       }
       rollButton.disabled = false;

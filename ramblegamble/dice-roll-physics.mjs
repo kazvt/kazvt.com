@@ -216,7 +216,7 @@ export function prepareDiceBodyForThrow(CANNON, body, launch) {
   return body;
 }
 
-export function resizeDiceBody(CANNON, body, halfExtents) {
+export function resizeDiceBody(body, halfExtents) {
   validateVector(halfExtents, "halfExtents");
   if (halfExtents.some((value) => value <= 0)) throw new RangeError("halfExtents must be positive.");
   const shape = body.shapes[0];
