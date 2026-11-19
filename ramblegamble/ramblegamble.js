@@ -48,6 +48,9 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     rouletteCenterX: 15.0,
     rouletteScale: 0.13,
     rouletteClearance: 0.12,
+    // The supplied close-up arrow shifts the wheel about 0.58 wheel diameters
+    // to screen-right. Keep this relative to the model size rather than fixed units.
+    rouletteRightOffsetDiameters: 0.58,
     // Normalized canvas point at the center of the red marked floor area.
     rouletteScreenAnchor: Object.freeze({ x: 0.60, y: 0.71 }),
   });
@@ -724,6 +727,14 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     const currentCenter = currentBounds.getCenter(new THREE.Vector3());
     rouletteRig.position.x += floorPoint.x - currentCenter.x;
     rouletteRig.position.z += floorPoint.z - currentCenter.z;
+
+    // Move along the close-up camera's horizontal screen-right axis. That maps
+    // the red-arrow direction into the room without changing the wheel's size,
+    // elevation, or clearance from the raised stage.
+    const wheelDiameter = rouletteRig.userData.referenceBounds?.diameter || 0;
+    const screenRightOffset = wheelDiameter * ARCADE_REFERENCE_LAYOUT.rouletteRightOffsetDiameters;
+    rouletteRig.position.x += Math.cos(REFERENCE_START_VIEW.yaw) * screenRightOffset;
+    rouletteRig.position.z -= Math.sin(REFERENCE_START_VIEW.yaw) * screenRightOffset;
     rouletteRig.updateMatrixWorld(true);
 
     const placedBounds = new THREE.Box3().setFromObject(rouletteRig);
@@ -1567,12 +1578,13 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
 
       placeMachinesFromStage();
       setupPicking();
-      // Keep the current camera composition stable after moving the roulette unit.
-      overviewCameraBounds = getArcadeBounds();
       applyTheme();
       sceneReady = true;
       fitCamera();
       moveRouletteToMarkedFloorSpot(new THREE.Box3().setFromObject(stageModel.getObjectByName("table")).min.y);
+      // Refit from the final wheel location so the rightward move remains in frame.
+      overviewCameraBounds = getArcadeBounds();
+      fitCamera();
       loading.classList.add("is-hidden");
       resizeObserver = new ResizeObserver(fitCamera);
       resizeObserver.observe(preview);
