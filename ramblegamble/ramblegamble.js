@@ -6,7 +6,7 @@ import {
   resolveArcadeShortcut,
 } from "./point-click-routing.js?v=dice-door-focus-20261119-v1";
 import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
-import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-doorway-cut-20261119-v2";
+import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-door-wall-target-20261120-v1";
 
 (() => {
   "use strict";
@@ -558,7 +558,9 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     const bounds = getViewBounds(view);
     if (bounds.isEmpty()) return null;
     const target = bounds.getCenter(new THREE.Vector3());
-    const yaw = (view.kind === "dice-door" ? 0 : REFERENCE_START_VIEW.yaw) - view.look * 0.42;
+    // The Dice entrance is on the room's right-hand wall, so approach it from
+    // inside the room along the X axis instead of aiming at the rear wall.
+    const yaw = (view.kind === "dice-door" ? -Math.PI / 2 : REFERENCE_START_VIEW.yaw) - view.look * 0.42;
     // The roulette interaction is best inspected from above, like looking down
     // at a real table. Keep the room and every other close-up at the authored angle.
     // Preserve the reference's elevated oblique view instead of a near-vertical map view.
@@ -618,9 +620,10 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     if (view.kind === "overview") return getArcadeBounds();
     if (view.kind === "dice-door") {
       const opening = ARCADE_REFERENCE_LAYOUT.diceDoor;
+      const interactionX = opening.wallX - opening.interactionOffset;
       bounds.set(
-        new THREE.Vector3(opening.minX, opening.minY, opening.wallZ),
-        new THREE.Vector3(opening.maxX, opening.maxY, opening.wallZ),
+        new THREE.Vector3(interactionX, opening.minY, opening.minZ),
+        new THREE.Vector3(interactionX, opening.maxY, opening.maxZ),
       );
       return bounds.expandByScalar(0.18);
     }
@@ -932,8 +935,8 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     });
 
     root.userData.diceDoorBackingTrianglesRemoved = removedTriangles;
-    if (removedTriangles !== 6) {
-      console.warn(`Expected to open six dice-door backing triangles, removed ${removedTriangles}.`);
+    if (removedTriangles !== 2) {
+      console.warn(`Expected to open the two backing triangles inside the right-wall dice doorway, removed ${removedTriangles}.`);
     }
     return removedTriangles;
   }
@@ -990,7 +993,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   function setupDiceDoorTarget() {
     const opening = ARCADE_REFERENCE_LAYOUT.diceDoor;
     const target = new THREE.Mesh(
-      new THREE.PlaneGeometry(opening.maxX - opening.minX, opening.maxY - opening.minY),
+      new THREE.PlaneGeometry(opening.maxZ - opening.minZ, opening.maxY - opening.minY),
       new THREE.MeshBasicMaterial({
         colorWrite: false,
         depthWrite: false,
@@ -998,10 +1001,11 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
       }),
     );
     target.name = "point-click-dice-door";
+    target.rotation.y = Math.PI / 2;
     target.position.set(
-      (opening.minX + opening.maxX) / 2,
+      opening.wallX - opening.interactionOffset,
       (opening.minY + opening.maxY) / 2,
-      opening.wallZ + 0.025,
+      (opening.minZ + opening.maxZ) / 2,
     );
     target.userData.machine = "dice-door";
     target.frustumCulled = false;

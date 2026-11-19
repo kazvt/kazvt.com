@@ -3,19 +3,20 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs";
 
-test("only triangles wholly inside the door backing plane are removed", () => {
+test("only triangles wholly inside the right-wall dice doorway backing are removed", () => {
   const inside = [
-    { x: 14.8, y: 0.8, z: -6.16 },
-    { x: 15.5, y: 0.8, z: -6.16 },
-    { x: 15.5, y: 2.1, z: -6.16 },
+    { x: 16.764, y: 0.1, z: -2.4 },
+    { x: 16.764, y: 0.1, z: -1.5 },
+    { x: 16.764, y: 1.9, z: -1.5 },
   ];
   assert.equal(isDiceDoorBackingTriangle(inside), true);
-  assert.equal(isDiceDoorBackingTriangle([...inside.slice(0, 2), { x: 16.84, y: 1, z: -6.16 }]), false);
-  assert.equal(isDiceDoorBackingTriangle([...inside.slice(0, 2), { x: 15.5, y: 2.6, z: -6.16 }]), false);
-  assert.equal(isDiceDoorBackingTriangle([...inside.slice(0, 2), { x: 15.5, y: 1, z: -6.1 }]), false);
+  assert.equal(isDiceDoorBackingTriangle([...inside.slice(0, 2), { x: 16.79, y: 1, z: -1.8 }]), false);
+  assert.equal(isDiceDoorBackingTriangle([...inside.slice(0, 2), { x: 16.764, y: 2.1, z: -1.8 }]), false);
+  assert.equal(isDiceDoorBackingTriangle([...inside.slice(0, 2), { x: 16.764, y: 1, z: -1.4 }]), false);
+  assert.equal(isDiceDoorBackingTriangle(inside.map((point) => ({ ...point, x: 16.764, z: -6.1585 }))), false);
 });
 
-test("the supplied stage has exactly six backing triangles inside the dice frame", () => {
+test("the supplied stage has exactly two backing triangles inside the right-wall dice frame", () => {
   const gltf = JSON.parse(readFileSync(new URL("./assets/provided/rg_stage.gltf", import.meta.url), "utf8"));
   const buffer = Buffer.from(gltf.buffers[0].uri.split(",", 2)[1], "base64");
   const stageNode = gltf.nodes.find((node) => node.mesh === 0);
@@ -61,5 +62,5 @@ test("the supplied stage has exactly six backing triangles inside the dice frame
     }
   }
 
-  assert.equal(cuttableTriangles, 6);
+  assert.equal(cuttableTriangles, 2);
 });
