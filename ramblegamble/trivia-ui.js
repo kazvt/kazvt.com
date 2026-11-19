@@ -727,9 +727,9 @@ import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from ".
   }
 
   function optionRowsHTML(format, content) {
-    if (!isChoiceMode(format.mode)) return "";
+    if (!isChoiceMode(format.mode) || format.mode === "number-grid") return "";
     let html = '<h4 class="rg-editor-section-title">ANSWER OPTIONS <span>(' + format.optionCount + ')</span></h4>';
-    html += '<p class="rg-editor-hint">Fill text, an image URL, or both. Select the radio button for the correct choice.</p>';
+    html += '<p class="rg-editor-hint">Fill text, an image URL, or both. Check every option that counts as correct.</p>';
     const options = padOptions(content.options, format.optionCount);
     options.forEach((option, index) => {
       html += '<div class="rg-option-row" data-option-row="' + index + '" data-asset-id="' + esc(option.asset || "") + '">';
@@ -741,7 +741,7 @@ import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from ".
         html += '<input type="url" data-option-image placeholder="Image URL (optional)" value="' + esc(option.image || "") + '" aria-label="Option ' + (index + 1) + ' image URL">';
         html += '<label class="rg-option-upload">FILE<input type="file" data-option-file accept="image/*" aria-label="Upload image for option ' + (index + 1) + '"></label>';
       }
-      html += '<input type="radio" name="rg-correct-option" data-option-correct aria-label="Mark option ' + (index + 1) + ' correct" ' + (option.correct ? "checked" : "") + ">";
+      html += '<input type="checkbox" data-option-correct aria-label="Mark option ' + (index + 1) + ' correct" ' + (option.correct ? "checked" : "") + ">";
       html += '</div>';
     });
     return html;
@@ -783,6 +783,15 @@ import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from ".
       html += '<label class="rg-field-label" for="rg-edit-option-count">Number of options<select id="rg-edit-option-count" data-option-count>';
       counts.forEach((count) => { html += '<option value="' + count + '" ' + (count === chosen ? "selected" : "") + '>' + count + '</option>'; });
       html += '</select></label>';
+      html += '<label class="rg-field-label" for="rg-edit-selection-rule">How answers are judged<select id="rg-edit-selection-rule" data-selection-rule>';
+      html += '<option value="any" ' + (content.selectionRule !== "all" ? "selected" : "") + '>Accept any one marked correct answer</option>';
+      html += '<option value="all" ' + (content.selectionRule === "all" ? "selected" : "") + '>Require every marked correct answer</option>';
+      html += '</select></label>';
+      html += '<label class="rg-field-label" for="rg-edit-required-correct-count" ' + (content.selectionRule === "all" ? "" : "hidden") + '>Required selections <span>(0 = use the number marked correct)</span><input id="rg-edit-required-correct-count" type="number" min="0" max="24" step="1" data-required-correct-count value="' + (content.requiredCorrectCount || 0) + '"></label>';
+    }
+    if (format.mode === "number-grid") {
+      html += '<label class="rg-field-label" for="rg-edit-number-code">Secret 4-digit number<input id="rg-edit-number-code" type="text" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" autocomplete="off" data-number-code value="' + esc(content.numberCode || "") + '" placeholder="For example, 0042"></label>';
+      html += '<p class="rg-editor-hint">Contestants get four guesses. Keep leading zeroes if the code begins with 0.</p>';
     }
     if (format.mode === "categorize-images") {
       html += '<h4 class="rg-editor-section-title">CATEGORY NAMES</h4>';
@@ -830,6 +839,9 @@ import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from ".
       promptAsset: $("#rg-edit-prompt-file").dataset.assetId || "",
       mode: $("#rg-edit-mode").value,
       acceptedAnswers: parseList($("#rg-edit-answers").value),
+      selectionRule: $("[data-selection-rule]", $("#rg-special-fields"))?.value || effectiveNow().content.selectionRule || "any",
+      requiredCorrectCount: Number($("[data-required-correct-count]", $("#rg-special-fields"))?.value ?? effectiveNow().content.requiredCorrectCount ?? 0),
+      numberCode: $("[data-number-code]", $("#rg-special-fields"))?.value.replace(/\D/g, "").slice(0, 4) || "",
       options: $$("[data-option-row]", $("#rg-options-editor")).map((row) => ({
         label: $("[data-option-label]", row).value,
         image: $("[data-option-image]", row).value.trim(),
