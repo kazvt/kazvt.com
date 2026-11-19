@@ -377,6 +377,8 @@ import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from ".
         content.drawing = "";
         if (Array.isArray(content.options)) content.options = content.options.map((option) => option && typeof option === "object" ? { ...option, correct: false } : option);
       }
+      if (Object.hasOwn(rule, "selectionRule")) content.selectionRule = rule.selectionRule;
+      if (Object.hasOwn(rule, "requiredCorrectCount")) content.requiredCorrectCount = rule.requiredCorrectCount;
       if (rule.resetPromptImage) { content.promptImage = ""; content.promptAsset = ""; }
       if (rule.replaceOptions) content.options = [];
       if (rule.replaceItems) content.items = [];
@@ -1055,9 +1057,11 @@ import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from ".
   function renderChoiceStage(format, content) {
     screen.dataset.mode = format.mode;
     const count = format.optionCount;
-    const columns = format.mode === "image-grid" ? (format.columns || (count <= 6 ? 3 : 4)) : format.mode === "number-grid" ? (format.columns || 4) : (count <= 6 ? 3 : count <= 10 ? 5 : 4);
+    const columns = format.mode === "image-grid" ? (format.columns || (count <= 6 ? 3 : 4)) : (count <= 6 ? 3 : count <= 10 ? 5 : 4);
     stageItems.style.setProperty("--rg-choice-columns", String(columns || 2));
     const options = padOptions(content.options, count);
+    const multiSelect = content.selectionRule === "all";
+    const selected = new Set();
     options.forEach((option, index) => {
       const button = document.createElement("button");
       button.type = "button";
@@ -1068,15 +1072,142 @@ import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from ".
       if (option.image || option.asset) addImageToNode(button, option.image, option.asset);
       const label = document.createElement("span");
       const blankOption = format.blankOption && index === options.length - 1;
-      label.textContent = format.mode === "number-grid" ? String(index + 1) : option.label || (blankOption ? "BLANK" : (option.image || option.asset ? "" : "OPTION " + String(index + 1).padStart(2, "0")));
+      label.textContent = option.label || (blankOption ? "BLANK" : (option.image || option.asset ? "" : "OPTION " + String(index + 1).padStart(2, "0")));
       button.append(label);
       button.addEventListener("click", () => {
-        $$(".rg-answer-option", stageItems).forEach((other) => other.setAttribute("aria-pressed", "false"));
-        button.setAttribute("aria-pressed", "true");
-        checkOption(index);
+        if (multiSelect) {
+          if (selected.has(index)) selected.delete(index);
+          else selected.add(index);
+          button.setAttribute("aria-pressed", String(selected.has(index)));
+          progress.textContent = selectionProgress(selected.size, content.requiredCorrectCount, correctIndexes.length);
+        } else {
+          $$(".rg-answer-option", stageItems).forEach((other) => other.setAttribute("aria-pressed", "false"));
+          button.setAttribute("aria-pressed", "true");
+          checkOption(index);
+        }
       });
       stageItems.append(button);
     });
+    if (multiSelect) {
+      const correctIndexes = options.flatMap((option, index) => option.correct ? [index] : []);
+      const progress = document.createElement("p");
+      progress.className = "rg-selection-progress";
+      progress.setAttribute("aria-live", "polite");
+      progress.textContent = selectionProgress(0, content.requiredCorrectCount, correctIndexes.length);
+      const submit = document.createElement("button");
+      submit.type = "button";
+      submit.className = "rg-stage-button";
+      submit.textContent = "CHECK SELECTION";
+      submit.addEventListener("click", () => {
+        if (!correctIndexes.length || (content.requiredCorrectCount > 0 && correctIndexes.length !== content.requiredCorrectCount)) {
+          setAnswerStatus("Host setup: mark " + (content.requiredCorrectCount || "at least one") + " correct option" + (content.requiredCorrectCount === 1 ? "" : "s") + " first.", "neutral");
+          return;
+        }
+        if (!selected.size) {
+          setAnswerStatus("Select the correct answer option" + (correctIndexes.length === 1 ? "" : "s") + " first.", "neutral");
+          return;
+        }
+        if (matchesCorrectSelection([...selected], correctIndexes)) {
+          setAnswerStatus("CORRECT!", "correct");
+          submit.disabled = true;
+          $$(".rg-answer-option", stageItems).forEach((button) => { button.disabled = true; });
+        } else setAnswerStatus("Not quite - adjust your selection and try again.", "wrong");
+      });
+      answerArea.append(progress, submit);
+    }
+  }
+
+  function selectionProgress(selectedCount, requiredCount, correctCount) {
+    const expected = requiredCount || correctCount;
+    return expected
+      ? "Select all " + expected + " correct answer" + (expected === 1 ? "" : "s") + " (" + selectedCount + " selected)."
+      : "Select every marked correct answer (" + selectedCount + " selected).";
+  }
+
+  function renderNumberGrid(content) {
+    const key = [currentRound, currentDifficulty, content.question, content.numberCode].join(":");
+    if (numberGuessState.key !== key) numberGuessState = { key, guesses: [], solved: false };
+    const board = document.createElement("div");
+    board.className = "rg-number-guess-board";
+    board.setAttribute("aria-label", "Four guesses, four digits per guess");
+    stageItems.append(board);
+
+    const renderRows = () => {
+      board.replaceChildren();
+      for (let rowIndex = 0; rowIndex < 4; rowIndex += 1) {
+        const entry = numberGuessState.guesses[rowIndex];
+        const row = document.createElement("div");
+        row.className = "rg-number-guess-row" + (entry ? "" : " is-empty");
+        row.setAttribute("aria-label", entry
+          ? "Guess " + (rowIndex + 1) + ": " + entry.result.map((color, index) => entry.guess[index] + " " + color).join(", ")
+          : "Guess " + (rowIndex + 1) + " not used");
+        for (let column = 0; column < 4; column += 1) {
+          const cell = document.createElement("span");
+          const color = entry?.result[column] || "";
+          cell.className = "rg-number-guess-cell" + (color ? " is-" + color : "");
+          cell.textContent = entry?.guess[column] || "";
+          cell.setAttribute("aria-hidden", "true");
+          row.append(cell);
+        }
+        board.append(row);
+      }
+    };
+    renderRows();
+
+    const form = document.createElement("form");
+    form.className = "rg-number-guess-form";
+    const input = document.createElement("input");
+    input.type = "text";
+    input.id = "rg-number-guess";
+    input.inputMode = "numeric";
+    input.maxLength = 4;
+    input.pattern = "[0-9]{4}";
+    input.autocomplete = "off";
+    input.spellcheck = false;
+    input.setAttribute("aria-label", "Enter a four-digit guess");
+    input.placeholder = "4 DIGITS";
+    const submit = document.createElement("button");
+    submit.type = "submit";
+    submit.className = "rg-stage-button";
+    submit.textContent = "GUESS";
+    const codeReady = isFourDigitCode(content.numberCode);
+    if (!codeReady) {
+      input.disabled = true;
+      submit.disabled = true;
+      setAnswerStatus("Host: enter a four-digit secret in the editor first.", "neutral");
+    }
+    if (numberGuessState.solved || numberGuessState.guesses.length >= 4) {
+      input.disabled = true;
+      submit.disabled = true;
+    }
+    input.addEventListener("input", () => {
+      const clean = input.value.replace(/\D/g, "").slice(0, 4);
+      if (input.value !== clean) input.value = clean;
+    });
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (numberGuessState.solved || numberGuessState.guesses.length >= 4 || !codeReady) return;
+      const guess = input.value;
+      if (!isFourDigitCode(guess)) {
+        setAnswerStatus("Enter exactly four digits.", "neutral");
+        input.focus();
+        return;
+      }
+      const result = scoreFourDigitGuess(content.numberCode, guess);
+      numberGuessState.guesses.push({ guess, result });
+      const correct = result.every((color) => color === "green");
+      numberGuessState.solved = correct;
+      renderRows();
+      if (correct) setAnswerStatus("CORRECT!", "correct");
+      else if (numberGuessState.guesses.length >= 4) setAnswerStatus("No guesses left. The number was " + content.numberCode + ".", "wrong");
+      else setAnswerStatus((4 - numberGuessState.guesses.length) + " guesses left.", "neutral");
+      input.value = "";
+      input.disabled = correct || numberGuessState.guesses.length >= 4;
+      submit.disabled = input.disabled;
+      if (!input.disabled) input.focus();
+    });
+    form.append(input, submit);
+    answerArea.append(form);
   }
 
   function renderShortAnswer() {
