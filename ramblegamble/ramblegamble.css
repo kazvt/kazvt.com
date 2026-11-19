@@ -623,7 +623,6 @@ body.ramble-page *::after {
   pointer-events: none;
 }
 
-.rg-preview.is-menu .rg-billboard-layer,
 .rg-preview.is-menu .rg-game-cursor,
 .rg-preview.is-menu .rg-result {
   visibility: hidden !important;

@@ -1410,7 +1410,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     for (const object of [stageModel, rouletteRig, slotRig]) {
       if (object) object.visible = visible;
     }
-    billboardLayer.style.visibility = visible ? "" : "hidden";
+    billboardLayer.classList.toggle("rg-billboards-fading", !visible);
   }
 
   function showPauseMenu() {
