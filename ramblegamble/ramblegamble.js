@@ -1645,6 +1645,7 @@ import {
     const open = Boolean(event.detail?.open);
     if (open === diceModeOpen) return;
     diceModeOpen = open;
+    updateLiquidPortalProjection();
     if (open) {
       diceModeVisibility = [stageModel, rouletteRig, slotRig]
         .filter(Boolean)
@@ -1785,7 +1786,10 @@ import {
       renderer.render(scene, camera);
       return;
     }
-    if (sceneReady) updateBillboardProjection();
+    if (sceneReady) {
+      updateBillboardProjection();
+      updateLiquidPortalProjection();
+    }
 
     if (wheelMotion && wheelPivot && ballPivot) {
       const progress = Math.min(1, (time - wheelMotion.started) / wheelMotion.duration);
