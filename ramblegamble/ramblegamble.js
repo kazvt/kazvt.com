@@ -245,7 +245,6 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     resizeObserver.observe(preview);
     window.addEventListener("resize", fitCamera, { passive: true });
     fitCamera();
-    if (!document.hidden && !animationFrame) animationFrame = requestAnimationFrame(animate);
   }
 
   function createSkybox() {
@@ -1363,6 +1362,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     loading.classList.add("is-hidden");
     result.hidden = true;
     hideGameCursor();
+    if (!document.hidden && renderer && !animationFrame) animationFrame = requestAnimationFrame(animate);
 
     menuMarquee.pause();
     try { menuMarquee.currentTime = 0; } catch {}
@@ -1686,7 +1686,6 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
       overviewCameraBounds = getArcadeBounds();
       fitCamera();
       loading.classList.add("is-hidden");
-      if (!document.hidden && !animationFrame) animationFrame = requestAnimationFrame(animate);
     } catch (error) {
       console.error("Ramble Gamble preview failed to start:", error);
       loading.textContent = "The 3D preview could not load.";
@@ -1699,7 +1698,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     if (document.hidden) {
       cancelAnimationFrame(animationFrame);
       animationFrame = 0;
-    } else if (renderer && !animationFrame) {
+    } else if ((gameStarted || pauseMenuOpen) && renderer && !animationFrame) {
       animationFrame = requestAnimationFrame(animate);
     }
   });
