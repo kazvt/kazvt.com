@@ -612,6 +612,14 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     scene?.updateMatrixWorld(true);
 
     if (view.kind === "overview") return getArcadeBounds();
+    if (view.kind === "dice-door") {
+      const opening = ARCADE_REFERENCE_LAYOUT.diceDoor;
+      bounds.set(
+        new THREE.Vector3(opening.minX, opening.minY, opening.wallZ),
+        new THREE.Vector3(opening.maxX, opening.maxY, opening.wallZ),
+      );
+      return bounds.expandByScalar(0.18);
+    }
     if (view.kind === "contestants") return getContestantsBounds();
     if (view.kind === "contestant") {
       const contestant = contestants.find((entry) => entry.id === view.contestantId);
@@ -1474,7 +1482,13 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     if (!interaction) return;
 
     if (interaction.machine === "dice-door") {
-      if (resolvePointClickAction({ machine: "dice-door" }) === "open-dice") {
+      const action = resolvePointClickAction({
+        machine: "dice-door",
+        focused: currentView.kind === "dice-door",
+      });
+      if (action === "focus-dice-door") {
+        transitionToView({ kind: "dice-door" });
+      } else if (action === "open-dice") {
         window.dispatchEvent(new CustomEvent("rg:open-dice-mode"));
       }
       return;
@@ -1525,14 +1539,14 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
         .filter(Boolean)
         .map((object) => [object, object.visible]);
       for (const [object] of diceModeVisibility) object.visible = false;
-      billboardLayer.style.visibility = "hidden";
+      billboardLayer.classList.add("rg-billboards-fading");
       preview.classList.add("is-dice-mode");
       hideGameCursor();
       result.hidden = true;
     } else {
       for (const [object, visible] of diceModeVisibility || []) object.visible = visible;
       diceModeVisibility = null;
-      billboardLayer.style.visibility = "";
+      billboardLayer.classList.remove("rg-billboards-fading");
       preview.classList.remove("is-dice-mode");
       camera.updateMatrixWorld(true);
     }
@@ -1551,7 +1565,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     }
     const shortcut = resolveArcadeShortcut(key);
     if (shortcut === "participants") transitionToView({ kind: "contestants" });
-    else if (shortcut === "dice") window.dispatchEvent(new CustomEvent("rg:open-dice-mode"));
+    else if (shortcut === "dice-door") transitionToView({ kind: "dice-door" });
     else if (shortcut === "host") transitionToView({ kind: "host" });
     else if (shortcut === "cheer") {
       if (!event.repeat) playCheer();
