@@ -6,6 +6,13 @@ import {
   DICE_FACE_ORDER,
   nextDiceAsset,
 } from "./dice-game-state.mjs?v=dice-game-state-20261119-v1";
+import {
+  createDiceFlightState,
+  DICE_FLIGHT_DURATION,
+  DICE_FLIGHT_STEP,
+  DICE_SETTLE_DURATION,
+  stepDiceFlight,
+} from "./dice-roll-physics.mjs?v=dice-roll-physics-20261119-v1";
 
 (() => {
   "use strict";
@@ -34,10 +41,9 @@ import {
   let scene = null;
   let camera = null;
   let frame = 0;
+  let previousFrameTime = null;
   let loadPromise = null;
   let rolling = false;
-  let rollStarted = 0;
-  let rollDuration = 1900;
   let activeRolls = [];
   let isOpen = false;
   let isClosing = false;
@@ -66,6 +72,7 @@ import {
       updateFaceButton(button, face, next.id);
       updateSticker(dieState, faceIndex, next.id);
       status.textContent = "SET THE FACES, THEN ROLL";
+      ensureRenderLoop();
     });
     updateFaceButton(button, face, dieState.assignments[faceIndex]);
     parent.append(button);
@@ -89,13 +96,10 @@ import {
     }
   }
 
-  function createStickerCanvas(assetId) {
-    const stickerCanvas = document.createElement("canvas");
-    stickerCanvas.width = 256;
-    stickerCanvas.height = 256;
+  function paintStickerCanvas(stickerCanvas, assetId) {
     const context = stickerCanvas.getContext("2d");
-    context.clearRect(0, 0, 256, 256);
-    if (assetId === "blank") return stickerCanvas;
+    context.clearRect(0, 0, stickerCanvas.width, stickerCanvas.height);
+    if (assetId === "blank") return;
 
     const color = berryColors[assetId];
     context.fillStyle = "rgba(19, 12, 42, 0.88)";
@@ -115,14 +119,18 @@ import {
     context.fillText(assetId.toUpperCase(), 128, 131, 188);
     context.fillStyle = "rgba(255, 250, 230, .92)";
     context.fillRect(72, 172, 112, 6);
+  }
+
+  function createStickerCanvas(assetId) {
+    const stickerCanvas = document.createElement("canvas");
+    stickerCanvas.width = 256;
+    stickerCanvas.height = 256;
+    paintStickerCanvas(stickerCanvas, assetId);
     return stickerCanvas;
   }
 
   function setStickerTexture(sticker, assetId) {
-    const context = sticker.canvas.getContext("2d");
-    context.clearRect(0, 0, sticker.canvas.width, sticker.canvas.height);
-    const nextCanvas = createStickerCanvas(assetId);
-    context.drawImage(nextCanvas, 0, 0);
+    paintStickerCanvas(sticker.canvas, assetId);
     sticker.texture.needsUpdate = true;
     sticker.mesh.visible = assetId !== "blank";
   }
@@ -245,6 +253,26 @@ import {
     return sample[0] / limit;
   }
 
+  function targetOrientation(result) {
+    const normal = new THREE.Vector3(...result.face.normal);
+    const align = new THREE.Quaternion().setFromUnitVectors(normal, new THREE.Vector3(0, 0, 1));
+    const twist = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), cryptoRandomUnit() * Math.PI * 2);
+    return twist.multiply(align);
+  }
+
+  function setRollResults() {
+    activeRolls.forEach((roll, index) => {
+      const label = DICE_ASSET_CYCLE.find(({ id }) => id === roll.result.asset)?.label || "Blank";
+      outcomeLabels[index].textContent = `${index === 0 ? "LEFT" : "RIGHT"}: ${label.toUpperCase()}`;
+    });
+    rolling = false;
+    activeRolls = [];
+    previousFrameTime = null;
+    rollButton.disabled = false;
+    for (const picker of document.querySelectorAll(".rg-die-face-button")) picker.disabled = false;
+    status.textContent = "ROLL COMPLETE";
+  }
+
   function startRoll() {
     if (rolling || !renderer || dieStates.some(({ stickers }) => stickers.length !== DICE_FACE_ORDER.length)) return;
     rolling = true;
@@ -253,53 +281,93 @@ import {
     const results = dieStates.map(({ assignments }) => chooseDiceOutcome(assignments, cryptoRandomUnit));
     activeRolls = results.map((result, index) => {
       const group = dieStates[index].group;
-      const from = group.quaternion.clone();
-      const normal = new THREE.Vector3(...result.face.normal);
-      const align = new THREE.Quaternion().setFromUnitVectors(normal, new THREE.Vector3(0, 0, 1));
-      const twist = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), cryptoRandomUnit() * Math.PI * 2);
-      const target = twist.multiply(align);
+      const restPosition = group.position.clone();
+      const lane = index === 0 ? -1 : 1;
       return {
         group,
-        from,
-        target,
+        restPosition,
+        target: targetOrientation(result),
         result,
-        spinAxis: new THREE.Vector3(0.7 + index * 0.12, 1, 0.46).normalize(),
+        elapsed: 0,
+        flightAccumulator: 0,
+        flight: createDiceFlightState({
+          origin: [restPosition.x, 0.08, restPosition.z],
+          lane,
+          random: cryptoRandomUnit,
+        }),
+        settlePosition: null,
+        settleQuaternion: null,
       };
     });
-    rollStarted = performance.now();
-    rollDuration = reducedMotion.matches ? 250 : 1900;
-    status.textContent = "ROLLING...";
     outcomeLabels.forEach((label) => { label.textContent = "ROLLING"; });
+
+    if (reducedMotion.matches) {
+      activeRolls.forEach((roll) => {
+        roll.group.position.copy(roll.restPosition);
+        roll.group.quaternion.copy(roll.target);
+      });
+      setRollResults();
+      renderer.render(scene, camera);
+      return;
+    }
+
+    previousFrameTime = null;
+    status.textContent = "ROLLING...";
     ensureRenderLoop();
   }
 
-  function updateRoll(time) {
-    if (!rolling) return;
-    const progress = Math.min(1, (time - rollStarted) / rollDuration);
-    const eased = 1 - Math.pow(1 - progress, 4);
-    for (const roll of activeRolls) {
-      roll.group.quaternion.slerpQuaternions(roll.from, roll.target, eased);
-      const spin = new THREE.Quaternion().setFromAxisAngle(roll.spinAxis, Math.PI * 8 * (1 - eased));
-      roll.group.quaternion.premultiply(spin);
-    }
-    if (progress < 1) return;
+  function rotateDieByAngularVelocity(roll, delta) {
+    const spin = roll.flight.angularVelocity;
+    const speed = Math.hypot(spin.x, spin.y, spin.z);
+    if (speed < 1e-5) return;
+    const axis = new THREE.Vector3(spin.x / speed, spin.y / speed, spin.z / speed);
+    roll.group.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(axis, speed * delta));
+    roll.group.quaternion.normalize();
+  }
 
-    activeRolls.forEach((roll, index) => {
-      roll.group.quaternion.copy(roll.target);
-      const label = DICE_ASSET_CYCLE.find(({ id }) => id === roll.result.asset)?.label || "Blank";
-      outcomeLabels[index].textContent = `${index === 0 ? "LEFT" : "RIGHT"}: ${label.toUpperCase()}`;
-    });
-    rolling = false;
-    activeRolls = [];
-    rollButton.disabled = false;
-    for (const picker of document.querySelectorAll(".rg-die-face-button")) picker.disabled = false;
-    status.textContent = "ROLL COMPLETE";
+  function updateRoll(deltaSeconds) {
+    if (!rolling) return;
+    for (const roll of activeRolls) {
+      const previousElapsed = roll.elapsed;
+      roll.elapsed = Math.min(DICE_FLIGHT_DURATION + DICE_SETTLE_DURATION, roll.elapsed + deltaSeconds);
+      const flightDelta = Math.max(0, Math.min(roll.elapsed, DICE_FLIGHT_DURATION) - previousElapsed);
+      roll.flightAccumulator += flightDelta;
+      while (roll.flightAccumulator + 1e-9 >= DICE_FLIGHT_STEP) {
+        stepDiceFlight(roll.flight, DICE_FLIGHT_STEP);
+        rotateDieByAngularVelocity(roll, DICE_FLIGHT_STEP);
+        roll.flightAccumulator -= DICE_FLIGHT_STEP;
+      }
+
+      if (roll.elapsed < DICE_FLIGHT_DURATION) {
+        roll.group.position.set(roll.flight.position.x, roll.flight.position.y, roll.flight.position.z);
+        continue;
+      }
+
+      if (!roll.settlePosition) {
+        roll.settlePosition = roll.group.position.clone();
+        roll.settleQuaternion = roll.group.quaternion.clone();
+      }
+      const settleProgress = Math.min(1, (roll.elapsed - DICE_FLIGHT_DURATION) / DICE_SETTLE_DURATION);
+      const eased = settleProgress * settleProgress * (3 - 2 * settleProgress);
+      roll.group.position.lerpVectors(roll.settlePosition, roll.restPosition, eased);
+      roll.group.quaternion.slerpQuaternions(roll.settleQuaternion, roll.target, eased);
+    }
+
+    if (activeRolls.every((roll) => roll.elapsed >= DICE_FLIGHT_DURATION + DICE_SETTLE_DURATION)) {
+      activeRolls.forEach((roll) => {
+        roll.group.position.copy(roll.restPosition);
+        roll.group.quaternion.copy(roll.target);
+      });
+      setRollResults();
+    }
   }
 
   function render(time) {
     frame = 0;
     if (!isOpen || !renderer || !scene || !camera) return;
-    updateRoll(time);
+    const deltaSeconds = previousFrameTime === null ? 0 : Math.min(0.05, Math.max(0, (time - previousFrameTime) / 1000));
+    previousFrameTime = time;
+    updateRoll(deltaSeconds);
     renderer.render(scene, camera);
     if (rolling) frame = requestAnimationFrame(render);
   }
@@ -351,6 +419,7 @@ import {
     dialog.removeEventListener("transitionend", onDiceDialogTransitionEnd);
     cancelAnimationFrame(frame);
     frame = 0;
+    previousFrameTime = null;
     if (dialog.open) dialog.close();
     dialog.classList.remove("rg-dice-entering", "rg-dice-exiting");
     liquid.removeAttribute("src");
@@ -411,7 +480,9 @@ import {
     if (document.hidden) {
       cancelAnimationFrame(frame);
       frame = 0;
+      previousFrameTime = null;
     } else {
+      previousFrameTime = null;
       ensureRenderLoop();
     }
   });
