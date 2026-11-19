@@ -18,6 +18,7 @@ const ASSET_IDS = new Set(DICE_ASSET_CYCLE.map(({ id }) => id));
 
 export function nextDiceAsset(current) {
   const currentIndex = DICE_ASSET_CYCLE.findIndex(({ id }) => id === current);
+  if (currentIndex < 0) return DICE_ASSET_CYCLE[0];
   return DICE_ASSET_CYCLE[(currentIndex + 1 + DICE_ASSET_CYCLE.length) % DICE_ASSET_CYCLE.length];
 }
 
