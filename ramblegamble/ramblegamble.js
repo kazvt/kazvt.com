@@ -1293,7 +1293,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   }
 
   function updatePointer(event) {
-    if (!gameStarted || pauseMenuOpen || event.pointerType === "touch" || !camera || event.buttons) {
+    if (!gameStarted || pauseMenuOpen || event.pointerType === "touch" || !camera || event.buttons || cameraTransition) {
       hideGameCursor();
       return;
     }
