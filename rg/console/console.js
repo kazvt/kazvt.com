@@ -3,7 +3,7 @@ import {
   readPointScores,
   writePointScores,
 } from "/ramblegamble/points-store.mjs?v=points-console-20261120-v1";
-import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=points-console-commands-20261120-v2";
+import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=points-console-hyphen-20261120-v3";
 
 const output = document.getElementById("terminal-output");
 const form = document.getElementById("terminal-form");
