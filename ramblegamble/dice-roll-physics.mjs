@@ -141,7 +141,7 @@ export function createDicePhysicsWorld(CANNON) {
   world.allowSleep = true;
   world.solver.iterations = 18;
   world.solver.tolerance = 0.001;
-  world.defaultContactMaterial.friction = 0.56;
+  world.defaultContactMaterial.friction = 0.68;
   world.defaultContactMaterial.restitution = 0.18;
   world.defaultContactMaterial.contactEquationStiffness = 1e7;
   world.defaultContactMaterial.contactEquationRelaxation = 3;
@@ -152,6 +152,20 @@ export function createDicePhysicsWorld(CANNON) {
   floor.addShape(new CANNON.Plane());
   floor.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
   world.addBody(floor);
+
+  // Invisible tray rails keep high-energy throws in the visible roll area.
+  const addRail = (halfExtents, position) => {
+    const rail = new CANNON.Body({ mass: 0, position: new CANNON.Vec3(...position) });
+    rail.addShape(new CANNON.Box(new CANNON.Vec3(...halfExtents)));
+    world.addBody(rail);
+  };
+  const wallHalfHeight = 3.6;
+  const trayHalfWidth = 4.2;
+  const trayHalfDepth = 2.8;
+  addRail([0.12, wallHalfHeight, trayHalfDepth], [-trayHalfWidth, wallHalfHeight, 0]);
+  addRail([0.12, wallHalfHeight, trayHalfDepth], [trayHalfWidth, wallHalfHeight, 0]);
+  addRail([trayHalfWidth, wallHalfHeight, 0.12], [0, wallHalfHeight, -trayHalfDepth]);
+  addRail([trayHalfWidth, wallHalfHeight, 0.12], [0, wallHalfHeight, trayHalfDepth]);
 
   return world;
 }
