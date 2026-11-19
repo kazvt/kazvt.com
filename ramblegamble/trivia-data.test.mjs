@@ -41,6 +41,14 @@ test("question-specific templates preserve the supplied counts and modes", () =>
   assert.equal(resolveRoundFormat("08", 3).mode, "short-answer");
   assert.equal(resolveRoundFormat("09", 4).optionCount, 13);
   assert.equal(resolveRoundFormat("09", 5).optionCount, 13);
+  assert.deepEqual(
+    [resolveRoundFormat("09", 4).selectionRule, resolveRoundFormat("09", 4).requiredCorrectCount],
+    ["all", 5],
+  );
+  assert.deepEqual(
+    [resolveRoundFormat("09", 5).selectionRule, resolveRoundFormat("09", 5).requiredCorrectCount],
+    ["any", 0],
+  );
   assert.equal(resolveRoundFormat("10", 5).mode, "number-grid");
   assert.equal(resolveRoundFormat("10", 5).rows, 4);
   assert.equal(resolveRoundFormat("10", 5).columns, 4);

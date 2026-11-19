@@ -230,7 +230,7 @@ function parseQuestionObjects(questions) {
     const answerValue = item.answer ?? item.back ?? item.definition;
     const acceptedAnswers = normalizeAnswerObjects(explicitAccepted ?? (options.length ? null : answerValue));
     const mode = normalizeMode(item.mode ?? item.type ?? item.format) || (options.length > 1 ? "choice-text" : "short-answer");
-    const rawCorrect = item.correctAnswer ?? item.correct_answer ?? item.answerKey ?? item.answer_key ?? item.correctOption ?? item.correct_option ?? item.correct ?? (options.length ? answerValue : null);
+    const rawCorrect = item.correctAnswers ?? item.correct_answers ?? item.correctAnswer ?? item.correct_answer ?? item.answerKey ?? item.answer_key ?? item.correctOption ?? item.correct_option ?? item.correct ?? (options.length ? answerValue : null);
     const correct = typeof rawCorrect === "boolean" ? null : rawCorrect;
     const hasDifficulty = item.difficulty != null || item.level != null || item.tier != null;
     const rawDifficulty = item.difficulty ?? item.level ?? item.tier ?? 1;

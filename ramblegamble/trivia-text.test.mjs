@@ -204,6 +204,7 @@ test("JSON text export round-trips modes, tier fields, correct answers, media re
       acceptedAnswers: ["Alternate"], subtitle: "A hint", promptImage: "", promptAsset: "asset-one",
       items: [], pairs: [], categories: [], videoUrl: "", numberValue: 0, numberVisible: false,
       imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
+      selectionRule: "all", requiredCorrectCount: 2, numberCode: "0042",
     } } },
     questionBank: [{ id: "bank-1", text: "Ask everyone?" }],
     media: { "asset-one": "data:image/png;base64,aGVsbG8=" },
@@ -213,6 +214,48 @@ test("JSON text export round-trips modes, tier fields, correct answers, media re
   assert.deepEqual(parsed.rounds, data.rounds);
   assert.deepEqual(parsed.questionBank, data.questionBank);
   assert.deepEqual(parsed.media, data.media);
+});
+
+test("multiple correct answers and selection rules import from human text and JSON", () => {
+  const human = parseTriviaText(`
+Round 09: Select the listed answers
+Difficulty 4:
+Mode: multiple choice
+Selection rule: require all correct answers
+Required selections: 2
+Options:
+- [x] First answer
+- [x] Second answer
+- Third answer
+Difficulty 5:
+Selection rule: one of the correct answers
+`);
+  assert.equal(human.rounds["09"][4].selectionRule, "all");
+  assert.equal(human.rounds["09"][4].requiredCorrectCount, 2);
+  assert.deepEqual(human.rounds["09"][4].options.filter((option) => option.correct).map((option) => option.label), ["First answer", "Second answer"]);
+  assert.equal(human.rounds["09"][5].selectionRule, "any");
+
+  const json = parseTriviaText(JSON.stringify({ questions: [{
+    round: 11, difficulty: 2, question: "Pick both", options: ["A", "B", "C"],
+    correctAnswers: ["A", "B"], selectionMode: "all", requiredSelections: 2,
+  }] }));
+  assert.equal(json.rounds["11"][2].selectionRule, "all");
+  assert.equal(json.rounds["11"][2].requiredCorrectCount, 2);
+  assert.deepEqual(json.rounds["11"][2].options.filter((option) => option.correct).map((option) => option.label), ["A", "B"]);
+});
+
+test("number-grid answer codes import as text and preserve leading zeroes", () => {
+  const imported = parseTriviaText(`
+Round 10: Guess the code
+Difficulty 3:
+Mode: 4x4 number grid
+Secret number: 0042
+`);
+  assert.equal(imported.rounds["10"][3].mode, "number-grid");
+  assert.equal(imported.rounds["10"][3].numberCode, "0042");
+
+  const delimited = parseTriviaText("Question,Mode,Secret Number\nGuess the code,number grid,0071\n");
+  assert.equal(delimited.rounds["01"][1].numberCode, "0071");
 });
 
 test("empty or unrelated files return a visible diagnostic instead of an empty successful import", () => {
