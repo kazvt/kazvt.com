@@ -13,8 +13,8 @@ test("participant and host aliases coexist with their number shortcuts, and C is
   assert.equal(resolveArcadeShortcut("1"), "participants");
   assert.equal(resolveArcadeShortcut("p"), "participants");
   assert.equal(resolveArcadeShortcut("P"), "participants");
-  assert.equal(resolveArcadeShortcut("d"), "dice");
-  assert.equal(resolveArcadeShortcut("D"), "dice");
+  assert.equal(resolveArcadeShortcut("d"), "dice-door");
+  assert.equal(resolveArcadeShortcut("D"), "dice-door");
   assert.equal(resolveArcadeShortcut("4"), "host");
   assert.equal(resolveArcadeShortcut("h"), "host");
   assert.equal(resolveArcadeShortcut("H"), "host");
