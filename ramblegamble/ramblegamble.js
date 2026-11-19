@@ -554,7 +554,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     const bounds = getViewBounds(view);
     if (bounds.isEmpty()) return null;
     const target = bounds.getCenter(new THREE.Vector3());
-    const yaw = REFERENCE_START_VIEW.yaw - view.look * 0.42;
+    const yaw = (view.kind === "dice-door" ? 0 : REFERENCE_START_VIEW.yaw) - view.look * 0.42;
     // The roulette interaction is best inspected from above, like looking down
     // at a real table. Keep the room and every other close-up at the authored angle.
     // Preserve the reference's elevated oblique view instead of a near-vertical map view.
@@ -1465,7 +1465,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   }
 
   function pointClickAt(clientX, clientY) {
-    if (!gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen) return;
+    if (!gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen || cameraTransition) return;
     const rect = preview.getBoundingClientRect();
     const zone = resolvePointClickZone({
       x: clientX - rect.left,
@@ -1565,7 +1565,11 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     }
     const shortcut = resolveArcadeShortcut(key);
     if (shortcut === "participants") transitionToView({ kind: "contestants" });
-    else if (shortcut === "dice-door") transitionToView({ kind: "dice-door" });
+    else if (shortcut === "dice-door") {
+      if (currentView.kind !== "dice-door" || currentView.look !== 0) {
+        transitionToView({ kind: "dice-door" });
+      }
+    }
     else if (shortcut === "host") transitionToView({ kind: "host" });
     else if (shortcut === "cheer") {
       if (!event.repeat) playCheer();
