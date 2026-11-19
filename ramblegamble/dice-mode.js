@@ -342,28 +342,60 @@ import {
     return loadPromise;
   }
 
+  function finishClosingDiceMode() {
+    if (!isClosing) return;
+    isClosing = false;
+    isOpen = false;
+    if (closeFadeTimeout) window.clearTimeout(closeFadeTimeout);
+    closeFadeTimeout = 0;
+    dialog.removeEventListener("transitionend", onDiceDialogTransitionEnd);
+    cancelAnimationFrame(frame);
+    frame = 0;
+    if (dialog.open) dialog.close();
+    dialog.classList.remove("rg-dice-entering", "rg-dice-exiting");
+    liquid.removeAttribute("src");
+    document.body.classList.remove("rg-dice-mode-open");
+    window.dispatchEvent(new CustomEvent("rg:dice-mode-state", { detail: { open: false } }));
+    document.getElementById("rg-canvas")?.focus({ preventScroll: true });
+  }
+
+  function onDiceDialogTransitionEnd(event) {
+    if (event.target === dialog && event.propertyName === "opacity" && isClosing) {
+      finishClosingDiceMode();
+    }
+  }
+
   function openDiceMode() {
     if (isOpen) return;
     isOpen = true;
+    isClosing = false;
+    dialog.classList.remove("rg-dice-exiting");
+    dialog.classList.add("rg-dice-entering");
     dialog.showModal();
     document.body.classList.add("rg-dice-mode-open");
     liquid.src = "/liquid/?theatre=on";
     window.dispatchEvent(new CustomEvent("rg:dice-mode-state", { detail: { open: true } }));
     loadDiceModel();
     ensureRenderLoop();
-    returnButton.focus({ preventScroll: true });
+
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (!isOpen || isClosing) return;
+      dialog.classList.remove("rg-dice-entering");
+      returnButton.focus({ preventScroll: true });
+    }));
   }
 
   function closeDiceMode() {
-    if (!isOpen) return;
-    isOpen = false;
-    cancelAnimationFrame(frame);
-    frame = 0;
-    if (dialog.open) dialog.close();
-    liquid.removeAttribute("src");
-    document.body.classList.remove("rg-dice-mode-open");
-    window.dispatchEvent(new CustomEvent("rg:dice-mode-state", { detail: { open: false } }));
-    document.getElementById("rg-canvas")?.focus({ preventScroll: true });
+    if (!isOpen || isClosing) return;
+    isClosing = true;
+    dialog.classList.remove("rg-dice-entering");
+    dialog.classList.add("rg-dice-exiting");
+    if (reducedMotion.matches || !dialog.open) {
+      finishClosingDiceMode();
+      return;
+    }
+    dialog.addEventListener("transitionend", onDiceDialogTransitionEnd);
+    closeFadeTimeout = window.setTimeout(finishClosingDiceMode, 420);
   }
 
   buildFacePickers();
