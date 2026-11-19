@@ -25,15 +25,11 @@ import {
   const rollButton = document.getElementById("rg-dice-roll");
   const status = document.getElementById("rg-dice-status");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const berryColors = Object.freeze({
-    erinberry: "#ef78bd",
-    faroeberry: "#63c9ec",
-    kazberry: "#b38cff",
-  });
   const dieStates = [
     { side: "left", assignments: Array(6).fill("blank"), group: null, stickers: [], body: null, baseHalfExtents: null, throwOrigin: null },
     { side: "right", assignments: Array(6).fill("blank"), group: null, stickers: [], body: null, baseHalfExtents: null, throwOrigin: null },
   ];
+  const berryImages = new Map();
   let renderer = null;
   let scene = null;
   let camera = null;
@@ -57,8 +53,11 @@ import {
     const faceLabel = document.createElement("span");
     faceLabel.className = "rg-die-face-side";
     faceLabel.textContent = face.label;
-    const value = document.createElement("strong");
+    const value = document.createElement("img");
     value.className = "rg-die-face-value";
+    value.alt = "";
+    value.setAttribute("aria-hidden", "true");
+    value.draggable = false;
     button.append(faceLabel, value);
     button.addEventListener("click", () => {
       if (rolling) return;
@@ -76,7 +75,14 @@ import {
 
   function updateFaceButton(button, face, assetId) {
     const asset = DICE_ASSET_CYCLE.find((choice) => choice.id === assetId) || DICE_ASSET_CYCLE[0];
-    button.querySelector(".rg-die-face-value").textContent = asset.label.toUpperCase();
+    const image = button.querySelector(".rg-die-face-value");
+    if (asset.imageSrc) {
+      image.src = asset.imageSrc;
+      image.hidden = false;
+    } else {
+      image.removeAttribute("src");
+      image.hidden = true;
+    }
     button.dataset.asset = asset.id;
     button.setAttribute("aria-label", `${button.dataset.die} die, ${face.label.toLowerCase()} face: ${asset.label}. Click to cycle to the next berry.`);
   }
@@ -97,24 +103,9 @@ import {
     context.clearRect(0, 0, stickerCanvas.width, stickerCanvas.height);
     if (assetId === "blank") return;
 
-    const color = berryColors[assetId];
-    context.fillStyle = "rgba(19, 12, 42, 0.88)";
-    context.fillRect(15, 15, 226, 226);
-    context.fillStyle = color;
-    context.fillRect(20, 20, 216, 216);
-    context.strokeStyle = "#fff4dc";
-    context.lineWidth = 8;
-    context.strokeRect(18, 18, 220, 220);
-    context.strokeStyle = "rgba(22, 12, 50, .84)";
-    context.lineWidth = 4;
-    context.strokeRect(29, 29, 198, 198);
-    context.textAlign = "center";
-    context.textBaseline = "middle";
-    context.fillStyle = "#1a1039";
-    context.font = "900 28px Arial, Helvetica, sans-serif";
-    context.fillText(assetId.toUpperCase(), 128, 131, 188);
-    context.fillStyle = "rgba(255, 250, 230, .92)";
-    context.fillRect(72, 172, 112, 6);
+    const image = berryImages.get(assetId);
+    if (!image?.complete || !image.naturalWidth) return;
+    context.drawImage(image, 0, 0, stickerCanvas.width, stickerCanvas.height);
   }
 
   function createStickerCanvas(assetId) {
@@ -123,6 +114,24 @@ import {
     stickerCanvas.height = 256;
     paintStickerCanvas(stickerCanvas, assetId);
     return stickerCanvas;
+  }
+
+  function preloadBerryImages() {
+    for (const asset of DICE_ASSET_CYCLE) {
+      if (!asset.imageSrc || berryImages.has(asset.id)) continue;
+      const image = new Image();
+      image.decoding = "async";
+      image.addEventListener("load", () => {
+        for (const dieState of dieStates) {
+          dieState.assignments.forEach((assignedAsset, faceIndex) => {
+            if (assignedAsset === asset.id) updateSticker(dieState, faceIndex, assignedAsset);
+          });
+        }
+        ensureRenderLoop();
+      }, { once: true });
+      berryImages.set(asset.id, image);
+      image.src = asset.imageSrc;
+    }
   }
 
   function setStickerTexture(sticker, assetId) {
@@ -271,8 +280,7 @@ import {
     const labels = activeRolls.map(({ body, dieState }) => {
       const faceIndex = getUpwardFaceIndex(body.quaternion, DICE_FACE_ORDER);
       const asset = dieState.assignments[faceIndex];
-      const label = DICE_ASSET_CYCLE.find((choice) => choice.id === asset)?.label || "Blank";
-      return label.toUpperCase();
+      return asset;
     });
     rolling = false;
     activeRolls = [];
@@ -280,7 +288,30 @@ import {
     rollButton.disabled = false;
     for (const picker of document.querySelectorAll(".rg-die-face-button")) picker.disabled = false;
     status.dataset.state = "complete";
-    status.textContent = `LEFT: ${labels[0]} · RIGHT: ${labels[1]}`;
+    status.replaceChildren();
+    labels.forEach((assetId, index) => {
+      const asset = DICE_ASSET_CYCLE.find((choice) => choice.id === assetId) || DICE_ASSET_CYCLE[0];
+      if (index) status.append(document.createTextNode(" · "));
+      const result = document.createElement("span");
+      result.className = "rg-dice-result";
+      const side = document.createElement("span");
+      side.textContent = index === 0 ? "LEFT" : "RIGHT";
+      result.append(side);
+      if (asset.imageSrc) {
+        const image = document.createElement("img");
+        image.src = asset.imageSrc;
+        image.alt = asset.label;
+        image.className = "rg-dice-result-image";
+        result.append(image);
+      } else {
+        const blank = document.createElement("span");
+        blank.className = "rg-dice-result-blank";
+        blank.setAttribute("role", "img");
+        blank.setAttribute("aria-label", "Blank");
+        result.append(blank);
+      }
+      status.append(result);
+    });
   }
 
   function startRoll() {
@@ -450,6 +481,7 @@ import {
     closeFadeTimeout = window.setTimeout(finishClosingDiceMode, 420);
   }
 
+  preloadBerryImages();
   buildFacePickers();
   returnButton.addEventListener("click", closeDiceMode);
   rollButton.addEventListener("click", startRoll);
