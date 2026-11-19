@@ -900,7 +900,7 @@ function parseInlineQuestionAnswer(line) {
     question = line.slice(0, tab).trim();
     answer = line.slice(tab + 1).trim();
   } else {
-    const match = line.match(/^(.+?)\s+(?:-|–|—)\s+(.+)$/);
+    const match = line.match(/^(.+?)\s+(?:-|–|\u2014)\s+(.+)$/);
     if (!match) return null;
     question = match[1].trim();
     answer = match[2].trim();
@@ -910,9 +910,9 @@ function parseInlineQuestionAnswer(line) {
 }
 
 function parseRoundHeader(line) {
-  let match = line.match(/^\s*(?:round|question\s*#?|q)\s*#?\s*(\d{1,2})\s*(?:[:.)–—-]|\s+-\s*)\s*(.*)$/i);
+  let match = line.match(/^\s*(?:round|question\s*#?|q)\s*#?\s*(\d{1,2})\s*(?:[:.)–\u2014-]|\s+-\s*)\s*(.*)$/i);
   if (match) return { id: match[1], question: match[2].trim() };
-  match = line.match(/^\s*(\d{1,2})\s*[:.)–—-]\s*(.*)$/);
+  match = line.match(/^\s*(\d{1,2})\s*[:.)–\u2014-]\s*(.*)$/);
   if (!match) return null;
   const number = Number(match[1]);
   if (number < 1 || number > 36) return null;
@@ -921,7 +921,7 @@ function parseRoundHeader(line) {
 }
 
 function parseDifficultyHeader(line) {
-  let match = line.match(/^\s*(?:difficult(?:y|ies)|diff|level|tier|stage|d)\s*(?:(?:number|level|tier)\s*)?#?\s*(\d+|one|first|1st|two|second|2nd|three|third|3rd|four|fourth|4th|five|fifth|5th|easy|easiest|beginner|simple|medium|intermediate|normal|hard|hardest|expert|advanced)\s*(?:[:=.)–—-]\s*)?(.*)$/i);
+  let match = line.match(/^\s*(?:difficult(?:y|ies)|diff|level|tier|stage|d)\s*(?:(?:number|level|tier)\s*)?#?\s*(\d+|one|first|1st|two|second|2nd|three|third|3rd|four|fourth|4th|five|fifth|5th|easy|easiest|beginner|simple|medium|intermediate|normal|hard|hardest|expert|advanced)\s*(?:[:=.)–\u2014-]\s*)?(.*)$/i);
   if (match) {
     const level = parseLevelValue(match[1]);
     return level ? { level, annotation: match[2].trim() } : null;
@@ -991,12 +991,12 @@ function safeCodePoint(value) {
   return Number.isInteger(value) && value >= 0 && value <= 0x10ffff ? String.fromCodePoint(value) : " ";
 }
 
-function isBullet(line) { return /^\s*(?:[-*+•‣▪◦–—]\s+|\[\s*[xX✓✔ ]\s*\]\s*|\d+\s*[.)]\s+|[A-Za-z]\s*[.)]\s+)/.test(line); }
+function isBullet(line) { return /^\s*(?:[-*+•‣▪◦–\u2014]\s+|\[\s*[xX✓✔ ]\s*\]\s*|\d+\s*[.)]\s+|[A-Za-z]\s*[.)]\s+)/.test(line); }
 function isLabeledAnswer(line) { return /^\s*(?:option|choice|answer)\s+[A-Za-z0-9]+\s*[:.)-]\s*|^[A-Za-z]\s*:\s*/i.test(line); }
 
 function parseAnswerLine(value) {
   let text = String(value || "").trim();
-  text = text.replace(/^\s*(?:[-*+•‣▪◦–—]\s+|\d+\s*[.)]\s+|[A-Za-z]\s*[.)]\s+)/, "");
+  text = text.replace(/^\s*(?:[-*+•‣▪◦–\u2014]\s+|\d+\s*[.)]\s+|[A-Za-z]\s*[.)]\s+)/, "");
   let correct = false;
   if (/^\[\s*[xX✓✔]\s*\]\s*/.test(text) || /^(?:✓|✔)\s*/.test(text)) { correct = true; text = text.replace(/^\[\s*[xX✓✔]\s*\]\s*|^(?:✓|✔)\s*/, ""); }
   if (/\s*(?:\[(?:correct|right|x|✓|✔)\]|\((?:correct|right|✓|✔)\)|\*\*?)\s*$/i.test(text)) {
@@ -1004,7 +1004,7 @@ function parseAnswerLine(value) {
     text = text.replace(/\s*(?:\[(?:correct|right|x|✓|✔)\]|\((?:correct|right|✓|✔)\)|\*\*?)\s*$/i, "");
   }
   text = text.replace(/^\s*(?:option|choice|answer)\s+[A-Za-z0-9]+\s*[:.)-]\s*/i, "");
-  text = text.replace(/^\s*(?:\[\s*[xX✓✔ ]\s*\]\s*|[-*+•‣▪◦–—]\s+|\d+\s*[.)]\s+|[A-Za-z]\s*[.)]\s+)/, "");
+  text = text.replace(/^\s*(?:\[\s*[xX✓✔ ]\s*\]\s*|[-*+•‣▪◦–\u2014]\s+|\d+\s*[.)]\s+|[A-Za-z]\s*[.)]\s+)/, "");
   return { text: text.trim(), image: "", correct };
 }
 
