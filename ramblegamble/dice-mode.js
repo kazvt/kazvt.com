@@ -23,10 +23,6 @@ import {
   const returnButton = document.getElementById("rg-dice-return");
   const rollButton = document.getElementById("rg-dice-roll");
   const status = document.getElementById("rg-dice-status");
-  const outcomeLabels = [
-    document.getElementById("rg-dice-outcome-left"),
-    document.getElementById("rg-dice-outcome-right"),
-  ];
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const berryColors = Object.freeze({
     erinberry: "#ef78bd",
@@ -60,18 +56,15 @@ import {
     faceLabel.textContent = face.label;
     const value = document.createElement("strong");
     value.className = "rg-die-face-value";
-    const cycle = document.createElement("span");
-    cycle.className = "rg-die-face-cycle";
-    cycle.setAttribute("aria-hidden", "true");
-    cycle.textContent = "↻";
-    button.append(faceLabel, value, cycle);
+    button.append(faceLabel, value);
     button.addEventListener("click", () => {
       if (rolling) return;
       const next = nextDiceAsset(dieState.assignments[faceIndex]);
       dieState.assignments[faceIndex] = next.id;
       updateFaceButton(button, face, next.id);
       updateSticker(dieState, faceIndex, next.id);
-      status.textContent = "SET THE FACES, THEN ROLL";
+      status.textContent = "";
+      status.dataset.state = "idle";
       ensureRenderLoop();
     });
     updateFaceButton(button, face, dieState.assignments[faceIndex]);
@@ -219,6 +212,7 @@ import {
     canvas.addEventListener("webglcontextlost", (event) => {
       event.preventDefault();
       rollButton.disabled = true;
+      status.dataset.state = "error";
       status.textContent = "DICE PAUSED - GRAPHICS CONTEXT LOST";
     });
   }
@@ -272,16 +266,17 @@ import {
   }
 
   function setRollResults() {
-    activeRolls.forEach((roll, index) => {
+    const labels = activeRolls.map((roll) => {
       const label = DICE_ASSET_CYCLE.find(({ id }) => id === roll.result.asset)?.label || "Blank";
-      outcomeLabels[index].textContent = `${index === 0 ? "LEFT" : "RIGHT"}: ${label.toUpperCase()}`;
+      return label.toUpperCase();
     });
     rolling = false;
     activeRolls = [];
     previousFrameTime = null;
     rollButton.disabled = false;
     for (const picker of document.querySelectorAll(".rg-die-face-button")) picker.disabled = false;
-    status.textContent = "ROLL COMPLETE";
+    status.dataset.state = "complete";
+    status.textContent = `LEFT: ${labels[0]} · RIGHT: ${labels[1]}`;
   }
 
   function startRoll() {
@@ -310,8 +305,6 @@ import {
         settleQuaternion: null,
       };
     });
-    outcomeLabels.forEach((label) => { label.textContent = "ROLLING"; });
-
     if (reducedMotion.matches) {
       activeRolls.forEach((roll) => {
         roll.group.position.copy(roll.restPosition);
@@ -323,7 +316,8 @@ import {
     }
 
     previousFrameTime = null;
-    status.textContent = "ROLLING...";
+    status.dataset.state = "rolling";
+    status.textContent = "ROLLING";
     ensureRenderLoop();
   }
 
@@ -392,7 +386,8 @@ import {
     loadPromise = (async () => {
       createDiceRenderer();
       resizeRenderer();
-      status.textContent = "LOADING THE DICE MODEL...";
+      status.dataset.state = "loading";
+      status.textContent = "LOADING";
       const loader = new GLTFLoader();
       const gltf = await loader.loadAsync("/ramblegamble/assets/dice-source/dice%20blank.gltf");
       const base = gltf.scene;
@@ -410,10 +405,12 @@ import {
         addFaceStickers(dieState);
       }
       rollButton.disabled = false;
-      status.textContent = "SET THE FACES, THEN ROLL";
+      status.textContent = "";
+      status.dataset.state = "idle";
       ensureRenderLoop();
     })().catch((error) => {
       console.error("Ramble Gamble dice model failed to load:", error);
+      status.dataset.state = "error";
       status.textContent = "THE DICE MODEL COULD NOT LOAD";
       rollButton.disabled = true;
       loadPromise = null;
