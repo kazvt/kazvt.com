@@ -40,6 +40,8 @@ import {
   let rollDuration = 1900;
   let activeRolls = [];
   let isOpen = false;
+  let isClosing = false;
+  let closeFadeTimeout = 0;
 
   function makeFaceButton(dieState, face, faceIndex, parent) {
     const button = document.createElement("button");
