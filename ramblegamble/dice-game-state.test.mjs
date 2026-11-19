@@ -11,6 +11,15 @@ test("face choices cycle through Blank, Erinberry, Faroeberry, and Kazberry", ()
   assert.equal(nextDiceAsset("unrecognised").id, "blank");
 });
 
+test("each berry choice points at its matching supplied image, while Blank stays image-free", () => {
+  assert.deepEqual(DICE_ASSET_CYCLE.map(({ id, imageSrc }) => [id, imageSrc]), [
+    ["blank", null],
+    ["erinberry", "/ramblegamble/assets/berries/erinberry.png"],
+    ["faroeberry", "/ramblegamble/assets/berries/faroeberry.png"],
+    ["kazberry", "/ramblegamble/assets/berries/kazberry.png"],
+  ]);
+});
+
 test("the six selectable stickers map one-to-one to the six physical die normals", () => {
   assert.deepEqual(DICE_FACE_ORDER.map(({ id }) => id), ["top", "bottom", "front", "back", "left", "right"]);
   assert.equal(new Set(DICE_FACE_ORDER.map(({ normal }) => normal.join(","))).size, 6);

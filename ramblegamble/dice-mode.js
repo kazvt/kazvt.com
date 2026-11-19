@@ -4,7 +4,7 @@ import {
   DICE_ASSET_CYCLE,
   DICE_FACE_ORDER,
   nextDiceAsset,
-} from "./dice-game-state.mjs?v=dice-game-state-20261119-v1";
+} from "./dice-game-state.mjs?v=dice-berry-assets-20261120-v1";
 import {
   createDiceBody,
   createDicePhysicsWorld,
