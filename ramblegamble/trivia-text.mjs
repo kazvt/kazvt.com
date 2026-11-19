@@ -964,6 +964,9 @@ function parseField(line) {
     ["image", "promptimage"], ["prompt image", "promptimage"], ["image url", "promptimage"], ["prompt image url", "promptimage"],
     ["video", "video"], ["video url", "video"], ["background image", "backgroundimage"], ["background image url", "backgroundimage"],
     ["number", "number"], ["starting number", "number"], ["value", "number"],
+    ["selection", "selectionrule"], ["selection rule", "selectionrule"], ["answer selection", "selectionrule"], ["answer selection rule", "selectionrule"], ["answer rule", "selectionrule"], ["correct selection", "selectionrule"], ["correct answer rule", "selectionrule"], ["select mode", "selectionrule"], ["select any or all", "selectionrule"], ["multi select", "selectionrule"],
+    ["required correct count", "requiredcorrectcount"], ["required selections", "requiredcorrectcount"], ["number to select", "requiredcorrectcount"], ["correct count", "requiredcorrectcount"],
+    ["number code", "numbercode"], ["secret number", "numbercode"], ["target number", "numbercode"], ["wordle code", "numbercode"],
     ["add", "additive"], ["add these", "additive"], ["add to previous", "additive"], ["additive", "additive"], ["append", "additive"], ["plus", "additive"],
     ["no multiple choice", "nomultiplechoice"], ["without multiple choice", "nomultiplechoice"], ["no mc", "nomultiplechoice"], ["no mcq", "nomultiplechoice"],
   ]);
