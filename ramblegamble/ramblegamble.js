@@ -1496,8 +1496,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     if (!gameStarted || pauseMenuOpen) return;
     const key = event.key.toLowerCase();
     if (key === "escape") {
-      if (canGoBack()) goBack();
-      else showPauseMenu();
+      showPauseMenu();
       event.preventDefault();
       return;
     }
