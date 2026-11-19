@@ -1608,7 +1608,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
       renderer.render(scene, camera);
       return;
     }
-    updateBillboardProjection();
+    if (sceneReady) updateBillboardProjection();
 
     if (wheelMotion && wheelPivot && ballPivot) {
       const progress = Math.min(1, (time - wheelMotion.started) / wheelMotion.duration);
@@ -1658,6 +1658,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
 
       stageModel = stageGltf.scene;
       prepareModel(stageModel);
+      stageModel.visible = !pauseMenuOpen;
       scene.add(stageModel);
       carveDiceDoorway(stageModel);
 
@@ -1686,10 +1687,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
       overviewCameraBounds = getArcadeBounds();
       fitCamera();
       loading.classList.add("is-hidden");
-      resizeObserver = new ResizeObserver(fitCamera);
-      resizeObserver.observe(preview);
-      window.addEventListener("resize", fitCamera, { passive: true });
-      if (!document.hidden) animationFrame = requestAnimationFrame(animate);
+      if (!document.hidden && !animationFrame) animationFrame = requestAnimationFrame(animate);
     } catch (error) {
       console.error("Ramble Gamble preview failed to start:", error);
       loading.textContent = "The 3D preview could not load.";
@@ -1702,7 +1700,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     if (document.hidden) {
       cancelAnimationFrame(animationFrame);
       animationFrame = 0;
-    } else if (sceneReady && renderer && !animationFrame) {
+    } else if (renderer && !animationFrame) {
       animationFrame = requestAnimationFrame(animate);
     }
   });
