@@ -8,6 +8,12 @@ import {
 import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
 import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-door-wall-target-20261120-v1";
 import { subscribePointScores } from "./points-store.mjs?v=points-console-20261120-v1";
+import {
+  createCssProjectiveQuad,
+  LIQUID_PORTAL_HEIGHT,
+  LIQUID_PORTAL_SOURCE,
+  LIQUID_PORTAL_WIDTH,
+} from "./liquid-portal.mjs?v=liquid-door-portal-20261120-v1";
 
 (() => {
   "use strict";
@@ -16,6 +22,8 @@ import { subscribePointScores } from "./points-store.mjs?v=points-console-202611
   let GLTFLoader;
   const preview = document.getElementById("rg-preview");
   const canvas = document.getElementById("rg-canvas");
+  const liquidPortalLayer = document.getElementById("rg-liquid-portal-layer");
+  const liquidPortalFrame = document.getElementById("rg-liquid-portal-frame");
   const billboardLayer = document.getElementById("rg-billboard-layer");
   const gameCursor = document.getElementById("rg-game-cursor");
   const gameCursorImage = document.getElementById("rg-game-cursor-image");
@@ -120,6 +128,7 @@ import { subscribePointScores } from "./points-store.mjs?v=points-console-202611
   let pauseMenuOpen = false;
   let marqueeVideoUnavailable = false;
   let sceneReady = false;
+  let liquidPortalLoaded = false;
   let diceModeOpen = false;
   let diceModeVisibility = null;
   let stageModel;
@@ -137,6 +146,62 @@ import { subscribePointScores } from "./points-store.mjs?v=points-console-202611
   let overviewCameraBounds = null;
   let cursorMode = "";
   let skyRandomState = 0x4b415a56;
+
+  function setLiquidPortalLoaded(shouldLoad) {
+    if (!liquidPortalFrame || shouldLoad === liquidPortalLoaded) return;
+    liquidPortalLoaded = shouldLoad;
+    if (shouldLoad) liquidPortalFrame.src = LIQUID_PORTAL_SOURCE;
+    else {
+      liquidPortalFrame.removeAttribute("src");
+      liquidPortalFrame.style.transform = "";
+    }
+  }
+
+  function updateLiquidPortalProjection() {
+    if (!liquidPortalLayer || !liquidPortalFrame) return;
+    const active = gameStarted
+      && !pauseMenuOpen
+      && !diceModeOpen
+      && currentView.kind === "dice-door";
+    setLiquidPortalLoaded(active);
+    if (!active || !camera || !sceneReady || preview.clientWidth < 1 || preview.clientHeight < 1) {
+      liquidPortalLayer.hidden = true;
+      return;
+    }
+
+    camera.updateMatrixWorld(true);
+    const opening = ARCADE_REFERENCE_LAYOUT.diceDoor;
+    const planeX = opening.wallX + 0.008;
+    const worldCorners = [
+      new THREE.Vector3(planeX, opening.maxY, opening.minZ),
+      new THREE.Vector3(planeX, opening.maxY, opening.maxZ),
+      new THREE.Vector3(planeX, opening.minY, opening.maxZ),
+      new THREE.Vector3(planeX, opening.minY, opening.minZ),
+    ];
+    const previewBounds = preview.getBoundingClientRect();
+    const corners = [];
+    for (const worldCorner of worldCorners) {
+      const cameraSpace = camera.worldToLocal(worldCorner.clone());
+      const depth = -cameraSpace.z;
+      if (depth <= camera.near || depth >= camera.far) {
+        liquidPortalLayer.hidden = true;
+        return;
+      }
+      const projected = worldCorner.project(camera);
+      corners.push({
+        x: (projected.x + 1) * 0.5 * previewBounds.width,
+        y: (1 - projected.y) * 0.5 * previewBounds.height,
+      });
+    }
+
+    const transform = createCssProjectiveQuad(LIQUID_PORTAL_WIDTH, LIQUID_PORTAL_HEIGHT, corners);
+    if (!transform) {
+      liquidPortalLayer.hidden = true;
+      return;
+    }
+    liquidPortalFrame.style.transform = transform;
+    liquidPortalLayer.hidden = false;
+  }
 
   function nextSkyRandom() {
     skyRandomState = (Math.imul(skyRandomState, 1664525) + 1013904223) >>> 0;
