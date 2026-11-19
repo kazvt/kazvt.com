@@ -3,6 +3,7 @@ const ROULETTE_MENU_PARTS = new Set(["center", "rim"]);
 export function resolveArcadeShortcut(key) {
   const shortcut = String(key || "").toLowerCase();
   if (shortcut === "1" || shortcut === "p") return "participants";
+  if (shortcut === "d") return "dice";
   if (shortcut === "4" || shortcut === "h") return "host";
   if (shortcut === "c") return "cheer";
   return "";

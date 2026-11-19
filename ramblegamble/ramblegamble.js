@@ -6,7 +6,7 @@ import {
   resolvePointClickCursor,
   resolvePointClickZone,
   resolveArcadeShortcut,
-} from "./point-click-routing.js?v=point-click-hotkeys-20261119-v1";
+} from "./point-click-routing.js?v=point-click-dice-hotkey-20261119-v1";
 import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
 import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-doorway-cut-20261119-v2";
 
@@ -1392,6 +1392,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     const key = event.key.toLowerCase();
     const shortcut = resolveArcadeShortcut(key);
     if (shortcut === "participants") transitionToView({ kind: "contestants" });
+    else if (shortcut === "dice") window.dispatchEvent(new CustomEvent("rg:open-dice-mode"));
     else if (shortcut === "host") transitionToView({ kind: "host" });
     else if (shortcut === "cheer") {
       if (!event.repeat) playCheer();
