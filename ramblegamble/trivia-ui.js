@@ -1636,7 +1636,7 @@ import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from ".
     saveAndRenderStage();
   });
   editor.addEventListener("change", (event) => {
-    if (event.target.id === "rg-edit-mode" || event.target.id === "rg-edit-option-count") {
+    if (event.target.id === "rg-edit-mode" || event.target.id === "rg-edit-option-count" || event.target.id === "rg-edit-selection-rule") {
       readEditor();
       render();
       queueSave();
