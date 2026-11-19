@@ -411,6 +411,9 @@ function parseDelimited(text) {
     const accepted = isAcceptedColumn ? rawAnswers : splitLooseList(getColumn(row, dataIndexes, ["accepted answers", "accepted answer"]));
     const correctValues = splitLooseList(getColumn(row, dataIndexes, ["correct", "correct answer", "answer key", "correct answers", "correct option", "correct choice"]));
     const mode = normalizeMode(getColumn(row, dataIndexes, ["mode", "type", "template"])) || (options.length > 1 ? "choice-text" : "short-answer");
+    const selectionRule = normalizeSelectionRule(getColumn(row, dataIndexes, ["selection rule", "answer selection", "selection mode", "correct selection", "answer rule", "multi select"]));
+    const requiredCorrectCount = Number(getColumn(row, dataIndexes, ["required correct count", "required selections", "correct count", "select count"]));
+    const numberCode = getColumn(row, dataIndexes, ["number code", "secret number", "target number", "wordle code"]).replace(/\D/g, "").slice(0, 4);
     const optionObjects = options.map((label) => ({ label, image: "", asset: "", correct: false }));
     applyCorrectValues(optionObjects, correctValues);
     const record = {
@@ -422,6 +425,9 @@ function parseDelimited(text) {
       correctValues,
       additive: /^(?:1|true|yes|on|add|append|plus)$/i.test(getColumn(row, dataIndexes, ["add", "additive", "append", "plus"])),
       noMultipleChoice: /^(?:1|true|yes|on|no|none)$/i.test(getColumn(row, dataIndexes, ["no multiple choice", "no mc", "no mcq"])),
+      selectionRule,
+      requiredCorrectCount: Number.isFinite(requiredCorrectCount) ? Math.max(0, Math.min(24, Math.trunc(requiredCorrectCount))) : undefined,
+      numberCode,
     };
     if (!grouped.has(round)) grouped.set(round, new Map());
     const tiers = grouped.get(round);
@@ -437,12 +443,16 @@ function parseDelimited(text) {
       options: [], acceptedAnswers: [], promptImage: "", promptAsset: "", items: [], pairs: [],
       categories: ["Group 1", "Group 2", "Group 3"], videoUrl: "", numberValue: 0,
       numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
+      selectionRule: "any", requiredCorrectCount: 0, numberCode: "",
     };
     rounds[roundId] = {};
     for (let level = 1; level <= 5; level += 1) {
       for (const record of tierRecords.get(level) || []) {
         state.question = record.question || state.question;
         state.subtitle = record.subtitle || state.subtitle;
+        if (record.selectionRule) state.selectionRule = record.selectionRule;
+        if (record.requiredCorrectCount != null) state.requiredCorrectCount = record.requiredCorrectCount;
+        if (record.numberCode) state.numberCode = record.numberCode;
         if (record.noMultipleChoice) {
           state.mode = "short-answer";
           state.options = [];
