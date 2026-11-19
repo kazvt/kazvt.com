@@ -632,13 +632,17 @@ body.ramble-page *::after {
   text-shadow: 3px 3px 0 #6254db, 6px 6px 0 #df54bd;
 }
 
-.rg-marquee-video {
+.rg-marquee-visual {
   display: block;
   width: min(86vw, 760px);
   max-height: 44dvh;
   aspect-ratio: 2 / 1;
   object-fit: contain;
   image-rendering: pixelated;
+}
+
+.rg-marquee-visual[hidden] {
+  display: none !important;
 }
 
 .rg-marquee-video.rg-marquee-matte {
@@ -733,7 +737,7 @@ body.ramble-page *::after {
 }
 
 @media (max-height: 560px) {
-  .rg-marquee-video {
+  .rg-marquee-visual {
     width: min(72vw, 480px);
     max-height: 30dvh;
   }
