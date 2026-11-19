@@ -412,7 +412,9 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
       end: null,
       startedAt: 0,
       duration: 3000,
-      nextAt: performance.now() + 2600 + index * 2600 + nextSkyRandom() * 1600,
+      // Defer scheduling until the sky is actually animating; the READY screen
+      // can remain open for an arbitrary time before the pause menu starts.
+      nextAt: 0,
       active: false,
       angle: 0,
       length: 88,
@@ -508,6 +510,10 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
         skyShootingStarsMesh.setMatrixAt(star.index, matrix);
         skyShootingStarsMesh.setColorAt(star.index, color.setRGB(0, 0, 0));
         continue;
+      }
+
+      if (!star.active && star.nextAt === 0) {
+        star.nextAt = time + 1400 + star.index * 2300 + nextSkyRandom() * 1000;
       }
 
       if (!star.active && time >= star.nextAt) {
