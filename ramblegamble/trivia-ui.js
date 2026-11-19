@@ -6,7 +6,7 @@ import {
   isChoiceMode,
   resolveRoundFormat,
   resolveRoundMode,
-} from "./trivia-data.js?v=host-console-20261114-v2";
+} from "./trivia-data.js?v=trivia-answer-modes-20261119-v1";
 import {
   QUESTION_BANK_SESSION_KEY,
   readSessionQuestionBank,
@@ -16,7 +16,8 @@ import {
   decodeTriviaBytes,
   exportTriviaText,
   parseTriviaText,
-} from "./trivia-text.mjs?v=trivia-text-import-export-20261118-v4";
+} from "./trivia-text.mjs?v=trivia-answer-modes-20261119-v1";
+import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from "./trivia-game.mjs?v=trivia-wordle-20261119-v1";
 
 (() => {
   "use strict";
@@ -70,6 +71,7 @@ import {
   let selectedPairLeft = -1;
   let matchedPairIndexes = new Set();
   let drawingData = new Map();
+  let numberGuessState = { key: "", guesses: [], solved: false };
   let audioContext = null;
   let lastWrongAt = 0;
   let drafts = loadDrafts();
@@ -351,6 +353,7 @@ import {
       question: "", subtitle: "", promptImage: "", promptAsset: "", mode: "",
       options: [], acceptedAnswers: [], items: [], pairs: [], categories: ["Group 1", "Group 2", "Group 3"],
       videoUrl: "", numberValue: 0, numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
+      selectionRule: format.selectionRule || "any", requiredCorrectCount: format.requiredCorrectCount || 0, numberCode: "",
     };
     if (!Number.isInteger(number) || number < 1 || number > 36) return { format, content };
 
@@ -378,7 +381,7 @@ import {
       if (rule.replaceOptions) content.options = [];
       if (rule.replaceItems) content.items = [];
       if (rule.mode === "match-pairs" && ROUND_RULES[number]?.[level - 1]?.mode !== "match-pairs") content.pairs = [];
-      for (const field of ["question", "subtitle", "promptImage", "promptAsset", "optionCount", "acceptedAnswers", "options", "items", "pairs", "categories", "videoUrl", "numberValue", "numberVisible", "imageVisible", "backgroundImage", "drawing", "assignments"]) {
+      for (const field of ["question", "subtitle", "promptImage", "promptAsset", "optionCount", "acceptedAnswers", "options", "items", "pairs", "categories", "videoUrl", "numberValue", "numberVisible", "imageVisible", "backgroundImage", "drawing", "assignments", "selectionRule", "requiredCorrectCount", "numberCode"]) {
         if (Object.hasOwn(draft, field)) content[field] = copy(draft[field]);
       }
     }
@@ -401,6 +404,9 @@ import {
     content.numberVisible = content.numberVisible === true;
     content.imageVisible = content.imageVisible !== false;
     content.drawing = typeof content.drawing === "string" ? content.drawing : "";
+    content.selectionRule = content.selectionRule === "all" ? "all" : "any";
+    content.requiredCorrectCount = Math.max(0, Math.min(24, Math.trunc(Number(content.requiredCorrectCount) || 0)));
+    content.numberCode = String(content.numberCode || "").replace(/\D/g, "").slice(0, 4);
     if (content.optionCount == null) content.optionCount = content.mode === "number-grid" ? 16 : content.mode === "image-grid" && format.mode !== "image-grid" ? 12 : format.optionCount;
     content.optionCount = Math.max(0, Math.min(24, Number(content.optionCount) || 0));
     if (isChoiceMode(content.mode) && content.optionCount === 0) content.optionCount = content.mode === "number-grid" ? 16 : content.mode === "image-grid" ? 12 : 6;
@@ -418,7 +424,7 @@ import {
       while (content.items.length < format.optionCount) content.items.push({ label: "", image: "", x: 8 + (content.items.length % 5) * 18, y: 8 + (Math.floor(content.items.length / 5) % 4) * 18 });
       content.items = content.items.slice(0, format.optionCount);
     }
-    return { format: { ...format, mode: content.mode }, content };
+    return { format: { ...format, mode: content.mode, selectionRule: content.selectionRule, requiredCorrectCount: content.requiredCorrectCount }, content };
   }
 
   function setTab(index, focus = false) {
