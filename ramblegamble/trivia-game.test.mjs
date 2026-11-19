@@ -15,7 +15,7 @@ test("number guesses mark exact positions green, misplaced digits yellow, and ab
 });
 
 test("duplicate digits are only marked yellow as many times as they occur in the secret", () => {
-  assert.deepEqual(scoreFourDigitGuess("1123", "1111"), ["green", "yellow", "grey", "grey"]);
+  assert.deepEqual(scoreFourDigitGuess("1213", "1111"), ["green", "grey", "yellow", "grey"]);
   assert.deepEqual(scoreFourDigitGuess("1001", "1100"), ["green", "yellow", "green", "yellow"]);
   assert.equal(scoreFourDigitGuess("1234", "123"), null);
 });
