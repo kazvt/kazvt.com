@@ -1100,7 +1100,10 @@ import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from ".
       submit.textContent = "CHECK SELECTION";
       submit.addEventListener("click", () => {
         if (!correctIndexes.length || (content.requiredCorrectCount > 0 && correctIndexes.length !== content.requiredCorrectCount)) {
-          setAnswerStatus("Host setup: mark " + (content.requiredCorrectCount || "at least one") + " correct option" + (content.requiredCorrectCount === 1 ? "" : "s") + " first.", "neutral");
+          const setupMessage = content.requiredCorrectCount > 0
+            ? "Host setup: mark exactly " + content.requiredCorrectCount + " correct options in the editor."
+            : "Host setup: mark at least one correct option in the editor.";
+          setAnswerStatus(setupMessage, "neutral");
           return;
         }
         if (!selected.size) {
