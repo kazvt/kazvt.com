@@ -89,6 +89,8 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   let renderer;
   let scene;
   let camera;
+  let raycaster;
+  let pointer;
   let resizeObserver;
   let animationFrame = 0;
   let wheelPivot;
@@ -217,6 +219,8 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   applyTheme();
 
   function createWorld() {
+    raycaster = new THREE.Raycaster();
+    pointer = new THREE.Vector2();
     cameraTarget = new THREE.Vector3();
     scene = new THREE.Scene();
     scene.background = new THREE.Color(SKY_CONFIG.topColor);
@@ -1214,9 +1218,6 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     };
     billboards.push(hostBillboard);
   }
-
-  const raycaster = new THREE.Raycaster();
-  const pointer = new THREE.Vector2();
 
   function getNamedPart(hit, model, knownNames) {
     for (let object = hit?.object; object && object !== model; object = object.parent) {
