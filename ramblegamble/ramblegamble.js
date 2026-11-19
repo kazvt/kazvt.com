@@ -111,6 +111,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   let playing = false;
   let gameStarted = false;
   let pauseMenuOpen = false;
+  let marqueeVideoUnavailable = false;
   let sceneReady = false;
   let diceModeOpen = false;
   let diceModeVisibility = null;
@@ -1363,21 +1364,33 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   }
 
   function updateMarqueeMotionPreference() {
-    const useStill = reducedMotion.matches;
+    const useStill = reducedMotion.matches || marqueeVideoUnavailable;
     menuMarquee.hidden = useStill;
     marqueeStill.hidden = !useStill;
     menuMarquee.preload = useStill ? "none" : "auto";
     if (useStill) {
       menuMarquee.pause();
       try { menuMarquee.currentTime = 0; } catch {}
-    } else if (pauseMenuOpen) {
+      return;
+    }
+    if (pauseMenuOpen) {
+      menuMarquee.pause();
+      try { menuMarquee.currentTime = 0; } catch {}
       const playback = menuMarquee.play();
-      if (playback?.catch) playback.catch((error) => console.warn("Marquee animation could not play:", error));
+      if (playback?.catch) playback.catch((error) => {
+        marqueeVideoUnavailable = true;
+        updateMarqueeMotionPreference();
+        console.warn("Marquee animation could not play:", error);
+      });
     }
   }
 
   menuMarquee.addEventListener("loadeddata", updateMarqueeMatteFallback);
-  menuMarquee.addEventListener("error", () => menuMarquee.classList.add("rg-marquee-matte"));
+  menuMarquee.addEventListener("error", () => {
+    marqueeVideoUnavailable = true;
+    menuMarquee.classList.add("rg-marquee-matte");
+    updateMarqueeMotionPreference();
+  });
   if (typeof reducedMotion.addEventListener === "function") {
     reducedMotion.addEventListener("change", updateMarqueeMotionPreference);
   } else {
@@ -1405,12 +1418,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     hideGameCursor();
     if (!document.hidden && renderer && !animationFrame) animationFrame = requestAnimationFrame(animate);
 
-    menuMarquee.pause();
-    try { menuMarquee.currentTime = 0; } catch {}
-    if (!reducedMotion.matches) {
-      const playback = menuMarquee.play();
-      if (playback?.catch) playback.catch((error) => console.warn("Marquee animation could not play:", error));
-    }
+    updateMarqueeMotionPreference();
     playButton.focus({ preventScroll: true });
   }
 
