@@ -365,7 +365,7 @@ body.ramble-page *::after {
   display: grid;
   flex: 1 1 auto;
   min-height: 0;
-  grid-template-columns: minmax(112px, clamp(112px, 13vw, 174px)) minmax(0, 1fr) minmax(112px, clamp(112px, 13vw, 174px));
+  grid-template-columns: minmax(104px, clamp(104px, 10.5vw, 144px)) minmax(0, 1fr) minmax(104px, clamp(104px, 10.5vw, 144px));
   align-items: stretch;
   gap: clamp(8px, 1.2vw, 16px);
 }
@@ -511,7 +511,7 @@ body.ramble-page *::after {
   }
 
   .rg-dice-layout {
-    grid-template-columns: minmax(78px, clamp(86px, 18vw, 132px)) minmax(0, 1fr) minmax(78px, clamp(86px, 18vw, 132px));
+    grid-template-columns: minmax(78px, clamp(86px, 14vw, 118px)) minmax(0, 1fr) minmax(78px, clamp(86px, 14vw, 118px));
     gap: 5px;
   }
 
