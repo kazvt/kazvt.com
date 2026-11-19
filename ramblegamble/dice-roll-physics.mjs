@@ -141,7 +141,7 @@ export function createDicePhysicsWorld(CANNON) {
   world.allowSleep = true;
   world.solver.iterations = 18;
   world.solver.tolerance = 0.001;
-  world.defaultContactMaterial.friction = 0.68;
+  world.defaultContactMaterial.friction = 0.45;
   world.defaultContactMaterial.restitution = 0.18;
   world.defaultContactMaterial.contactEquationStiffness = 1e7;
   world.defaultContactMaterial.contactEquationRelaxation = 3;
@@ -179,8 +179,8 @@ export function createDiceBody(CANNON, world, halfExtents, position) {
     mass: 1,
     position: new CANNON.Vec3(...position),
     allowSleep: true,
-    sleepSpeedLimit: 0.14,
-    sleepTimeLimit: 0.55,
+    sleepSpeedLimit: 0.11,
+    sleepTimeLimit: 0.6,
     linearDamping: 0.018,
     angularDamping: 0.018,
   });
