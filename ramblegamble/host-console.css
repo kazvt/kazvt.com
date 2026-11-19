@@ -304,6 +304,7 @@
 .rg-editor-title { margin: -10px -10px 10px; }
 .rg-save-state { font-size: 9px; }
 .rg-field-label { display: block; margin: 10px 0 4px; color: #486c2f; font-size: 11px; font-weight: 900; }
+.rg-field-label[hidden] { display: none; }
 .rg-field-label span { color: #574d36; font-size: 9px; font-weight: 600; letter-spacing: 0; }
 .rg-trivia-editor input:not([type="file"]),
 .rg-trivia-editor textarea,
