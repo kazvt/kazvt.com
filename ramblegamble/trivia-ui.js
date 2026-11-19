@@ -6,7 +6,7 @@ import {
   isChoiceMode,
   resolveRoundFormat,
   resolveRoundMode,
-} from "./trivia-data.js?v=trivia-answer-modes-20261119-v2";
+} from "./trivia-data.js?v=trivia-answer-modes-20261119-v3";
 import {
   QUESTION_BANK_SESSION_KEY,
   readSessionQuestionBank,
@@ -16,7 +16,7 @@ import {
   decodeTriviaBytes,
   exportTriviaText,
   parseTriviaText,
-} from "./trivia-text.mjs?v=trivia-answer-modes-20261119-v2";
+} from "./trivia-text.mjs?v=trivia-answer-modes-20261119-v3";
 import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from "./trivia-game.mjs?v=trivia-wordle-20261119-v1";
 
 (() => {

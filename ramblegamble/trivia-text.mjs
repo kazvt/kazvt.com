@@ -1,4 +1,4 @@
-import { MODE_NAMES, isChoiceMode, resolveRoundFormat } from "./trivia-data.js?v=trivia-answer-modes-20261119-v2";
+import { MODE_NAMES, isChoiceMode, resolveRoundFormat } from "./trivia-data.js?v=trivia-answer-modes-20261119-v3";
 
 export const TRIVIA_EXPORT_FORMAT = "kazvt-ramble-gamble-trivia";
 export const TRIVIA_EXPORT_VERSION = 1;
