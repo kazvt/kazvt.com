@@ -373,7 +373,9 @@ body.ramble-page *::after {
 .rg-die-picker {
   display: flex;
   min-height: 0;
+  align-self: center;
   flex-direction: column;
+  height: fit-content;
   gap: 6px;
   padding: clamp(5px, .7vw, 9px);
   border: 1px solid color-mix(in srgb, var(--ink) 76%, transparent);
@@ -392,10 +394,10 @@ body.ramble-page *::after {
 .rg-die-faces {
   display: grid;
   width: 100%;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   min-height: 0;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: repeat(6, minmax(0, 1fr));
+  grid-template-rows: repeat(6, auto);
   justify-items: center;
   align-items: center;
   gap: clamp(3px, .45vh, 6px);
@@ -557,6 +559,24 @@ body.ramble-page *::after {
     min-height: 40px;
     padding: 5px 10px;
     font-size: 10px !important;
+  }
+}
+
+@media (max-height: 520px) {
+  .rg-dice-shell {
+    gap: 6px;
+  }
+
+  .rg-dice-header {
+    min-height: 36px;
+  }
+
+  .rg-die-face-button {
+    width: min(100%, clamp(30px, 6.8vh, 42px));
+  }
+
+  .rg-die-faces {
+    gap: 3px;
   }
 }
 
