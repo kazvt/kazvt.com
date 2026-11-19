@@ -1,5 +1,13 @@
 const ROULETTE_MENU_PARTS = new Set(["center", "rim"]);
 
+export function resolveArcadeShortcut(key) {
+  const shortcut = String(key || "").toLowerCase();
+  if (shortcut === "1" || shortcut === "p") return "participants";
+  if (shortcut === "4" || shortcut === "h") return "host";
+  if (shortcut === "c") return "cheer";
+  return "";
+}
+
 export function resolvePointClick(machine, part = "") {
   if (machine === "dice-door") return "open-dice";
   if (machine === "roulette") return ROULETTE_MENU_PARTS.has(part) ? "open-trivia" : "spin-wheel";

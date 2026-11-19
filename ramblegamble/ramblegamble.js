@@ -5,6 +5,7 @@ import {
   resolvePointClickBack,
   resolvePointClickCursor,
   resolvePointClickZone,
+  resolveArcadeShortcut,
 } from "./point-click-routing.js?v=point-click-back-stop-20261119-v1";
 import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
 import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-doorway-cut-20261119-v2";
@@ -19,6 +20,8 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   const gameCursorImage = document.getElementById("rg-game-cursor-image");
   const loading = document.getElementById("rg-loading");
   const result = document.getElementById("rg-result");
+  const cheerSound = new Audio("/ramblegamble/assets/sfx/cheers_1.ogg");
+  cheerSound.preload = "auto";
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const FORCED_THEME = "p2";
   const ROULETTE_PART_NAMES = new Set(["center", "wheel", "rim", "ball"]);
@@ -1292,6 +1295,13 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     gameCursor.hidden = true;
   }
 
+  function playCheer() {
+    cheerSound.pause();
+    cheerSound.currentTime = 0;
+    const playback = cheerSound.play();
+    if (playback?.catch) playback.catch((error) => console.warn("Cheer sound could not play:", error));
+  }
+
   function pointClickAt(clientX, clientY) {
     if (!camera || !sceneReady || diceModeOpen) return;
     const rect = preview.getBoundingClientRect();
@@ -1374,13 +1384,19 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     }
   });
 
-  canvas.addEventListener("keydown", (event) => {
+  window.addEventListener("keydown", (event) => {
     if (event.altKey || event.ctrlKey || event.metaKey) return;
+    if (document.querySelector("dialog[open]")) return;
+    if (event.target instanceof Element && event.target.closest("input, textarea, select, [contenteditable='true']")) return;
     const key = event.key.toLowerCase();
-    if (key === "1") transitionToView({ kind: "contestants" });
+    const shortcut = resolveArcadeShortcut(key);
+    if (shortcut === "participants") transitionToView({ kind: "contestants" });
+    else if (shortcut === "host") transitionToView({ kind: "host" });
+    else if (shortcut === "cheer") {
+      if (!event.repeat) playCheer();
+    }
     else if (key === "2") transitionToView({ kind: "slot" });
     else if (key === "3") transitionToView({ kind: "roulette" });
-    else if (key === "4") transitionToView({ kind: "host" });
     else if (key === "arrowleft") setLookDirection(-1);
     else if (key === "arrowright") setLookDirection(1);
     else if (key === "arrowdown" || key === "escape" || key === "backspace") goBack();
@@ -1392,7 +1408,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     else if (key === "s") startLeverPull();
     else if (key === "g") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "slots" } }));
     else if (key === "t") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "trivia" } }));
-    else return;
+    else if (shortcut !== "cheer") return;
     event.preventDefault();
   });
 

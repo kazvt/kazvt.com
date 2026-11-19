@@ -1,12 +1,25 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  resolveArcadeShortcut,
   resolvePointClick,
   resolvePointClickAction,
   resolvePointClickBack,
   resolvePointClickCursor,
   resolvePointClickZone,
 } from "./point-click-routing.js";
+
+test("participant and host aliases coexist with their number shortcuts, and C is cheer", () => {
+  assert.equal(resolveArcadeShortcut("1"), "participants");
+  assert.equal(resolveArcadeShortcut("p"), "participants");
+  assert.equal(resolveArcadeShortcut("P"), "participants");
+  assert.equal(resolveArcadeShortcut("4"), "host");
+  assert.equal(resolveArcadeShortcut("h"), "host");
+  assert.equal(resolveArcadeShortcut("H"), "host");
+  assert.equal(resolveArcadeShortcut("c"), "cheer");
+  assert.equal(resolveArcadeShortcut("C"), "cheer");
+  assert.equal(resolveArcadeShortcut("x"), "");
+});
 
 test("roulette parts distinguish direct play from opening trivia", () => {
   assert.equal(resolvePointClick("roulette", "wheel"), "spin-wheel");
