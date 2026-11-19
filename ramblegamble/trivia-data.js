@@ -9,7 +9,7 @@ export const ROUND_RULES = {
   6: { 1: { mode: "choice-text", optionCount: 6 }, 2: { addOptions: 4 }, 3: { resetQuestion: true }, 4: { resetQuestion: true }, 5: { resetQuestion: true } },
   7: { 1: { mode: "choice-text", optionCount: 6 }, 3: { addOptions: 3 } },
   8: { 1: { mode: "choice-text", optionCount: 6 }, 2: { mode: "match-pairs", optionCount: 12, pairCount: 6 }, 3: { mode: "short-answer", optionCount: 0, pairCount: 0, resetQuestion: true }, 4: { resetQuestion: true }, 5: { resetQuestion: true } },
-  9: { 1: { mode: "choice-text", optionCount: 6 }, 2: { replaceOptions: true, resetQuestion: true }, 3: { replaceOptions: true, resetQuestion: true }, 4: { optionCount: 13, replaceOptions: true, resetQuestion: true }, 5: { replaceOptions: true, resetQuestion: true } },
+  9: { 1: { mode: "choice-text", optionCount: 6 }, 2: { replaceOptions: true, resetQuestion: true }, 3: { replaceOptions: true, resetQuestion: true }, 4: { optionCount: 13, selectionRule: "all", requiredCorrectCount: 5, replaceOptions: true, resetQuestion: true }, 5: { selectionRule: "any", requiredCorrectCount: 0, replaceOptions: true, resetQuestion: true } },
   10: { 1: { mode: "choice-text", optionCount: 6 }, 2: { addOptions: 4 }, 3: { mode: "number-grid", optionCount: 16, rows: 4, columns: 4, replaceOptions: true, resetQuestion: true }, 4: { resetQuestion: true }, 5: { resetQuestion: true } },
   11: { 1: { mode: "choice-text", optionCount: 6 }, 3: { addOptions: 4 } },
   12: { 1: { mode: "choice-text", optionCount: 6 }, 2: { addOptions: 4 }, 3: { mode: "short-answer", optionCount: 0, resetQuestion: true } },
@@ -50,6 +50,8 @@ const baseFormat = Object.freeze({
   reorder: false,
   blankOption: false,
   imageAspect: "auto",
+  selectionRule: "any",
+  requiredCorrectCount: 0,
 });
 
 export const SPECIAL_ROUNDS = Object.freeze({
