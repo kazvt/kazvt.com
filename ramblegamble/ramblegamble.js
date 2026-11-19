@@ -20,7 +20,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   const gameCursorImage = document.getElementById("rg-game-cursor-image");
   const loading = document.getElementById("rg-loading");
   const result = document.getElementById("rg-result");
-  const cheerSound = new Audio("/ramblegamble/assets/sfx/cheer.ogg?v=audience-applause-1");
+  const cheerSound = new Audio("/ramblegamble/assets/sfx/cheer.ogg?v=audience-applause-2");
   cheerSound.preload = "auto";
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const FORCED_THEME = "p2";
