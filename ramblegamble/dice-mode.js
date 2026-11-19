@@ -233,9 +233,20 @@ import {
     camera.aspect = width / height;
     camera.position.z = compact ? 11.2 : 9.2;
     const spread = compact ? 0.82 : 1.4;
-    dieStates[0].group.position.x = -spread;
-    dieStates[1].group.position.x = spread;
-    for (const dieState of dieStates) {
+    for (const [index, dieState] of dieStates.entries()) {
+      const group = dieState.group;
+      if (!group) continue;
+      const nextX = index === 0 ? -spread : spread;
+      const roll = rolling ? activeRolls[index] : null;
+      if (roll) {
+        const shift = nextX - roll.restPosition.x;
+        roll.restPosition.x = nextX;
+        roll.flight.position.x += shift;
+        if (roll.settlePosition) roll.settlePosition.x += shift;
+        group.position.x += shift;
+      } else {
+        group.position.x = nextX;
+      }
       if (dieState.group) dieState.group.scale.setScalar(compact ? 0.78 : 1);
     }
     camera.updateProjectionMatrix();

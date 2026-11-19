@@ -34,7 +34,7 @@ export function createDiceFlightState({ origin, lane, random = Math.random } = {
     elapsed: 0,
     position: { x: origin[0], y: Math.max(0, origin[1]), z: origin[2] },
     velocity: {
-      x: lane * (0.8 + sample(random) * 0.9),
+      x: lane * (0.25 + sample(random) * 0.35),
       y: 6.1 + sample(random) * 1.25,
       z: 0.45 + sample(random) * 0.85,
     },
