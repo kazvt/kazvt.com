@@ -3,7 +3,7 @@ import {
   readPointScores,
   writePointScores,
 } from "/ramblegamble/points-store.mjs?v=points-console-20261120-v1";
-import { parsePointsCommand } from "/ramblegamble/points-commands.mjs?v=points-console-20261120-v1";
+import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=points-console-20261120-v1";
 
 const output = document.getElementById("terminal-output");
 const form = document.getElementById("terminal-form");
@@ -30,7 +30,7 @@ function execute(rawCommand) {
   const parsed = parsePointsCommand(command);
   if (parsed.action === "noop") return;
   if (parsed.action === "help") {
-    addLine("help · clear · points [faroe|erin|kaz] · points add <name> [amount] · points set <name> <total> · points reset [name]");
+    addLine(POINTS_HELP);
     return;
   }
   if (parsed.action === "clear") {
