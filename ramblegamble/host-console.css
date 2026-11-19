@@ -282,7 +282,7 @@
 .rg-trivia-screen[data-mode="choice-image-wide"] .rg-answer-option img { width: 100%; height: auto; aspect-ratio: 2.35 / 1; object-fit: cover; }
 .rg-trivia-screen[data-mode="choice-image"] .rg-answer-option img,
 .rg-trivia-screen[data-mode="image-grid"] .rg-answer-option img { aspect-ratio: 1; object-fit: contain; }
-.rg-trivia-screen[data-mode="number-grid"] .rg-stage-items { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+.rg-trivia-screen[data-mode="number-grid"] .rg-stage-items { display: block; }
 .rg-video-box video { display: block; width: 100%; max-height: 300px; background: #111; }
 .rg-stage-items { display: grid; grid-template-columns: repeat(var(--rg-choice-columns, 2), minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
 .rg-answer-option { display: grid; min-width: 0; min-height: 54px; align-content: center; justify-items: center; gap: 4px; padding: 7px; overflow-wrap: anywhere; }
@@ -322,7 +322,7 @@
 .rg-option-row,
 .rg-item-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 34px; gap: 5px; align-items: center; margin: 6px 0; }
 .rg-option-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto 28px; }
-.rg-option-row input[type="radio"] { width: 20px; height: 20px; justify-self: center; accent-color: #8b2626; }
+.rg-option-row input[type="checkbox"] { width: 20px; height: 20px; justify-self: center; accent-color: #8b2626; }
 .rg-option-upload { position: relative; display: grid; min-width: 34px; min-height: 34px; place-items: center; border: 1px solid #111; background: #ffdf00; font-size: 9px; font-weight: 900; cursor: pointer; }
 .rg-option-upload input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 .rg-editor-section-title { margin: 14px 0 4px; color: #8b2626; font-size: 11px; font-weight: 900; }
@@ -341,8 +341,17 @@
 .rg-pair-card img { width: 100%; aspect-ratio: 6 / 5; object-fit: contain; }
 .rg-trivia-screen[data-mode="categorize-images"] .rg-stage-media,
 .rg-trivia-screen[data-mode="image-sequence"] .rg-stage-media { width: min(100%, 240px); aspect-ratio: 1; object-fit: contain; }
-.rg-number-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
-.rg-number-grid button { min-height: 44px; border: 1px solid #111; background: #ffdf00; font-weight: 900; }
+.rg-number-guess-board { display: grid; width: min(100%, 360px); gap: 7px; margin: 12px auto; }
+.rg-number-guess-row { display: grid; grid-template-columns: repeat(4, minmax(44px, 1fr)); gap: 7px; justify-content: center; }
+.rg-number-guess-cell { display: grid; min-width: 0; aspect-ratio: 1; place-items: center; border: 2px solid #486c2f; color: #111; background: #fffdf0; font-size: clamp(20px, 4vw, 32px); font-weight: 900; }
+.rg-number-guess-row.is-empty .rg-number-guess-cell { opacity: .48; }
+.rg-number-guess-cell.is-green { border-color: #2f6d35; color: #fff; background: #3c9b48; }
+.rg-number-guess-cell.is-yellow { border-color: #937400; color: #111; background: #f2cf36; }
+.rg-number-guess-cell.is-grey { border-color: #595959; color: #fff; background: #777; }
+.rg-number-guess-form { display: flex; width: min(100%, 360px); gap: 7px; margin: 10px auto; }
+.rg-number-guess-form input { min-width: 0; min-height: 44px; flex: 1; padding: 8px 10px; border: 2px solid #111; background: #fff; font: inherit; font-size: 18px; letter-spacing: .25em; text-align: center; }
+.rg-number-guess-form button { min-width: 82px; }
+.rg-selection-progress { flex-basis: 100%; margin: 2px 0; font-size: 12px; font-weight: 700; }
 .rg-category-buckets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 10px; }
 .rg-category-bucket { min-width: 0; min-height: 72px; padding: 7px; border: 2px dashed #486c2f; background: #fff5be; font-size: 11px; }
 .rg-category-bucket strong { display: block; margin-bottom: 5px; }
@@ -350,7 +359,8 @@
 .rg-draw-wrapper { position: relative; grid-column: 1 / -1; width: min(100%, 500px); aspect-ratio: 1; margin: 0 auto; overflow: hidden; border: 2px solid #111; background: #fff; touch-action: none; }
 .rg-draw-background,
 .rg-draw-canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
-.rg-draw-canvas { touch-action: none; cursor: crosshair; }
+.rg-draw-background { z-index: 0; pointer-events: none; user-select: none; }
+.rg-draw-canvas { z-index: 1; background: transparent; touch-action: none; cursor: crosshair; }
 .rg-compose-piece .rg-stage-media { display: block; width: 100%; max-height: 52px; object-fit: contain; }
 .rg-option-row [data-option-image] { min-width: 0; }
 .rg-trivia-editor [data-error="true"] { color: #8b2626; }
