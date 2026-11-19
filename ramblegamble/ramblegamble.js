@@ -48,8 +48,8 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     rouletteCenterX: 15.0,
     rouletteScale: 0.13,
     rouletteClearance: 0.12,
-    // The supplied close-up arrow shifts the wheel about 0.58 wheel diameters
-    // to screen-right. Keep this relative to the model size rather than fixed units.
+    // Ease the wheel back a fraction from the previous rightward move, then
+    // nudge it forward toward the recess; both offsets scale with the wheel.
     rouletteRightOffsetDiameters: 0.55,
     rouletteForwardOffsetDiameters: 0.10,
     // Normalized canvas point at the center of the red marked floor area.
@@ -1598,7 +1598,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
       sceneReady = true;
       fitCamera();
       moveRouletteToMarkedFloorSpot(new THREE.Box3().setFromObject(stageModel.getObjectByName("table")).min.y);
-      // Refit from the final wheel location so the rightward move remains in frame.
+      // Refit from the final wheel location so both adjustments remain in frame.
       overviewCameraBounds = getArcadeBounds();
       fitCamera();
       loading.classList.add("is-hidden");
