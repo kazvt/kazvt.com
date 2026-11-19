@@ -1409,8 +1409,8 @@ import { subscribePointScores } from "./points-store.mjs?v=points-console-202611
   function updateMarqueeMotionPreference() {
     const useStill = reducedMotion.matches || marqueeVideoUnavailable;
     menuMarquee.hidden = useStill;
-    marqueeStill.hidden = false;
-    pauseMenu.classList.toggle("rg-marquee-animated", !useStill && pauseMenuOpen);
+    marqueeStill.hidden = !useStill;
+    pauseMenu.classList.toggle("rg-marquee-animated", useStill && !reducedMotion.matches && pauseMenuOpen);
     menuMarquee.preload = useStill ? "none" : "auto";
     if (useStill) {
       menuMarquee.pause();

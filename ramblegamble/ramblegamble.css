@@ -706,17 +706,6 @@ body.ramble-page *::after {
   image-rendering: pixelated;
 }
 
-.rg-marquee-audio {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  max-height: none;
-  aspect-ratio: auto;
-  overflow: hidden;
-  opacity: 0;
-  pointer-events: none;
-}
-
 .rg-marquee-logo {
   width: min(84vw, 456px);
   height: auto;
