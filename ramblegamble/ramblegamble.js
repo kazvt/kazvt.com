@@ -532,7 +532,8 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     const yaw = REFERENCE_START_VIEW.yaw - view.look * 0.42;
     // The roulette interaction is best inspected from above, like looking down
     // at a real table. Keep the room and every other close-up at the authored angle.
-    const elevation = view.kind === "roulette" ? 0.985 : REFERENCE_START_VIEW.elevation;
+    // Preserve the reference's elevated oblique view instead of a near-vertical map view.
+    const elevation = view.kind === "roulette" ? 0.86 : REFERENCE_START_VIEW.elevation;
     const horizontal = Math.sqrt(1 - elevation * elevation);
     const direction = new THREE.Vector3(
       Math.sin(yaw) * horizontal,
