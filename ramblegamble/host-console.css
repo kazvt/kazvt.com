@@ -285,6 +285,7 @@
 .rg-trivia-screen[data-mode="number-grid"] .rg-stage-items { display: block; }
 .rg-video-box video { display: block; width: 100%; max-height: 300px; background: #111; }
 .rg-stage-items { display: grid; grid-template-columns: repeat(var(--rg-choice-columns, 2), minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
+.rg-round-empty { grid-column: 1 / -1; align-self: center; justify-self: center; margin: 44px 0; color: #486c2f; font-size: clamp(14px, 1.8vw, 20px); font-weight: 900; letter-spacing: .06em; text-align: center; }
 .rg-answer-option { display: grid; min-width: 0; min-height: 54px; align-content: center; justify-items: center; gap: 4px; padding: 7px; overflow-wrap: anywhere; }
 .rg-answer-option img { width: 100%; height: clamp(74px, 10vw, 130px); object-fit: contain; }
 .rg-answer-option[aria-pressed="true"] { color: #fff; background: #8b2626; }

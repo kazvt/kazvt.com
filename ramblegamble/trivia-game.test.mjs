@@ -1,6 +1,19 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from "./trivia-game.mjs";
+import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from "./trivia-game.mjs";
+
+test("blank round templates stay blank until the host adds visible content", () => {
+  assert.equal(hasAuthoredTriviaContent({
+    question: "", subtitle: "", promptImage: "", promptAsset: "", videoUrl: "",
+    options: Array.from({ length: 6 }, () => ({ label: "", image: "", asset: "", correct: false })),
+    items: [], pairs: [], categories: ["Group 1", "Group 2", "Group 3"],
+    assignments: [], numberValue: 0, numberVisible: false, numberCode: "", acceptedAnswers: [],
+  }), false);
+  assert.equal(hasAuthoredTriviaContent({ question: "  What is this?  " }), true);
+  assert.equal(hasAuthoredTriviaContent({ options: [{ label: "", image: "/berry.png" }] }), true);
+  assert.equal(hasAuthoredTriviaContent({ categories: ["Fruit", "Group 2", "Group 3"] }), true);
+  assert.equal(hasAuthoredTriviaContent({ numberVisible: true, numberValue: 0 }), true);
+});
 
 test("four-digit codes preserve leading zeroes and reject incomplete or non-digit values", () => {
   assert.equal(isFourDigitCode("0042"), true);

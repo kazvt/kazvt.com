@@ -1,5 +1,31 @@
 const FOUR_DIGITS = /^\d{4}$/;
 
+export function hasAuthoredTriviaContent(content = {}) {
+  const hasText = (value) => typeof value === "string" && value.trim().length > 0;
+  const hasMedia = (value) => hasText(value);
+
+  return hasText(content.question)
+    || hasText(content.subtitle)
+    || hasMedia(content.promptImage)
+    || hasMedia(content.promptAsset)
+    || hasMedia(content.videoUrl)
+    || hasMedia(content.backgroundImage)
+    || hasMedia(content.drawing)
+    || hasText(content.numberCode)
+    || content.numberVisible === true
+    || (Number.isFinite(Number(content.numberValue)) && Number(content.numberValue) !== 0)
+    || (Array.isArray(content.acceptedAnswers) && content.acceptedAnswers.some(hasText))
+    || (Array.isArray(content.options) && content.options.some((option) =>
+      hasText(option?.label) || hasMedia(option?.image) || hasMedia(option?.asset)))
+    || (Array.isArray(content.items) && content.items.some((item) =>
+      hasText(item?.label) || hasMedia(item?.image)))
+    || (Array.isArray(content.pairs) && content.pairs.some((pair) =>
+      hasText(pair?.left) || hasMedia(pair?.leftImage) || hasText(pair?.right)))
+    || (Array.isArray(content.categories) && content.categories.some((category, index) =>
+      hasText(category) && category.trim() !== "Group " + (index + 1)))
+    || (Array.isArray(content.assignments) && content.assignments.some((assignment) => assignment != null));
+}
+
 export function isFourDigitCode(value) {
   return FOUR_DIGITS.test(String(value ?? ""));
 }

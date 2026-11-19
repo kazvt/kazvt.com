@@ -17,7 +17,7 @@ import {
   exportTriviaText,
   parseTriviaText,
 } from "./trivia-text.mjs?v=trivia-answer-modes-20261119-v3";
-import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from "./trivia-game.mjs?v=trivia-wordle-20261119-v1";
+import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from "./trivia-game.mjs?v=trivia-empty-stage-20261119-v1";
 
 (() => {
   "use strict";
@@ -1591,6 +1591,16 @@ import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from ".
       $("#rg-format-badge").textContent = "SPECIAL INSTRUCTIONS";
       stageItems.innerHTML = '<div class="rg-host-instructions">' + esc(SPECIAL_ROUNDS["0"].body) + '</div>';
       answerArea.hidden = true;
+      return;
+    }
+    if (!hasAuthoredTriviaContent(content)) {
+      $("#rg-format-badge").textContent = "EMPTY ROUND";
+      stageItems.hidden = false;
+      answerArea.hidden = true;
+      const emptyState = document.createElement("p");
+      emptyState.className = "rg-round-empty";
+      emptyState.textContent = "NO QUESTION SET FOR THIS ROUND";
+      stageItems.append(emptyState);
       return;
     }
     if (format.mode === "number-grid") renderNumberGrid(content);
