@@ -1303,14 +1303,14 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
       return;
     }
     const rect = preview.getBoundingClientRect();
-    const zone = resolvePointClickZone({
+    const interaction = getSceneInteractionAt(event.clientX, event.clientY);
+    const zone = interaction ? "" : resolvePointClickZone({
       x: event.clientX - rect.left,
       y: event.clientY - rect.top,
       width: rect.width,
       height: rect.height,
       canGoBack: canGoBack(),
     });
-    const interaction = zone ? null : getSceneInteractionAt(event.clientX, event.clientY);
     const sameFocusedTarget = interaction?.machine === "host"
       ? currentView.kind === "host"
       : interaction?.machine === "contestant"
@@ -1472,19 +1472,20 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   function pointClickAt(clientX, clientY) {
     if (!gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen || cameraTransition) return;
     const rect = preview.getBoundingClientRect();
-    const zone = resolvePointClickZone({
-      x: clientX - rect.left,
-      y: clientY - rect.top,
-      width: rect.width,
-      height: rect.height,
-      canGoBack: canGoBack(),
-    });
-    if (zone === "left") return setLookDirection(-1);
-    if (zone === "right") return setLookDirection(1);
-    if (zone === "back") return goBack();
-
     const interaction = getSceneInteractionAt(clientX, clientY);
-    if (!interaction) return;
+    if (!interaction) {
+      const zone = resolvePointClickZone({
+        x: clientX - rect.left,
+        y: clientY - rect.top,
+        width: rect.width,
+        height: rect.height,
+        canGoBack: canGoBack(),
+      });
+      if (zone === "left") return setLookDirection(-1);
+      if (zone === "right") return setLookDirection(1);
+      if (zone === "back") return goBack();
+      return;
+    }
 
     if (interaction.machine === "dice-door") {
       const action = resolvePointClickAction({
