@@ -1345,6 +1345,25 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     gameCursor.hidden = true;
   }
 
+  function updateMarqueeMatteFallback() {
+    if (menuMarquee.readyState < 2) return;
+    let frameHasAlpha = false;
+    try {
+      const probe = document.createElement("canvas");
+      probe.width = 1;
+      probe.height = 1;
+      const context = probe.getContext("2d", { willReadFrequently: true });
+      context.drawImage(menuMarquee, 0, 0, 1, 1);
+      frameHasAlpha = context.getImageData(0, 0, 1, 1).data[3] < 250;
+    } catch {
+      frameHasAlpha = false;
+    }
+    menuMarquee.classList.toggle("rg-marquee-matte", !frameHasAlpha);
+  }
+
+  menuMarquee.addEventListener("loadeddata", updateMarqueeMatteFallback);
+  menuMarquee.addEventListener("error", () => menuMarquee.classList.add("rg-marquee-matte"));
+
   function setMenuSceneVisibility(visible) {
     for (const object of [stageModel, rouletteRig, slotRig]) {
       if (object) object.visible = visible;
