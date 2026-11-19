@@ -12,7 +12,7 @@ import {
   DICE_FLIGHT_STEP,
   DICE_SETTLE_DURATION,
   stepDiceFlight,
-} from "./dice-roll-physics.mjs?v=dice-roll-physics-20261119-v1";
+} from "./dice-roll-physics.mjs?v=dice-roll-physics-20261119-v2";
 
 (() => {
   "use strict";
