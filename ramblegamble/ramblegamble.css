@@ -476,7 +476,20 @@ body.ramble-page *::after {
 }
 
 .rg-dice-status:empty {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.rg-dice-status:not(:empty) {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip: auto;
 }
 
 .rg-dice-roll {
