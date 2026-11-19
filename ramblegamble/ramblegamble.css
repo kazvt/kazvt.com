@@ -556,3 +556,188 @@ body.ramble-page *::after {
     transition-duration: .01ms;
   }
 }
+
+.rg-ready-screen,
+.rg-pause-menu {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+}
+
+.rg-ready-screen[hidden],
+.rg-pause-menu[hidden] {
+  display: none !important;
+}
+
+.rg-ready-screen {
+  z-index: 12;
+  color: #fff2ba;
+  background: #000;
+}
+
+.rg-pause-menu {
+  z-index: 11;
+  overflow: hidden;
+  color: #fff2ba;
+  background: transparent;
+  pointer-events: auto;
+}
+
+.rg-preview.is-menu #rg-canvas {
+  cursor: none;
+  pointer-events: none;
+}
+
+.rg-preview.is-menu .rg-billboard-layer,
+.rg-preview.is-menu .rg-game-cursor,
+.rg-preview.is-menu .rg-result {
+  visibility: hidden !important;
+}
+
+.rg-ready-stack,
+.rg-pause-stack {
+  display: flex;
+  width: min(100%, 900px);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 2.2vh, 24px);
+  text-align: center;
+}
+
+.rg-ready-stack {
+  gap: clamp(18px, 4vh, 36px);
+}
+
+.rg-ready-title {
+  margin: 0;
+  color: #f8ee9c;
+  font-size: clamp(32px, 8vw, 86px);
+  font-weight: 900;
+  letter-spacing: .07em;
+  line-height: 1;
+  -webkit-text-stroke: 2px #261b56;
+  paint-order: stroke fill;
+  text-shadow: 3px 3px 0 #6254db, 6px 6px 0 #df54bd;
+}
+
+.rg-marquee-video {
+  display: block;
+  width: min(86vw, 760px);
+  max-height: 44dvh;
+  aspect-ratio: 2 / 1;
+  object-fit: contain;
+  image-rendering: pixelated;
+  mix-blend-mode: screen;
+}
+
+.rg-pause-actions {
+  display: grid;
+  width: min(260px, 78vw);
+  gap: clamp(8px, 1.4vh, 13px);
+}
+
+.rg-menu-button {
+  min-height: clamp(46px, 6.5vh, 62px);
+  padding: .38em .8em;
+  border: 3px solid #fff09b;
+  color: #fff7c4;
+  background: #6959e9;
+  box-shadow: 4px 4px 0 #211744, 7px 7px 0 #ed68c4;
+  font-size: clamp(18px, 2.6vw, 27px);
+  font-weight: 900;
+  letter-spacing: .08em;
+  line-height: 1;
+  -webkit-text-stroke: 1px #211744;
+  paint-order: stroke fill;
+  text-shadow: 2px 2px 0 #211744, 4px 4px 0 #f277cd;
+  cursor: pointer;
+  transition: transform 110ms steps(2, end), box-shadow 110ms steps(2, end), background-color 110ms linear;
+}
+
+.rg-menu-button:hover {
+  transform: translate(-2px, -2px);
+  background: #806df5;
+  box-shadow: 6px 6px 0 #211744, 9px 9px 0 #ed68c4;
+}
+
+.rg-menu-button:active {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0 #211744, 3px 3px 0 #ed68c4;
+}
+
+.rg-menu-button:focus-visible,
+.rg-controls-close:focus-visible {
+  outline: 3px dashed #fff09b;
+  outline-offset: 4px;
+}
+
+.rg-controls-dialog {
+  position: fixed;
+  inset: 50% auto auto 50%;
+  width: min(680px, calc(100vw - 32px));
+  max-width: none;
+  max-height: calc(100dvh - 32px);
+  margin: 0;
+  padding: clamp(24px, 5vw, 42px);
+  transform: translate(-50%, -50%);
+  border: 3px solid #fff09b;
+  color: #fff2ba;
+  background: #17102aeF;
+  box-shadow: 7px 7px 0 #6254db, 12px 12px 0 #ed68c4;
+  text-align: center;
+}
+
+.rg-controls-dialog::backdrop {
+  background: rgb(0 0 0 / 50%);
+}
+
+.rg-controls-dialog p {
+  margin: .55em 0;
+  font-size: clamp(13px, 2.2vw, 19px);
+  font-weight: 800;
+  letter-spacing: .025em;
+  line-height: 1.45;
+  -webkit-text-stroke: .45px #211744;
+  paint-order: stroke fill;
+  text-shadow: 1px 1px 0 #211744, 2px 2px 0 #6254db;
+}
+
+.rg-controls-close {
+  position: absolute;
+  top: 7px;
+  right: 9px;
+  width: 34px;
+  height: 34px;
+  border: 2px solid #fff09b;
+  color: #fff2ba;
+  background: #6959e9;
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+}
+
+@media (max-height: 560px) {
+  .rg-marquee-video {
+    width: min(72vw, 480px);
+    max-height: 30dvh;
+  }
+
+  .rg-pause-stack {
+    gap: 8px;
+  }
+
+  .rg-menu-button {
+    min-height: 40px;
+    font-size: clamp(15px, 3.6vh, 21px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rg-menu-button {
+    transition: none;
+  }
+}
