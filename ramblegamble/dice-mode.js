@@ -248,7 +248,7 @@ import {
         const scale = group.scale.x;
         const halfExtents = dieState.baseHalfExtents.map((extent) => extent * scale);
         resizeDiceBody(body, halfExtents);
-        dieState.throwOrigin = [group.position.x, halfExtents[1], group.position.z];
+        dieState.throwOrigin = [group.position.x, halfExtents[1], dieState.throwOrigin?.[2] ?? group.position.z];
         group.position.set(body.position.x, body.position.y, body.position.z);
       }
     }
