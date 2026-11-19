@@ -387,10 +387,11 @@ import {
 
   function closeDiceMode() {
     if (!isOpen || isClosing) return;
+    const wasEntering = dialog.classList.contains("rg-dice-entering");
     isClosing = true;
     dialog.classList.remove("rg-dice-entering");
     dialog.classList.add("rg-dice-exiting");
-    if (reducedMotion.matches || !dialog.open) {
+    if (reducedMotion.matches || wasEntering || !dialog.open) {
       finishClosingDiceMode();
       return;
     }
