@@ -291,7 +291,7 @@ import {
     status.replaceChildren();
     labels.forEach((assetId, index) => {
       const asset = DICE_ASSET_CYCLE.find((choice) => choice.id === assetId) || DICE_ASSET_CYCLE[0];
-      if (index) status.append(document.createTextNode(" · "));
+      if (index) status.append(document.createTextNode(" - "));
       const result = document.createElement("span");
       result.className = "rg-dice-result";
       const side = document.createElement("span");

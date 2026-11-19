@@ -57,20 +57,20 @@ function execute(rawCommand) {
     }
     scores[parsed.name] += parsed.amount;
     const result = writePointScores(scores);
-    addLine(`${parsed.name}: ${result.scores[parsed.name]} (+${parsed.amount})${result.persisted ? "" : " · browser storage unavailable; update was sent to open tabs only"}`);
+    addLine(`${parsed.name}: ${result.scores[parsed.name]} (+${parsed.amount})${result.persisted ? "" : " - browser storage unavailable; update was sent to open tabs only"}`);
     return;
   }
   if (parsed.action === "set") {
     scores[parsed.name] = parsed.total;
     const result = writePointScores(scores);
-    addLine(`${parsed.name}: ${result.scores[parsed.name]}${result.persisted ? "" : " · browser storage unavailable; update was sent to open tabs only"}`);
+    addLine(`${parsed.name}: ${result.scores[parsed.name]}${result.persisted ? "" : " - browser storage unavailable; update was sent to open tabs only"}`);
     return;
   }
   if (parsed.action === "reset") {
     if (parsed.name) scores[parsed.name] = 0;
     else for (const contestant of RG_CONTESTANTS) scores[contestant] = 0;
     const result = writePointScores(scores);
-    addLine(parsed.name ? `${parsed.name}: 0` : `Scores reset · ${formatScores(result.scores)}`);
+    addLine(parsed.name ? `${parsed.name}: 0` : `Scores reset - ${formatScores(result.scores)}`);
     if (!result.persisted) addLine("Browser storage unavailable; update was sent to open tabs only", "terminal-error");
   }
 }
@@ -98,5 +98,5 @@ input.addEventListener("keydown", (event) => {
   }
 });
 
-addLine("RG points console · type help");
+addLine("RG points console - type help");
 addLine(formatScores(readPointScores()));
