@@ -695,7 +695,7 @@ body.ramble-page *::after {
 }
 
 .rg-marquee-logo {
-  width: min(86vw, 570px);
+  width: min(84vw, 456px);
   height: auto;
   max-height: 30dvh;
   aspect-ratio: auto;
@@ -832,7 +832,7 @@ body.ramble-page *::after {
   }
 
   .rg-marquee-logo {
-    width: min(72vw, 480px);
+    width: min(72vw, 384px);
   }
 
   .rg-pause-stack {
