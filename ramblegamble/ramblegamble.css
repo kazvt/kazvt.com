@@ -232,3 +232,327 @@ body.ramble-page *::after {
     transition-duration: .01ms;
   }
 }
+
+.rg-dice-dialog {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  width: 100vw;
+  max-width: none;
+  height: 100vh;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  color: var(--ink);
+  background: transparent;
+  font-family: Arial, Helvetica, sans-serif !important;
+}
+
+.rg-dice-dialog::backdrop {
+  background: transparent;
+}
+
+.rg-dice-liquid,
+.rg-dice-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.rg-dice-liquid {
+  z-index: 0;
+  opacity: .5;
+  pointer-events: none;
+}
+
+.rg-dice-canvas {
+  z-index: 1;
+  pointer-events: none;
+}
+
+.rg-dice-shell {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.8vh, 20px);
+  padding: max(12px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  pointer-events: none;
+}
+
+.rg-dice-shell button {
+  font: inherit;
+  color: inherit;
+  pointer-events: auto;
+}
+
+.rg-dice-header {
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 clamp(2px, 1vw, 16px);
+  text-shadow: 0 1px 4px color-mix(in srgb, var(--bg) 70%, transparent);
+}
+
+.rg-dice-kicker,
+.rg-dice-header h1,
+.rg-die-picker h2,
+.rg-dice-help {
+  margin: 0;
+}
+
+.rg-dice-kicker {
+  color: var(--ink);
+  font-size: clamp(9px, 1vw, 13px);
+  font-weight: 800;
+  letter-spacing: .18em;
+}
+
+.rg-dice-header h1 {
+  font-size: clamp(18px, 2.2vw, 30px);
+  font-weight: 900;
+  letter-spacing: .08em;
+  line-height: 1.05;
+}
+
+.rg-dice-return,
+.rg-dice-roll {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 2px solid var(--ink);
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  box-shadow: 3px 3px 0 var(--pink, #e871a7);
+  font-weight: 900 !important;
+  letter-spacing: .04em;
+  cursor: pointer;
+}
+
+.rg-dice-return:hover,
+.rg-dice-roll:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--pink, #e871a7);
+}
+
+.rg-dice-layout {
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 0;
+  grid-template-columns: minmax(150px, 1fr) minmax(250px, 1.5fr) minmax(150px, 1fr);
+  align-items: stretch;
+  gap: clamp(10px, 2vw, 30px);
+}
+
+.rg-die-picker {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  gap: 9px;
+  padding: clamp(8px, 1.2vw, 16px);
+  border: 2px solid var(--ink);
+  background: color-mix(in srgb, var(--paper) 78%, transparent);
+  box-shadow: 4px 4px 0 color-mix(in srgb, var(--pink, #e871a7) 75%, transparent);
+  backdrop-filter: blur(5px);
+}
+
+.rg-die-picker h2 {
+  padding-bottom: 6px;
+  border-bottom: 1px dashed color-mix(in srgb, var(--ink) 65%, transparent);
+  font-size: clamp(11px, 1.15vw, 15px);
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+.rg-die-faces {
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 0;
+  grid-template-rows: repeat(6, minmax(38px, 1fr));
+  gap: clamp(4px, .75vh, 9px);
+}
+
+.rg-die-face-button {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr;
+  align-content: center;
+  align-items: center;
+  column-gap: 6px;
+  padding: 5px 8px;
+  border: 1px solid color-mix(in srgb, var(--ink) 70%, transparent);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease, transform 120ms ease;
+}
+
+.rg-die-face-button:hover {
+  transform: translateX(2px);
+  background: color-mix(in srgb, var(--pink, #e871a7) 22%, var(--paper));
+}
+
+.rg-die-face-button:focus-visible,
+.rg-dice-return:focus-visible,
+.rg-dice-roll:focus-visible {
+  outline: 3px solid var(--pink, #e871a7);
+  outline-offset: 2px;
+}
+
+.rg-die-face-side {
+  grid-column: 1 / -1;
+  color: color-mix(in srgb, var(--ink) 74%, transparent);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+
+.rg-die-face-value {
+  overflow: hidden;
+  font-size: clamp(10px, 1vw, 13px);
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rg-die-face-cycle {
+  color: var(--pink, #e871a7);
+  font-size: 16px;
+  line-height: 1;
+}
+
+.rg-dice-center {
+  display: flex;
+  align-self: end;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: clamp(12px, 4vh, 44px);
+  text-align: center;
+  text-shadow: 0 1px 4px color-mix(in srgb, var(--bg) 80%, transparent);
+  pointer-events: none;
+}
+
+.rg-dice-status {
+  max-width: 100%;
+  padding: 4px 9px;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--paper) 76%, transparent);
+  font-size: clamp(9px, 1vw, 13px);
+  font-weight: 900;
+  letter-spacing: .09em;
+}
+
+.rg-dice-outcomes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  color: var(--ink);
+  font-size: clamp(10px, 1.1vw, 14px);
+  font-weight: 900;
+}
+
+.rg-dice-outcomes span {
+  padding: 4px 7px;
+  border: 1px solid color-mix(in srgb, var(--ink) 72%, transparent);
+  background: color-mix(in srgb, var(--paper) 84%, transparent);
+}
+
+.rg-dice-roll {
+  min-width: min(100%, 220px);
+  min-height: 50px;
+  padding-inline: 20px;
+  background: color-mix(in srgb, var(--pink, #e871a7) 54%, var(--paper));
+  font-size: clamp(13px, 1.3vw, 17px) !important;
+  cursor: pointer;
+}
+
+.rg-dice-roll:disabled {
+  opacity: .68;
+  cursor: wait;
+}
+
+.rg-dice-help {
+  padding: 2px 6px;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--paper) 70%, transparent);
+  font-size: clamp(9px, .9vw, 12px);
+}
+
+@media (max-width: 760px) {
+  .rg-dice-shell {
+    gap: 8px;
+    padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+  }
+
+  .rg-dice-layout {
+    grid-template-columns: minmax(76px, .78fr) minmax(110px, 1fr) minmax(76px, .78fr);
+    gap: 5px;
+  }
+
+  .rg-die-picker {
+    gap: 5px;
+    padding: 5px;
+    box-shadow: 2px 2px 0 color-mix(in srgb, var(--pink, #e871a7) 75%, transparent);
+  }
+
+  .rg-die-picker h2 {
+    font-size: 10px;
+  }
+
+  .rg-die-faces {
+    grid-template-rows: repeat(6, minmax(38px, 1fr));
+    gap: 4px;
+  }
+
+  .rg-die-face-button {
+    padding: 4px;
+    column-gap: 2px;
+  }
+
+  .rg-die-face-side {
+    font-size: 7px;
+  }
+
+  .rg-die-face-value {
+    font-size: clamp(7px, 2.1vw, 10px);
+  }
+
+  .rg-die-face-cycle {
+    font-size: 12px;
+  }
+
+  .rg-dice-center {
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .rg-dice-roll {
+    min-height: 42px;
+    padding-inline: 5px;
+    font-size: 10px !important;
+  }
+
+  .rg-dice-return {
+    min-height: 38px;
+    padding: 5px 8px;
+    font-size: 10px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rg-die-face-button,
+  .rg-dice-return,
+  .rg-dice-roll {
+    transition-duration: .01ms;
+  }
+}
