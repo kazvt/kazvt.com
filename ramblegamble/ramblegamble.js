@@ -24,6 +24,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   const goButton = document.getElementById("rg-go");
   const pauseMenu = document.getElementById("rg-pause-menu");
   const menuMarquee = document.getElementById("rg-marquee-video");
+  const marqueeStill = document.getElementById("rg-marquee-still");
   const playButton = document.getElementById("rg-play");
   const controlsOpenButton = document.getElementById("rg-controls-open");
   const consoleOpenButton = document.getElementById("rg-console-open");
@@ -1361,8 +1362,28 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     menuMarquee.classList.toggle("rg-marquee-matte", !frameHasAlpha);
   }
 
+  function updateMarqueeMotionPreference() {
+    const useStill = reducedMotion.matches;
+    menuMarquee.hidden = useStill;
+    marqueeStill.hidden = !useStill;
+    menuMarquee.preload = useStill ? "none" : "auto";
+    if (useStill) {
+      menuMarquee.pause();
+      try { menuMarquee.currentTime = 0; } catch {}
+    } else if (pauseMenuOpen) {
+      const playback = menuMarquee.play();
+      if (playback?.catch) playback.catch((error) => console.warn("Marquee animation could not play:", error));
+    }
+  }
+
   menuMarquee.addEventListener("loadeddata", updateMarqueeMatteFallback);
   menuMarquee.addEventListener("error", () => menuMarquee.classList.add("rg-marquee-matte"));
+  if (typeof reducedMotion.addEventListener === "function") {
+    reducedMotion.addEventListener("change", updateMarqueeMotionPreference);
+  } else {
+    reducedMotion.addListener(updateMarqueeMotionPreference);
+  }
+  updateMarqueeMotionPreference();
 
   function setMenuSceneVisibility(visible) {
     for (const object of [stageModel, rouletteRig, slotRig]) {
