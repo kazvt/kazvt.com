@@ -343,6 +343,7 @@
 .rg-trivia-screen[data-mode="categorize-images"] .rg-stage-media,
 .rg-trivia-screen[data-mode="image-sequence"] .rg-stage-media { width: min(100%, 240px); aspect-ratio: 1; object-fit: contain; }
 .rg-number-guess-board { display: grid; width: min(100%, 360px); gap: 7px; margin: 12px auto; }
+.rg-number-wordle-instructions { max-width: 620px; margin: 8px auto; font-size: 12px; line-height: 1.4; text-align: center; }
 .rg-number-guess-row { display: grid; grid-template-columns: repeat(4, minmax(44px, 1fr)); gap: 7px; justify-content: center; }
 .rg-number-guess-cell { display: grid; min-width: 0; aspect-ratio: 1; place-items: center; border: 2px solid #486c2f; color: #111; background: #fffdf0; font-size: clamp(20px, 4vw, 32px); font-weight: 900; }
 .rg-number-guess-row.is-empty .rg-number-guess-cell { opacity: .48; }

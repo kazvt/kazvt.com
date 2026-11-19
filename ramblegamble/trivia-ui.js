@@ -1134,7 +1134,10 @@ import { isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from ".
     const board = document.createElement("div");
     board.className = "rg-number-guess-board";
     board.setAttribute("aria-label", "Four guesses, four digits per guess");
-    stageItems.append(board);
+    const instructions = document.createElement("p");
+    instructions.className = "rg-number-wordle-instructions";
+    instructions.textContent = "Four guesses. Green = right spot, yellow = in the number elsewhere, grey = not in the number.";
+    stageItems.append(instructions, board);
 
     const renderRows = () => {
       board.replaceChildren();
