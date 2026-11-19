@@ -51,7 +51,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     // Ease the wheel back a fraction from the previous rightward move, then
     // nudge it forward toward the recess; both offsets scale with the wheel.
     rouletteRightOffsetDiameters: 0.55,
-    rouletteForwardOffsetDiameters: 0.10,
+    rouletteForwardOffsetDiameters: 0.22,
     // Normalized canvas point at the center of the red marked floor area.
     rouletteScreenAnchor: Object.freeze({ x: 0.60, y: 0.71 }),
   });
