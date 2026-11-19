@@ -87,11 +87,14 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   let skyStarsInitialized = false;
   let rouletteTargets = [];
   let slotTargets = [];
+  let diceDoorTargets = [];
   let wheelMotion = null;
   let leverMotion = null;
   const pickQuestion = createQuestionPicker();
   let playing = false;
   let sceneReady = false;
+  let diceModeOpen = false;
+  let diceModeVisibility = null;
   let stageModel;
   let rouletteModel;
   let slotsModel;
@@ -903,6 +906,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   function setupPicking() {
     rouletteTargets = [];
     slotTargets = [];
+    diceDoorTargets = [];
     contestantTargets = [];
     hostTargets = [];
     contestants = [];
@@ -915,7 +919,30 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     slotsModel?.traverse((object) => {
       if (object.isMesh) slotTargets.push(object);
     });
+    setupDiceDoorTarget();
     setupContestants();
+  }
+
+  function setupDiceDoorTarget() {
+    const opening = ARCADE_REFERENCE_LAYOUT.diceDoor;
+    const target = new THREE.Mesh(
+      new THREE.PlaneGeometry(opening.maxX - opening.minX, opening.maxY - opening.minY),
+      new THREE.MeshBasicMaterial({
+        colorWrite: false,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      }),
+    );
+    target.name = "point-click-dice-door";
+    target.position.set(
+      (opening.minX + opening.maxX) / 2,
+      (opening.minY + opening.maxY) / 2,
+      opening.wallZ + 0.025,
+    );
+    target.userData.machine = "dice-door";
+    target.frustumCulled = false;
+    scene.add(target);
+    diceDoorTargets.push(target);
   }
 
   function createBillboardPanel(source, kind) {
@@ -1146,11 +1173,13 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     raycaster.setFromCamera(pointer, camera);
     const wheelHit = raycaster.intersectObjects(rouletteTargets, true)[0];
     const slotHit = raycaster.intersectObjects(slotTargets, true)[0];
+    const diceDoorHit = raycaster.intersectObjects(diceDoorTargets, false)[0];
     const chairHit = raycaster.intersectObjects(contestantTargets, false)[0];
     const hostHit = raycaster.intersectObjects(hostTargets, false)[0];
     const hits = [
       wheelHit && { distance: wheelHit.distance, hit: wheelHit, machine: "roulette", model: rouletteModel },
       slotHit && { distance: slotHit.distance, hit: slotHit, machine: "slot", model: slotsModel },
+      diceDoorHit && { distance: diceDoorHit.distance, hit: diceDoorHit, machine: "dice-door" },
       chairHit && {
         distance: chairHit.distance,
         machine: "contestant",
@@ -1264,7 +1293,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   }
 
   function pointClickAt(clientX, clientY) {
-    if (!camera || !sceneReady) return;
+    if (!camera || !sceneReady || diceModeOpen) return;
     const rect = preview.getBoundingClientRect();
     const zone = resolvePointClickZone({
       x: clientX - rect.left,
@@ -1279,6 +1308,13 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
 
     const interaction = getSceneInteractionAt(clientX, clientY);
     if (!interaction) return;
+
+    if (interaction.machine === "dice-door") {
+      if (resolvePointClickAction({ machine: "dice-door" }) === "open-dice") {
+        window.dispatchEvent(new CustomEvent("rg:open-dice-mode"));
+      }
+      return;
+    }
 
     if (interaction.machine === "contestant") {
       const focused = currentView.kind === "contestants" || currentView.kind === "contestant";
@@ -1315,6 +1351,28 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   canvas.addEventListener("click", (event) => pointClickAt(event.clientX, event.clientY));
   canvas.addEventListener("pointerleave", hideGameCursor);
   window.addEventListener("blur", hideGameCursor);
+
+  window.addEventListener("rg:dice-mode-state", (event) => {
+    const open = Boolean(event.detail?.open);
+    if (open === diceModeOpen) return;
+    diceModeOpen = open;
+    if (open) {
+      diceModeVisibility = [stageModel, rouletteRig, slotRig]
+        .filter(Boolean)
+        .map((object) => [object, object.visible]);
+      for (const [object] of diceModeVisibility) object.visible = false;
+      billboardLayer.style.visibility = "hidden";
+      preview.classList.add("is-dice-mode");
+      hideGameCursor();
+      result.hidden = true;
+    } else {
+      for (const [object, visible] of diceModeVisibility || []) object.visible = visible;
+      diceModeVisibility = null;
+      billboardLayer.style.visibility = "";
+      preview.classList.remove("is-dice-mode");
+      camera.updateMatrixWorld(true);
+    }
+  });
 
   canvas.addEventListener("keydown", (event) => {
     if (event.altKey || event.ctrlKey || event.metaKey) return;
@@ -1417,6 +1475,10 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
 
     updateCameraTransition(time);
     updateSkyAnimations(time);
+    if (diceModeOpen) {
+      renderer.render(scene, camera);
+      return;
+    }
     updateBillboardProjection();
 
     if (wheelMotion && wheelPivot && ballPivot) {
