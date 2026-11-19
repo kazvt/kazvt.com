@@ -50,7 +50,8 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     rouletteClearance: 0.12,
     // The supplied close-up arrow shifts the wheel about 0.58 wheel diameters
     // to screen-right. Keep this relative to the model size rather than fixed units.
-    rouletteRightOffsetDiameters: 0.58,
+    rouletteRightOffsetDiameters: 0.55,
+    rouletteForwardOffsetDiameters: 0.10,
     // Normalized canvas point at the center of the red marked floor area.
     rouletteScreenAnchor: Object.freeze({ x: 0.60, y: 0.71 }),
   });
@@ -727,17 +728,32 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
     const currentCenter = currentBounds.getCenter(new THREE.Vector3());
     rouletteRig.position.x += floorPoint.x - currentCenter.x;
     rouletteRig.position.z += floorPoint.z - currentCenter.z;
+    rouletteRig.updateMatrixWorld(true);
 
     // Move along the close-up camera's horizontal screen-right axis. That maps
-    // the red-arrow direction into the room without changing the wheel's size,
-    // elevation, or clearance from the raised stage.
+    // the red-arrow direction into the room without changing the wheel's size
+    // or elevation. Then ease it forward toward the recess while preserving
+    // the stage clearance from the earlier off-stage requirement.
     const wheelDiameter = rouletteRig.userData.referenceBounds?.diameter || 0;
     const screenRightOffset = wheelDiameter * ARCADE_REFERENCE_LAYOUT.rouletteRightOffsetDiameters;
-    rouletteRig.position.x += Math.cos(REFERENCE_START_VIEW.yaw) * screenRightOffset;
-    rouletteRig.position.z -= Math.sin(REFERENCE_START_VIEW.yaw) * screenRightOffset;
+    const yaw = REFERENCE_START_VIEW.yaw;
+    rouletteRig.position.x += Math.cos(yaw) * screenRightOffset;
+    rouletteRig.position.z -= Math.sin(yaw) * screenRightOffset;
+    rouletteRig.updateMatrixWorld(true);
+
+    const requiredStageGap = ARCADE_REFERENCE_LAYOUT.stageFrontZ + ARCADE_REFERENCE_LAYOUT.rouletteClearance;
+    const afterRightBounds = new THREE.Box3().setFromObject(rouletteRig);
+    const requestedForwardOffset = wheelDiameter * ARCADE_REFERENCE_LAYOUT.rouletteForwardOffsetDiameters;
+    const maxForwardOffset = Math.max(0, (afterRightBounds.min.z - requiredStageGap) / Math.cos(yaw));
+    const forwardOffset = Math.min(requestedForwardOffset, maxForwardOffset);
+    rouletteRig.position.x -= Math.sin(yaw) * forwardOffset;
+    rouletteRig.position.z -= Math.cos(yaw) * forwardOffset;
     rouletteRig.updateMatrixWorld(true);
 
     const placedBounds = new THREE.Box3().setFromObject(rouletteRig);
+    if (placedBounds.min.z < requiredStageGap - 0.001) {
+      throw new Error("The right-and-forward roulette adjustment crossed the stage clearance.");
+    }
     rouletteRig.userData.referenceBounds = {
       min: placedBounds.min.toArray(),
       max: placedBounds.max.toArray(),
