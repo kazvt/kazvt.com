@@ -8,7 +8,7 @@
     <link rel="canonical" href="https://kazvt.com/rg/">
     <title>Ramble Gamble - kazvt</title>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
-    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=dice-mode-20261119-v1">
+    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=marquee-pause-menu-20261119-v1">
     <link rel="stylesheet" href="/ramblegamble/host-console.css?v=trivia-empty-stage-20261119-v1">
     <script type="importmap">
       {
@@ -18,7 +18,7 @@
         }
       }
     </script>
-    <script type="module" src="/ramblegamble/ramblegamble.js?v=cheer-audience-applause-20261119-v2"></script>
+    <script type="module" src="/ramblegamble/ramblegamble.js?v=marquee-pause-menu-20261119-v1"></script>
     <script type="module" src="/ramblegamble/dice-mode.js?v=dice-mode-20261119-v1"></script>
     <script type="module" src="/ramblegamble/trivia-ui.js?v=trivia-empty-stage-20261119-v1"></script>
   </head>
@@ -32,6 +32,41 @@
       <p class="rg-result" id="rg-result" hidden></p>
       <div class="rg-loading" id="rg-loading">Loading the 3D preview...</div>
     </main>
+
+    <section class="rg-ready-screen" id="rg-ready-screen" aria-labelledby="rg-ready-title">
+      <div class="rg-ready-stack">
+        <p class="rg-ready-title" id="rg-ready-title">READY...?</p>
+        <button class="rg-menu-button rg-go-button" id="rg-go" type="button">GO!</button>
+      </div>
+    </section>
+
+    <section class="rg-pause-menu" id="rg-pause-menu" aria-label="Pause menu" hidden>
+      <div class="rg-pause-stack">
+        <video
+          class="rg-marquee-video"
+          id="rg-marquee-video"
+          poster="/ramblegamble/assets/marquee/ramble-gamble-marquee-poster.png"
+          preload="auto"
+          playsinline
+          aria-hidden="true"
+        >
+          <source src="/ramblegamble/assets/marquee/ramble-gamble-marquee.mp4" type="video/mp4">
+        </video>
+        <nav class="rg-pause-actions" aria-label="Pause menu actions">
+          <button class="rg-menu-button" id="rg-play" type="button">PLAY!</button>
+          <button class="rg-menu-button" id="rg-controls-open" type="button">CONTROLS!</button>
+          <button class="rg-menu-button" id="rg-console-open" type="button">CONSOLE!</button>
+        </nav>
+      </div>
+    </section>
+
+    <dialog class="rg-controls-dialog" id="rg-controls-dialog" aria-label="Controls">
+      <button class="rg-controls-close" id="rg-controls-close" type="button" aria-label="Close controls">×</button>
+      <p>CLICK — CHOOSE · ← → — LOOK</p>
+      <p>↓ / ESC — BACK / PAUSE</p>
+      <p>P — PEOPLE · H — HOST · 2 — SLOTS · 3 — ROULETTE · D — DICE</p>
+      <p>C — CHEER · R — SPIN · S — LEVER</p>
+    </dialog>
 
     <dialog class="rg-dice-dialog" id="rg-dice-dialog" aria-labelledby="rg-dice-title">
       <iframe class="rg-dice-liquid" id="rg-dice-liquid" title="Full-screen liquid animation" aria-hidden="true" tabindex="-1"></iframe>
