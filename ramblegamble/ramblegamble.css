@@ -427,7 +427,7 @@ body.ramble-page *::after {
   gap: 2px;
   padding: clamp(2px, .45vh, 5px);
   border: 1px solid color-mix(in srgb, var(--ink) 70%, transparent);
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  background: color-mix(in srgb, var(--paper) 92%, var(--bg));
   text-align: center;
   cursor: pointer;
   transition: background-color 120ms ease, transform 120ms ease;

@@ -42,6 +42,19 @@ test("identical random inputs produce repeatable throw trajectories", () => {
   assert.deepEqual(first, second);
 });
 
+test("fixed-step motion stays consistent when frames arrive at different rates", () => {
+  const at120Hz = createDiceFlightState({ origin: [0, 0.08, 0], lane: -1, random: constantRandom(0.72) });
+  const at60Hz = createDiceFlightState({ origin: [0, 0.08, 0], lane: -1, random: constantRandom(0.72) });
+  for (let i = 0; i < 162; i += 1) stepDiceFlight(at120Hz, DICE_FLIGHT_STEP);
+  for (let i = 0; i < 81; i += 1) stepDiceFlight(at60Hz, DICE_FLIGHT_STEP * 2);
+  for (const key of ["x", "y", "z"]) {
+    assert.ok(Math.abs(at120Hz.position[key] - at60Hz.position[key]) < 1e-8);
+    assert.ok(Math.abs(at120Hz.velocity[key] - at60Hz.velocity[key]) < 1e-8);
+  }
+  assert.equal(at120Hz.bounceCount, at60Hz.bounceCount);
+  assert.equal(at120Hz.landed, at60Hz.landed);
+});
+
 test("the complete toss has a deliberate flight and settle phase", () => {
   assert.ok(DICE_FLIGHT_DURATION > 1);
   assert.ok(DICE_SETTLE_DURATION >= 0.5);
