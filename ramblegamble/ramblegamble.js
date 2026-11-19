@@ -1,5 +1,3 @@
-import * as THREE from "three";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import {
   resolvePointClickAction,
   resolvePointClickBack,
@@ -13,6 +11,8 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
 (() => {
   "use strict";
 
+  let THREE;
+  let GLTFLoader;
   const preview = document.getElementById("rg-preview");
   const canvas = document.getElementById("rg-canvas");
   const billboardLayer = document.getElementById("rg-billboard-layer");
@@ -123,7 +123,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   let contestantTargets = [];
   let hostTargets = [];
   let currentView = { kind: "overview", look: 0 };
-  let cameraTarget = new THREE.Vector3();
+  let cameraTarget;
   let cameraTransition = null;
   let overviewCameraBounds = null;
   let cursorMode = "";
@@ -215,6 +215,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
   applyTheme();
 
   function createWorld() {
+    cameraTarget = new THREE.Vector3();
     scene = new THREE.Scene();
     scene.background = new THREE.Color(SKY_CONFIG.topColor);
 
@@ -1647,7 +1648,16 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
 
   async function boot() {
     try {
+      const [threeModule, loaderModule] = await Promise.all([
+        import("three"),
+        import("three/addons/loaders/GLTFLoader.js"),
+      ]);
+      THREE = threeModule;
+      GLTFLoader = loaderModule.GLTFLoader;
       createWorld();
+      if (!document.hidden && (gameStarted || pauseMenuOpen) && !animationFrame) {
+        animationFrame = requestAnimationFrame(animate);
+      }
       const loader = new GLTFLoader();
       const [stageGltf, rouletteGltf, slotsGltf] = await Promise.all([
         loader.loadAsync("/ramblegamble/assets/provided/rg_stage.gltf"),
