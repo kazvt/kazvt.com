@@ -59,8 +59,8 @@ function normalizeMode(value) {
 
 function normalizeSelectionRule(value) {
   const raw = String(value ?? "").trim().toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ");
-  if (/^(?:all|both|all correct|all answers|require all|select all|every|every correct answer|all of them|multiple)$/.test(raw)) return "all";
-  if (/^(?:any|one|one correct answer|any one|either|single|at least one|one of them)$/.test(raw)) return "any";
+  if (/^(?:all|both|all correct|all answers|require all|select all|every|every correct answer|all of them|multiple)$/.test(raw) || /\b(?:require|select|choose)\s+all\b|\b(?:both|every)\s+(?:correct\s+)?(?:answers?|options?|choices?)\b/.test(raw)) return "all";
+  if (/^(?:any|one|one correct answer|any one|either|single|at least one|one of them)$/.test(raw) || /\b(?:any one|one of|either|at least one)\b/.test(raw)) return "any";
   return "";
 }
 
@@ -274,6 +274,9 @@ function parseQuestionObjects(questions) {
       pairs: item.pairs,
       assignments: item.assignments,
       optionCount: item.optionCount ?? item.option_count,
+      selectionRule: normalizeSelectionRule(item.selectionRule ?? item.selection_rule ?? item.selectionMode ?? item.selection_mode ?? item.answerSelection ?? item.answer_selection ?? item.correctSelection ?? item.correct_selection),
+      requiredCorrectCount: item.requiredCorrectCount ?? item.required_correct_count ?? item.requiredSelections ?? item.required_selections ?? item.correctCount ?? item.correct_count,
+      numberCode: item.numberCode ?? item.number_code ?? item.secretNumber ?? item.secret_number ?? item.targetNumber ?? item.target_number,
     };
     if (!grouped.has(round)) grouped.set(round, { base: null, levels: new Map() });
     const group = grouped.get(round);
@@ -293,6 +296,7 @@ function parseQuestionObjects(questions) {
       acceptedAnswers: [], options: [], promptImage: "", promptAsset: "", items: [], pairs: [],
       categories: ["Group 1", "Group 2", "Group 3"], videoUrl: "", numberValue: 0,
       numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
+      selectionRule: "any", requiredCorrectCount: 0, numberCode: "",
     };
     rounds[round] = {};
     for (let level = 1; level <= 5; level += 1) {
@@ -302,9 +306,11 @@ function parseQuestionObjects(questions) {
         for (const field of ["subtitle", "promptImage", "promptAsset", "videoUrl", "backgroundImage", "drawing"]) {
           if (record[field]) state[field] = record[field];
         }
-        for (const field of ["numberValue", "numberVisible", "imageVisible", "categories", "items", "pairs", "assignments", "optionCount"]) {
+        for (const field of ["numberValue", "numberVisible", "imageVisible", "categories", "items", "pairs", "assignments", "optionCount", "requiredCorrectCount"]) {
           if (record[field] != null) state[field] = clone(record[field]);
         }
+        if (record.selectionRule) state.selectionRule = record.selectionRule;
+        if (record.numberCode != null) state.numberCode = safeString(record.numberCode).replace(/\D/g, "").slice(0, 4);
         if (record.mode) state.mode = record.mode;
         if (record.noMultipleChoice) {
           state.mode = "short-answer";
