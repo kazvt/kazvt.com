@@ -397,6 +397,22 @@
 .rg-compose-piece { position: absolute; width: 48px; min-height: 44px; padding: 3px; border: 2px solid #111; background: #ffdf00; font-size: 10px; font-weight: 800; cursor: grab; }
 .rg-compose-piece:active { background: #f12b24; }
 
+@container rg-trivia (max-width: 1040px) {
+  .rg-trivia-screen[data-mode="categorize-images"] .rg-category-item-grid,
+  .rg-trivia-screen[data-mode="image-grid"] #rg-stage-items { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@container rg-trivia (max-width: 680px) {
+  .rg-trivia-screen[data-mode="categorize-images"] .rg-category-item-grid,
+  .rg-trivia-screen[data-mode="image-grid"] #rg-stage-items { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .rg-trivia-screen[data-mode="categorize-images"] .rg-category-buckets { grid-template-columns: 1fr; }
+}
+
+@container rg-trivia (max-width: 430px) {
+  .rg-trivia-screen[data-mode="categorize-images"] .rg-category-item-grid,
+  .rg-trivia-screen[data-mode="image-grid"] #rg-stage-items { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 .rg-console.is-presenting {
   width: 100vw;
   height: 100dvh;
