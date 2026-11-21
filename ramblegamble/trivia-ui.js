@@ -905,6 +905,10 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
       drawing: drawingData.get(currentRound + ":" + currentDifficulty) || effectiveNow().content.drawing || "",
       assignments: effectiveNow().content.assignments || [],
     };
+    if (content.mode === "timeline") {
+      const reorderControl = $("[data-timeline-reorder]", $("#rg-special-fields"));
+      content.reorder = reorderControl ? reorderControl.checked : effectiveNow().format.reorder === true;
+    }
     if (content.promptImage) content.promptAsset = "";
     delete content.optionCount;
     levelDraft()["question"] = content.question;
