@@ -804,6 +804,10 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
       if (numberLabel) numberLabel.textContent = number;
       const dragHandle = $("[data-item-drag-handle]", row);
       if (dragHandle) dragHandle.setAttribute("aria-label", "Drag event " + (index + 1) + " to reorder");
+      const itemLabel = $("[data-item-label]", row);
+      if (itemLabel && row.classList.contains("rg-item-row--timeline")) itemLabel.setAttribute("aria-label", "Timeline event " + (index + 1) + " name");
+      const imageInput = $("[data-item-image]", row);
+      if (imageInput && row.classList.contains("rg-item-row--timeline")) imageInput.setAttribute("aria-label", "Timeline event " + (index + 1) + " image URL");
       const up = $("[data-item-move='-1']", row);
       const down = $("[data-item-move='1']", row);
       if (up) {
