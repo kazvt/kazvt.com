@@ -6,6 +6,7 @@ import {
   isChoiceMode,
   resolveRoundFormat,
   resolveRoundMode,
+  resolveTimelineReorder,
 } from "./trivia-data.js?v=trivia-answer-modes-20261119-v3";
 import {
   QUESTION_BANK_SESSION_KEY,
@@ -41,6 +42,7 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
   const roundSelect = $("#rg-round-select");
   const difficultySelect = $("#rg-difficulty-select");
   const editor = $(".rg-trivia-editor", dialog);
+  const itemsEditor = $("#rg-items-editor");
   const feedback = $("#rg-answer-feedback");
   const answerArea = $("#rg-answer-area");
   const stageItems = $("#rg-stage-items");
@@ -412,7 +414,11 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
     if (content.optionCount == null) content.optionCount = content.mode === "number-grid" ? 16 : content.mode === "image-grid" && format.mode !== "image-grid" ? 12 : format.optionCount;
     content.optionCount = Math.max(0, Math.min(24, Number(content.optionCount) || 0));
     if (isChoiceMode(content.mode) && content.optionCount === 0) content.optionCount = content.mode === "number-grid" ? 16 : content.mode === "image-grid" ? 12 : 6;
-    format = { ...format, optionCount: content.optionCount };
+    format = {
+      ...format,
+      optionCount: content.optionCount,
+      reorder: resolveTimelineReorder(round, difficulty, drafts.rounds[round] || {}),
+    };
     if (isChoiceMode(content.mode)) {
       while (content.options.length < format.optionCount) content.options.push({ label: "", image: "", correct: false });
       content.options = content.options.slice(0, format.optionCount);
