@@ -1134,7 +1134,7 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
   function renderChoiceStage(format, content) {
     screen.dataset.mode = format.mode;
     const count = format.optionCount;
-    const columns = format.mode === "image-grid" ? (format.columns || (count <= 6 ? 3 : 4)) : (count <= 6 ? 3 : count <= 10 ? 5 : 4);
+      const columns = format.mode === "image-grid" ? (count > 12 ? 6 : format.columns || (count <= 6 ? 3 : 4)) : (count <= 6 ? 3 : count <= 10 ? 5 : 4);
     stageItems.style.setProperty("--rg-choice-columns", String(columns || 2));
     const options = padOptions(content.options, count);
     const multiSelect = content.selectionRule === "all";
@@ -1424,8 +1424,7 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
     const buckets = document.createElement("div");
     buckets.className = "rg-category-buckets";
     const itemTray = document.createElement("div");
-    itemTray.className = "rg-stage-items";
-    itemTray.style.setProperty("--rg-choice-columns", "3");
+    itemTray.className = "rg-stage-items rg-category-item-grid";
     let selectedItem = -1;
     const bucketsList = [];
     for (let index = 0; index < format.categories; index += 1) {
@@ -1469,7 +1468,9 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
       tile.type = "button";
       tile.className = "rg-answer-option";
       tile.dataset.categoryItem = String(index);
-      tile.textContent = item.label || "IMAGE " + String(index + 1).padStart(2, "0");
+      const label = document.createElement("span");
+      label.textContent = item.label || "IMAGE " + String(index + 1).padStart(2, "0");
+      tile.append(label);
       if (item.image) addImageToNode(tile, item.image, "", "rg-stage-media");
       tile.addEventListener("click", () => {
         selectedItem = index;
