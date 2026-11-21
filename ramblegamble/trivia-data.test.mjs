@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { MODE_NAMES, ROUND_IDS, ROUND_RULES, SPECIAL_ROUNDS, resolveRoundFormat, resolveRoundMode } from "./trivia-data.js";
+import { MODE_NAMES, ROUND_IDS, ROUND_RULES, SPECIAL_ROUNDS, resolveRoundFormat, resolveRoundMode, resolveTimelineReorder } from "./trivia-data.js";
 
 test("special round ids stay distinct from rounds 1 through 36", () => {
   assert.equal(ROUND_IDS.length, 38);
@@ -27,6 +27,14 @@ test("sparse difficulties inherit and additive choices accumulate", () => {
   assert.equal(ROUND_RULES[1][2].resetQuestion, true);
   assert.equal(ROUND_RULES[2][3].resetPromptImage, true);
   assert.equal(ROUND_RULES[10][3].replaceOptions, true);
+});
+
+test("timeline reordering follows each difficulty default and supports a saved override", () => {
+  assert.equal(resolveTimelineReorder("15", 1), false);
+  assert.equal(resolveTimelineReorder("15", 3), true);
+  assert.equal(resolveTimelineReorder("15", 1, { 1: { reorder: true } }), true);
+  assert.equal(resolveTimelineReorder("15", 3, { 3: { reorder: false } }), false);
+  assert.equal(resolveTimelineReorder("15", 3, { 1: { reorder: false } }), true);
 });
 
 test("question-specific templates preserve the supplied counts and modes", () => {
