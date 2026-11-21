@@ -857,7 +857,8 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
     $("#rg-edit-mode").value = format.mode;
     $("#rg-special-fields").innerHTML = renderSpecialFields(format, content);
     $("#rg-options-editor").innerHTML = optionRowsHTML(format, content);
-    $("#rg-items-editor").innerHTML = itemRowsHTML(format, content) + pairRowsHTML(format, content);
+    itemsEditor.innerHTML = itemRowsHTML(format, content) + pairRowsHTML(format, content);
+    syncEditorItemRows();
     const disabled = currentRound === "00" || currentRound === "0";
     $$("input, textarea, select, button", editor).forEach((control) => {
       if (control.id !== "rg-clear-draft") control.disabled = disabled;
@@ -884,11 +885,11 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
         asset: row.dataset.assetId || "",
         correct: $("[data-option-correct]", row).checked,
       })),
-      items: $$("[data-item-row]", $("#rg-items-editor")).map((row, index) => ({
+      items: $$("[data-item-row]", itemsEditor).map((row, index) => ({
         label: $("[data-item-label]", row).value,
         image: $("[data-item-image]", row).value.trim(),
-        x: effectiveNow().content.items[index]?.x ?? 8 + (index % 5) * 18,
-        y: effectiveNow().content.items[index]?.y ?? 8 + (Math.floor(index / 5) % 4) * 18,
+        x: Number.isFinite(Number(row.dataset.itemX)) ? Number(row.dataset.itemX) : effectiveNow().content.items[index]?.x ?? 8 + (index % 5) * 18,
+        y: Number.isFinite(Number(row.dataset.itemY)) ? Number(row.dataset.itemY) : effectiveNow().content.items[index]?.y ?? 8 + (Math.floor(index / 5) % 4) * 18,
       })),
       pairs: $$("[data-pair-row]", $("#rg-items-editor")).map((row) => ({
         left: $("[data-pair-left]", row).value,
