@@ -813,6 +813,9 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
       html += '<label class="rg-field-label" for="rg-edit-number-code">Secret 4-digit number<input id="rg-edit-number-code" type="text" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" autocomplete="off" data-number-code value="' + esc(content.numberCode || "") + '" placeholder="For example, 0042"></label>';
       html += '<p class="rg-editor-hint">Contestants get four guesses. Keep leading zeroes if the code begins with 0.</p>';
     }
+    if (format.mode === "timeline") {
+      html += '<label class="rg-timeline-reorder-setting"><input type="checkbox" data-timeline-reorder ' + (format.reorder ? "checked" : "") + '><span>Allow events to be reordered on the stage</span></label>';
+    }
     if (format.mode === "categorize-images") {
       html += '<h4 class="rg-editor-section-title">CATEGORY NAMES</h4>';
       for (let index = 0; index < format.categories; index += 1) {
