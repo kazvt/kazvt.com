@@ -1,0 +1,19 @@
+/* Keep the multistream guide's type independent from the active site palette.
+   The homepage imports this guide's markup into its modal, rather than loading
+   it in an iframe, so the scoped palette override applies in both contexts. */
+body.guide-page,
+.multistream-guide-modal:not(.art-viewer-modal) {
+  --site-font: "Comic Sans MS", "Comic Sans", cursive;
+  font-family: var(--site-font);
+  font-size-adjust: none;
+}
+
+body.guide-page *,
+body.guide-page *::before,
+body.guide-page *::after,
+.multistream-guide-modal:not(.art-viewer-modal) *,
+.multistream-guide-modal:not(.art-viewer-modal) *::before,
+.multistream-guide-modal:not(.art-viewer-modal) *::after {
+  font-family: "Comic Sans MS", "Comic Sans", cursive !important;
+  font-size-adjust: none;
+}
