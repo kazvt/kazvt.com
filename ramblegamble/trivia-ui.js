@@ -1772,12 +1772,54 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
     saveAndRenderStage();
   });
   editor.addEventListener("change", (event) => {
-    if (event.target.id === "rg-edit-mode" || event.target.id === "rg-edit-option-count" || event.target.id === "rg-edit-selection-rule") {
+    if (event.target.id === "rg-edit-mode" || event.target.id === "rg-edit-option-count" || event.target.id === "rg-edit-selection-rule" || event.target.matches("[data-timeline-reorder]")) {
       readEditor();
       render();
       queueSave();
     }
   });
+  itemsEditor.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-item-move]");
+    if (!button) return;
+    const row = button.closest("[data-item-row]");
+    if (!row || button.disabled) return;
+    event.preventDefault();
+    moveEditorItem(row, Number(button.dataset.itemMove));
+    button.focus();
+  });
+  let editorItemDrag = null;
+  const finishEditorItemDrag = (event) => {
+    if (!editorItemDrag || event.pointerId !== editorItemDrag.pointerId) return;
+    const { row, changed } = editorItemDrag;
+    row.classList.remove("is-dragging");
+    editorItemDrag = null;
+    if (!changed) return;
+    syncEditorItemRows();
+    saveAndRenderStage();
+  };
+  itemsEditor.addEventListener("pointerdown", (event) => {
+    const handle = event.target.closest("[data-item-drag-handle]");
+    if (!handle || (event.pointerType === "mouse" && event.button !== 0)) return;
+    const row = handle.closest("[data-item-row]");
+    if (!row) return;
+    event.preventDefault();
+    editorItemDrag = { pointerId: event.pointerId, row, changed: false };
+    row.classList.add("is-dragging");
+    try { handle.setPointerCapture(event.pointerId); } catch {}
+  });
+  itemsEditor.addEventListener("pointermove", (event) => {
+    if (!editorItemDrag || event.pointerId !== editorItemDrag.pointerId) return;
+    const target = document.elementFromPoint(event.clientX, event.clientY)?.closest("[data-item-row]");
+    if (!target || target === editorItemDrag.row || target.parentElement !== itemsEditor) return;
+    const rect = target.getBoundingClientRect();
+    const insertBefore = event.clientY < rect.top + rect.height / 2;
+    const reference = insertBefore ? target : target.nextElementSibling;
+    if (reference === editorItemDrag.row || editorItemDrag.row.nextElementSibling === reference) return;
+    itemsEditor.insertBefore(editorItemDrag.row, reference);
+    editorItemDrag.changed = true;
+  });
+  itemsEditor.addEventListener("pointerup", finishEditorItemDrag);
+  itemsEditor.addEventListener("pointercancel", finishEditorItemDrag);
   $("#rg-edit-prompt-file").addEventListener("change", (event) => savePromptUpload(event.target.files?.[0]));
   $("#rg-clear-prompt-image").addEventListener("click", () => {
     $("#rg-edit-prompt-image").value = "";
