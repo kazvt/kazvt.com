@@ -186,6 +186,11 @@ test("generic JSON question arrays accept common prompt, option, and key aliases
   }));
   assert.equal(indexedCorrect.rounds["01"][1].options[0].correct, true);
 
+  const boundedAttempts = parseTriviaText(JSON.stringify({ questions: [
+    { question: "Guess the code", mode: "number-grid", numberCode: "0042", maxGuesses: 2 },
+  ] }));
+  assert.equal(boundedAttempts.rounds["01"][1].guessLimit, 2);
+
   const tiers = parseTriviaText(JSON.stringify({ questions: [
     { round: 4, question: "Tiered choices?", difficulty: 1, options: ["A", "B"], answer: "B" },
     { round: 4, question: "Tiered choices?", difficulty: 2, options: ["C"], add: "add these" },
@@ -214,6 +219,9 @@ test("JSON text export round-trips modes, tier fields, correct answers, media re
   assert.deepEqual(parsed.rounds, data.rounds);
   assert.deepEqual(parsed.questionBank, data.questionBank);
   assert.deepEqual(parsed.media, data.media);
+
+  const clamped = parseTriviaText(JSON.stringify({ rounds: { "10": { 3: { mode: "number-grid", guessLimit: 9 } } } }));
+  assert.equal(clamped.rounds["10"][3].guessLimit, 4);
 });
 
 test("multiple correct answers and selection rules import from human text and JSON", () => {
