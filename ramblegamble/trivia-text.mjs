@@ -1,4 +1,5 @@
 import { MODE_NAMES, isChoiceMode, resolveRoundFormat } from "./trivia-data.js?v=trivia-answer-modes-20261119-v3";
+import { normalizeGuessLimit } from "./trivia-game.mjs?v=number-grid-guess-limit-20261121-v1";
 
 export const TRIVIA_EXPORT_FORMAT = "kazvt-ramble-gamble-trivia";
 export const TRIVIA_EXPORT_VERSION = 1;
@@ -13,7 +14,7 @@ export function decodeTriviaBytes(buffer) {
 const ROUND_FIELDS = new Set([
   "question", "subtitle", "promptImage", "promptAsset", "mode", "optionCount", "acceptedAnswers",
   "options", "items", "pairs", "categories", "videoUrl", "numberValue", "numberVisible",
-  "imageVisible", "backgroundImage", "drawing", "assignments", "selectionRule", "requiredCorrectCount", "numberCode",
+  "imageVisible", "backgroundImage", "drawing", "assignments", "selectionRule", "requiredCorrectCount", "numberCode", "guessLimit",
 ]);
 
 const MODE_ALIASES = new Map([
@@ -122,6 +123,8 @@ function sanitizeRoundDrafts(value) {
           if (Number.isFinite(count)) draft.requiredCorrectCount = Math.max(0, Math.min(24, Math.trunc(count)));
         } else if (field === "numberCode") {
           draft.numberCode = safeString(item).replace(/\D/g, "").slice(0, 4);
+        } else if (field === "guessLimit") {
+          draft.guessLimit = normalizeGuessLimit(item);
         }
       }
       levels[level] = draft;
@@ -277,6 +280,7 @@ function parseQuestionObjects(questions) {
       selectionRule: normalizeSelectionRule(item.selectionRule ?? item.selection_rule ?? item.selectionMode ?? item.selection_mode ?? item.answerSelection ?? item.answer_selection ?? item.correctSelection ?? item.correct_selection),
       requiredCorrectCount: item.requiredCorrectCount ?? item.required_correct_count ?? item.requiredSelections ?? item.required_selections ?? item.correctCount ?? item.correct_count,
       numberCode: item.numberCode ?? item.number_code ?? item.secretNumber ?? item.secret_number ?? item.targetNumber ?? item.target_number,
+      guessLimit: item.guessLimit ?? item.guess_limit ?? item.maxGuesses ?? item.max_guesses ?? item.numberOfGuesses ?? item.number_of_guesses ?? item.attempts,
     };
     if (!grouped.has(round)) grouped.set(round, { base: null, levels: new Map() });
     const group = grouped.get(round);
@@ -296,7 +300,7 @@ function parseQuestionObjects(questions) {
       acceptedAnswers: [], options: [], promptImage: "", promptAsset: "", items: [], pairs: [],
       categories: ["Group 1", "Group 2", "Group 3"], videoUrl: "", numberValue: 0,
       numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
-      selectionRule: "any", requiredCorrectCount: 0, numberCode: "",
+      selectionRule: "any", requiredCorrectCount: 0, numberCode: "", guessLimit: 4,
     };
     rounds[round] = {};
     for (let level = 1; level <= 5; level += 1) {
@@ -306,7 +310,7 @@ function parseQuestionObjects(questions) {
         for (const field of ["subtitle", "promptImage", "promptAsset", "videoUrl", "backgroundImage", "drawing"]) {
           if (record[field]) state[field] = record[field];
         }
-        for (const field of ["numberValue", "numberVisible", "imageVisible", "categories", "items", "pairs", "assignments", "optionCount", "requiredCorrectCount"]) {
+        for (const field of ["numberValue", "numberVisible", "imageVisible", "categories", "items", "pairs", "assignments", "optionCount", "requiredCorrectCount", "guessLimit"]) {
           if (record[field] != null) state[field] = clone(record[field]);
         }
         if (record.selectionRule) state.selectionRule = record.selectionRule;
@@ -415,6 +419,7 @@ function parseDelimited(text) {
     const selectionRule = normalizeSelectionRule(getColumn(row, dataIndexes, ["selection rule", "answer selection", "answer selection rule", "selection mode", "correct selection", "answer rule", "multi select"]));
     const requiredCorrectCount = Number(getColumn(row, dataIndexes, ["required correct count", "required selections", "correct count", "select count"]));
     const numberCode = getColumn(row, dataIndexes, ["number code", "secret number", "target number", "wordle code"]).replace(/\D/g, "").slice(0, 4);
+    const rawGuessLimit = getColumn(row, dataIndexes, ["guess limit", "maximum guesses", "max guesses", "number of guesses", "attempts"]);
     const optionObjects = options.map((label) => ({ label, image: "", asset: "", correct: false }));
     applyCorrectValues(optionObjects, correctValues);
     const record = {
@@ -429,6 +434,7 @@ function parseDelimited(text) {
       selectionRule,
       requiredCorrectCount: Number.isFinite(requiredCorrectCount) ? Math.max(0, Math.min(24, Math.trunc(requiredCorrectCount))) : undefined,
       numberCode,
+      guessLimit: rawGuessLimit.trim() ? normalizeGuessLimit(rawGuessLimit) : undefined,
     };
     if (!grouped.has(round)) grouped.set(round, new Map());
     const tiers = grouped.get(round);
@@ -444,7 +450,7 @@ function parseDelimited(text) {
       options: [], acceptedAnswers: [], promptImage: "", promptAsset: "", items: [], pairs: [],
       categories: ["Group 1", "Group 2", "Group 3"], videoUrl: "", numberValue: 0,
       numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
-      selectionRule: "any", requiredCorrectCount: 0, numberCode: "",
+      selectionRule: "any", requiredCorrectCount: 0, numberCode: "", guessLimit: 4,
     };
     rounds[roundId] = {};
     for (let level = 1; level <= 5; level += 1) {
@@ -454,6 +460,7 @@ function parseDelimited(text) {
         if (record.selectionRule) state.selectionRule = record.selectionRule;
         if (record.requiredCorrectCount != null) state.requiredCorrectCount = record.requiredCorrectCount;
         if (record.numberCode) state.numberCode = record.numberCode;
+        if (record.guessLimit != null) state.guessLimit = normalizeGuessLimit(record.guessLimit);
         if (record.noMultipleChoice) {
           state.mode = "short-answer";
           state.options = [];
@@ -600,7 +607,7 @@ function parseHumanText(input) {
       optionCount: Number.isFinite(Number(base.optionCount)) ? Number(base.optionCount) : defaults.optionCount,
       acceptedAnswers: [], options: [], items: [], pairs: [], categories: ["Group 1", "Group 2", "Group 3"],
       videoUrl: "", numberValue: 0, numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
-      selectionRule: "any", requiredCorrectCount: 0, numberCode: "",
+      selectionRule: "any", requiredCorrectCount: 0, numberCode: "", guessLimit: 4,
     };
     if (Array.isArray(base.acceptedAnswers)) state.acceptedAnswers = [...base.acceptedAnswers];
     const sharedQuestion = current.question || base.question || "";
@@ -669,7 +676,7 @@ function parseHumanText(input) {
         videoUrl: state.videoUrl, numberValue: state.numberValue, numberVisible: state.numberVisible,
         imageVisible: state.imageVisible, backgroundImage: state.backgroundImage, drawing: state.drawing,
         assignments: clone(state.assignments), selectionRule: state.selectionRule,
-        requiredCorrectCount: state.requiredCorrectCount, numberCode: state.numberCode,
+        requiredCorrectCount: state.requiredCorrectCount, numberCode: state.numberCode, guessLimit: state.guessLimit,
       };
     }
     rounds[id] = levels;
@@ -813,6 +820,9 @@ function parseHumanText(input) {
         pendingList = "";
       } else if (name === "numbercode") {
         if (current) ensureLevel(currentLevel).fields.numberCode = value.replace(/\D/g, "").slice(0, 4);
+        pendingList = "";
+      } else if (name === "guesslimit") {
+        if (current) ensureLevel(currentLevel).fields.guessLimit = normalizeGuessLimit(value);
         pendingList = "";
       } else if (name === "additive") {
         if (current) ensureLevel(currentLevel).additive = /^(?:true|yes|on|add|append|plus)$/i.test(value);
@@ -968,6 +978,7 @@ function parseField(line) {
     ["selection", "selectionrule"], ["selection rule", "selectionrule"], ["answer selection", "selectionrule"], ["answer selection rule", "selectionrule"], ["answer rule", "selectionrule"], ["correct selection", "selectionrule"], ["correct answer rule", "selectionrule"], ["select mode", "selectionrule"], ["select any or all", "selectionrule"], ["multi select", "selectionrule"],
     ["required correct count", "requiredcorrectcount"], ["required selections", "requiredcorrectcount"], ["number to select", "requiredcorrectcount"], ["correct count", "requiredcorrectcount"],
     ["number code", "numbercode"], ["secret number", "numbercode"], ["target number", "numbercode"], ["wordle code", "numbercode"],
+    ["guess limit", "guesslimit"], ["maximum guesses", "guesslimit"], ["max guesses", "guesslimit"], ["number of guesses", "guesslimit"], ["attempts", "guesslimit"],
     ["add", "additive"], ["add these", "additive"], ["add to previous", "additive"], ["additive", "additive"], ["append", "additive"], ["plus", "additive"],
     ["no multiple choice", "nomultiplechoice"], ["without multiple choice", "nomultiplechoice"], ["no mc", "nomultiplechoice"], ["no mcq", "nomultiplechoice"],
   ]);

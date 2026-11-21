@@ -30,6 +30,13 @@ export function isFourDigitCode(value) {
   return FOUR_DIGITS.test(String(value ?? ""));
 }
 
+export function normalizeGuessLimit(value) {
+  if (value == null || String(value).trim() === "") return 4;
+  const count = Number(value);
+  if (!Number.isFinite(count)) return 4;
+  return Math.max(1, Math.min(4, Math.trunc(count)));
+}
+
 // Score duplicate digits with Wordle's exact-first, then present-elsewhere rule.
 export function scoreFourDigitGuess(secret, guess) {
   const target = String(secret ?? "");

@@ -204,7 +204,7 @@ test("JSON text export round-trips modes, tier fields, correct answers, media re
       acceptedAnswers: ["Alternate"], subtitle: "A hint", promptImage: "", promptAsset: "asset-one",
       items: [], pairs: [], categories: [], videoUrl: "", numberValue: 0, numberVisible: false,
       imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
-      selectionRule: "all", requiredCorrectCount: 2, numberCode: "0042",
+      selectionRule: "all", requiredCorrectCount: 2, numberCode: "0042", guessLimit: 2,
     } } },
     questionBank: [{ id: "bank-1", text: "Ask everyone?" }],
     media: { "asset-one": "data:image/png;base64,aGVsbG8=" },
@@ -253,9 +253,21 @@ Secret number: 0042
 `);
   assert.equal(imported.rounds["10"][3].mode, "number-grid");
   assert.equal(imported.rounds["10"][3].numberCode, "0042");
+  assert.equal(imported.rounds["10"][3].guessLimit, 4);
+
+  const customLimit = parseTriviaText(`
+Round 10: Guess the code
+Difficulty 3:
+Mode: 4x4 number grid
+Secret number: 0042
+Maximum guesses: 2
+`);
+  assert.equal(customLimit.rounds["10"][3].guessLimit, 2);
 
   const delimited = parseTriviaText("Question,Mode,Secret Number\nGuess the code,number grid,0071\n");
   assert.equal(delimited.rounds["01"][1].numberCode, "0071");
+  const delimitedLimit = parseTriviaText("Question,Mode,Secret Number,Max Guesses\nGuess the code,number grid,0071,3\n");
+  assert.equal(delimitedLimit.rounds["01"][1].guessLimit, 3);
 });
 
 test("empty or unrelated files return a visible diagnostic instead of an empty successful import", () => {

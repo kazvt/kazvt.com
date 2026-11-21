@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from "./trivia-game.mjs";
+import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, normalizeGuessLimit, scoreFourDigitGuess } from "./trivia-game.mjs";
 
 test("blank round templates stay blank until the host adds visible content", () => {
   assert.equal(hasAuthoredTriviaContent({
@@ -19,6 +19,16 @@ test("four-digit codes preserve leading zeroes and reject incomplete or non-digi
   assert.equal(isFourDigitCode("0042"), true);
   assert.equal(isFourDigitCode("42"), false);
   assert.equal(isFourDigitCode("12a4"), false);
+});
+
+test("guess limit defaults to four and only allows a lower positive attempt count", () => {
+  assert.equal(normalizeGuessLimit(undefined), 4);
+  assert.equal(normalizeGuessLimit(""), 4);
+  assert.equal(normalizeGuessLimit(3), 3);
+  assert.equal(normalizeGuessLimit(1.9), 1);
+  assert.equal(normalizeGuessLimit(0), 1);
+  assert.equal(normalizeGuessLimit(8), 4);
+  assert.equal(normalizeGuessLimit("invalid"), 4);
 });
 
 test("number guesses mark exact positions green, misplaced digits yellow, and absent digits grey", () => {

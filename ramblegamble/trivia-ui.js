@@ -18,7 +18,7 @@ import {
   exportTriviaText,
   parseTriviaText,
 } from "./trivia-text.mjs?v=trivia-answer-modes-20261119-v3";
-import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, scoreFourDigitGuess } from "./trivia-game.mjs?v=trivia-empty-stage-20261119-v1";
+import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, normalizeGuessLimit, scoreFourDigitGuess } from "./trivia-game.mjs?v=number-grid-guess-limit-20261121-v1";
 
 (() => {
   "use strict";
@@ -355,7 +355,7 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
       question: "", subtitle: "", promptImage: "", promptAsset: "", mode: "",
       options: [], acceptedAnswers: [], items: [], pairs: [], categories: ["Group 1", "Group 2", "Group 3"],
       videoUrl: "", numberValue: 0, numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
-      selectionRule: format.selectionRule || "any", requiredCorrectCount: format.requiredCorrectCount || 0, numberCode: "",
+      selectionRule: format.selectionRule || "any", requiredCorrectCount: format.requiredCorrectCount || 0, numberCode: "", guessLimit: 4,
     };
     if (!Number.isInteger(number) || number < 1 || number > 36) return { format, content };
 
@@ -385,7 +385,7 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
       if (rule.replaceOptions) content.options = [];
       if (rule.replaceItems) content.items = [];
       if (rule.mode === "match-pairs" && ROUND_RULES[number]?.[level - 1]?.mode !== "match-pairs") content.pairs = [];
-      for (const field of ["question", "subtitle", "promptImage", "promptAsset", "optionCount", "acceptedAnswers", "options", "items", "pairs", "categories", "videoUrl", "numberValue", "numberVisible", "imageVisible", "backgroundImage", "drawing", "assignments", "selectionRule", "requiredCorrectCount", "numberCode"]) {
+      for (const field of ["question", "subtitle", "promptImage", "promptAsset", "optionCount", "acceptedAnswers", "options", "items", "pairs", "categories", "videoUrl", "numberValue", "numberVisible", "imageVisible", "backgroundImage", "drawing", "assignments", "selectionRule", "requiredCorrectCount", "numberCode", "guessLimit"]) {
         if (Object.hasOwn(draft, field)) content[field] = copy(draft[field]);
       }
     }
@@ -411,6 +411,7 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
     content.selectionRule = content.selectionRule === "all" ? "all" : "any";
     content.requiredCorrectCount = Math.max(0, Math.min(24, Math.trunc(Number(content.requiredCorrectCount) || 0)));
     content.numberCode = String(content.numberCode || "").replace(/\D/g, "").slice(0, 4);
+    content.guessLimit = normalizeGuessLimit(content.guessLimit);
     if (content.optionCount == null) content.optionCount = content.mode === "number-grid" ? 16 : content.mode === "image-grid" && format.mode !== "image-grid" ? 12 : format.optionCount;
     content.optionCount = Math.max(0, Math.min(24, Number(content.optionCount) || 0));
     if (isChoiceMode(content.mode) && content.optionCount === 0) content.optionCount = content.mode === "number-grid" ? 16 : content.mode === "image-grid" ? 12 : 6;
@@ -862,7 +863,10 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
     }
     if (format.mode === "number-grid") {
       html += '<label class="rg-field-label" for="rg-edit-number-code">Secret 4-digit number<input id="rg-edit-number-code" type="text" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" autocomplete="off" data-number-code value="' + esc(content.numberCode || "") + '" placeholder="For example, 0042"></label>';
-      html += '<p class="rg-editor-hint">Contestants get four guesses. Keep leading zeroes if the code begins with 0.</p>';
+      html += '<label class="rg-field-label" for="rg-edit-guess-limit">Maximum guesses<select id="rg-edit-guess-limit" data-guess-limit>';
+      for (let count = 1; count <= 4; count += 1) html += '<option value="' + count + '" ' + (count === normalizeGuessLimit(content.guessLimit) ? "selected" : "") + '>' + count + (count === 1 ? " guess" : " guesses") + '</option>';
+      html += '</select></label>';
+      html += '<p class="rg-editor-hint">Four digits per guess. Keep leading zeroes if the code begins with 0.</p>';
     }
     if (format.mode === "timeline") {
       html += '<label class="rg-timeline-reorder-setting"><input type="checkbox" data-timeline-reorder ' + (format.reorder ? "checked" : "") + '><span>Allow events to be reordered on the stage</span></label>';
@@ -917,6 +921,7 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
       selectionRule: $("[data-selection-rule]", $("#rg-special-fields"))?.value || effectiveNow().content.selectionRule || "any",
       requiredCorrectCount: Number($("[data-required-correct-count]", $("#rg-special-fields"))?.value ?? effectiveNow().content.requiredCorrectCount ?? 0),
       numberCode: $("[data-number-code]", $("#rg-special-fields"))?.value.replace(/\D/g, "").slice(0, 4) || "",
+      guessLimit: normalizeGuessLimit($("[data-guess-limit]", $("#rg-special-fields"))?.value ?? effectiveNow().content.guessLimit),
       options: $$("[data-option-row]", $("#rg-options-editor")).map((row) => ({
         label: $("[data-option-label]", row).value,
         image: $("[data-option-image]", row).value.trim(),
@@ -1206,19 +1211,20 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
   }
 
   function renderNumberGrid(content) {
-    const key = [currentRound, currentDifficulty, content.question, content.numberCode].join(":");
+    const guessLimit = normalizeGuessLimit(content.guessLimit);
+    const key = [currentRound, currentDifficulty, content.question, content.numberCode, guessLimit].join(":");
     if (numberGuessState.key !== key) numberGuessState = { key, guesses: [], solved: false };
     const board = document.createElement("div");
     board.className = "rg-number-guess-board";
-    board.setAttribute("aria-label", "Four guesses, four digits per guess");
+    board.setAttribute("aria-label", guessLimit + (guessLimit === 1 ? " guess" : " guesses") + ", four digits per guess");
     const instructions = document.createElement("p");
     instructions.className = "rg-number-wordle-instructions";
-    instructions.textContent = "Four guesses. Green = right spot, yellow = in the number elsewhere, grey = not in the number.";
+    instructions.textContent = guessLimit + (guessLimit === 1 ? " guess" : " guesses") + ". Green = right spot, yellow = in the number elsewhere, grey = not in the number.";
     stageItems.append(instructions, board);
 
     const renderRows = () => {
       board.replaceChildren();
-      for (let rowIndex = 0; rowIndex < 4; rowIndex += 1) {
+      for (let rowIndex = 0; rowIndex < guessLimit; rowIndex += 1) {
         const entry = numberGuessState.guesses[rowIndex];
         const row = document.createElement("div");
         row.className = "rg-number-guess-row" + (entry ? "" : " is-empty");
@@ -1261,7 +1267,7 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
       submit.disabled = true;
       setAnswerStatus("Host: enter a four-digit secret in the editor first.", "neutral");
     }
-    if (numberGuessState.solved || numberGuessState.guesses.length >= 4) {
+    if (numberGuessState.solved || numberGuessState.guesses.length >= guessLimit) {
       input.disabled = true;
       submit.disabled = true;
     }
@@ -1271,7 +1277,7 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
     });
     form.addEventListener("submit", (event) => {
       event.preventDefault();
-      if (numberGuessState.solved || numberGuessState.guesses.length >= 4 || !codeReady) return;
+      if (numberGuessState.solved || numberGuessState.guesses.length >= guessLimit || !codeReady) return;
       const guess = input.value;
       if (!isFourDigitCode(guess)) {
         setAnswerStatus("Enter exactly four digits.", "neutral");
@@ -1284,10 +1290,10 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
       numberGuessState.solved = correct;
       renderRows();
       if (correct) setAnswerStatus("CORRECT!", "correct");
-      else if (numberGuessState.guesses.length >= 4) setAnswerStatus("No guesses left. The number was " + content.numberCode + ".", "wrong");
-      else setAnswerStatus((4 - numberGuessState.guesses.length) + " guesses left.", "neutral");
+      else if (numberGuessState.guesses.length >= guessLimit) setAnswerStatus("No guesses left. The number was " + content.numberCode + ".", "wrong");
+      else setAnswerStatus((guessLimit - numberGuessState.guesses.length) + (guessLimit - numberGuessState.guesses.length === 1 ? " guess left." : " guesses left."), "neutral");
       input.value = "";
-      input.disabled = correct || numberGuessState.guesses.length >= 4;
+      input.disabled = correct || numberGuessState.guesses.length >= guessLimit;
       submit.disabled = input.disabled;
       if (!input.disabled) input.focus();
     });
@@ -1777,7 +1783,7 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
     saveAndRenderStage();
   });
   editor.addEventListener("change", (event) => {
-    if (event.target.id === "rg-edit-mode" || event.target.id === "rg-edit-option-count" || event.target.id === "rg-edit-selection-rule" || event.target.matches("[data-timeline-reorder]")) {
+    if (event.target.id === "rg-edit-mode" || event.target.id === "rg-edit-option-count" || event.target.id === "rg-edit-selection-rule" || event.target.id === "rg-edit-guess-limit" || event.target.matches("[data-timeline-reorder]")) {
       readEditor();
       render();
       queueSave();
