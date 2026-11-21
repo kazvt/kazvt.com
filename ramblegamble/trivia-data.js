@@ -85,6 +85,13 @@ export function resolveRoundFormat(roundId, difficulty = 1) {
   return format;
 }
 
+export function resolveTimelineReorder(roundId, difficulty = 1, levelDrafts = {}) {
+  const targetDifficulty = Math.max(1, Math.min(5, Number(difficulty) || 1));
+  const override = levelDrafts?.[targetDifficulty]?.reorder;
+  if (typeof override === "boolean") return override;
+  return resolveRoundFormat(roundId, targetDifficulty).reorder === true;
+}
+
 export function resolveRoundMode(roundId, difficulty = 1, levelDrafts = {}) {
   const roundNumber = Number.parseInt(roundId, 10);
   if (!Number.isInteger(roundNumber) || roundNumber < 1 || roundNumber > 36) return baseFormat.mode;
