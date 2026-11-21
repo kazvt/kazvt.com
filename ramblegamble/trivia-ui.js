@@ -770,14 +770,27 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
   function itemRowsHTML(format, content) {
     const modes = ["categorize-images", "timeline", "image-sequence", "text-sequence", "compose-image"];
     if (!modes.includes(format.mode)) return "";
+    const isTimeline = format.mode === "timeline";
     const items = content.items || [];
     let html = '<h4 class="rg-editor-section-title">' + (format.mode === "compose-image" ? "PIECES" : "ITEMS") + ' <span>(' + format.optionCount + ')</span></h4>';
-    html += '<p class="rg-editor-hint">Use text, an image URL, or both. Empty items remain visibly marked as placeholders.</p>';
+    html += isTimeline
+      ? '<p class="rg-editor-hint">Edit event names, then drag a handle or use UP/DOWN to set their order.</p>'
+      : '<p class="rg-editor-hint">Use text, an image URL, or both. Empty items remain visibly marked as placeholders.</p>';
     items.forEach((item, index) => {
-      html += '<div class="rg-item-row" data-item-row="' + index + '">';
-      html += '<input type="text" data-item-label placeholder="Item ' + String(index + 1).padStart(2, "0") + '" value="' + esc(item.label || "") + '" aria-label="Item ' + (index + 1) + ' text">';
-      html += '<input type="url" data-item-image placeholder="Image URL" value="' + esc(item.image || "") + '" aria-label="Item ' + (index + 1) + ' image URL">';
-      html += '<span aria-hidden="true">' + String(index + 1).padStart(2, "0") + '</span></div>';
+      const number = String(index + 1).padStart(2, "0");
+      html += '<div class="rg-item-row' + (isTimeline ? ' rg-item-row--timeline' : '') + '" data-item-row="' + index + '" data-item-x="' + Number(item.x ?? 0) + '" data-item-y="' + Number(item.y ?? 0) + '">';
+      if (isTimeline) {
+        html += '<div class="rg-item-order-controls">';
+        html += '<button type="button" data-item-drag-handle aria-label="Drag event ' + (index + 1) + ' to reorder">DRAG</button>';
+        html += '<button type="button" data-item-move="-1" aria-label="Move event ' + (index + 1) + ' up">UP</button>';
+        html += '<button type="button" data-item-move="1" aria-label="Move event ' + (index + 1) + ' down">DOWN</button>';
+        html += '<span data-item-number aria-hidden="true">' + number + '</span>';
+        html += '</div>';
+      }
+      html += '<input type="text" data-item-label placeholder="' + (isTimeline ? "Event " : "Item ") + number + '" value="' + esc(item.label || "") + '" aria-label="' + (isTimeline ? "Timeline event " : "Item ") + (index + 1) + ' name">';
+      html += '<input type="url" data-item-image placeholder="Image URL" value="' + esc(item.image || "") + '" aria-label="' + (isTimeline ? "Timeline event " : "Item ") + (index + 1) + ' image URL">';
+      if (!isTimeline) html += '<span aria-hidden="true">' + number + '</span>';
+      html += '</div>';
     });
     return html;
   }
