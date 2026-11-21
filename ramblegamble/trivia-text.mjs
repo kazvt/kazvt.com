@@ -310,9 +310,10 @@ function parseQuestionObjects(questions) {
         for (const field of ["subtitle", "promptImage", "promptAsset", "videoUrl", "backgroundImage", "drawing"]) {
           if (record[field]) state[field] = record[field];
         }
-        for (const field of ["numberValue", "numberVisible", "imageVisible", "categories", "items", "pairs", "assignments", "optionCount", "requiredCorrectCount", "guessLimit"]) {
+        for (const field of ["numberValue", "numberVisible", "imageVisible", "categories", "items", "pairs", "assignments", "optionCount", "requiredCorrectCount"]) {
           if (record[field] != null) state[field] = clone(record[field]);
         }
+        if (record.guessLimit != null) state.guessLimit = normalizeGuessLimit(record.guessLimit);
         if (record.selectionRule) state.selectionRule = record.selectionRule;
         if (record.numberCode != null) state.numberCode = safeString(record.numberCode).replace(/\D/g, "").slice(0, 4);
         if (record.mode) state.mode = record.mode;
@@ -390,7 +391,7 @@ function parseDelimited(text) {
   const headerless = questionColumn < 0;
   if (headerless && rows[0].length < 2) return null;
   if (headerless) { questionColumn = 0; answerColumn = 1; }
-  const recognizedMetadata = header.some((name) => ["mode", "type", "template", "difficulty", "level", "tier", "selection rule", "answer selection", "answer selection rule", "selection mode", "correct selection", "required correct count", "required selections", "number code", "secret number", "target number"].includes(name));
+  const recognizedMetadata = header.some((name) => ["mode", "type", "template", "difficulty", "level", "tier", "selection rule", "answer selection", "answer selection rule", "selection mode", "correct selection", "required correct count", "required selections", "number code", "secret number", "target number", "guess limit", "maximum guesses", "max guesses", "number of guesses", "attempts"].includes(name));
   if (answerColumn < 0 && !optionColumns.length && !recognizedMetadata) return null;
   const dataIndexes = headerless ? {} : indexes;
 

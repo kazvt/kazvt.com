@@ -17,7 +17,7 @@ import {
   decodeTriviaBytes,
   exportTriviaText,
   parseTriviaText,
-} from "./trivia-text.mjs?v=trivia-answer-modes-20261119-v3";
+} from "./trivia-text.mjs?v=number-grid-guess-limit-20261121-v1";
 import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, normalizeGuessLimit, scoreFourDigitGuess } from "./trivia-game.mjs?v=number-grid-guess-limit-20261121-v1";
 
 (() => {
