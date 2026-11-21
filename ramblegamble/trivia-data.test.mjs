@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { MODE_NAMES, ROUND_IDS, ROUND_RULES, SPECIAL_ROUNDS, resolveRoundFormat, resolveRoundMode, resolveTimelineReorder } from "./trivia-data.js";
 
 test("special round ids stay distinct from rounds 1 through 36", () => {
+  assert.equal(MODE_NAMES["image-grid"], "Image grid");
   assert.equal(ROUND_IDS.length, 38);
   assert.equal(ROUND_IDS[0], "00");
   assert.equal(ROUND_IDS[1], "0");

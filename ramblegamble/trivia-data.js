@@ -118,7 +118,7 @@ export const MODE_NAMES = Object.freeze({
   "match-pairs": "Match pairs",
   "image-sequence": "Images, one at a time",
   "text-sequence": "Texts, one at a time",
-  "image-grid": "4 x 3 image selection",
+  "image-grid": "Image grid",
   "compose-image": "Place images on the picture",
   "number-stepper": "Changeable number",
   "memory-number": "Reveal image, then changeable number",
