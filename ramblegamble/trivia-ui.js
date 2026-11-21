@@ -795,6 +795,40 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
     return html;
   }
 
+  function syncEditorItemRows() {
+    const rows = $$("[data-item-row]", itemsEditor);
+    rows.forEach((row, index) => {
+      const number = String(index + 1).padStart(2, "0");
+      row.dataset.itemRow = String(index);
+      const numberLabel = $("[data-item-number]", row);
+      if (numberLabel) numberLabel.textContent = number;
+      const dragHandle = $("[data-item-drag-handle]", row);
+      if (dragHandle) dragHandle.setAttribute("aria-label", "Drag event " + (index + 1) + " to reorder");
+      const up = $("[data-item-move='-1']", row);
+      const down = $("[data-item-move='1']", row);
+      if (up) {
+        up.disabled = index === 0;
+        up.setAttribute("aria-label", "Move event " + (index + 1) + " up");
+      }
+      if (down) {
+        down.disabled = index === rows.length - 1;
+        down.setAttribute("aria-label", "Move event " + (index + 1) + " down");
+      }
+    });
+  }
+
+  function moveEditorItem(row, direction) {
+    const rows = $$("[data-item-row]", itemsEditor);
+    const index = rows.indexOf(row);
+    const target = rows[index + direction];
+    if (!target) return false;
+    if (direction < 0) itemsEditor.insertBefore(row, target);
+    else itemsEditor.insertBefore(row, target.nextSibling);
+    syncEditorItemRows();
+    saveAndRenderStage();
+    return true;
+  }
+
   function pairRowsHTML(format, content) {
     if (format.mode !== "match-pairs") return "";
     let html = '<h4 class="rg-editor-section-title">PAIRS <span>(' + format.pairCount + ')</span></h4>';
