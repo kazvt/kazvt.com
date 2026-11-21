@@ -1340,15 +1340,25 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
   function renderTimeline(format, content) {
     const list = document.createElement("div");
     list.className = "rg-timeline-list";
+    list.setAttribute("role", "list");
     content.items.forEach((item, index) => {
       const row = document.createElement("div");
       row.className = "rg-timeline-row";
+      row.setAttribute("role", "listitem");
+      row.timelineItem = item;
       const label = document.createElement("div");
       label.className = "rg-empty-state";
       label.textContent = item.label || "EVENT " + String(index + 1).padStart(2, "0");
       if (item.image) addImageToNode(label, item.image, "", "rg-stage-media");
       row.append(label);
       if (format.reorder) {
+        const dragHandle = document.createElement("button");
+        dragHandle.type = "button";
+        dragHandle.className = "rg-stage-button rg-timeline-drag-handle";
+        dragHandle.textContent = "DRAG";
+        dragHandle.dataset.timelineDrag = "true";
+        dragHandle.setAttribute("aria-label", "Drag to reorder " + (item.label || "event " + (index + 1)));
+        row.append(dragHandle);
         for (const direction of [-1, 1]) {
           const move = document.createElement("button");
           move.type = "button";
@@ -1368,6 +1378,41 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, sco
       } else row.append(document.createElement("span"));
       list.append(row);
     });
+    if (format.reorder) {
+      let activeDrag = null;
+      const finishDrag = (event) => {
+        if (!activeDrag || event.pointerId !== activeDrag.pointerId) return;
+        const changed = activeDrag.changed;
+        activeDrag.row.classList.remove("is-dragging");
+        activeDrag = null;
+        if (!changed) return;
+        writeLevelField("items", [...list.children].map((row) => copy(row.timelineItem)));
+        render();
+      };
+      list.addEventListener("pointerdown", (event) => {
+        const handle = event.target.closest("[data-timeline-drag]");
+        if (!handle || (event.pointerType === "mouse" && event.button !== 0)) return;
+        const row = handle.closest(".rg-timeline-row");
+        if (!row) return;
+        event.preventDefault();
+        activeDrag = { pointerId: event.pointerId, handle, row, changed: false };
+        row.classList.add("is-dragging");
+        try { handle.setPointerCapture(event.pointerId); } catch {}
+      });
+      list.addEventListener("pointermove", (event) => {
+        if (!activeDrag || event.pointerId !== activeDrag.pointerId) return;
+        const target = document.elementFromPoint(event.clientX, event.clientY)?.closest(".rg-timeline-row");
+        if (!target || target === activeDrag.row || target.parentElement !== list) return;
+        const rect = target.getBoundingClientRect();
+        const insertBefore = event.clientY < rect.top + rect.height / 2;
+        const reference = insertBefore ? target : target.nextElementSibling;
+        if (reference === activeDrag.row || activeDrag.row.nextElementSibling === reference) return;
+        list.insertBefore(activeDrag.row, reference);
+        activeDrag.changed = true;
+      });
+      list.addEventListener("pointerup", finishDrag);
+      list.addEventListener("pointercancel", finishDrag);
+    }
     stageItems.append(list);
   }
 
