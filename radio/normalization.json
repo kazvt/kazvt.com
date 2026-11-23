@@ -963,6 +963,27 @@
       "loudnessRangeLufs": 4.9,
       "sourceSizeBytes": 5585191,
       "sourceSha256": "81b5a91e716b99c69eecbe22fe4552cace1c42dc1c01c23b7f53d86b4b00f724"
+    },
+    "tracks/(free) alt indie pop type beat “not sorry”.mp3": {
+      "integratedLufs": -9.21,
+      "truePeakDbtp": 5.46,
+      "loudnessRangeLufs": 4.1,
+      "sourceSizeBytes": 3488814,
+      "sourceSha256": "5590202a8053d8acd584e0f1dea1e4c873aa093a1b67d62c67a90d431fc0b60e"
+    },
+    "tracks/[FREE] Clairo x boy pablo x Wallows Type Beat 'Strings break' - Indie Rock 80's instrumental.mp3": {
+      "integratedLufs": -9.46,
+      "truePeakDbtp": 0.65,
+      "loudnessRangeLufs": 16,
+      "sourceSizeBytes": 2949899,
+      "sourceSha256": "2f3ecd6758435910abe0bc61037476747f2c217659800a8a0d7376ee9e1c4021"
+    },
+    "tracks/overtonight indie rock type beat - ＂different＂.mp3": {
+      "integratedLufs": -12.74,
+      "truePeakDbtp": -0.71,
+      "loudnessRangeLufs": 4.3,
+      "sourceSizeBytes": 3178724,
+      "sourceSha256": "1c7fc93df2aeb570470e70f25b6e0c87eb67f6767b96da705b62958aa086e709"
     }
   }
 }
