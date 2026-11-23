@@ -970,6 +970,13 @@
       "loudnessRangeLufs": 4.3,
       "sourceSizeBytes": 3178724,
       "sourceSha256": "1c7fc93df2aeb570470e70f25b6e0c87eb67f6767b96da705b62958aa086e709"
+    },
+    "tracks/jakob ogawa x boy pablo type beat ＂oceanside＂ (prod. kofi bæ x pandrs).mp3": {
+      "integratedLufs": -15.26,
+      "truePeakDbtp": -0.88,
+      "loudnessRangeLufs": 5.1,
+      "sourceSizeBytes": 3355204,
+      "sourceSha256": "40471b6de1d1f6f1f2755aa96aa661ace39b45866ddb73f9c978a0d56199dcbd"
     }
   }
 }
