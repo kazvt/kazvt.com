@@ -362,20 +362,6 @@
       "sourceSizeBytes": 3811699,
       "sourceSha256": "0f8bcedf852dedadc3c32c1478f5d0fdad5943b7ecd57d7b8593d20e15e382b4"
     },
-    "tracks/Makihiko Araki - POISON DARK - 01.mp3": {
-      "integratedLufs": -17.9,
-      "truePeakDbtp": -0.75,
-      "loudnessRangeLufs": 4,
-      "sourceSizeBytes": 6186619,
-      "sourceSha256": "54e4c7dd69d0fa7c91f781b9484cdf29c3575ab380c6c4cf242fbf6c4d50b65b"
-    },
-    "tracks/Makihiko Araki - 1999 - 08.mp3": {
-      "integratedLufs": -16.83,
-      "truePeakDbtp": -0.96,
-      "loudnessRangeLufs": 2.7,
-      "sourceSizeBytes": 7440060,
-      "sourceSha256": "1974f7a4a8c161cb6a0a2d34780264309e30deaf0af9f04bc03b8df70f4610d7"
-    },
     "tracks/Mario Kart 64 Credits Theme in the style of Masayoshi Takanaka 🎆.mp3": {
       "integratedLufs": -8.92,
       "truePeakDbtp": 0.01,
