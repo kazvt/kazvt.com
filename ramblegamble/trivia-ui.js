@@ -19,6 +19,7 @@ import {
   parseTriviaText,
 } from "./trivia-text.mjs?v=number-grid-guess-limit-20261121-v1";
 import { compareNumberGuess, hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, normalizeGuessLimit, scoreFourDigitGuess } from "./trivia-game.mjs?v=changeable-number-feedback-20261124-v1";
+import { migrateLegacyComposePlacements, normalizeComposePlacements, snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-place-20261124-v1";
 
 (() => {
   "use strict";
@@ -355,9 +356,10 @@ import { compareNumberGuess, hasAuthoredTriviaContent, isFourDigitCode, matchesC
     const content = {
       question: "", subtitle: "", promptImage: "", promptAsset: "", mode: "",
       options: [], acceptedAnswers: [], items: [], pairs: [], categories: ["Group 1", "Group 2", "Group 3"],
-      videoUrl: "", numberValue: 0, numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
+      videoUrl: "", numberValue: 0, numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [], placements: [],
       selectionRule: format.selectionRule || "any", requiredCorrectCount: format.requiredCorrectCount || 0, numberCode: "", guessLimit: 4,
     };
+    let hasExplicitPlacements = false;
     if (!Number.isInteger(number) || number < 1 || number > 36) return { format, content };
 
     for (let level = 1; level <= Number(difficulty); level += 1) {
@@ -384,10 +386,13 @@ import { compareNumberGuess, hasAuthoredTriviaContent, isFourDigitCode, matchesC
       if (Object.hasOwn(rule, "requiredCorrectCount")) content.requiredCorrectCount = rule.requiredCorrectCount;
       if (rule.resetPromptImage) { content.promptImage = ""; content.promptAsset = ""; }
       if (rule.replaceOptions) content.options = [];
-      if (rule.replaceItems) content.items = [];
+      if (rule.replaceItems) { content.items = []; content.placements = []; hasExplicitPlacements = true; }
       if (rule.mode === "match-pairs" && ROUND_RULES[number]?.[level - 1]?.mode !== "match-pairs") content.pairs = [];
-      for (const field of ["question", "subtitle", "promptImage", "promptAsset", "optionCount", "acceptedAnswers", "options", "items", "pairs", "categories", "videoUrl", "numberValue", "numberVisible", "imageVisible", "backgroundImage", "drawing", "assignments", "selectionRule", "requiredCorrectCount", "numberCode", "guessLimit"]) {
-        if (Object.hasOwn(draft, field)) content[field] = copy(draft[field]);
+      for (const field of ["question", "subtitle", "promptImage", "promptAsset", "optionCount", "acceptedAnswers", "options", "items", "pairs", "categories", "videoUrl", "numberValue", "numberVisible", "imageVisible", "backgroundImage", "drawing", "assignments", "placements", "selectionRule", "requiredCorrectCount", "numberCode", "guessLimit"]) {
+        if (Object.hasOwn(draft, field)) {
+          content[field] = copy(draft[field]);
+          if (field === "placements") hasExplicitPlacements = true;
+        }
       }
     }
 
@@ -399,7 +404,7 @@ import { compareNumberGuess, hasAuthoredTriviaContent, isFourDigitCode, matchesC
     content.promptAsset = String(content.promptAsset || "");
     content.acceptedAnswers = Array.isArray(content.acceptedAnswers) ? content.acceptedAnswers.map(String) : [];
     content.options = Array.isArray(content.options) ? content.options.filter((item) => item && typeof item === "object").map((item) => ({ label: String(item.label || ""), image: String(item.image || ""), asset: String(item.asset || ""), correct: item.correct === true })) : [];
-    content.items = Array.isArray(content.items) ? content.items.filter((item) => item && typeof item === "object").map((item) => ({ label: String(item.label || ""), image: String(item.image || ""), x: Number.isFinite(Number(item.x)) ? Number(item.x) : 8, y: Number.isFinite(Number(item.y)) ? Number(item.y) : 8 })) : [];
+    content.items = Array.isArray(content.items) ? content.items.filter((item) => item && typeof item === "object").map((item) => ({ label: String(item.label || ""), image: String(item.image || ""), asset: String(item.asset || ""), x: Number.isFinite(Number(item.x)) ? Number(item.x) : 8, y: Number.isFinite(Number(item.y)) ? Number(item.y) : 8 })) : [];
     content.pairs = Array.isArray(content.pairs) ? content.pairs.filter((item) => item && typeof item === "object").map((item) => ({ left: String(item.left || ""), leftImage: String(item.leftImage || ""), right: String(item.right || "") })) : [];
     content.categories = Array.isArray(content.categories) ? content.categories.map(String) : ["Group 1", "Group 2", "Group 3"];
     content.assignments = Array.isArray(content.assignments) ? content.assignments.map((index) => Number.isInteger(index) && index >= 0 && index < 3 ? index : null) : [];
@@ -434,6 +439,9 @@ import { compareNumberGuess, hasAuthoredTriviaContent, isFourDigitCode, matchesC
       while (content.items.length < format.optionCount) content.items.push({ label: "", image: "", x: 8 + (content.items.length % 5) * 18, y: 8 + (Math.floor(content.items.length / 5) % 4) * 18 });
       content.items = content.items.slice(0, format.optionCount);
     }
+    content.placements = hasExplicitPlacements
+      ? normalizeComposePlacements(content.placements, content.items)
+      : content.mode === "compose-image" ? migrateLegacyComposePlacements(content.items) : [];
     return { format: { ...format, mode: content.mode, selectionRule: content.selectionRule, requiredCorrectCount: content.requiredCorrectCount }, content };
   }
 
