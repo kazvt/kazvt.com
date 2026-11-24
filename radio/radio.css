@@ -302,15 +302,29 @@ html.radio-document body.radio-page :is(
 .radio-page .small-control:hover,
 .radio-page .transport-button:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--blue); }
 .radio-page .small-control:active,
-.radio-page .transport-button:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--blue); }
+.radio-page .transport-button:active {
+  transform: translate(1px, 1px);
+  border-color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 84%, var(--paper-alt) 16%);
+  box-shadow: 1px 1px 0 var(--ink);
+}
 .radio-page .small-control.is-on,
-.radio-page .transport-button.is-on { color: var(--banner-text); background: var(--blue); }
+.radio-page .transport-button.is-on {
+  border-color: var(--ink);
+  color: var(--banner-text);
+  background: color-mix(in srgb, var(--ink) 84%, var(--paper-alt) 16%);
+  box-shadow: 2px 2px 0 var(--ink);
+}
 .radio-page .play-button {
   min-height: 34px;
   color: var(--banner-text);
   background: var(--banner);
 }
-.radio-page .play-button.is-on { background: var(--blue); }
+.radio-page .play-button.is-on {
+  border-color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 84%, var(--paper-alt) 16%);
+  box-shadow: 2px 2px 0 var(--ink);
+}
 .radio-page .visuals-control { margin-left: 2px; }
 .player-message {
   flex: 0 1 auto;
