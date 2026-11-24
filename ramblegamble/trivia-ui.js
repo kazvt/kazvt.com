@@ -514,6 +514,7 @@ import { migrateLegacyComposePlacements, normalizeComposePlacements, snapCompose
   function persistGrid() {
     try { localStorage.setItem(GRID_KEY, JSON.stringify(slotGrid)); }
     catch (error) { console.warn("Ramble Gamble slot layout could not be saved:", error); }
+    window.dispatchEvent(new CustomEvent("rg:slot-grid-updated", { detail: { grid: slotGrid.slice() } }));
   }
 
   function updateGridStatus() {
