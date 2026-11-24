@@ -19,6 +19,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
 
   const $ = (selector, root = document) => root.querySelector(selector);
   const layer = $("#rg-card-games-layer");
+  const header = $(".rg-card-games-header", layer);
   const title = $("#rg-card-games-title");
   const content = $("#rg-card-games-content");
   const roomButton = $("#rg-card-room");
@@ -79,7 +80,11 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     return item;
   }
 
-  function setStageTitle(value) { title.textContent = value; }
+  function setStageTitle(value, mode = "") {
+    title.textContent = value;
+    if (mode) header.dataset.cardMode = mode;
+    else delete header.dataset.cardMode;
+  }
 
   function saveDeckInputs({ report = true } = {}) {
     const shop = {};
@@ -226,7 +231,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   function renderMenu() {
     layer.hidden = false;
     hostButton.hidden = true;
-    setStageTitle("CARD TABLE");
+    setStageTitle("CARD TABLE", "menu");
     content.replaceChildren();
     const grid = element("div", "rg-card-menu-grid");
     grid.append(
@@ -281,7 +286,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   function renderRound(round) {
     layer.hidden = false;
     hostButton.hidden = false;
-    setStageTitle(modeNames[round.mode] || "CARD TABLE");
+    setStageTitle(modeNames[round.mode] || "CARD TABLE", round.mode);
     content.replaceChildren();
     if (round.mode === "shop") {
       renderShop(round);
@@ -389,9 +394,11 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   function renderSmeemo(game) {
     layer.hidden = false;
     hostButton.hidden = true;
-    setStageTitle("SMEEMO SCRAMBLE");
+    setStageTitle("SMEEMO SCRAMBLE", "smeemo");
     content.replaceChildren();
-    const board = element("div", "rg-smeemo-board");
+    const initialShuffle = game.draws.length === 0 && lastSmeemoSignal !== `${game.status}:0:${game.winner || ""}`;
+    lastSmeemoSignal = `${game.status}:${game.draws.length}:${game.winner || ""}`;
+    const board = element("div", `rg-smeemo-board${initialShuffle ? " is-shuffling" : ""}`);
     const nextPlayer = game.status === "playing" ? CARD_GAME_PLAYERS[game.turnCursor % CARD_GAME_PLAYERS.length] : null;
     for (const [playerIndex, player] of CARD_GAME_PLAYERS.entries()) {
       const section = element("section", `rg-smeemo-player${nextPlayer === player ? " is-turn" : ""}`);
@@ -401,6 +408,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       cards.forEach((card, index) => {
         const back = element("span", "rg-smeemo-card");
         back.style.setProperty("--card-angle", `${(index - 1) * 7}deg`);
+        back.style.setProperty("--deal-delay", `${playerIndex * 110 + index * 75}ms`);
         back.setAttribute("aria-hidden", "true");
         pile.append(back);
       });
@@ -415,7 +423,8 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       const history = element("div", "rg-smeemo-draw-list");
       for (const [index, draw] of game.draws.entries()) {
         const item = element("div", "rg-smeemo-draw");
-        item.append(element("span", "", playerNames[draw.player]), element("span", "", draw.smeemo ? "SMEEMO!" : "BLANK"));
+        const face = element("span", `rg-smeemo-draw-card${draw.smeemo ? " is-smeemo" : ""}`, draw.smeemo ? "SMEEMO!" : "BLANK");
+        item.append(element("span", "", playerNames[draw.player]), face);
         if (index === game.draws.length - 1) item.classList.add("is-latest");
         history.append(item);
       }

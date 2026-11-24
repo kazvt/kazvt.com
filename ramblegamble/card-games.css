@@ -37,6 +37,21 @@
   letter-spacing: .055em;
   text-shadow: 2px 2px 0 #b77beb;
 }
+.rg-card-games-header[data-card-mode="red-handed"]::before,
+.rg-card-games-header[data-card-mode="red-handed"]::after {
+  display: block;
+  width: clamp(32px, 4vw, 54px);
+  height: clamp(42px, 5.5vw, 70px);
+  flex: 0 0 auto;
+  content: "";
+  border: 2px solid #1e0b01;
+  box-shadow: 2px 3px 0 #8b2626;
+  background-position: center;
+  background-size: 100% 100%;
+  image-rendering: pixelated;
+}
+.rg-card-games-header[data-card-mode="red-handed"]::before { background-image: url("/ramblegamble/assets/card-games/red-handed-evidence-face.png"); transform: rotate(-6deg); }
+.rg-card-games-header[data-card-mode="red-handed"]::after { background-image: url("/ramblegamble/assets/card-games/red-handed-suspect-face.png"); transform: rotate(6deg); }
 .rg-card-room-button,
 .rg-card-games-layer button {
   font: inherit;
@@ -288,8 +303,13 @@
 .rg-smeemo-card:first-child { margin-left: 0; }
 .rg-smeemo-card.is-drawn { z-index: 2; color: #1e0b01; background: #f2f2da; transform: translateY(-14px) rotate(0); animation: rg-card-flip 620ms cubic-bezier(.2,.8,.2,1); }
 .rg-smeemo-card.is-smeemo { color: #b20000; box-shadow: 0 0 20px #ffdf00; font-size: 10px; font-weight: 900; }
+.rg-smeemo-board.is-shuffling .rg-smeemo-card { animation: rg-scramble-deal 920ms cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--deal-delay); }
+@keyframes rg-scramble-deal { 0% { opacity: .15; transform: translateY(-85px) rotate(34deg) scale(.7); } 38% { opacity: 1; transform: translateY(-22px) rotate(-20deg) scale(1.1); } 72% { transform: translateY(8px) rotate(12deg) scale(.96); } 100% { transform: translateY(0) rotate(var(--card-angle, 0deg)) scale(1); } }
 .rg-smeemo-draw-list { display: flex; justify-content: center; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
 .rg-smeemo-draw { display: grid; min-width: 70px; justify-items: center; gap: 2px; padding: 5px; border: 1px solid #8b2626; background: #f2f2da; font-size: 10px; font-weight: 900; }
+.rg-smeemo-draw-card { display: grid; min-width: 54px; min-height: 28px; place-items: center; color: #486c2f; font-size: 9px; }
+.rg-smeemo-draw-card.is-smeemo { color: #b20000; text-shadow: 1px 1px 0 #ffdf00; }
+.rg-smeemo-draw.is-latest .rg-smeemo-draw-card { animation: rg-card-flip 520ms cubic-bezier(.2,.8,.2,1); }
 .rg-smeemo-winner { margin: 18px 0 0; color: #8b2626; font-size: clamp(21px, 4vw, 42px); font-weight: 900; text-align: center; text-shadow: 3px 3px 0 #ffdf00, 5px 5px 0 #b77beb; animation: rg-berry-pop 580ms cubic-bezier(.18,.9,.3,1.4); }
 @keyframes rg-card-flip { 50% { transform: translateY(-24px) rotateY(90deg) scale(1.08); } }
 
