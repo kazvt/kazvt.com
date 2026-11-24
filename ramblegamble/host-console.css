@@ -393,12 +393,34 @@
 .rg-draw-canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 .rg-draw-background { z-index: 0; pointer-events: none; user-select: none; }
 .rg-draw-canvas { z-index: 1; background: transparent; touch-action: none; cursor: crosshair; }
-.rg-compose-piece .rg-stage-media { display: block; width: 100%; max-height: 52px; object-fit: contain; }
 .rg-option-row [data-option-image] { min-width: 0; }
 .rg-trivia-editor [data-error="true"] { color: #8b2626; }
-.rg-compose-board { position: relative; min-height: 240px; margin: 10px 0; border: 2px solid #111; background: #e6d994 center / contain no-repeat; }
-.rg-compose-piece { position: absolute; width: 48px; min-height: 44px; padding: 3px; border: 2px solid #111; background: #ffdf00; font-size: 10px; font-weight: 800; cursor: grab; }
-.rg-compose-piece:active { background: #f12b24; }
+.rg-item-row--compose { grid-template-columns: minmax(0, .8fr) minmax(0, 1fr) 44px 34px; }
+.rg-item-upload { min-width: 40px; min-height: 38px; }
+.rg-compose-help { margin: 4px 0; color: #486c2f; font-size: 12px; font-weight: 800; text-align: center; }
+.rg-trivia-screen[data-mode="compose-image"] #rg-stage-items { display: block; width: 100%; }
+.rg-compose-layout { display: grid; grid-template-columns: minmax(130px, 190px) minmax(0, 1fr); align-items: start; gap: clamp(8px, 1.5vw, 18px); width: min(100%, 1320px); margin: 8px auto; }
+.rg-compose-tray { display: grid; grid-template-columns: 1fr; gap: 6px; }
+.rg-compose-type { display: grid; min-width: 0; min-height: 48px; grid-template-columns: 32px minmax(0, 1fr); align-items: center; gap: 7px; padding: 5px; border: 2px solid #111; color: #111; background: #ffdf00; text-align: left; overflow-wrap: anywhere; cursor: pointer; }
+.rg-compose-type[aria-pressed="true"] { border-color: #8b2626; color: #fff; background: #8b2626; box-shadow: 0 0 0 2px #f1e5a1; }
+.rg-compose-type > span { min-width: 0; font-size: 11px; font-weight: 800; }
+.rg-compose-pixel-art { display: block; width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; image-rendering: crisp-edges; pointer-events: none; }
+.rg-compose-type .rg-compose-pixel-art { width: 32px; height: 32px; image-rendering: pixelated; }
+.rg-compose-board { position: relative; width: 100%; min-width: 0; min-height: 0; aspect-ratio: 11 / 3; margin: 0; overflow: hidden; border: 2px solid #111; background-color: #e6e6e6; touch-action: manipulation; user-select: none; cursor: crosshair; }
+.rg-compose-board[data-grid-size="16"] { background-image: linear-gradient(rgba(0,0,0,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,.5) 1px, transparent 1px), repeating-conic-gradient(#f4f4f4 0 25%, #c9c9c9 0 50%); background-size: var(--rg-compose-grid-width) var(--rg-compose-grid-height), var(--rg-compose-grid-width) var(--rg-compose-grid-height), calc(var(--rg-compose-grid-width) * 2) calc(var(--rg-compose-grid-height) * 2); }
+.rg-compose-background { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: fill; image-rendering: pixelated; pointer-events: none; user-select: none; }
+.rg-compose-piece,
+.rg-compose-ghost { position: absolute; z-index: 1; display: grid; min-width: 0; min-height: 0; place-items: center; padding: 0; overflow: hidden; border: 0; background: transparent; line-height: 1; }
+.rg-compose-piece { cursor: pointer; }
+.rg-compose-piece:hover { outline: 2px solid #8b2626; outline-offset: -2px; }
+.rg-compose-piece:focus-visible { z-index: 3; outline: 3px solid #486c2f; outline-offset: 1px; }
+.rg-compose-piece .rg-compose-pixel-art,
+.rg-compose-ghost .rg-compose-pixel-art { width: 100%; height: 100%; image-rendering: pixelated; }
+.rg-compose-ghost { z-index: 2; opacity: .56; pointer-events: none; }
+.rg-compose-ghost[hidden] { display: none; }
+.rg-compose-board.has-selected-type { cursor: crosshair; }
+.rg-item-row--compose .rg-option-upload { width: 44px; min-width: 44px; min-height: 38px; }
+.rg-item-row--compose .rg-option-upload input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 
 @container rg-trivia (max-width: 1040px) {
   .rg-trivia-screen[data-mode="categorize-images"] .rg-category-item-grid,
@@ -411,6 +433,10 @@
   .rg-trivia-screen[data-mode="image-grid"] #rg-stage-items { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .rg-trivia-screen[data-round="21"][data-mode="match-pairs"] .rg-pair-columns > div { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .rg-trivia-screen[data-mode="categorize-images"] .rg-category-buckets { grid-template-columns: 1fr; }
+  .rg-compose-layout { grid-template-columns: minmax(0, 1fr); }
+  .rg-compose-tray { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .rg-compose-type { min-height: 52px; grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 2px; padding: 3px; text-align: center; }
+  .rg-compose-type > span { font-size: 10px; }
 }
 
 @container rg-trivia (max-width: 430px) {
@@ -494,6 +520,13 @@
   .rg-item-row--timeline .rg-item-order-controls { grid-column: 1; grid-row: 1 / span 2; align-self: start; }
   .rg-option-row .rg-option-upload { grid-column: 1; width: 44px; }
   .rg-option-row input[type="radio"] { grid-column: 2; grid-row: 1 / span 3; }
+  .rg-item-row--compose { grid-template-columns: minmax(0, 1fr) 34px; }
+  .rg-item-row--compose input { grid-column: 1; }
+  .rg-item-row--compose .rg-item-upload { grid-column: 1; width: 44px; }
+}
+
+@container rg-trivia (max-width: 430px) {
+  .rg-compose-tray { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (prefers-reduced-motion: reduce) {
