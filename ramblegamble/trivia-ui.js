@@ -783,14 +783,17 @@ import { migrateLegacyComposePlacements, normalizeComposePlacements, snapCompose
     const modes = ["categorize-images", "timeline", "image-sequence", "text-sequence", "compose-image"];
     if (!modes.includes(format.mode)) return "";
     const isTimeline = format.mode === "timeline";
+    const isCompose = format.mode === "compose-image";
     const items = content.items || [];
-    let html = '<h4 class="rg-editor-section-title">' + (format.mode === "compose-image" ? "PIECES" : "ITEMS") + ' <span>(' + format.optionCount + ')</span></h4>';
-    html += isTimeline
+    let html = '<h4 class="rg-editor-section-title">' + (isCompose ? "OBJECT TYPES" : "ITEMS") + ' <span>(' + format.optionCount + ')</span></h4>';
+    html += isCompose
+      ? '<p class="rg-editor-hint">Select a type, place it on the image, then click a placed object to remove it.</p>'
+      : isTimeline
       ? '<p class="rg-editor-hint">Edit event names, then drag a handle or use UP/DOWN to set their order.</p>'
       : '<p class="rg-editor-hint">Use text, an image URL, or both. Empty items remain visibly marked as placeholders.</p>';
     items.forEach((item, index) => {
       const number = String(index + 1).padStart(2, "0");
-      html += '<div class="rg-item-row' + (isTimeline ? ' rg-item-row--timeline' : '') + '" data-item-row="' + index + '" data-item-x="' + Number(item.x ?? 0) + '" data-item-y="' + Number(item.y ?? 0) + '">';
+      html += '<div class="rg-item-row' + (isTimeline ? ' rg-item-row--timeline' : '') + (isCompose ? ' rg-item-row--compose' : '') + '" data-item-row="' + index + '" data-asset-id="' + esc(item.asset || "") + '" data-item-x="' + Number(item.x ?? 0) + '" data-item-y="' + Number(item.y ?? 0) + '">';
       if (isTimeline) {
         html += '<div class="rg-item-order-controls">';
         html += '<button type="button" data-item-drag-handle aria-label="Drag event ' + (index + 1) + ' to reorder">DRAG</button>';
@@ -801,6 +804,7 @@ import { migrateLegacyComposePlacements, normalizeComposePlacements, snapCompose
       }
       html += '<input type="text" data-item-label placeholder="' + (isTimeline ? "Event " : "Item ") + number + '" value="' + esc(item.label || "") + '" aria-label="' + (isTimeline ? "Timeline event " : "Item ") + (index + 1) + ' name">';
       html += '<input type="url" data-item-image placeholder="Image URL" value="' + esc(item.image || "") + '" aria-label="' + (isTimeline ? "Timeline event " : "Item ") + (index + 1) + ' image URL">';
+      if (isCompose) html += '<label class="rg-option-upload rg-item-upload">FILE<input type="file" data-item-file accept="image/*" aria-label="Upload image for object type ' + (index + 1) + '"></label>';
       if (!isTimeline) html += '<span aria-hidden="true">' + number + '</span>';
       html += '</div>';
     });
@@ -941,6 +945,7 @@ import { migrateLegacyComposePlacements, normalizeComposePlacements, snapCompose
       items: $$("[data-item-row]", itemsEditor).map((row, index) => ({
         label: $("[data-item-label]", row).value,
         image: $("[data-item-image]", row).value.trim(),
+        asset: row.dataset.assetId || "",
         x: Number.isFinite(Number(row.dataset.itemX)) ? Number(row.dataset.itemX) : effectiveNow().content.items[index]?.x ?? 8 + (index % 5) * 18,
         y: Number.isFinite(Number(row.dataset.itemY)) ? Number(row.dataset.itemY) : effectiveNow().content.items[index]?.y ?? 8 + (Math.floor(index / 5) % 4) * 18,
       })),
@@ -957,6 +962,7 @@ import { migrateLegacyComposePlacements, normalizeComposePlacements, snapCompose
       numberVisible: effectiveNow().content.numberVisible,
       drawing: drawingData.get(currentRound + ":" + currentDifficulty) || effectiveNow().content.drawing || "",
       assignments: effectiveNow().content.assignments || [],
+      placements: effectiveNow().content.placements || [],
     };
     if (content.promptImage) content.promptAsset = "";
     delete content.optionCount;
@@ -1859,16 +1865,20 @@ import { migrateLegacyComposePlacements, normalizeComposePlacements, snapCompose
     saveAndRenderStage();
   });
   editor.addEventListener("change", async (event) => {
-    const fileInput = event.target.closest("[data-option-file]");
+    const fileInput = event.target.closest("[data-option-file], [data-item-file]");
     if (!fileInput || !fileInput.files?.[0]) return;
-    const row = fileInput.closest("[data-option-row]");
+    const itemFile = fileInput.matches("[data-item-file]");
+    const row = fileInput.closest(itemFile ? "[data-item-row]" : "[data-option-row]");
     if (!row) return;
     try {
       row.dataset.assetId = await storeMedia(fileInput.files[0]);
-      $("[data-option-image]", row).value = "";
+      $(itemFile ? "[data-item-image]" : "[data-option-image]", row).value = "";
       saveAndRenderStage();
       saveState.textContent = "IMAGE SAVED HERE";
-    } catch (error) { saveState.textContent = "IMAGE NOT SAVED"; }
+    } catch (error) {
+      saveState.textContent = "IMAGE NOT SAVED";
+      console.warn("Image upload failed:", error);
+    }
   });
   $("#rg-clear-draft").addEventListener("click", () => {
     delete drafts.rounds[currentRound]?.[currentDifficulty];
