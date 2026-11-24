@@ -1,5 +1,6 @@
 import { MODE_NAMES, isChoiceMode, resolveRoundFormat } from "./trivia-data.js?v=trivia-answer-modes-20261119-v3";
 import { normalizeGuessLimit } from "./trivia-game.mjs?v=number-grid-guess-limit-20261121-v1";
+import { normalizeComposePlacements } from "./compose-placement.mjs";
 
 export const TRIVIA_EXPORT_FORMAT = "kazvt-ramble-gamble-trivia";
 export const TRIVIA_EXPORT_VERSION = 1;
@@ -14,7 +15,7 @@ export function decodeTriviaBytes(buffer) {
 const ROUND_FIELDS = new Set([
   "question", "subtitle", "promptImage", "promptAsset", "mode", "optionCount", "acceptedAnswers",
   "options", "items", "pairs", "categories", "videoUrl", "numberValue", "numberVisible",
-  "imageVisible", "backgroundImage", "drawing", "assignments", "selectionRule", "requiredCorrectCount", "numberCode", "guessLimit",
+  "imageVisible", "backgroundImage", "drawing", "assignments", "placements", "selectionRule", "requiredCorrectCount", "numberCode", "guessLimit",
 ]);
 
 const MODE_ALIASES = new Map([
@@ -103,8 +104,10 @@ function sanitizeRoundDrafts(value) {
           }));
         } else if (field === "items" && Array.isArray(item)) {
           draft.items = item.filter((entry) => entry && typeof entry === "object").map((entry) => ({
-            label: safeString(entry.label), image: safeString(entry.image), x: finiteOr(entry.x, 8), y: finiteOr(entry.y, 8),
+            label: safeString(entry.label), image: safeString(entry.image), asset: safeString(entry.asset), x: finiteOr(entry.x, 8), y: finiteOr(entry.y, 8),
           }));
+        } else if (field === "placements" && Array.isArray(item)) {
+          draft.placements = item;
         } else if (field === "pairs" && Array.isArray(item)) {
           draft.pairs = item.filter((entry) => entry && typeof entry === "object").map((entry) => ({
             left: safeString(entry.left), leftImage: safeString(entry.leftImage), right: safeString(entry.right),
@@ -127,6 +130,7 @@ function sanitizeRoundDrafts(value) {
           draft.guessLimit = normalizeGuessLimit(item);
         }
       }
+      if (Array.isArray(draft.placements)) draft.placements = normalizeComposePlacements(draft.placements, draft.items || []);
       levels[level] = draft;
     }
     if (Object.keys(levels).length) rounds[round] = levels;
@@ -274,6 +278,7 @@ function parseQuestionObjects(questions) {
       drawing: item.drawing,
       categories: item.categories,
       items: item.items,
+      placements: item.placements ?? item.objectPlacements ?? item.object_placements,
       pairs: item.pairs,
       assignments: item.assignments,
       optionCount: item.optionCount ?? item.option_count,
@@ -297,9 +302,9 @@ function parseQuestionObjects(questions) {
     const initial = resolveRoundFormat(round, 1);
     const state = {
       question: "", subtitle: "", mode: initial.mode, optionCount: initial.optionCount,
-      acceptedAnswers: [], options: [], promptImage: "", promptAsset: "", items: [], pairs: [],
+      acceptedAnswers: [], options: [], promptImage: "", promptAsset: "", items: [], placements: [], pairs: [],
       categories: ["Group 1", "Group 2", "Group 3"], videoUrl: "", numberValue: 0,
-      numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
+      numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [], placements: [],
       selectionRule: "any", requiredCorrectCount: 0, numberCode: "", guessLimit: 4,
     };
     rounds[round] = {};
@@ -310,7 +315,7 @@ function parseQuestionObjects(questions) {
         for (const field of ["subtitle", "promptImage", "promptAsset", "videoUrl", "backgroundImage", "drawing"]) {
           if (record[field]) state[field] = record[field];
         }
-        for (const field of ["numberValue", "numberVisible", "imageVisible", "categories", "items", "pairs", "assignments", "optionCount", "requiredCorrectCount"]) {
+        for (const field of ["numberValue", "numberVisible", "imageVisible", "categories", "items", "placements", "pairs", "assignments", "optionCount", "requiredCorrectCount"]) {
           if (record[field] != null) state[field] = clone(record[field]);
         }
         if (record.guessLimit != null) state.guessLimit = normalizeGuessLimit(record.guessLimit);
@@ -448,9 +453,9 @@ function parseDelimited(text) {
     const initial = resolveRoundFormat(roundId, 1);
     const state = {
       question: "", subtitle: "", mode: initial.mode, optionCount: initial.optionCount,
-      options: [], acceptedAnswers: [], promptImage: "", promptAsset: "", items: [], pairs: [],
+      options: [], acceptedAnswers: [], promptImage: "", promptAsset: "", items: [], placements: [], pairs: [],
       categories: ["Group 1", "Group 2", "Group 3"], videoUrl: "", numberValue: 0,
-      numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
+      numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [], placements: [],
       selectionRule: "any", requiredCorrectCount: 0, numberCode: "", guessLimit: 4,
     };
     rounds[roundId] = {};
@@ -606,7 +611,7 @@ function parseHumanText(input) {
       question: base.question || current.question || "", subtitle: base.subtitle || "",
       promptImage: base.promptImage || "", promptAsset: "", mode: base.mode || defaults.mode,
       optionCount: Number.isFinite(Number(base.optionCount)) ? Number(base.optionCount) : defaults.optionCount,
-      acceptedAnswers: [], options: [], items: [], pairs: [], categories: ["Group 1", "Group 2", "Group 3"],
+      acceptedAnswers: [], options: [], items: [], placements: [], pairs: [], categories: ["Group 1", "Group 2", "Group 3"],
       videoUrl: "", numberValue: 0, numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
       selectionRule: "any", requiredCorrectCount: 0, numberCode: "", guessLimit: 4,
     };
@@ -619,7 +624,7 @@ function parseHumanText(input) {
         for (const [field, value] of Object.entries(block.fields)) {
           if (field === "acceptedAnswers") state.acceptedAnswers = [...value];
           else if (field === "options" && Array.isArray(value)) state.options = clone(value);
-          else if (field === "items" || field === "pairs" || field === "categories" || field === "assignments") state[field] = clone(value);
+          else if (field === "items" || field === "placements" || field === "pairs" || field === "categories" || field === "assignments") state[field] = clone(value);
           else state[field] = value;
         }
         if (block.noMultipleChoice) {
@@ -673,7 +678,7 @@ function parseHumanText(input) {
       levels[level] = {
         question: state.question, subtitle: state.subtitle, promptImage: state.promptImage, promptAsset: state.promptAsset,
         mode: state.mode, optionCount: state.optionCount, acceptedAnswers: [...state.acceptedAnswers],
-        options: clone(state.options), items: clone(state.items), pairs: clone(state.pairs), categories: clone(state.categories),
+        options: clone(state.options), items: clone(state.items), placements: clone(state.placements), pairs: clone(state.pairs), categories: clone(state.categories),
         videoUrl: state.videoUrl, numberValue: state.numberValue, numberVisible: state.numberVisible,
         imageVisible: state.imageVisible, backgroundImage: state.backgroundImage, drawing: state.drawing,
         assignments: clone(state.assignments), selectionRule: state.selectionRule,
