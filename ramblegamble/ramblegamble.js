@@ -1483,7 +1483,8 @@ import {
     pointer.y = -((clientY - bounds.top) / bounds.height) * 2 + 1;
     raycaster.setFromCamera(pointer, camera);
     const wheelHit = raycaster.intersectObjects(rouletteTargets, true)[0];
-    const slotHit = raycaster.intersectObjects(slotTargets, true)[0];
+    const slotIntersections = raycaster.intersectObjects(slotTargets, true);
+    const slotHit = slotIntersections[0];
     const cardTableHit = raycaster.intersectObjects(cardTableTargets, true)[0];
     const diceDoorHit = raycaster.intersectObjects(diceDoorTargets, false)[0];
     const chairHit = raycaster.intersectObjects(contestantTargets, false)[0];
@@ -1509,7 +1510,21 @@ import {
     if (hit.machine === "contestant" || hit.machine === "host") return hit;
     if (hit.machine === "card-table") return hit;
     const partNames = hit.machine === "roulette" ? ROULETTE_PART_NAMES : SLOT_PART_NAMES;
-    return { ...hit, part: getNamedPart(hit.hit, hit.model, partNames) };
+    const part = getNamedPart(hit.hit, hit.model, partNames);
+    if (hit.machine === "slot") {
+      window.__rgLastSlotHit = {
+        part,
+        nearestName: hit.hit?.object?.name,
+        distance: hit.distance,
+        intersections: slotIntersections.slice(0, 12).map((entry) => ({
+          name: entry.object?.name,
+          parent: entry.object?.parent?.name,
+          distance: Number(entry.distance.toFixed(3)),
+          part: getNamedPart(entry, slotsModel, SLOT_PART_NAMES),
+        })),
+      };
+    }
+    return { ...hit, part };
   }
 
   function getSeatAtScreen(clientX, clientY, canvasBounds) {
