@@ -1485,7 +1485,6 @@ import {
     if (!camera || !slotControlTargets.size) return null;
     camera.updateMatrixWorld(true);
     const candidates = [];
-    const diagnostics = [];
     for (const [part, object] of slotControlTargets) {
       const box = new THREE.Box3().setFromObject(object);
       if (box.isEmpty()) continue;
@@ -1504,7 +1503,6 @@ import {
       const top = canvasBounds.top + (1 - Math.max(...projected.map((point) => point.y))) * 0.5 * canvasBounds.height;
       const bottom = canvasBounds.top + (1 - Math.min(...projected.map((point) => point.y))) * 0.5 * canvasBounds.height;
       const padding = part.startsWith("button") ? 5 : 2;
-      diagnostics.push({ part, left, right, top, bottom });
       if (clientX < left - padding || clientX > right + padding || clientY < top - padding || clientY > bottom + padding) continue;
       const center = box.getCenter(new THREE.Vector3());
       const centerX = (left + right) / 2;
@@ -1517,11 +1515,6 @@ import {
       });
     }
     candidates.sort((a, b) => a.area - b.area || a.centerDistance - b.centerDistance);
-    preview.dataset.debugSlotControls = JSON.stringify({
-      pointer: [clientX, clientY],
-      bounds: diagnostics,
-      matches: candidates.map(({ part, centerDistance }) => ({ part, centerDistance })),
-    });
     return candidates[0] || null;
   }
 
@@ -1872,13 +1865,6 @@ import {
       part: interaction.part,
       focused: currentView.kind === interaction.machine,
       canGoBack: canGoBack(),
-    });
-    preview.dataset.debugPointAction = JSON.stringify({
-      machine: interaction.machine,
-      part: interaction.part,
-      view: currentView.kind,
-      action,
-      point: [clientX, clientY],
     });
     if (action === "focus-roulette") transitionToView({ kind: "roulette" });
     else if (action === "focus-slot") transitionToView({ kind: "slot" });
