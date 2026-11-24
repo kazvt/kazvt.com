@@ -111,6 +111,7 @@ import {
   let lever;
   let rouletteRig;
   let slotRig;
+  let cardTableModel;
   let skyRoot;
   let skyStars;
   let skyStarsMesh;
@@ -119,6 +120,7 @@ import {
   let skyStarsInitialized = false;
   let rouletteTargets = [];
   let slotTargets = [];
+  let cardTableTargets = [];
   let diceDoorTargets = [];
   let wheelMotion = null;
   let leverMotion = null;
@@ -145,6 +147,7 @@ import {
   let cameraTransition = null;
   let overviewCameraBounds = null;
   let cursorMode = "";
+  let pendingCardGameMode = "";
   let skyRandomState = 0x4b415a56;
 
   function setLiquidPortalLoaded(shouldLoad) {
@@ -743,6 +746,10 @@ import {
       bounds.setFromObject(rouletteRig);
       return bounds.expandByScalar(0.38);
     }
+    if (view.kind === "card-table" && cardTableModel) {
+      bounds.setFromObject(cardTableModel);
+      return bounds.expandByScalar(0.48);
+    }
 
     return getArcadeBounds();
   }
@@ -1068,6 +1075,7 @@ import {
   function setupPicking() {
     rouletteTargets = [];
     slotTargets = [];
+    cardTableTargets = [];
     diceDoorTargets = [];
     contestantTargets = [];
     hostTargets = [];
@@ -1080,6 +1088,10 @@ import {
     });
     slotsModel?.traverse((object) => {
       if (object.isMesh) slotTargets.push(object);
+    });
+    cardTableModel = stageModel?.getObjectByName("table") || null;
+    cardTableModel?.traverse((object) => {
+      if (object.isMesh) cardTableTargets.push(object);
     });
     setupDiceDoorTarget();
     setupContestants();
@@ -1333,12 +1345,14 @@ import {
     raycaster.setFromCamera(pointer, camera);
     const wheelHit = raycaster.intersectObjects(rouletteTargets, true)[0];
     const slotHit = raycaster.intersectObjects(slotTargets, true)[0];
+    const cardTableHit = raycaster.intersectObjects(cardTableTargets, true)[0];
     const diceDoorHit = raycaster.intersectObjects(diceDoorTargets, false)[0];
     const chairHit = raycaster.intersectObjects(contestantTargets, false)[0];
     const hostHit = raycaster.intersectObjects(hostTargets, false)[0];
     const hits = [
       wheelHit && { distance: wheelHit.distance, hit: wheelHit, machine: "roulette", model: rouletteModel },
       slotHit && { distance: slotHit.distance, hit: slotHit, machine: "slot", model: slotsModel },
+      cardTableHit && { distance: cardTableHit.distance, hit: cardTableHit, machine: "card-table", model: cardTableModel },
       diceDoorHit && { distance: diceDoorHit.distance, hit: diceDoorHit, machine: "dice-door" },
       chairHit && {
         distance: chairHit.distance,
@@ -1354,6 +1368,7 @@ import {
     const hit = hits[0];
     if (!hit) return getSeatAtScreen(clientX, clientY, bounds);
     if (hit.machine === "contestant" || hit.machine === "host") return hit;
+    if (hit.machine === "card-table") return hit;
     const partNames = hit.machine === "roulette" ? ROULETTE_PART_NAMES : SLOT_PART_NAMES;
     return { ...hit, part: getNamedPart(hit.hit, hit.model, partNames) };
   }
@@ -1544,6 +1559,31 @@ import {
     canvas.focus({ preventScroll: true });
   }
 
+  function activateCardGameMode(mode) {
+    if (!new Set(["red-handed", "quiplash", "shop", "smeemo"]).has(mode)) return;
+    if (!sceneReady) {
+      pendingCardGameMode = mode;
+      return;
+    }
+    if (!gameStarted) {
+      gameStarted = true;
+      pauseMenuOpen = false;
+      readyScreen.hidden = true;
+      pauseMenu.hidden = true;
+      preview.classList.remove("is-menu");
+      setMenuSceneVisibility(true);
+      menuMarquee.pause();
+      try { menuMarquee.currentTime = 0; } catch {}
+    }
+    result.hidden = true;
+    transitionToView({ kind: "card-table" });
+  }
+
+  window.addEventListener("rg:card-game-active", (event) => activateCardGameMode(event.detail?.mode));
+  window.addEventListener("rg:close-card-games", () => {
+    if (currentView.kind === "card-table") transitionToView({ kind: "overview" });
+  });
+
   goButton.addEventListener("click", showPauseMenu);
   playButton.addEventListener("click", startGame);
   controlsOpenButton.addEventListener("click", () => {
@@ -1619,6 +1659,16 @@ import {
     if (interaction.machine === "host") {
       const action = resolvePointClickAction({ machine: "host", focused: currentView.kind === "host" });
       if (action === "focus-host") transitionToView({ kind: "host" });
+      return;
+    }
+
+    if (interaction.machine === "card-table") {
+      const action = resolvePointClickAction({
+        machine: "card-table",
+        focused: currentView.kind === "card-table",
+      });
+      if (action === "focus-card-table") transitionToView({ kind: "card-table" });
+      else if (action === "open-card-games") window.dispatchEvent(new CustomEvent("rg:show-card-menu"));
       return;
     }
 
@@ -1876,6 +1926,11 @@ import {
       // Refit from the final wheel location so both adjustments remain in frame.
       overviewCameraBounds = getArcadeBounds();
       fitCamera();
+      if (pendingCardGameMode) {
+        const mode = pendingCardGameMode;
+        pendingCardGameMode = "";
+        activateCardGameMode(mode);
+      }
       loading.classList.add("is-hidden");
     } catch (error) {
       console.error("Ramble Gamble preview failed to start:", error);
