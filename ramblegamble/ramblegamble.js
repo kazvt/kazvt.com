@@ -321,7 +321,12 @@ import {
     ballOrbitObject = orbitNodes.find((object) => String(object.name || "").toLowerCase() === "ball")
       || orbitNodes[0]
       || null;
-    if (!ballOrbitObject) console.warn("Could not find the roulette ball's authored orbit offset.");
+    if (!ballOrbitObject) {
+      console.warn("Could not find the roulette ball's authored orbit offset.");
+      return;
+    }
+    const startingPosition = rouletteBallPositionAtRadius(ballOrbitObject.position, ROULETTE_BALL_LANDING_RADIUS);
+    if (startingPosition) ballOrbitObject.position.set(startingPosition.x, startingPosition.y, startingPosition.z);
   }
 
   function startLeverPull() {
