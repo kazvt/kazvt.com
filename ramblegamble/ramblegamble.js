@@ -53,6 +53,9 @@ import {
   const FORCED_THEME = "p2";
   const ROULETTE_PART_NAMES = new Set(["center", "wheel", "rim", "ball"]);
   const SLOT_PART_NAMES = new Set(["machine", "arm", "button1", "button2", "button3", "button4", "button5"]);
+  const SLOT_GRID_STORAGE_KEY = "ramblegamble.slot-grid.v1";
+  const SLOT_DISPLAY_PIXELS = Object.freeze({ left: 5, right: 75, top: 16, bottom: 58 });
+  const SLOT_SYMBOL_IMAGE_PATH = "/ramblegamble/assets/berries/";
   const REFERENCE_START_VIEW = Object.freeze({
     // Match the supplied reference's opposite-side oblique view and lower sightline.
     // Landscape screens keep the close crop; portrait screens ease out to retain hotspots.
@@ -130,6 +133,13 @@ import {
   let diceDoorTargets = [];
   let wheelMotion = null;
   let leverMotion = null;
+  let slotReelMotion = null;
+  let slotReelGrid = normalizeSlotGrid(null);
+  let slotReelCanvas = null;
+  let slotReelContext = null;
+  let slotReelTexture = null;
+  let slotReelDisplay = null;
+  const slotReelImages = new Map();
   const pickQuestion = createQuestionPicker();
   let playing = false;
   let gameStarted = false;
@@ -283,16 +293,139 @@ import {
   }
 
   function startLeverPull() {
-    if (!beginTurn("slot")) return;
-    if (!lever) {
-      leverMotion = { started: performance.now(), duration: 650, base: 0 };
-      return;
+    return startSlotReelSpin([0, 1, 2, 3, 4], true);
+  }
+
+  function readSavedSlotGrid() {
+    try { return normalizeSlotGrid(localStorage.getItem(SLOT_GRID_STORAGE_KEY)); }
+    catch { return normalizeSlotGrid(null); }
+  }
+
+  function drawSlotSymbol(column, row, symbol, xOffset = 0, yOffset = 0) {
+    if (!symbol || !slotReelContext) return;
+    const image = slotReelImages.get(symbol);
+    if (!image?.complete || !image.naturalWidth) return;
+    const cellWidth = slotReelCanvas.width / 5;
+    const cellHeight = slotReelCanvas.height / 3;
+    const size = Math.min(cellWidth, cellHeight) * 0.82;
+    const x = column * cellWidth + (cellWidth - size) / 2 + xOffset;
+    const y = row * cellHeight + (cellHeight - size) / 2 + yOffset;
+    slotReelContext.drawImage(image, x, y, size, size);
+  }
+
+  function drawSlotReelDisplay(time = performance.now()) {
+    if (!slotReelContext || !slotReelTexture) return;
+    const context = slotReelContext;
+    const cellWidth = slotReelCanvas.width / 5;
+    const cellHeight = slotReelCanvas.height / 3;
+    context.clearRect(0, 0, slotReelCanvas.width, slotReelCanvas.height);
+
+    for (let column = 0; column < 5; column += 1) {
+      const motionColumn = slotReelMotion?.columns.find((entry) => entry.column === column);
+      const frame = motionColumn ? sampleSlotReelColumn(motionColumn, slotReelMotion, time) : null;
+      if (!motionColumn || !frame || frame.symbols) {
+        const symbols = frame?.symbols || Array.from({ length: 3 }, (_, row) => slotReelGrid[row * 5 + column]);
+        symbols.forEach((symbol, row) => drawSlotSymbol(column, row, symbol));
+        continue;
+      }
+
+      context.save();
+      context.beginPath();
+      context.rect(column * cellWidth, 0, cellWidth, slotReelCanvas.height);
+      context.clip();
+      const wholeRows = Math.floor(frame.offset);
+      const fractionalRow = frame.offset - wholeRows;
+      for (let row = 0; row <= 3; row += 1) {
+        const symbol = motionColumn.strip[wholeRows + row] || null;
+        drawSlotSymbol(column, row, symbol, 0, -fractionalRow * cellHeight);
+      }
+      context.restore();
     }
-    leverMotion = {
-      started: performance.now(),
-      duration: reducedMotion.matches ? 500 : 1700,
-      base: lever.rotation.z,
-    };
+    slotReelTexture.needsUpdate = true;
+  }
+
+  function createSlotReelDisplay() {
+    slotReelGrid = readSavedSlotGrid();
+    slotReelCanvas = document.createElement("canvas");
+    slotReelCanvas.width = 1000;
+    slotReelCanvas.height = 600;
+    slotReelContext = slotReelCanvas.getContext("2d", { alpha: true });
+    slotReelContext.imageSmoothingEnabled = false;
+
+    slotReelTexture = new THREE.CanvasTexture(slotReelCanvas);
+    slotReelTexture.colorSpace = THREE.SRGBColorSpace;
+    slotReelTexture.magFilter = THREE.NearestFilter;
+    slotReelTexture.minFilter = THREE.NearestFilter;
+    slotReelTexture.generateMipmaps = false;
+
+    const { left, right, top, bottom } = SLOT_DISPLAY_PIXELS;
+    const points = [
+      slotScreenPoint(left, top, 0.065),
+      slotScreenPoint(left, bottom, 0.065),
+      slotScreenPoint(right, top, 0.065),
+      slotScreenPoint(right, bottom, 0.065),
+    ];
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.Float32BufferAttribute(
+      points.flatMap(({ x, y, z }) => [x, y, z]),
+      3,
+    ));
+    geometry.setAttribute("uv", new THREE.Float32BufferAttribute([
+      0, 1,
+      0, 0,
+      1, 1,
+      1, 0,
+    ], 2));
+    geometry.setIndex([0, 1, 2, 1, 3, 2]);
+    geometry.computeVertexNormals();
+
+    const material = new THREE.MeshBasicMaterial({
+      map: slotReelTexture,
+      transparent: true,
+      alphaTest: 0.01,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+      toneMapped: false,
+    });
+    slotReelDisplay = new THREE.Mesh(geometry, material);
+    slotReelDisplay.name = "slot-reel-display";
+    slotReelDisplay.renderOrder = 1;
+    slotReelDisplay.frustumCulled = false;
+    slotsModel.add(slotReelDisplay);
+
+    for (const symbol of ["faroeberry", "erinberry", "kazberry"]) {
+      const image = new Image();
+      image.decoding = "async";
+      image.addEventListener("load", () => drawSlotReelDisplay());
+      image.src = `${SLOT_SYMBOL_IMAGE_PATH}${symbol}.png`;
+      slotReelImages.set(symbol, image);
+    }
+    drawSlotReelDisplay();
+  }
+
+  function startSlotReelSpin(columns, pullCrank = false) {
+    if (!beginTurn("slot")) return false;
+    const startedAt = performance.now();
+    slotReelGrid = readSavedSlotGrid();
+    slotReelMotion = createSlotReelMotion(slotReelGrid, columns, {
+      startedAt,
+      duration: reducedMotion.matches ? 520 : 1950,
+      stagger: reducedMotion.matches ? 55 : 120,
+      reducedMotion: reducedMotion.matches,
+    });
+    if (pullCrank && lever) {
+      leverMotion = {
+        started: startedAt,
+        duration: reducedMotion.matches ? 360 : 760,
+        baseQuaternion: lever.quaternion.clone(),
+      };
+    }
+    drawSlotReelDisplay(startedAt);
+    return true;
+  }
+
+  function spinSlotColumn(column) {
+    return startSlotReelSpin([column]);
   }
 
   applyTheme();
