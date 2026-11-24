@@ -870,7 +870,6 @@ import { compareNumberGuess, hasAuthoredTriviaContent, isFourDigitCode, matchesC
       html += '<p class="rg-editor-hint">Four digits per guess. Keep leading zeroes if the code begins with 0.</p>';
     }
     if (format.mode === "timeline") {
-      html += '<label class="rg-timeline-reorder-setting"><input type="checkbox" data-timeline-reorder ' + (format.reorder ? "checked" : "") + '><span>Allow events to be reordered on the stage</span></label>';
     }
     if (format.mode === "categorize-images") {
       html += '<h4 class="rg-editor-section-title">CATEGORY NAMES</h4>';
@@ -949,10 +948,6 @@ import { compareNumberGuess, hasAuthoredTriviaContent, isFourDigitCode, matchesC
       drawing: drawingData.get(currentRound + ":" + currentDifficulty) || effectiveNow().content.drawing || "",
       assignments: effectiveNow().content.assignments || [],
     };
-    if (content.mode === "timeline") {
-      const reorderControl = $("[data-timeline-reorder]", $("#rg-special-fields"));
-      content.reorder = reorderControl ? reorderControl.checked : effectiveNow().format.reorder === true;
-    }
     if (content.promptImage) content.promptAsset = "";
     delete content.optionCount;
     levelDraft()["question"] = content.question;
@@ -1799,7 +1794,7 @@ import { compareNumberGuess, hasAuthoredTriviaContent, isFourDigitCode, matchesC
     saveAndRenderStage();
   });
   editor.addEventListener("change", (event) => {
-    if (event.target.id === "rg-edit-mode" || event.target.id === "rg-edit-option-count" || event.target.id === "rg-edit-selection-rule" || event.target.id === "rg-edit-guess-limit" || event.target.matches("[data-timeline-reorder]")) {
+    if (event.target.id === "rg-edit-mode" || event.target.id === "rg-edit-option-count" || event.target.id === "rg-edit-selection-rule" || event.target.id === "rg-edit-guess-limit") {
       readEditor();
       render();
       queueSave();

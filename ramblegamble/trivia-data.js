@@ -21,7 +21,7 @@ export const ROUND_RULES = {
   18: { 1: { mode: "choice-image", optionCount: 10, imageAspect: "square" } },
   19: { 1: { mode: "short-answer", optionCount: 0 } },
   20: { 1: { mode: "short-answer", optionCount: 0 } },
-  21: { 1: { mode: "match-pairs", optionCount: 24, pairCount: 12, imageAspect: "6 / 5" } },
+  21: { 1: { mode: "match-pairs", optionCount: 24, pairCount: 12, imageAspect: "16 / 9" } },
   22: { 1: { mode: "short-answer", optionCount: 0 } },
   23: { 1: { mode: "image-grid", optionCount: 12, rows: 3, columns: 4, imageAspect: "square" } },
   24: { 1: { mode: "choice-text", optionCount: 6, blankOption: true } },
@@ -86,20 +86,9 @@ export function resolveRoundFormat(roundId, difficulty = 1) {
 }
 
 export function resolveTimelineReorder(roundId, difficulty = 1, levelDrafts = {}) {
-  const targetDifficulty = Math.max(1, Math.min(5, Number(difficulty) || 1));
-  if (resolveRoundMode(roundId, targetDifficulty, levelDrafts) !== "timeline") return false;
-
-  // A timeline is a player-arranged puzzle by default. Tier rules and explicit
-  // host overrides can still turn arranging off or back on at a given tier.
-  const roundNumber = Number.parseInt(roundId, 10);
-  let reorder = true;
-  for (let level = 1; level <= targetDifficulty; level += 1) {
-    const ruleValue = ROUND_RULES[roundNumber]?.[level]?.reorder;
-    const draftValue = levelDrafts?.[level]?.reorder;
-    if (typeof ruleValue === "boolean") reorder = ruleValue;
-    if (typeof draftValue === "boolean") reorder = draftValue;
-  }
-  return reorder;
+  // Timeline is inherently an ordering puzzle. Ignore legacy `reorder: false`
+  // session drafts so an old session cannot silently disable player controls.
+  return resolveRoundMode(roundId, difficulty, levelDrafts) === "timeline";
 }
 
 export function resolveRoundMode(roundId, difficulty = 1, levelDrafts = {}) {

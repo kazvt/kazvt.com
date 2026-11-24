@@ -30,15 +30,15 @@ test("sparse difficulties inherit and additive choices accumulate", () => {
   assert.equal(ROUND_RULES[10][3].replaceOptions, true);
 });
 
-test("timeline questions can be rearranged in Present at every tier by default", () => {
+test("timeline questions stay rearrangeable at every tier, including legacy false drafts", () => {
   assert.equal(resolveTimelineReorder("15", 1), true);
   assert.equal(resolveTimelineReorder("15", 2), true);
   assert.equal(resolveTimelineReorder("15", 3), true);
-  assert.equal(resolveTimelineReorder("15", 1, { 1: { reorder: true } }), true);
-  assert.equal(resolveTimelineReorder("15", 2, { 1: { reorder: false } }), false);
-  assert.equal(resolveTimelineReorder("15", 3, { 3: { reorder: false } }), false);
-  assert.equal(resolveTimelineReorder("15", 3, { 1: { reorder: false } }), true);
+  assert.equal(resolveTimelineReorder("15", 1, { 1: { reorder: false } }), true);
+  assert.equal(resolveTimelineReorder("15", 3, { 3: { reorder: false } }), true);
+  assert.equal(resolveTimelineReorder("01", 1, { 1: { mode: "timeline", reorder: false } }), true);
   assert.equal(resolveTimelineReorder("01", 1), false);
+  assert.equal(resolveTimelineReorder("15", 1, { 1: { mode: "short-answer" } }), false);
 });
 
 test("question-specific templates preserve the supplied counts and modes", () => {
@@ -76,7 +76,10 @@ test("special media templates keep their authored sizes", () => {
   assert.equal(q15d3.optionCount, 8);
   assert.equal(q15d3.reorder, true);
   assert.deepEqual([resolveRoundFormat("18", 1).mode, resolveRoundFormat("18", 1).optionCount], ["choice-image", 10]);
-  assert.deepEqual([resolveRoundFormat("21", 1).pairCount, resolveRoundFormat("21", 1).optionCount], [12, 24]);
+  assert.deepEqual(
+    [resolveRoundFormat("21", 1).pairCount, resolveRoundFormat("21", 1).optionCount, resolveRoundFormat("21", 1).imageAspect],
+    [12, 24, "16 / 9"],
+  );
   assert.deepEqual([resolveRoundFormat("23", 1).rows, resolveRoundFormat("23", 1).columns], [3, 4]);
   assert.equal(resolveRoundFormat("28", 1).mode, "compose-image");
   assert.equal(resolveRoundFormat("31", 1).mode, "number-stepper");
