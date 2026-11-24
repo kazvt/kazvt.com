@@ -4,7 +4,7 @@ import {
   resolvePointClickCursor,
   resolvePointClickZone,
   resolveArcadeShortcut,
-} from "./point-click-routing.js?v=rg-card-table-20261124-v2";
+} from "./point-click-routing.js?v=rg-slot-hardware-controls-20261125-v1";
 import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
 import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-door-wall-target-20261120-v1";
 import { subscribePointScores } from "./points-store.mjs?v=points-console-20261120-v1";
@@ -14,6 +14,12 @@ import {
   LIQUID_PORTAL_SOURCE,
   LIQUID_PORTAL_WIDTH,
 } from "./liquid-portal.mjs?v=liquid-door-portal-20261120-v1";
+import {
+  createSlotReelMotion,
+  normalizeSlotGrid,
+  sampleSlotReelColumn,
+  slotScreenPoint,
+} from "./slot-reels.mjs?v=slot-reels-canvas-20261125-v1";
 
 (() => {
   "use strict";
