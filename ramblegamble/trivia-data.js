@@ -28,7 +28,7 @@ export const ROUND_RULES = {
   25: { 1: { mode: "short-answer", optionCount: 0 } },
   26: { 1: { mode: "image-sequence", optionCount: 6, imageAspect: "square" } },
   27: { 1: { mode: "text-sequence", optionCount: 24 } },
-  28: { 1: { mode: "compose-image", optionCount: 6, promptImage: true, imageAspect: "square" } },
+  28: { 1: { mode: "compose-image", optionCount: 6, promptImage: true, imageAspect: "11 / 3", gridSize: 16 } },
   29: { 1: { mode: "choice-text", optionCount: 6 } },
   30: { 1: { mode: "image-sequence", optionCount: 2, imageAspect: "square" } },
   31: { 1: { mode: "number-stepper", optionCount: 0 } },
@@ -50,6 +50,7 @@ const baseFormat = Object.freeze({
   reorder: false,
   blankOption: false,
   imageAspect: "auto",
+  gridSize: 0,
   selectionRule: "any",
   requiredCorrectCount: 0,
 });
