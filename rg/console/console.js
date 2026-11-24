@@ -3,7 +3,7 @@ import {
   readPointScores,
   writePointScores,
 } from "/ramblegamble/points-store.mjs?v=points-console-20261120-v1";
-import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=points-console-hyphen-20261120-v3";
+import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=rg-smeemo-20261124-v1";
 import { createSmeemoGame, drawSmeemoCard } from "/ramblegamble/card-games.mjs?v=rg-card-games-20261124-v1";
 import { readCardGames, writeCardGames } from "/ramblegamble/card-games-store.mjs?v=rg-card-games-20261124-v1";
 
@@ -127,5 +127,5 @@ input.addEventListener("keydown", (event) => {
   }
 });
 
-addLine("RG points console - type help");
+addLine("RG console - type help");
 addLine(formatScores(readPointScores()));
