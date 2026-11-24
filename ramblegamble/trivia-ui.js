@@ -1685,13 +1685,14 @@ import { migrateLegacyComposePlacements, normalizeComposePlacements, snapCompose
     board.className = "rg-compose-board";
     board.tabIndex = 0;
     board.style.aspectRatio = format.imageAspect || "11 / 3";
+    const gridSize = Math.max(0, Number(format.gridSize) || 0);
     board.dataset.imageWidth = "880";
     board.dataset.imageHeight = "240";
     board.style.setProperty("--rg-compose-piece-width", (32 / 880 * 100) + "%");
     board.style.setProperty("--rg-compose-piece-height", (32 / 240 * 100) + "%");
-    board.dataset.gridSize = String(Number(format.gridSize) || 0);
-    board.style.setProperty("--rg-compose-grid-width", (Number(format.gridSize || 0) / 880 * 100 || 16 / 880 * 100) + "%");
-    board.style.setProperty("--rg-compose-grid-height", (Number(format.gridSize || 0) / 240 * 100 || 16 / 240 * 100) + "%");
+    board.dataset.gridSize = String(gridSize);
+    board.style.setProperty("--rg-compose-grid-width", gridSize ? (gridSize / 880 * 100) + "%" : "0px");
+    board.style.setProperty("--rg-compose-grid-height", gridSize ? (gridSize / 240 * 100) + "%" : "0px");
     board.setAttribute("aria-label", "Image board. Select a type, then click to place it. Click a placed object to remove it. With a keyboard, use arrow keys and Enter.");
 
     const background = document.createElement("img");
@@ -1710,10 +1711,11 @@ import { migrateLegacyComposePlacements, normalizeComposePlacements, snapCompose
         board.style.aspectRatio = width + " / " + height;
         board.style.setProperty("--rg-compose-piece-width", (32 / width * 100) + "%");
         board.style.setProperty("--rg-compose-piece-height", (32 / height * 100) + "%");
-        if (Number(format.gridSize) > 0) {
-          board.style.setProperty("--rg-compose-grid-width", (Number(format.gridSize) / width * 100) + "%");
-          board.style.setProperty("--rg-compose-grid-height", (Number(format.gridSize) / height * 100) + "%");
+        if (gridSize > 0) {
+          board.style.setProperty("--rg-compose-grid-width", (gridSize / width * 100) + "%");
+          board.style.setProperty("--rg-compose-grid-height", (gridSize / height * 100) + "%");
         }
+        updateGhost();
       };
       background.src = url;
     };
@@ -1790,13 +1792,17 @@ import { migrateLegacyComposePlacements, normalizeComposePlacements, snapCompose
     board.append(ghost);
     const pointerPlacement = (clientX, clientY) => {
       const rect = board.getBoundingClientRect();
+      const imageWidth = Math.max(1, board.clientWidth);
+      const imageHeight = Math.max(1, board.clientHeight);
+      const localX = Math.max(0, Math.min(imageWidth, clientX - rect.left - board.clientLeft));
+      const localY = Math.max(0, Math.min(imageHeight, clientY - rect.top - board.clientTop));
       const width = Number(board.dataset.imageWidth) || 880;
       const height = Number(board.dataset.imageHeight) || 240;
       composeCursor = {
-        x: Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100)),
-        y: Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100)),
+        x: localX / imageWidth * 100,
+        y: localY / imageHeight * 100,
       };
-      return snapComposePlacement((clientX - rect.left) / rect.width * width, (clientY - rect.top) / rect.height * height, width, height, Number(board.dataset.gridSize), 32);
+      return snapComposePlacement(localX / imageWidth * width, localY / imageHeight * height, width, height, Number(board.dataset.gridSize), 32);
     };
     const placeSelected = (placement) => {
       if (selectedComposePiece < 0 || !content.items[selectedComposePiece]) return;
