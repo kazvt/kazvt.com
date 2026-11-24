@@ -13,7 +13,12 @@ export function resolveArcadeShortcut(key) {
 export function resolvePointClick(machine, part = "", focused = false) {
   if (machine === "dice-door") return focused ? "open-dice" : "focus-dice-door";
   if (machine === "roulette") return ROULETTE_MENU_PARTS.has(part) ? "open-trivia" : "spin-wheel";
-  if (machine === "slot") return part === "arm" ? "pull-lever" : "open-slots";
+  if (machine === "slot") {
+    if (part === "arm") return "pull-lever";
+    const button = /^button([1-5])$/.exec(part);
+    if (button) return `spin-column-${Number(button[1]) - 1}`;
+    return "open-slots";
+  }
   return "";
 }
 
