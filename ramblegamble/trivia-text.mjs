@@ -130,7 +130,7 @@ function sanitizeRoundDrafts(value) {
           draft.guessLimit = normalizeGuessLimit(item);
         }
       }
-      if (Array.isArray(draft.placements)) draft.placements = normalizeComposePlacements(draft.placements, draft.items || []);
+      if (Array.isArray(draft.placements)) draft.placements = normalizeComposePlacements(draft.placements, draft.items || 24);
       levels[level] = draft;
     }
     if (Object.keys(levels).length) rounds[round] = levels;

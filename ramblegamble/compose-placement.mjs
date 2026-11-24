@@ -6,13 +6,14 @@ function finiteCoordinate(value) {
 }
 
 export function normalizeComposePlacements(placements, items) {
-  if (!Array.isArray(placements) || !Array.isArray(items)) return [];
+  const itemCount = Array.isArray(items) ? items.length : Number(items);
+  if (!Array.isArray(placements) || !Number.isInteger(itemCount) || itemCount < 0) return [];
   return placements.flatMap((placement) => {
     if (!placement || typeof placement !== "object") return [];
     const itemIndex = Number(placement.itemIndex ?? placement.item ?? placement.typeIndex);
     const x = finiteCoordinate(placement.x);
     const y = finiteCoordinate(placement.y);
-    if (!Number.isInteger(itemIndex) || itemIndex < 0 || itemIndex >= items.length || x == null || y == null) return [];
+    if (!Number.isInteger(itemIndex) || itemIndex < 0 || itemIndex >= itemCount || x == null || y == null) return [];
     return [{ itemIndex, x: clamp(x, 0, 100), y: clamp(y, 0, 100) }];
   });
 }
