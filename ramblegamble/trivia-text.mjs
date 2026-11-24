@@ -304,7 +304,7 @@ function parseQuestionObjects(questions) {
       question: "", subtitle: "", mode: initial.mode, optionCount: initial.optionCount,
       acceptedAnswers: [], options: [], promptImage: "", promptAsset: "", items: [], placements: [], pairs: [],
       categories: ["Group 1", "Group 2", "Group 3"], videoUrl: "", numberValue: 0,
-      numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [], placements: [],
+      numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
       selectionRule: "any", requiredCorrectCount: 0, numberCode: "", guessLimit: 4,
     };
     rounds[round] = {};
@@ -455,7 +455,7 @@ function parseDelimited(text) {
       question: "", subtitle: "", mode: initial.mode, optionCount: initial.optionCount,
       options: [], acceptedAnswers: [], promptImage: "", promptAsset: "", items: [], placements: [], pairs: [],
       categories: ["Group 1", "Group 2", "Group 3"], videoUrl: "", numberValue: 0,
-      numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [], placements: [],
+      numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
       selectionRule: "any", requiredCorrectCount: 0, numberCode: "", guessLimit: 4,
     };
     rounds[roundId] = {};
