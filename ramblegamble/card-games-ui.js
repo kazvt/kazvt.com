@@ -185,8 +185,6 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     } else if (dismissedActive) {
       layer.hidden = true;
     } else if (activeSmeemo) {
-      const signal = `${state.smeemo.status}:${state.smeemo.draws.length}:${state.smeemo.winner || ""}`;
-      if (signal !== lastSmeemoSignal) lastSmeemoSignal = signal;
       menuOpen = false;
       renderSmeemo(state.smeemo);
     } else if (state.round) {
