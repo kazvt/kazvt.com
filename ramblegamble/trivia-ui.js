@@ -116,6 +116,7 @@ import { migrateLegacyComposePlacements, normalizeComposePlacements, snapCompose
       for (const draft of Object.values(levels || {})) {
         if (draft?.promptAsset) ids.add(String(draft.promptAsset));
         for (const option of draft?.options || []) if (option?.asset) ids.add(String(option.asset));
+        for (const item of draft?.items || []) if (item?.asset) ids.add(String(item.asset));
       }
     }
     return [...ids];
@@ -212,6 +213,7 @@ import { migrateLegacyComposePlacements, normalizeComposePlacements, snapCompose
       for (const draft of Object.values(levels || {})) {
         if (idMap[draft.promptAsset]) draft.promptAsset = idMap[draft.promptAsset];
         for (const option of draft.options || []) if (idMap[option.asset]) option.asset = idMap[option.asset];
+        for (const item of draft.items || []) if (idMap[item.asset]) item.asset = idMap[item.asset];
       }
     }
   }
