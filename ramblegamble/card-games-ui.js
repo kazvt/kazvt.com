@@ -66,6 +66,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   let state = readCardGames();
   let pointScores = readPointScores();
   let menuOpen = false;
+  let dismissedActive = false;
   let selectedBuyer = "faroe";
   let lastActiveMode = null;
   let lastSmeemoSignal = "";
@@ -164,6 +165,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     const nextMode = activeSmeemo ? "smeemo" : state.round?.mode || null;
     if (nextMode && nextMode !== lastActiveMode) {
       lastActiveMode = nextMode;
+      dismissedActive = false;
       window.dispatchEvent(new CustomEvent("rg:card-game-active", { detail: { mode: nextMode } }));
     } else if (!nextMode && lastActiveMode) {
       lastActiveMode = null;
@@ -171,8 +173,13 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
         layer.hidden = true;
         content.replaceChildren();
       }
+      window.dispatchEvent(new Event("rg:close-card-games"));
     }
-    if (activeSmeemo) {
+    if (menuOpen && !activeSmeemo) {
+      renderMenu();
+    } else if (dismissedActive) {
+      layer.hidden = true;
+    } else if (activeSmeemo) {
       const signal = `${state.smeemo.status}:${state.smeemo.draws.length}:${state.smeemo.winner || ""}`;
       if (signal !== lastSmeemoSignal) lastSmeemoSignal = signal;
       menuOpen = false;
@@ -264,8 +271,8 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     return progress;
   }
 
-  function promptCard(text, evidence = false) {
-    const card = element("div", `rg-card-prompt${evidence ? " is-evidence" : ""}`);
+  function promptCard(text, type = "suspect") {
+    const card = element("div", `rg-card-prompt is-${type}`);
     const copy = element("div", "rg-card-prompt-copy", text);
     card.append(copy);
     return card;
@@ -280,7 +287,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       renderShop(round);
       return;
     }
-    const prompt = promptCard(round.prompt, round.mode === "quiplash");
+    const prompt = promptCard(round.prompt, round.mode === "red-handed" ? "suspect" : "quiplash");
     const shell = element("div", "rg-card-round");
     const promptSide = element("div", "rg-card-prompt-side");
     promptSide.append(prompt);
@@ -357,8 +364,6 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       if (card.revealed) {
         button.append(element("span", "rg-shop-card-name", card.name));
         button.append(element("span", "rg-shop-card-owner", `TAKEN BY ${playerNames[card.buyer]}`));
-      } else {
-        button.append(element("span", "rg-shop-card-type", card.category));
       }
       button.addEventListener("click", () => {
         const purchase = buyShopCard(state.round, card.id, selectedBuyer, pointScores);
@@ -456,6 +461,8 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       return;
     }
     const next = { ...state, decks, round, smeemo: null };
+    menuOpen = false;
+    dismissedActive = false;
     sync(next);
     window.dispatchEvent(new CustomEvent("rg:card-game-active", { detail: { mode: round.mode } }));
     closeHostPanel();
@@ -477,7 +484,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
 
   function openCardMenu() {
     menuOpen = true;
-    lastActiveMode = null;
+    dismissedActive = false;
     renderMenu();
     closeHostPanel();
   }
@@ -504,6 +511,8 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       return;
     }
     selectedBuyer = "faroe";
+    menuOpen = false;
+    dismissedActive = false;
     sync({ ...state, round });
     window.dispatchEvent(new CustomEvent("rg:card-game-active", { detail: { mode: "shop" } }));
     closeHostPanel();
@@ -511,16 +520,21 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   hostButton.addEventListener("click", openHostPanel);
   roomButton.addEventListener("click", () => {
     menuOpen = false;
+    dismissedActive = Boolean(state.round || state.smeemo);
     window.clearTimeout(menuTimer);
     layer.hidden = true;
     window.dispatchEvent(new Event("rg:close-card-games"));
   });
   window.addEventListener("rg:show-card-menu", () => {
     menuOpen = true;
+    dismissedActive = false;
     renderMenu();
   });
   window.addEventListener("rg:card-game-active", (event) => {
-    if (event.detail?.mode) menuOpen = false;
+    if (event.detail?.mode) {
+      menuOpen = false;
+      dismissedActive = false;
+    }
   });
 
   loadDeckInputs(state.decks);
@@ -528,6 +542,6 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   subscribeCardGames(updateFromState);
   subscribePointScores((scores) => {
     pointScores = scores;
-    if (state.round?.mode === "shop") renderShop(state.round);
+    if (state.round?.mode === "shop" && !layer.hidden && !menuOpen && !dismissedActive) renderShop(state.round);
   });
 })();
