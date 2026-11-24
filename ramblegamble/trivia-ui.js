@@ -1673,47 +1673,164 @@ import { migrateLegacyComposePlacements, normalizeComposePlacements, snapCompose
     answerArea.append(clear);
   }
 
-  function renderCompose(content) {
+  function renderCompose(content, format) {
+    const layout = document.createElement("div");
+    layout.className = "rg-compose-layout";
+    const tray = document.createElement("div");
+    tray.className = "rg-compose-tray";
+    tray.setAttribute("role", "group");
+    tray.setAttribute("aria-label", "Object types");
     const board = document.createElement("div");
     board.className = "rg-compose-board";
     board.tabIndex = 0;
-    board.setAttribute("aria-label", "Image composition board. Select a piece, then click a place on the board.");
-    const background = safeUrl(content.backgroundImage || content.promptImage);
-    if (background) board.style.backgroundImage = 'url("' + background.replace(/["\\]/g, "") + '")';
-    else if (content.promptAsset) readMedia(content.promptAsset).then((url) => {
-      if (url && board.isConnected) board.style.backgroundImage = 'url("' + url.replace(/["\\]/g, "") + '")';
-    });
+    board.style.aspectRatio = format.imageAspect || "11 / 3";
+    board.dataset.imageWidth = "880";
+    board.dataset.imageHeight = "240";
+    board.style.setProperty("--rg-compose-piece-width", (32 / 880 * 100) + "%");
+    board.style.setProperty("--rg-compose-piece-height", (32 / 240 * 100) + "%");
+    board.dataset.gridSize = String(Number(format.gridSize) || 0);
+    board.setAttribute("aria-label", "Image board. Select a type, then click to place it. Click a placed object to remove it. With a keyboard, use arrow keys and Enter.");
+
+    const background = document.createElement("img");
+    background.className = "rg-compose-background";
+    background.alt = "";
+    background.draggable = false;
+    board.append(background);
+    const setBackground = (url) => {
+      if (!url) return;
+      background.onload = () => {
+        if (!board.isConnected || !background.naturalWidth || !background.naturalHeight) return;
+        const width = background.naturalWidth;
+        const height = background.naturalHeight;
+        board.dataset.imageWidth = String(width);
+        board.dataset.imageHeight = String(height);
+        board.style.aspectRatio = width + " / " + height;
+        board.style.setProperty("--rg-compose-piece-width", (32 / width * 100) + "%");
+        board.style.setProperty("--rg-compose-piece-height", (32 / height * 100) + "%");
+      };
+      background.src = url;
+    };
+    const backgroundUrl = safeUrl(content.backgroundImage || content.promptImage);
+    if (backgroundUrl) setBackground(backgroundUrl);
+    else if (content.promptAsset) readMedia(content.promptAsset).then((url) => { if (url && board.isConnected) setBackground(url); });
+
+    const placements = normalizeComposePlacements(content.placements, content.items);
+    const ghost = document.createElement("div");
+    ghost.className = "rg-compose-ghost";
+    ghost.setAttribute("aria-hidden", "true");
+    ghost.hidden = true;
+    const updateGhost = () => {
+      const type = content.items[selectedComposePiece];
+      board.classList.toggle("has-selected-type", Boolean(type));
+      ghost.replaceChildren();
+      ghost.hidden = !type;
+      if (!type) return;
+      if (type.image || type.asset) addImageToNode(ghost, type.image, type.asset, "rg-compose-pixel-art");
+      else ghost.textContent = type.label || "OBJECT";
+      const width = Number(board.dataset.imageWidth) || 880;
+      const height = Number(board.dataset.imageHeight) || 240;
+      const snapped = snapComposePlacement(composeCursor.x / 100 * width, composeCursor.y / 100 * height, width, height, Number(board.dataset.gridSize), 32);
+      ghost.style.left = snapped.x + "%";
+      ghost.style.top = snapped.y + "%";
+      ghost.style.width = "var(--rg-compose-piece-width)";
+      ghost.style.height = "var(--rg-compose-piece-height)";
+    };
     content.items.forEach((item, index) => {
-      const piece = document.createElement("button");
-      piece.type = "button";
-      piece.className = "rg-compose-piece";
-      piece.textContent = item.label || "PIECE " + (index + 1);
-      piece.style.left = (item.x ?? 8) + "%";
-      piece.style.top = (item.y ?? 8) + "%";
-      piece.dataset.piece = String(index);
-      piece.setAttribute("aria-pressed", String(selectedComposePiece === index));
-      if (item.image) addImageToNode(piece, item.image, "", "rg-stage-media");
-      piece.addEventListener("click", (event) => {
-        event.stopPropagation();
-        selectedComposePiece = index;
-        $$(".rg-compose-piece", board).forEach((other) => other.setAttribute("aria-pressed", String(other === piece)));
-        setAnswerStatus("Piece selected - click the large image to place it.", "neutral");
+      const typeButton = document.createElement("button");
+      typeButton.type = "button";
+      typeButton.className = "rg-compose-type";
+      typeButton.dataset.composeType = String(index);
+      typeButton.setAttribute("aria-pressed", String(selectedComposePiece === index));
+      const label = item.label || "OBJECT " + String(index + 1).padStart(2, "0");
+      typeButton.setAttribute("aria-label", "Select " + label);
+      if (item.image || item.asset) addImageToNode(typeButton, item.image, item.asset, "rg-compose-pixel-art");
+      const text = document.createElement("span");
+      text.textContent = item.label || String(index + 1).padStart(2, "0");
+      typeButton.append(text);
+      typeButton.addEventListener("click", (event) => {
+        selectedComposePiece = selectedComposePiece === index ? -1 : index;
+        $$("[data-compose-type]", tray).forEach((button) => button.setAttribute("aria-pressed", String(Number(button.dataset.composeType) === selectedComposePiece)));
+        updateGhost();
+        if (event.detail === 0 && selectedComposePiece >= 0) board.focus();
       });
-      board.append(piece);
+      tray.append(typeButton);
+    });
+
+    placements.forEach((placement, index) => {
+      const item = content.items[placement.itemIndex];
+      if (!item) return;
+      const placed = document.createElement("button");
+      placed.type = "button";
+      placed.className = "rg-compose-piece";
+      placed.dataset.composePlacement = String(index);
+      placed.style.left = placement.x + "%";
+      placed.style.top = placement.y + "%";
+      placed.style.width = "var(--rg-compose-piece-width)";
+      placed.style.height = "var(--rg-compose-piece-height)";
+      const name = item.label || "OBJECT " + String(placement.itemIndex + 1).padStart(2, "0");
+      placed.setAttribute("aria-label", "Remove placed " + name + " " + String(index + 1));
+      if (item.image || item.asset) addImageToNode(placed, item.image, item.asset, "rg-compose-pixel-art");
+      else placed.textContent = name;
+      placed.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const next = placements.filter((_, placementIndex) => placementIndex !== index);
+        writeLevelField("placements", next);
+        renderStage();
+      });
+      board.append(placed);
+    });
+
+    board.append(ghost);
+    const pointerPlacement = (clientX, clientY) => {
+      const rect = board.getBoundingClientRect();
+      const width = Number(board.dataset.imageWidth) || 880;
+      const height = Number(board.dataset.imageHeight) || 240;
+      composeCursor = {
+        x: Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100)),
+        y: Math.max(0, Math.min(100, ((clientY - rect.top) / rect.height) * 100)),
+      };
+      return snapComposePlacement((clientX - rect.left) / rect.width * width, (clientY - rect.top) / rect.height * height, width, height, Number(board.dataset.gridSize), 32);
+    };
+    const placeSelected = (placement) => {
+      if (selectedComposePiece < 0 || !content.items[selectedComposePiece]) return;
+      writeLevelField("placements", [...placements, { itemIndex: selectedComposePiece, ...placement }]);
+      renderStage();
+    };
+    board.addEventListener("pointermove", (event) => {
+      if (selectedComposePiece < 0) return;
+      pointerPlacement(event.clientX, event.clientY);
+      updateGhost();
     });
     board.addEventListener("click", (event) => {
-      if (selectedComposePiece < 0) return;
-      const rect = board.getBoundingClientRect();
-      const x = Math.max(0, Math.min(90, ((event.clientX - rect.left) / rect.width) * 100));
-      const y = Math.max(0, Math.min(90, ((event.clientY - rect.top) / rect.height) * 100));
-      const items = copy(content.items);
-      items[selectedComposePiece].x = x;
-      items[selectedComposePiece].y = y;
-      writeLevelField("items", items);
-      selectedComposePiece = -1;
-      render();
+      if (event.target.closest("[data-compose-placement]") || selectedComposePiece < 0) return;
+      placeSelected(pointerPlacement(event.clientX, event.clientY));
     });
-    stageItems.append(board);
+    board.addEventListener("keydown", (event) => {
+      if (selectedComposePiece < 0) return;
+      const width = Number(board.dataset.imageWidth) || 880;
+      const height = Number(board.dataset.imageHeight) || 240;
+      const step = Number(board.dataset.gridSize) || 8;
+      let x = composeCursor.x / 100 * width;
+      let y = composeCursor.y / 100 * height;
+      if (event.key === "ArrowLeft") x -= step;
+      else if (event.key === "ArrowRight") x += step;
+      else if (event.key === "ArrowUp") y -= step;
+      else if (event.key === "ArrowDown") y += step;
+      else if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        placeSelected(snapComposePlacement(x, y, width, height, Number(board.dataset.gridSize), 32));
+        return;
+      } else return;
+      event.preventDefault();
+      composeCursor = { x: Math.max(0, Math.min(100, x / width * 100)), y: Math.max(0, Math.min(100, y / height * 100)) };
+      updateGhost();
+    });
+
+    const note = document.createElement("p");
+    note.className = "rg-compose-help";
+    note.textContent = "Select - place - click to remove";
+    layout.append(tray, board);
+    stageItems.append(note, layout);
   }
 
   function renderStage() {
