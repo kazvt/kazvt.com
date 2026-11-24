@@ -1516,8 +1516,12 @@ import {
         distance: camera.position.distanceTo(center),
       });
     }
-    preview.dataset.debugSlotControls = JSON.stringify(diagnostics);
     candidates.sort((a, b) => a.area - b.area || a.centerDistance - b.centerDistance);
+    preview.dataset.debugSlotControls = JSON.stringify({
+      pointer: [clientX, clientY],
+      bounds: diagnostics,
+      matches: candidates.map(({ part, centerDistance }) => ({ part, centerDistance })),
+    });
     return candidates[0] || null;
   }
 
@@ -1874,6 +1878,7 @@ import {
       part: interaction.part,
       view: currentView.kind,
       action,
+      point: [clientX, clientY],
     });
     if (action === "focus-roulette") transitionToView({ kind: "roulette" });
     else if (action === "focus-slot") transitionToView({ kind: "slot" });
