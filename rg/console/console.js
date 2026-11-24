@@ -4,6 +4,8 @@ import {
   writePointScores,
 } from "/ramblegamble/points-store.mjs?v=points-console-20261120-v1";
 import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=points-console-hyphen-20261120-v3";
+import { createSmeemoGame, drawSmeemoCard } from "/ramblegamble/card-games.mjs?v=rg-card-games-20261124-v1";
+import { readCardGames, writeCardGames } from "/ramblegamble/card-games-store.mjs?v=rg-card-games-20261124-v1";
 
 const output = document.getElementById("terminal-output");
 const form = document.getElementById("terminal-form");
@@ -39,6 +41,33 @@ function execute(rawCommand) {
   }
   if (parsed.action === "error") {
     addLine(parsed.message || "Invalid command. Type help.", "terminal-error");
+    return;
+  }
+  if (parsed.action === "smeemo-start") {
+    const state = readCardGames();
+    state.round = null;
+    state.smeemo = createSmeemoGame();
+    const result = writeCardGames(state);
+    addLine(`Smeemo Scramble started - 9 cards, 3 each${result.persisted ? "" : " - update sent to open tabs only"}`);
+    return;
+  }
+  if (parsed.action === "smeemo-draw") {
+    const state = readCardGames();
+    const result = drawSmeemoCard(state.smeemo);
+    if (result.error) {
+      addLine("No active Smeemo game. Type smeemo start.", "terminal-error");
+      return;
+    }
+    state.smeemo = result.game;
+    const written = writeCardGames(state);
+    addLine(`${result.draw.player} drew ${result.draw.smeemo ? "SMEEMOBERRY" : "blank"}${result.draw.smeemo ? ` - ${result.draw.player} wins` : ""}${written.persisted ? "" : " - update sent to open tabs only"}`);
+    return;
+  }
+  if (parsed.action === "smeemo-reset") {
+    const state = readCardGames();
+    state.smeemo = null;
+    const result = writeCardGames(state);
+    addLine(`Smeemo Scramble reset${result.persisted ? "" : " - update sent to open tabs only"}`);
     return;
   }
   const scores = readPointScores();

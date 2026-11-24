@@ -1,6 +1,6 @@
 import { RG_CONTESTANTS } from "./points-store.mjs?v=points-console-20261120-v1";
 
-export const POINTS_HELP = "help - clear - points [faroe|erin|kaz] - points add <name> [amount] - points set <name> <total> - points reset [name]";
+export const POINTS_HELP = "help - clear - points [faroe|erin|kaz] - points add <name> [amount] - points set <name> <total> - points reset [name] - smeemo start|draw|reset";
 
 function parseName(value) {
   const name = String(value || "").trim().replace(/^@/, "").toLowerCase();
@@ -21,6 +21,13 @@ export function parsePointsCommand(rawCommand) {
   const action = verb.toLowerCase();
   if (action === "help") return args.length ? { action: "error" } : { action: "help" };
   if (action === "clear") return args.length ? { action: "error" } : { action: "clear" };
+  if (action === "smeemo") {
+    if (args.length !== 1) return { action: "error", message: "Use: smeemo start, smeemo draw, or smeemo reset." };
+    const subcommand = args[0].toLowerCase();
+    return ["start", "draw", "reset"].includes(subcommand)
+      ? { action: `smeemo-${subcommand}` }
+      : { action: "error", message: "Use: smeemo start, smeemo draw, or smeemo reset." };
+  }
   if (action !== "points") return { action: "error", message: `Unknown command: ${verb}. Type help.` };
   if (!args.length) return { action: "inspect-all" };
 
