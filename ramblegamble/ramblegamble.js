@@ -1733,6 +1733,7 @@ import {
       }
     }
     else if (shortcut === "host") transitionToView({ kind: "host" });
+    else if (shortcut === "card-table") transitionToView({ kind: "card-table" });
     else if (shortcut === "cheer") {
       if (!event.repeat) playCheer();
     }
