@@ -88,7 +88,7 @@ test("Smeemo is exactly one of nine cards distributed three per fixed player", (
 });
 
 test("Smeemo draws advance in player order, skip empty piles, and stop immediately on the berry", () => {
-  let game = createSmeemoGame(stableRandom);
+  let game = createSmeemoGame(() => 0.5);
   const total = CARD_GAME_PLAYERS.flatMap((player) => game.piles[player]).length;
   const order = [];
   let smeemoDrawn = false;

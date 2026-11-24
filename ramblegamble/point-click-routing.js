@@ -34,6 +34,7 @@ export function resolvePointClickAction({ zone = "", machine = "", part = "", fo
   if (zone === "back") return canGoBack ? "back" : "";
   if (machine === "host") return focused ? "" : "focus-host";
   if (machine === "contestant") return focused ? "" : "focus-contestants";
+  if (machine === "card-table") return focused ? "open-card-games" : "focus-card-table";
   if ((machine === "roulette" || machine === "slot") && !focused) return `focus-${machine}`;
   return resolvePointClick(machine, part, focused);
 }

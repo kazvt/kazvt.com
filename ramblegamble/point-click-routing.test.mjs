@@ -68,6 +68,8 @@ test("first machine or contestant click focuses the area; focused machines keep 
   assert.equal(resolvePointClickAction({ machine: "contestant", focused: true }), "");
   assert.equal(resolvePointClickAction({ machine: "host" }), "focus-host");
   assert.equal(resolvePointClickAction({ machine: "host", focused: true }), "");
+  assert.equal(resolvePointClickAction({ machine: "card-table" }), "focus-card-table");
+  assert.equal(resolvePointClickAction({ machine: "card-table", focused: true }), "open-card-games");
   assert.equal(resolvePointClickAction({ zone: "back", canGoBack: true }), "back");
   assert.equal(resolvePointClickAction({ zone: "back", canGoBack: false }), "");
 });
@@ -92,6 +94,7 @@ test("back returns to the starting overview view and never retreats past it", ()
     look: -1,
     retreat: 0,
   });
+  assert.deepEqual(resolvePointClickBack({ kind: "card-table", look: 0 }), { kind: "overview", look: 0, retreat: 0 });
   assert.deepEqual(resolvePointClickBack({ kind: "contestants", look: 1 }), { kind: "overview", look: 1, retreat: 0 });
   assert.deepEqual(resolvePointClickBack({ kind: "host", look: 0 }), { kind: "overview", look: 0, retreat: 0 });
 
