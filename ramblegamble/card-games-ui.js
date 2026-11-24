@@ -382,8 +382,8 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
           return;
         }
         pointScores = writePointScores(purchase.scores).scores;
-        setStatusMessage(`${playerNames[selectedBuyer]} bought ${card.name}.`);
         sync({ ...state, round: purchase.round });
+        setStatusMessage(`${playerNames[selectedBuyer]} bought ${card.name}.`);
       });
       const label = element("span", "rg-shop-card-type", `${card.category} card`);
       const price = element("span", "rg-shop-card-price", `${card.price} POINTS`);
@@ -442,7 +442,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       liveStatus.textContent = `${playerNames[game.winner]} found Smeemo.`;
     } else if (nextPlayer) {
       content.append(element("p", "rg-card-round-status", `${playerNames[nextPlayer]} UP`));
-      const latestDraw = game.draws.at(-1);
+      const latestDraw = game.draws[game.draws.length - 1];
       liveStatus.textContent = latestDraw
         ? `${playerNames[latestDraw.player]} drew ${latestDraw.smeemo ? "Smeemo" : "a blank"}. ${playerNames[nextPlayer]} up.`
         : "Smeemo Scramble started. Waiting for a console draw.";
