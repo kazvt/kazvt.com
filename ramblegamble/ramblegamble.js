@@ -1869,6 +1869,12 @@ import {
       focused: currentView.kind === interaction.machine,
       canGoBack: canGoBack(),
     });
+    preview.dataset.debugPointAction = JSON.stringify({
+      machine: interaction.machine,
+      part: interaction.part,
+      view: currentView.kind,
+      action,
+    });
     if (action === "focus-roulette") transitionToView({ kind: "roulette" });
     else if (action === "focus-slot") transitionToView({ kind: "slot" });
     else if (action === "spin-wheel") startWheelSpin();
