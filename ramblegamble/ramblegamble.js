@@ -26,7 +26,7 @@ import {
   ROULETTE_BALL_TRACK_RADIUS,
   rouletteBallPositionAtRadius,
   sampleRouletteBallRadius,
-} from "./roulette-ball-motion.mjs?v=roulette-ball-inner-ring-20261125-v1";
+} from "./roulette-ball-motion.mjs?v=roulette-ball-inner-ring-20261125-v2";
 
 (() => {
   "use strict";
