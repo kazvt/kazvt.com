@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
     <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=liquid-door-portal-20261120-v1">
     <link rel="stylesheet" href="/ramblegamble/host-console.css?v=compose-repeat-grid-20261124-v1">
+    <link rel="stylesheet" href="/ramblegamble/card-games.css?v=rg-card-games-20261124-v1">
     <script type="importmap">
       {
         "imports": {
@@ -22,10 +23,11 @@
     <script type="module" src="/ramblegamble/ramblegamble.js?v=liquid-door-portal-20261120-v2"></script>
     <script type="module" src="/ramblegamble/dice-mode.js?v=dice-berry-hyphen-20261120-v2"></script>
     <script type="module" src="/ramblegamble/trivia-ui.js?v=compose-repeat-place-20261124-v1"></script>
+    <script type="module" src="/ramblegamble/card-games-ui.js?v=rg-card-games-20261124-v1"></script>
   </head>
   <body class="ramble-page" data-theme="p2">
     <main class="rg-preview" id="rg-preview">
-      <canvas id="rg-canvas" tabindex="0" aria-label="Fixed-view point-and-click arcade. Click the contestant or host seats, slot machine, roulette wheel, or dice-framed door to interact. Click the dice door once to approach it, then click it again to enter Dice. Use the left and right screen edges to look around, and the bottom edge, Down, or Backspace to return to the parent view. Escape opens the pause menu. Keyboard: 1 or P participants, 2 slots, 3 roulette, D approaches the dice door, 4 or H host, C cheer, Left and Right look, Enter or Space activate, R spin, S pull lever."></canvas>
+      <canvas id="rg-canvas" tabindex="0" aria-label="Fixed-view point-and-click arcade. Click the contestant or host seats, card table, slot machine, roulette wheel, or dice-framed door to interact. Click the dice door once to approach it, then click it again to enter Dice. Use the left and right screen edges to look around, and the bottom edge, Down, or Backspace to return to the parent view. Escape opens the pause menu. Keyboard: 1 or P participants, 2 slots, 3 roulette, D approaches the dice door, 4 or H host, C cheer, Left and Right look, Enter or Space activate, R spin, S pull lever."></canvas>
       <div class="rg-liquid-portal-layer" id="rg-liquid-portal-layer" aria-hidden="true" hidden>
         <iframe
           class="rg-liquid-portal-frame"
@@ -44,6 +46,15 @@
       </div>
       <aside class="rg-points-hud" id="rg-points-hud" aria-label="Contestant points" aria-live="polite" aria-atomic="true" hidden></aside>
       <p class="rg-result" id="rg-result" hidden></p>
+      <section class="rg-card-games-layer" id="rg-card-games-layer" aria-label="Card games" hidden>
+        <div class="rg-card-games-shell">
+          <header class="rg-card-games-header">
+            <h1 id="rg-card-games-title">CARD TABLE</h1>
+            <button class="rg-card-room-button" id="rg-card-room" type="button">ROOM</button>
+          </header>
+          <div class="rg-card-games-content" id="rg-card-games-content"></div>
+        </div>
+      </section>
       <div class="rg-loading" id="rg-loading">Loading the 3D preview...</div>
     </main>
 
@@ -131,6 +142,7 @@
           <button class="rg-console-tab" id="rg-tab-arcade" type="button" role="tab" aria-selected="true" aria-controls="rg-panel-arcade" tabindex="0">ARCADE</button>
           <button class="rg-console-tab" id="rg-tab-slots" type="button" role="tab" aria-selected="false" aria-controls="rg-panel-slots" tabindex="-1">SLOT GRID</button>
           <button class="rg-console-tab" id="rg-tab-trivia" type="button" role="tab" aria-selected="false" aria-controls="rg-panel-trivia" tabindex="-1">TRIVIA</button>
+          <button class="rg-console-tab" id="rg-tab-card-games" type="button" role="tab" aria-selected="false" aria-controls="rg-panel-card-games" tabindex="-1">CARD GAMES</button>
         </nav>
 
         <section class="rg-console-panel" id="rg-panel-arcade" role="tabpanel" aria-labelledby="rg-tab-arcade" tabindex="0">
@@ -252,6 +264,48 @@
               <p class="rg-editor-note">Round content is blank until you add it. Changes are saved for this tab session.</p>
             </aside>
           </div>
+        </section>
+
+        <section class="rg-console-panel rg-card-admin" id="rg-panel-card-games" role="tabpanel" aria-labelledby="rg-tab-card-games" tabindex="0" hidden>
+          <div class="rg-panel-heading">
+            <div><p class="rg-kicker">CARD TABLE</p><h2>Card games</h2></div>
+            <span class="rg-theme-lock">FAROE / ERIN / KAZ</span>
+          </div>
+          <div class="rg-card-admin-toolbar">
+            <label for="rg-card-mode">GAME<select id="rg-card-mode"><option value="red-handed">RED HANDED</option><option value="quiplash">QUIPLASH BUT IT'S BERRY</option><option value="shop">THE SHOP</option></select></label>
+            <button class="rg-secondary-button" id="rg-card-save" type="button">SAVE LISTS</button>
+            <button class="rg-secondary-button" id="rg-card-menu" type="button">SHOW CARD MENU</button>
+            <button class="rg-stage-button" id="rg-card-start" type="button">START GAME</button>
+          </div>
+          <div class="rg-card-deck-editors">
+            <label class="rg-card-deck" data-deck-for="red-handed">A-CARDS / EVIDENCE<textarea id="rg-card-evidence" rows="6" placeholder="One card per line"></textarea></label>
+            <label class="rg-card-deck" data-deck-for="red-handed">B-CARDS / SUSPECTS<textarea id="rg-card-suspects" rows="6" placeholder="One prompt per line"></textarea></label>
+            <label class="rg-card-deck" data-deck-for="quiplash">PROMPTS<textarea id="rg-card-prompts" rows="6" placeholder="One prompt per line"></textarea></label>
+            <label class="rg-card-deck" data-deck-for="shop">PENALTY CARDS<textarea id="rg-shop-penalty" rows="6" placeholder="The Punishment [200]"></textarea></label>
+            <label class="rg-card-deck" data-deck-for="shop">CHALLENGE CARDS<textarea id="rg-shop-challenge" rows="6" placeholder="Rhyming Time [500]"></textarea></label>
+            <label class="rg-card-deck" data-deck-for="shop">INSTANT CARDS<textarea id="rg-shop-instant" rows="6" placeholder="Lucky Berry [100]"></textarea></label>
+          </div>
+          <p class="rg-card-admin-note">One entry per line. Shop entries use <code>Name [price]</code>. Lists save in this browser.</p>
+          <section class="rg-card-private-entry" id="rg-card-private-entry" hidden>
+            <h3>PRIVATE SUBMISSION</h3>
+            <p>Enter each player's answer here; names stay off the audience cards.</p>
+            <div class="rg-card-entry-controls">
+              <label for="rg-card-player">PLAYER<select id="rg-card-player"><option value="faroe">FAROE</option><option value="erin">ERIN</option><option value="kaz">KAZ</option></select></label>
+              <label class="rg-card-answer-choice" id="rg-card-answer-choice" for="rg-card-answer">A-CARD<select id="rg-card-answer"></select></label>
+              <label class="rg-card-answer-text" id="rg-card-answer-text" for="rg-card-answer-textarea">ANSWER<textarea id="rg-card-answer-textarea" rows="2" maxlength="800"></textarea></label>
+              <button class="rg-stage-button" id="rg-card-submit" type="button">SUBMIT</button>
+            </div>
+          </section>
+          <section class="rg-card-vote-controls" id="rg-card-vote-controls" hidden>
+            <div><h3>AUDIENCE VOTE</h3><p>Audience taps an answer to vote. Reveal after the count is in.</p></div>
+            <button class="rg-stage-button" id="rg-card-reveal-results" type="button">REVEAL RESULTS</button>
+          </section>
+          <section class="rg-card-shop-admin" id="rg-card-shop-admin" hidden>
+            <h3>SHOP CARDS</h3><p>Pick a buyer on the audience screen. Cards charge points when selected.</p>
+            <button class="rg-secondary-button" id="rg-card-shop-refresh" type="button">RESHUFFLE SHOP</button>
+          </section>
+          <p class="rg-card-admin-status" id="rg-card-admin-status" role="status" aria-live="polite">Add decks, then choose a game.</p>
+          <button class="rg-secondary-button rg-card-reset" id="rg-card-reset" type="button">RESET CURRENT GAME</button>
         </section>
       </div>
     </dialog>
