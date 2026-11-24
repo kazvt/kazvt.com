@@ -20,6 +20,13 @@ import {
   sampleSlotReelColumn,
   slotScreenPoint,
 } from "./slot-reels.mjs?v=slot-reels-canvas-20261125-v1";
+import {
+  ROULETTE_BALL_COLOR,
+  ROULETTE_BALL_LANDING_RADIUS,
+  ROULETTE_BALL_TRACK_RADIUS,
+  rouletteBallPositionAtRadius,
+  sampleRouletteBallRadius,
+} from "./roulette-ball-motion.mjs?v=roulette-ball-inner-ring-20261125-v1";
 
 (() => {
   "use strict";
@@ -117,6 +124,7 @@ import {
   let animationFrame = 0;
   let wheelPivot;
   let ballPivot;
+  let ballOrbitObject;
   let lever;
   let rouletteRig;
   let slotRig;
@@ -283,6 +291,9 @@ import {
       wheelMotion = { started: performance.now(), duration: 700, wheelFrom: 0, wheelTo: 0, ballFrom: 0, ballTo: 0 };
       return;
     }
+    const ballPosition = ballOrbitObject?.position;
+    const ballRadiusFrom = ballPosition ? Math.hypot(ballPosition.x, ballPosition.z) : ROULETTE_BALL_TRACK_RADIUS;
+    const ballPositionAtStart = ballPosition && rouletteBallPositionAtRadius(ballPosition, ballRadiusFrom);
     wheelMotion = {
       started: performance.now(),
       duration: reducedMotion.matches ? 650 : 3900,
@@ -290,7 +301,27 @@ import {
       wheelTo: wheelPivot.rotation.y + (5 + Math.random() * 3) * Math.PI * 2 + Math.random() * Math.PI * 2,
       ballFrom: ballPivot.rotation.y,
       ballTo: ballPivot.rotation.y - (8 + Math.random() * 4) * Math.PI * 2 - Math.random() * Math.PI * 2,
+      ballRadiusFrom,
+      ballAngle: ballPositionAtStart ? Math.atan2(ballPositionAtStart.z, ballPositionAtStart.x) : Math.atan2(1, -13),
+      ballHeight: ballPositionAtStart?.y ?? -7,
     };
+  }
+
+  function prepareRouletteBall() {
+    if (!ballPivot) return;
+
+    const orbitNodes = [];
+    const ballMaterial = new THREE.MeshBasicMaterial({ color: ROULETTE_BALL_COLOR, fog: false });
+    ballMaterial.toneMapped = false;
+    ballPivot.traverse((object) => {
+      if (object === ballPivot) return;
+      if (Math.hypot(object.position.x, object.position.z) > 1) orbitNodes.push(object);
+      if (object.isMesh) object.material = ballMaterial;
+    });
+    ballOrbitObject = orbitNodes.find((object) => String(object.name || "").toLowerCase() === "ball")
+      || orbitNodes[0]
+      || null;
+    if (!ballOrbitObject) console.warn("Could not find the roulette ball's authored orbit offset.");
   }
 
   function startLeverPull() {
@@ -2049,9 +2080,22 @@ import {
         wheelMotion.ballTo,
         1 - Math.pow(1 - progress, 2.2),
       );
+      if (ballOrbitObject) {
+        const radius = sampleRouletteBallRadius(progress, wheelMotion.ballRadiusFrom);
+        const position = rouletteBallPositionAtRadius({
+          x: Math.cos(wheelMotion.ballAngle),
+          y: wheelMotion.ballHeight,
+          z: Math.sin(wheelMotion.ballAngle),
+        }, radius);
+        if (position) ballOrbitObject.position.set(position.x, position.y, position.z);
+      }
       if (progress >= 1) {
         wheelPivot.rotation.y = wheelMotion.wheelTo;
         ballPivot.rotation.y = wheelMotion.ballTo;
+        if (ballOrbitObject) {
+          const landingPosition = rouletteBallPositionAtRadius(ballOrbitObject.position, ROULETTE_BALL_LANDING_RADIUS);
+          if (landingPosition) ballOrbitObject.position.set(landingPosition.x, landingPosition.y, landingPosition.z);
+        }
         wheelMotion = null;
         finishTurn();
       }
@@ -2119,6 +2163,7 @@ import {
         if (object.name === "wheel" && !object.isMesh && object.children.length > 0) wheelPivot = object;
         if (object.name === "ball" && !object.isMesh && object.children.length > 0) ballPivot = object;
       });
+      prepareRouletteBall();
 
       slotsModel = slotsGltf.scene;
       prepareModel(slotsModel);
