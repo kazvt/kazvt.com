@@ -1821,6 +1821,7 @@ import {
     else if (action === "focus-slot") transitionToView({ kind: "slot" });
     else if (action === "spin-wheel") startWheelSpin();
     else if (action === "pull-lever") startLeverPull();
+    else if (action.startsWith("spin-column-")) spinSlotColumn(Number(action.slice("spin-column-".length)));
     else if (action === "open-slots") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "slots" } }));
     else if (action === "open-trivia") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "trivia" } }));
   }
@@ -1904,6 +1905,15 @@ import {
 
   window.addEventListener("rg:spin-wheel", startWheelSpin);
   window.addEventListener("rg:pull-slots", startLeverPull);
+  window.addEventListener("rg:slot-grid-updated", (event) => {
+    slotReelGrid = normalizeSlotGrid(event.detail?.grid);
+    if (!slotReelMotion) drawSlotReelDisplay();
+  });
+  window.addEventListener("storage", (event) => {
+    if (event.key !== SLOT_GRID_STORAGE_KEY) return;
+    slotReelGrid = normalizeSlotGrid(event.newValue);
+    if (!slotReelMotion) drawSlotReelDisplay();
+  });
 
   function updateCameraTransition(time) {
     if (!cameraTransition) return;
@@ -2003,15 +2013,26 @@ import {
 
     if (leverMotion && lever) {
       const progress = Math.min(1, (time - leverMotion.started) / leverMotion.duration);
-      lever.rotation.z = leverMotion.base - Math.sin(progress * Math.PI) * 0.65;
+      lever.quaternion.copy(leverMotion.baseQuaternion);
+      lever.rotateX(-Math.sin(progress * Math.PI) * 0.92);
       if (progress >= 1) {
-        lever.rotation.z = leverMotion.base;
+        lever.quaternion.copy(leverMotion.baseQuaternion);
         leverMotion = null;
-        finishTurn();
       }
     } else if (leverMotion && time - leverMotion.started >= leverMotion.duration) {
       leverMotion = null;
-      finishTurn();
+    }
+
+    if (slotReelMotion) {
+      drawSlotReelDisplay(time);
+      const settled = slotReelMotion.columns.every((column) => (
+        !sampleSlotReelColumn(column, slotReelMotion, time)?.spinning
+      ));
+      if (settled) {
+        slotReelMotion = null;
+        drawSlotReelDisplay(time);
+        finishTurn();
+      }
     }
 
     renderer.render(scene, camera);
@@ -2056,6 +2077,7 @@ import {
       slotsModel.traverse((object) => {
         if (object.name === "arm") lever = object;
       });
+      createSlotReelDisplay();
 
       placeMachinesFromStage();
       setupPicking();
