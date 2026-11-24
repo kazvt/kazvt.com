@@ -22,6 +22,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   const header = $(".rg-card-games-header", layer);
   const title = $("#rg-card-games-title");
   const content = $("#rg-card-games-content");
+  const liveStatus = $("#rg-card-live-status");
   const roomButton = $("#rg-card-room");
   const hostButton = document.createElement("button");
   hostButton.type = "button";
@@ -230,6 +231,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     layer.hidden = false;
     hostButton.hidden = true;
     setStageTitle("CARD TABLE", "menu");
+    liveStatus.textContent = "Choose a card game.";
     content.replaceChildren();
     const grid = element("div", "rg-card-menu-grid");
     grid.append(
@@ -297,10 +299,13 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     if (round.phase === "submissions") {
       const submitted = CARD_GAME_PLAYERS.filter((player) => round.submissions[player]).length;
       promptSide.append(berryProgress(round), element("p", "rg-card-round-status", `${submitted} / 3`));
+      liveStatus.textContent = `${modeNames[round.mode]}: ${submitted} of 3 players have submitted.`;
       const waiting = element("div", "rg-card-waiting");
       waiting.append(element("h2", "rg-card-results-title", "ANSWERS"), element("p", "rg-card-round-status", "Waiting for all three berries."));
       shell.append(promptSide, waiting);
     } else if (round.phase === "voting") {
+      const voteTotal = Object.values(round.votes).reduce((total, count) => total + count, 0);
+      liveStatus.textContent = `Audience voting is open. ${voteTotal} votes cast.`;
       const answers = element("div", "rg-card-answer-grid");
       for (const response of round.responses) {
         const answer = element("button", "rg-card-answer");
@@ -319,6 +324,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       shell.classList.add("is-voting");
       shell.append(promptSide, answers);
     } else {
+      liveStatus.textContent = "Vote results revealed.";
       const results = element("div", "rg-card-results");
       results.append(element("h2", "rg-card-results-title", round.winnerIds.length ? "VOTE RESULTS" : "NO VOTES"));
       const answers = element("div", "rg-card-answer-grid");
@@ -387,6 +393,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     }
     shell.append(grid, element("p", "rg-card-round-status", "Choose a berry, then a card."));
     content.append(shell);
+    liveStatus.textContent = "Shop is open. Choose a berry, then a card.";
   }
 
   function renderSmeemo(game) {
@@ -432,13 +439,19 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     }
     if (game.status === "complete" && game.winner) {
       content.append(element("p", "rg-smeemo-winner", `${playerNames[game.winner]} FOUND SMEEMO!`));
+      liveStatus.textContent = `${playerNames[game.winner]} found Smeemo.`;
     } else if (nextPlayer) {
       content.append(element("p", "rg-card-round-status", `${playerNames[nextPlayer]} UP`));
+      const latestDraw = game.draws.at(-1);
+      liveStatus.textContent = latestDraw
+        ? `${playerNames[latestDraw.player]} drew ${latestDraw.smeemo ? "Smeemo" : "a blank"}. ${playerNames[nextPlayer]} up.`
+        : "Smeemo Scramble started. Waiting for a console draw.";
     }
   }
 
   function setStatusMessage(message) {
     adminStatus.textContent = message;
+    liveStatus.textContent = message;
     const status = content.querySelector(".rg-card-round-status");
     if (status) status.textContent = message;
   }
