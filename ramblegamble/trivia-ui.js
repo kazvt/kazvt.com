@@ -71,6 +71,7 @@ import { migrateLegacyComposePlacements, normalizeComposePlacements, snapCompose
   let saveTimer = 0;
   let activeSequenceIndex = 0;
   let selectedComposePiece = -1;
+  let composeCursor = { x: 50, y: 50 };
   let selectedPairLeft = -1;
   let matchedPairIndexes = new Set();
   let drawingData = new Map();
@@ -1884,7 +1885,7 @@ import { migrateLegacyComposePlacements, normalizeComposePlacements, snapCompose
     else if (format.mode === "match-pairs") renderPairs(content);
     else if (format.mode === "image-sequence" || format.mode === "text-sequence") renderSequence(format, content);
     else if (format.mode === "draw-over-image") renderDrawing(content);
-    else if (format.mode === "compose-image") renderCompose(content);
+    else if (format.mode === "compose-image") renderCompose(content, format);
     else if (format.mode === "number-stepper") renderNumberStepper(content, false);
     else if (format.mode === "memory-number") renderNumberStepper(content, true);
     else if (format.mode === "video" && !safeUrl(content.videoUrl)) stageItems.textContent = "Add a video URL in the host editor.";
