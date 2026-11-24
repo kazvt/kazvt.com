@@ -1,0 +1,373 @@
+.rg-card-games-layer {
+  position: absolute;
+  z-index: 8;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: auto;
+  padding: clamp(10px, 2vw, 30px);
+  color: #1e0b01;
+  background: rgb(13 8 34 / 66%);
+  perspective: 1400px;
+}
+.rg-card-games-layer[hidden] { display: none; }
+.rg-card-games-shell {
+  width: min(1120px, 100%);
+  max-height: 100%;
+  overflow: auto;
+  padding: clamp(12px, 2.2vw, 28px);
+  border: 4px ridge #8b2626;
+  background: linear-gradient(145deg, #f2f2da, #dfd4a0);
+  box-shadow: 10px 10px 0 #1e0b01, 0 0 36px rgb(151 110 255 / 54%);
+}
+.rg-card-games-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: clamp(10px, 2vh, 20px);
+  padding-bottom: 8px;
+  border-bottom: 3px double #8b2626;
+}
+.rg-card-games-header h1 {
+  margin: 0;
+  color: #8b2626;
+  font-size: clamp(19px, 3vw, 34px);
+  font-weight: 900;
+  letter-spacing: .055em;
+  text-shadow: 2px 2px 0 #b77beb;
+}
+.rg-card-room-button,
+.rg-card-games-layer button {
+  font: inherit;
+}
+.rg-card-room-button {
+  min-height: 42px;
+  padding: 7px 14px;
+  border: 3px outset #8b2626;
+  color: #fff;
+  background: #8b2626;
+  box-shadow: 3px 3px 0 #1e0b01;
+  font-weight: 900;
+  cursor: pointer;
+}
+.rg-card-games-content { min-height: 150px; }
+.rg-card-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(10px, 2.4vw, 30px);
+  width: min(900px, 100%);
+  margin: 0 auto;
+  align-items: center;
+}
+.rg-mode-choice {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  justify-items: center;
+  gap: 10px;
+  padding: 0 4px 8px;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: transform 330ms cubic-bezier(.2,.85,.25,1), filter 330ms ease;
+}
+.rg-mode-choice:focus-visible { outline: 4px dashed #8b2626; outline-offset: 6px; }
+.rg-mode-choice:hover { transform: translateY(-8px) rotateY(-4deg); }
+.rg-mode-card {
+  position: relative;
+  display: grid;
+  width: min(100%, 230px);
+  aspect-ratio: .68;
+  place-items: center;
+  overflow: hidden;
+  border: 4px solid #1e0b01;
+  border-radius: 14px 14px 22px 22px;
+  background: #9a88ff url("/ramblegamble/assets/provided/card_deck.png") repeat;
+  background-size: 42px 64px;
+  box-shadow: 6px 7px 0 #8b2626, 0 0 0 4px #f2f2da, 0 14px 24px rgb(20 10 30 / 32%);
+  transform-style: preserve-3d;
+  transition: transform 560ms cubic-bezier(.2,.8,.2,1), box-shadow 420ms ease, filter 420ms ease;
+}
+.rg-mode-card::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  opacity: 0;
+  background: url("/ramblegamble/assets/provided/card_deck.png") repeat;
+  background-size: 42px 64px;
+  transform: rotateY(180deg);
+  backface-visibility: hidden;
+}
+.rg-mode-card img {
+  width: 74%;
+  height: 74%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(3px 4px 0 #1e0b01);
+  transition: transform 520ms cubic-bezier(.2,.8,.2,1);
+}
+.rg-mode-label {
+  display: block;
+  max-width: 240px;
+  padding: 7px 10px;
+  color: #f2f2da;
+  background: #8b2626;
+  box-shadow: 3px 3px 0 #1e0b01;
+  font-size: clamp(12px, 1.8vw, 18px);
+  font-weight: 900;
+  letter-spacing: .04em;
+  line-height: 1.1;
+  text-align: center;
+  text-transform: uppercase;
+}
+.rg-card-menu-grid.is-choosing .rg-mode-choice { pointer-events: none; }
+.rg-card-menu-grid.is-choosing .rg-mode-choice:not(.is-selected) { filter: saturate(.55) brightness(.8); }
+.rg-card-menu-grid.is-choosing .rg-mode-choice:not(.is-selected) .rg-mode-card { transform: rotateY(180deg) scale(.9); }
+.rg-card-menu-grid.is-choosing .rg-mode-choice.is-selected { z-index: 2; filter: drop-shadow(0 0 24px #ffdf00); transform: translateY(-13px) scale(1.1); }
+.rg-card-menu-grid.is-choosing .rg-mode-choice.is-selected .rg-mode-card {
+  border-color: #ffdf00;
+  box-shadow: 0 0 0 5px #b77beb, 0 0 32px 10px #ffdf00, 10px 12px 0 #8b2626;
+  transform: rotateY(360deg) scale(1.08);
+}
+.rg-card-menu-grid.is-choosing .rg-mode-choice.is-selected .rg-mode-card img { transform: scale(1.12) rotate(-3deg); }
+
+.rg-card-round {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(220px, .9fr);
+  gap: clamp(12px, 2.5vw, 28px);
+  align-items: center;
+}
+.rg-card-prompt {
+  position: relative;
+  display: grid;
+  min-height: clamp(210px, 42vh, 440px);
+  place-items: center;
+  padding: clamp(34px, 6vw, 72px);
+  background: #b20000 url("/ramblegamble/assets/card-games/suspect-card.png") center / 100% 100% no-repeat;
+  image-rendering: pixelated;
+  filter: drop-shadow(7px 8px 0 #1e0b01);
+  text-align: center;
+}
+.rg-card-prompt.is-evidence {
+  background-image: url("/ramblegamble/assets/card-games/evidence-card.png");
+}
+.rg-card-prompt-copy {
+  max-width: 34ch;
+  color: #1e0b01;
+  font-size: clamp(20px, 3.2vw, 38px);
+  font-weight: 900;
+  line-height: 1.18;
+  overflow-wrap: anywhere;
+  text-shadow: 1px 1px 0 #f2f2da;
+}
+.rg-card-progress {
+  display: flex;
+  justify-content: center;
+  gap: clamp(12px, 2.5vw, 26px);
+  margin: 12px 0 0;
+}
+.rg-card-player-progress {
+  display: grid;
+  min-width: 56px;
+  justify-items: center;
+  gap: 4px;
+  color: #1e0b01;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .04em;
+}
+.rg-card-player-progress img {
+  width: clamp(36px, 5vw, 54px);
+  height: clamp(36px, 5vw, 54px);
+  object-fit: contain;
+  image-rendering: pixelated;
+  opacity: .2;
+  filter: grayscale(1);
+}
+.rg-card-player-progress.is-submitted img { opacity: 1; filter: none; animation: rg-berry-pop 430ms cubic-bezier(.18,.9,.3,1.4); }
+@keyframes rg-berry-pop { 50% { transform: scale(1.22) rotate(-7deg); } }
+.rg-card-answer-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(8px, 1.4vw, 16px);
+  align-items: stretch;
+}
+.rg-card-answer {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: clamp(190px, 34vh, 330px);
+  align-content: center;
+  justify-items: center;
+  gap: 8px;
+  padding: clamp(28px, 4vw, 54px);
+  border: 0;
+  color: #1e0b01;
+  background: #b20000 url("/ramblegamble/assets/card-games/evidence-card.png") center / 100% 100% no-repeat;
+  cursor: pointer;
+  filter: drop-shadow(5px 6px 0 #1e0b01);
+  transition: transform 220ms ease, filter 220ms ease;
+}
+.rg-card-answer:hover { transform: translateY(-7px) rotate(-1deg); filter: drop-shadow(7px 10px 0 #8b2626) drop-shadow(0 0 11px #b77beb); }
+.rg-card-answer-copy { max-width: 28ch; font-size: clamp(13px, 1.8vw, 21px); font-weight: 900; line-height: 1.2; overflow-wrap: anywhere; }
+.rg-card-vote-count { padding: 3px 8px; color: #f2f2da; background: #8b2626; font-size: 12px; font-weight: 900; }
+.rg-card-answer.is-winner { outline: 4px solid #ffdf00; outline-offset: -13px; filter: drop-shadow(7px 8px 0 #1e0b01) drop-shadow(0 0 18px #ffdf00); transform: translateY(-8px) scale(1.035); }
+.rg-card-results { display: grid; gap: 16px; }
+.rg-card-results-title { margin: 0; color: #8b2626; font-size: clamp(18px, 3vw, 30px); text-align: center; text-shadow: 2px 2px 0 #b77beb; }
+.rg-card-round-status { margin: 12px 0 0; min-height: 1.4em; color: #486c2f; font-weight: 900; text-align: center; }
+
+.rg-shop-buyers { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 0 0 10px; }
+.rg-shop-buyer {
+  display: flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 9px;
+  border: 2px solid #1e0b01;
+  color: #1e0b01;
+  background: #f2f2da;
+  box-shadow: 2px 2px 0 #8b2626;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.rg-shop-buyer[aria-pressed="true"] { color: #fff; background: #8b2626; box-shadow: 3px 3px 0 #486c2f; }
+.rg-shop-buyer img { width: 28px; height: 28px; object-fit: contain; image-rendering: pixelated; }
+.rg-shop-card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(10px, 2vw, 22px); align-items: stretch; }
+.rg-shop-card-wrap { display: grid; justify-items: center; gap: 8px; min-width: 0; }
+.rg-shop-card {
+  position: relative;
+  display: grid;
+  width: min(100%, 220px);
+  aspect-ratio: .68;
+  place-items: center;
+  padding: 16px;
+  overflow: hidden;
+  border: 4px solid #1e0b01;
+  border-radius: 14px 14px 22px 22px;
+  color: #1e0b01;
+  background: #9a88ff url("/ramblegamble/assets/provided/card_deck.png") repeat;
+  background-size: 42px 64px;
+  box-shadow: 6px 7px 0 #8b2626;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: transform 650ms cubic-bezier(.2,.8,.2,1), box-shadow 300ms ease;
+}
+.rg-shop-card:hover:not(:disabled) { transform: translateY(-7px) rotateY(-5deg); }
+.rg-shop-card:disabled { cursor: default; }
+.rg-shop-card.is-revealed { border-color: #ffdf00; background: #f2f2da; box-shadow: 0 0 0 4px #b77beb, 0 0 24px #ffdf00, 6px 7px 0 #8b2626; transform: rotateY(360deg); }
+.rg-shop-card-type { padding: 5px 8px; color: #f2f2da; background: #8b2626; font-size: clamp(11px, 1.4vw, 15px); font-weight: 900; text-align: center; text-transform: uppercase; }
+.rg-shop-card-price { color: #8b2626; font-size: clamp(14px, 1.8vw, 20px); font-weight: 900; }
+.rg-shop-card-name { font-size: clamp(17px, 2.5vw, 28px); font-weight: 900; line-height: 1.1; overflow-wrap: anywhere; text-align: center; text-shadow: 2px 2px 0 #b77beb; }
+.rg-shop-card-owner { max-width: 18ch; font-size: 12px; font-weight: 900; text-align: center; }
+.rg-shop-balance { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 8px 0 14px; font-size: 12px; font-weight: 900; }
+
+.rg-smeemo-board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(9px, 2vw, 24px); align-items: start; }
+.rg-smeemo-player { display: grid; justify-items: center; gap: 10px; min-width: 0; padding: clamp(8px, 1.5vw, 16px); border: 3px solid #8b2626; background: rgb(242 242 218 / 86%); box-shadow: 4px 5px 0 #1e0b01; }
+.rg-smeemo-player.is-turn { border-color: #ffdf00; box-shadow: 0 0 0 4px #b77beb, 0 0 18px #ffdf00, 4px 5px 0 #1e0b01; }
+.rg-smeemo-player h2 { margin: 0; color: #8b2626; font-size: clamp(12px, 2vw, 20px); text-transform: uppercase; }
+.rg-smeemo-pile { display: flex; min-height: clamp(78px, 12vw, 135px); align-items: center; justify-content: center; }
+.rg-smeemo-card {
+  display: grid;
+  width: clamp(42px, 6.4vw, 76px);
+  aspect-ratio: .68;
+  place-items: center;
+  margin-left: clamp(-24px, -2vw, -8px);
+  border: 2px solid #1e0b01;
+  border-radius: 5px 5px 10px 10px;
+  color: #1e0b01;
+  background: #9a88ff url("/ramblegamble/assets/provided/card_deck.png") repeat;
+  background-size: 30px 46px;
+  box-shadow: 2px 3px 0 #8b2626;
+  image-rendering: pixelated;
+  transform: rotate(var(--card-angle, 0deg));
+  transition: transform 440ms cubic-bezier(.15,.8,.25,1), background 240ms ease;
+}
+.rg-smeemo-card:first-child { margin-left: 0; }
+.rg-smeemo-card.is-drawn { z-index: 2; color: #1e0b01; background: #f2f2da; transform: translateY(-14px) rotate(0); animation: rg-card-flip 620ms cubic-bezier(.2,.8,.2,1); }
+.rg-smeemo-card.is-smeemo { color: #b20000; box-shadow: 0 0 20px #ffdf00; font-size: 10px; font-weight: 900; }
+.rg-smeemo-draw-list { display: flex; justify-content: center; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+.rg-smeemo-draw { display: grid; min-width: 70px; justify-items: center; gap: 2px; padding: 5px; border: 1px solid #8b2626; background: #f2f2da; font-size: 10px; font-weight: 900; }
+.rg-smeemo-winner { margin: 18px 0 0; color: #8b2626; font-size: clamp(21px, 4vw, 42px); font-weight: 900; text-align: center; text-shadow: 3px 3px 0 #ffdf00, 5px 5px 0 #b77beb; animation: rg-berry-pop 580ms cubic-bezier(.18,.9,.3,1.4); }
+@keyframes rg-card-flip { 50% { transform: translateY(-24px) rotateY(90deg) scale(1.08); } }
+
+.rg-card-admin { --card-ink: #1e0b01; }
+.rg-card-admin-toolbar { display: flex; align-items: end; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.rg-card-admin-toolbar label,
+.rg-card-entry-controls label { display: grid; gap: 5px; color: #486c2f; font-size: 10px; font-weight: 900; letter-spacing: .06em; }
+.rg-card-admin-toolbar select,
+.rg-card-entry-controls select,
+.rg-card-entry-controls textarea,
+.rg-card-deck textarea {
+  min-width: 0;
+  padding: 8px;
+  border: 2px solid #1e0b01;
+  color: #1e0b01;
+  background: #fffdf0;
+  font: inherit;
+  font-size: 13px;
+}
+.rg-card-admin-toolbar select { min-height: 42px; }
+.rg-card-deck-editors { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.rg-card-deck { display: grid; gap: 5px; color: #486c2f; font-size: 11px; font-weight: 900; letter-spacing: .04em; }
+.rg-card-deck[hidden] { display: none; }
+.rg-card-deck textarea { width: 100%; min-height: 96px; resize: vertical; line-height: 1.35; }
+.rg-card-admin-note { margin: 8px 0 14px; color: #3b3019; font-size: 12px; }
+.rg-card-private-entry,
+.rg-card-vote-controls,
+.rg-card-shop-admin { margin: 12px 0; padding: 12px; border: 2px ridge #8b2626; background: #eadc8c; }
+.rg-card-private-entry h3,
+.rg-card-vote-controls h3,
+.rg-card-shop-admin h3 { margin: 0 0 5px; color: #8b2626; font-size: 14px; }
+.rg-card-private-entry p,
+.rg-card-vote-controls p,
+.rg-card-shop-admin p { margin: 0 0 9px; color: #3b3019; font-size: 12px; }
+.rg-card-entry-controls { display: grid; grid-template-columns: 110px minmax(160px, 1fr) minmax(180px, 1.2fr) auto; align-items: end; gap: 8px; }
+.rg-card-answer-choice[hidden],
+.rg-card-answer-text[hidden] { display: none; }
+.rg-card-entry-controls textarea { min-height: 42px; resize: vertical; }
+.rg-card-vote-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.rg-card-vote-controls p { margin-bottom: 0; }
+.rg-card-admin-status { min-height: 1.5em; margin: 12px 0; color: #486c2f; font-size: 12px; font-weight: 900; }
+.rg-card-reset { margin: 0 0 10px; }
+.rg-card-admin [hidden] { display: none !important; }
+.rg-card-admin code { padding: 1px 4px; background: #f2f2da; }
+.rg-card-games-layer :focus-visible { outline: 4px solid #486c2f; outline-offset: 3px; }
+
+@media (max-width: 680px) {
+  .rg-card-games-layer { align-items: start; }
+  .rg-card-games-shell { margin-block: auto; }
+  .rg-card-menu-grid { gap: 8px; }
+  .rg-mode-card { border-width: 3px; box-shadow: 4px 5px 0 #8b2626, 0 0 0 3px #f2f2da; }
+  .rg-mode-label { padding: 6px 4px; font-size: 10px; }
+  .rg-card-round { grid-template-columns: 1fr; }
+  .rg-card-prompt { min-height: 180px; }
+  .rg-card-answer-grid { grid-template-columns: 1fr; width: min(100%, 430px); margin-inline: auto; }
+  .rg-card-answer { min-height: 170px; }
+  .rg-card-deck-editors { grid-template-columns: 1fr; }
+  .rg-card-entry-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .rg-card-entry-controls > :last-child { grid-column: 1 / -1; }
+}
+@media (max-width: 420px) {
+  .rg-card-games-layer { padding: 6px; }
+  .rg-card-games-shell { padding: 9px; }
+  .rg-card-menu-grid { grid-template-columns: 1fr; width: min(260px, 100%); }
+  .rg-mode-choice { grid-template-columns: 70px minmax(0, 1fr); justify-items: start; align-items: center; }
+  .rg-mode-card { width: 66px; aspect-ratio: .68; }
+  .rg-mode-card img { width: 72%; height: 72%; }
+  .rg-mode-label { max-width: none; font-size: 12px; }
+  .rg-shop-card-grid { gap: 5px; }
+  .rg-shop-card { padding: 6px; border-width: 2px; }
+  .rg-shop-card-type { padding: 3px; font-size: 9px; }
+  .rg-shop-card-name { font-size: 13px; }
+  .rg-shop-card-price { font-size: 12px; }
+  .rg-smeemo-player { padding: 5px; }
+  .rg-smeemo-pile { min-height: 65px; }
+  .rg-smeemo-card { width: clamp(32px, 8vw, 50px); margin-left: -12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rg-mode-choice, .rg-mode-card, .rg-mode-card img, .rg-card-answer, .rg-shop-card, .rg-smeemo-card { transition: none; animation: none !important; }
+}
