@@ -34,6 +34,6 @@ test("legacy single-piece positions migrate without treating defaults as placeme
 
 test("compose clicks snap the top-left of a doubled-size sprite to image grid cells", () => {
   const result = snapComposePlacement(101, 77, 880, 240, 16, 32);
-  assert.deepEqual(result, { x: 8 / 880 * 100, y: 64 / 240 * 100 });
+  assert.deepEqual(result, { x: 80 / 880 * 100, y: 64 / 240 * 100 });
   assert.deepEqual(snapComposePlacement(0, 0, 880, 240, 16, 32), { x: 0, y: 0 });
 });

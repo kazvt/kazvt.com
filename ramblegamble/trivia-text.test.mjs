@@ -203,22 +203,32 @@ test("generic JSON question arrays accept common prompt, option, and key aliases
 
 test("JSON text export round-trips modes, tier fields, correct answers, media references, and bank entries", () => {
   const data = {
-    rounds: { "03": { 1: {
+    rounds: {
+      "03": { 1: {
       question: "Pick one?", mode: "choice-text", optionCount: 2,
       options: [{ label: "A", image: "", asset: "asset-one", correct: true }, { label: "B", image: "", asset: "", correct: false }],
       acceptedAnswers: ["Alternate"], subtitle: "A hint", promptImage: "", promptAsset: "asset-one",
       items: [], pairs: [], categories: [], videoUrl: "", numberValue: 0, numberVisible: false,
       imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
       selectionRule: "all", requiredCorrectCount: 2, numberCode: "0042", guessLimit: 2,
-    } } },
+      } },
+      "28": { 1: {
+        question: "Place the objects", mode: "compose-image", optionCount: 6,
+        items: [{ label: "Pixel", image: "", asset: "asset-two", x: 8, y: 8 }],
+        placements: [{ itemIndex: 0, x: 16, y: 24 }, { itemIndex: 0, x: 72, y: 48 }],
+        options: [], acceptedAnswers: [], pairs: [], categories: [], videoUrl: "", numberValue: 0,
+        imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
+      } },
+    },
     questionBank: [{ id: "bank-1", text: "Ask everyone?" }],
-    media: { "asset-one": "data:image/png;base64,aGVsbG8=" },
+    media: { "asset-one": "data:image/png;base64,aGVsbG8=", "asset-two": "data:image/png;base64,cGl4ZWw=" },
   };
   const parsed = parseTriviaText(exportTriviaText(data));
   assert.deepEqual(parsed.errors, []);
   assert.deepEqual(parsed.rounds, data.rounds);
   assert.deepEqual(parsed.questionBank, data.questionBank);
   assert.deepEqual(parsed.media, data.media);
+  assert.deepEqual(parsed.rounds["28"][1].placements, data.rounds["28"][1].placements);
 
   const clamped = parseTriviaText(JSON.stringify({ rounds: { "10": { 3: { mode: "number-grid", guessLimit: 9 } } } }));
   assert.equal(clamped.rounds["10"][3].guessLimit, 4);

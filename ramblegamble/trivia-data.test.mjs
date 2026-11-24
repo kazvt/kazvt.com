@@ -81,7 +81,10 @@ test("special media templates keep their authored sizes", () => {
     [12, 24, "16 / 9"],
   );
   assert.deepEqual([resolveRoundFormat("23", 1).rows, resolveRoundFormat("23", 1).columns], [3, 4]);
-  assert.equal(resolveRoundFormat("28", 1).mode, "compose-image");
+  assert.deepEqual(
+    [resolveRoundFormat("28", 1).mode, resolveRoundFormat("28", 1).imageAspect, resolveRoundFormat("28", 1).gridSize],
+    ["compose-image", "11 / 3", 16],
+  );
   assert.equal(resolveRoundFormat("31", 1).mode, "number-stepper");
   assert.equal(resolveRoundFormat("32", 1).mode, "memory-number");
   assert.equal(resolveRoundFormat("35", 1).mode, "video");
