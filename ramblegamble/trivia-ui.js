@@ -450,6 +450,7 @@ import { migrateLegacyComposePlacements, normalizeComposePlacements, snapCompose
 
   function setTab(index, focus = false) {
     activeTab = (index + tabs.length) % tabs.length;
+    dialog.classList.toggle("is-card-host", activeTab === 3);
     if (activeTab !== 2) setPresentation(false);
     tabs.forEach((tab, tabIndex) => {
       const active = tabIndex === activeTab;
@@ -473,6 +474,7 @@ import { migrateLegacyComposePlacements, normalizeComposePlacements, snapCompose
 
   function closeConsole() {
     setPresentation(false);
+    dialog.classList.remove("is-card-host");
     if (typeof dialog.close === "function" && dialog.open) dialog.close();
     else dialog.removeAttribute("open");
     if (priorFocus?.focus) priorFocus.focus();
@@ -487,6 +489,7 @@ import { migrateLegacyComposePlacements, normalizeComposePlacements, snapCompose
   }
 
   window.addEventListener("rg:open-host-panel", (event) => openConsole(event.detail?.tab || activeTab));
+  window.addEventListener("rg:close-host-panel", closeConsole);
   closeButton.addEventListener("click", closeConsole);
   dialog.addEventListener("click", (event) => {
     if (event.target === dialog) closeConsole();

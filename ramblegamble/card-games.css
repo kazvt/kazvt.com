@@ -370,3 +370,18 @@
 @media (prefers-reduced-motion: reduce) {
   .rg-mode-choice, .rg-mode-card, .rg-mode-card img, .rg-card-answer, .rg-shop-card, .rg-smeemo-card { transition: none; animation: none !important; }
 }
+
+.rg-console.is-card-host {
+  position: fixed;
+  inset: 8px 8px 8px auto;
+  width: min(520px, calc(100vw - 16px));
+  height: auto;
+  max-height: calc(100dvh - 16px);
+  margin: 0;
+}
+.rg-console.is-card-host::backdrop { background: rgb(12 10 23 / 20%); }
+.rg-console.is-card-host .rg-console-frame { padding: 12px; }
+.rg-console.is-card-host .rg-card-deck-editors { grid-template-columns: 1fr; }
+@media (max-width: 680px) {
+  .rg-console.is-card-host { inset: 6px; width: auto; max-height: calc(100dvh - 12px); }
+}
