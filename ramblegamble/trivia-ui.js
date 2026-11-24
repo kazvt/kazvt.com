@@ -7,7 +7,7 @@ import {
   resolveRoundFormat,
   resolveRoundMode,
   resolveTimelineReorder,
-} from "./trivia-data.js?v=timeline-present-reorder-20261124-v1";
+} from "./trivia-data.js?v=compose-repeat-grid-20261124-v1";
 import {
   QUESTION_BANK_SESSION_KEY,
   readSessionQuestionBank,
