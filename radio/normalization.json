@@ -977,6 +977,27 @@
       "loudnessRangeLufs": 5.1,
       "sourceSizeBytes": 3355204,
       "sourceSha256": "40471b6de1d1f6f1f2755aa96aa661ace39b45866ddb73f9c978a0d56199dcbd"
+    },
+    "tracks/(FREE) Boom Bap 90s Old School Instrumental Type Beat [2026] - Little.mp3": {
+      "integratedLufs": -14.5,
+      "truePeakDbtp": 0.36,
+      "loudnessRangeLufs": 12.2,
+      "sourceSizeBytes": 2424238,
+      "sourceSha256": "1d8ce172a626a17a7ed53fd9bbb3ffdcbdecbdee1fedae3f22de0899c6737f06"
+    },
+    "tracks/(FREE) WHEN I ENTER - 90s Old School Boom Bap Type Beat ｜ Hip Hop Instrumental with Scratch Hook.mp3": {
+      "integratedLufs": -10.54,
+      "truePeakDbtp": 2.86,
+      "loudnessRangeLufs": 5.2,
+      "sourceSizeBytes": 3141587,
+      "sourceSha256": "a39ad4f99f85093c28ef3bc5a8089499c58cbeda19ccafa5eb39003892cae4dd"
+    },
+    "tracks/[FREE] Old School Beat ｜ Boom Bap Type Beat ｜ ＂Balloon＂ Freestyle Rap Instrumental 2026 ｜ Doz Beats.mp3": {
+      "integratedLufs": -16.2,
+      "truePeakDbtp": -0.81,
+      "loudnessRangeLufs": 12.9,
+      "sourceSizeBytes": 3572489,
+      "sourceSha256": "4e7825a1e88de2e69b531712fc7153235a2a9e247378f187f5ac029de59da117"
     }
   }
 }
