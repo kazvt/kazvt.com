@@ -1690,6 +1690,8 @@ import { migrateLegacyComposePlacements, normalizeComposePlacements, snapCompose
     board.style.setProperty("--rg-compose-piece-width", (32 / 880 * 100) + "%");
     board.style.setProperty("--rg-compose-piece-height", (32 / 240 * 100) + "%");
     board.dataset.gridSize = String(Number(format.gridSize) || 0);
+    board.style.setProperty("--rg-compose-grid-width", (Number(format.gridSize || 0) / 880 * 100 || 16 / 880 * 100) + "%");
+    board.style.setProperty("--rg-compose-grid-height", (Number(format.gridSize || 0) / 240 * 100 || 16 / 240 * 100) + "%");
     board.setAttribute("aria-label", "Image board. Select a type, then click to place it. Click a placed object to remove it. With a keyboard, use arrow keys and Enter.");
 
     const background = document.createElement("img");
@@ -1708,6 +1710,10 @@ import { migrateLegacyComposePlacements, normalizeComposePlacements, snapCompose
         board.style.aspectRatio = width + " / " + height;
         board.style.setProperty("--rg-compose-piece-width", (32 / width * 100) + "%");
         board.style.setProperty("--rg-compose-piece-height", (32 / height * 100) + "%");
+        if (Number(format.gridSize) > 0) {
+          board.style.setProperty("--rg-compose-grid-width", (Number(format.gridSize) / width * 100) + "%");
+          board.style.setProperty("--rg-compose-grid-height", (Number(format.gridSize) / height * 100) + "%");
+        }
       };
       background.src = url;
     };
