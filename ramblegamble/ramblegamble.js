@@ -139,6 +139,7 @@ import {
   let slotReelContext = null;
   let slotReelTexture = null;
   let slotReelDisplay = null;
+  let slotControlTargets = new Map();
   const slotReelImages = new Map();
   const pickQuestion = createQuestionPicker();
   let playing = false;
@@ -1214,6 +1215,7 @@ import {
   function setupPicking() {
     rouletteTargets = [];
     slotTargets = [];
+    slotControlTargets = new Map();
     cardTableTargets = [];
     diceDoorTargets = [];
     contestantTargets = [];
@@ -1477,6 +1479,43 @@ import {
     return "";
   }
 
+  function getProjectedSlotControlAt(clientX, clientY, canvasBounds) {
+    if (!camera || !slotControlTargets.size) return null;
+    camera.updateMatrixWorld(true);
+    const candidates = [];
+    for (const [part, object] of slotControlTargets) {
+      const box = new THREE.Box3().setFromObject(object);
+      if (box.isEmpty()) continue;
+      const projected = [];
+      for (const x of [box.min.x, box.max.x]) {
+        for (const y of [box.min.y, box.max.y]) {
+          for (const z of [box.min.z, box.max.z]) {
+            const point = new THREE.Vector3(x, y, z).project(camera);
+            if (point.z >= -1 && point.z <= 1) projected.push(point);
+          }
+        }
+      }
+      if (projected.length < 2) continue;
+      const left = canvasBounds.left + (Math.min(...projected.map((point) => point.x)) + 1) * 0.5 * canvasBounds.width;
+      const right = canvasBounds.left + (Math.max(...projected.map((point) => point.x)) + 1) * 0.5 * canvasBounds.width;
+      const top = canvasBounds.top + (1 - Math.max(...projected.map((point) => point.y))) * 0.5 * canvasBounds.height;
+      const bottom = canvasBounds.top + (1 - Math.min(...projected.map((point) => point.y))) * 0.5 * canvasBounds.height;
+      const padding = part.startsWith("button") ? 5 : 2;
+      if (clientX < left - padding || clientX > right + padding || clientY < top - padding || clientY > bottom + padding) continue;
+      const center = box.getCenter(new THREE.Vector3());
+      const centerX = (left + right) / 2;
+      const centerY = (top + bottom) / 2;
+      candidates.push({
+        part,
+        area: Math.max(1, (right - left) * (bottom - top)),
+        centerDistance: Math.hypot(clientX - centerX, clientY - centerY),
+        distance: camera.position.distanceTo(center),
+      });
+    }
+    candidates.sort((a, b) => a.area - b.area || a.centerDistance - b.centerDistance);
+    return candidates[0] || null;
+  }
+
   function getSceneInteractionAt(clientX, clientY) {
     const bounds = canvas.getBoundingClientRect();
     pointer.x = ((clientX - bounds.left) / bounds.width) * 2 - 1;
@@ -1485,6 +1524,7 @@ import {
     const wheelHit = raycaster.intersectObjects(rouletteTargets, true)[0];
     const slotIntersections = raycaster.intersectObjects(slotTargets, true);
     const slotHit = slotIntersections[0];
+    const projectedSlotControl = getProjectedSlotControlAt(clientX, clientY, bounds);
     const cardTableHit = raycaster.intersectObjects(cardTableTargets, true)[0];
     const diceDoorHit = raycaster.intersectObjects(diceDoorTargets, false)[0];
     const chairHit = raycaster.intersectObjects(contestantTargets, false)[0];
@@ -1506,24 +1546,16 @@ import {
       },
     ].filter(Boolean).sort((a, b) => a.distance - b.distance);
     const hit = hits[0];
-    if (!hit) return getSeatAtScreen(clientX, clientY, bounds);
+    if (!hit) {
+      return projectedSlotControl
+        ? { machine: "slot", part: projectedSlotControl.part, distance: projectedSlotControl.distance, model: slotsModel }
+        : getSeatAtScreen(clientX, clientY, bounds);
+    }
     if (hit.machine === "contestant" || hit.machine === "host") return hit;
     if (hit.machine === "card-table") return hit;
     const partNames = hit.machine === "roulette" ? ROULETTE_PART_NAMES : SLOT_PART_NAMES;
-    const part = getNamedPart(hit.hit, hit.model, partNames);
-    if (hit.machine === "slot") {
-      window.__rgLastSlotHit = {
-        part,
-        nearestName: hit.hit?.object?.name,
-        distance: hit.distance,
-        intersections: slotIntersections.slice(0, 12).map((entry) => ({
-          name: entry.object?.name,
-          parent: entry.object?.parent?.name,
-          distance: Number(entry.distance.toFixed(3)),
-          part: getNamedPart(entry, slotsModel, SLOT_PART_NAMES),
-        })),
-      };
-    }
+    let part = getNamedPart(hit.hit, hit.model, partNames);
+    if (hit.machine === "slot" && projectedSlotControl) part = projectedSlotControl.part;
     return { ...hit, part };
   }
 
@@ -2090,7 +2122,9 @@ import {
       prepareModel(slotsModel);
       slotRig.add(slotsModel);
       slotsModel.traverse((object) => {
-        if (object.name === "arm") lever = object;
+        const name = String(object.name || "").toLowerCase();
+        if (name === "arm") lever = object;
+        if (name === "arm" || /^button[1-5]$/.test(name)) slotControlTargets.set(name, object);
       });
       createSlotReelDisplay();
 
