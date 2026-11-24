@@ -30,12 +30,15 @@ test("sparse difficulties inherit and additive choices accumulate", () => {
   assert.equal(ROUND_RULES[10][3].replaceOptions, true);
 });
 
-test("timeline reordering follows each difficulty default and supports a saved override", () => {
-  assert.equal(resolveTimelineReorder("15", 1), false);
+test("timeline questions can be rearranged in Present at every tier by default", () => {
+  assert.equal(resolveTimelineReorder("15", 1), true);
+  assert.equal(resolveTimelineReorder("15", 2), true);
   assert.equal(resolveTimelineReorder("15", 3), true);
   assert.equal(resolveTimelineReorder("15", 1, { 1: { reorder: true } }), true);
+  assert.equal(resolveTimelineReorder("15", 2, { 1: { reorder: false } }), false);
   assert.equal(resolveTimelineReorder("15", 3, { 3: { reorder: false } }), false);
   assert.equal(resolveTimelineReorder("15", 3, { 1: { reorder: false } }), true);
+  assert.equal(resolveTimelineReorder("01", 1), false);
 });
 
 test("question-specific templates preserve the supplied counts and modes", () => {

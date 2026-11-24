@@ -37,6 +37,17 @@ export function normalizeGuessLimit(value) {
   return Math.max(1, Math.min(4, Math.trunc(count)));
 }
 
+export function compareNumberGuess(answer, guess) {
+  const rawGuess = String(guess ?? "").trim();
+  if (!rawGuess) return null;
+  const target = Number(answer);
+  const attempt = Number(rawGuess);
+  if (!Number.isFinite(target) || !Number.isFinite(attempt)) return null;
+  if (attempt < target) return "higher";
+  if (attempt > target) return "lower";
+  return "correct";
+}
+
 // Score duplicate digits with Wordle's exact-first, then present-elsewhere rule.
 export function scoreFourDigitGuess(secret, guess) {
   const target = String(secret ?? "");

@@ -367,6 +367,11 @@
 .rg-pair-columns > div { display: grid; align-content: start; gap: 6px; }
 .rg-pair-card { min-height: 44px; padding: 7px; border: 1px solid #486c2f; background: #f1e5a1; font-size: 11px; text-align: left; }
 .rg-pair-card img { width: 100%; aspect-ratio: 6 / 5; object-fit: contain; }
+.rg-trivia-screen[data-round="21"][data-mode="match-pairs"] #rg-stage-items { display: block; }
+.rg-trivia-screen[data-round="21"][data-mode="match-pairs"] .rg-pair-columns { gap: clamp(6px, 1vw, 14px); }
+.rg-trivia-screen[data-round="21"][data-mode="match-pairs"] .rg-pair-columns > div { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(4px, .65vw, 9px); }
+.rg-trivia-screen[data-round="21"][data-mode="match-pairs"] .rg-pair-card { display: grid; min-width: 0; min-height: 0; aspect-ratio: 6 / 5; align-content: center; justify-items: center; padding: clamp(3px, .45vw, 7px); overflow: hidden; text-align: center; overflow-wrap: anywhere; }
+.rg-trivia-screen[data-round="21"][data-mode="match-pairs"] .rg-pair-card img { display: block; width: 100%; height: 100%; max-height: none; aspect-ratio: 6 / 5; object-fit: contain; }
 .rg-trivia-screen[data-mode="categorize-images"] .rg-stage-media,
 .rg-trivia-screen[data-mode="image-sequence"] .rg-stage-media { width: min(100%, 240px); aspect-ratio: 1; object-fit: contain; }
 .rg-number-guess-board { display: grid; width: min(100%, 360px); gap: 7px; margin: 12px auto; }
@@ -400,11 +405,13 @@
 @container rg-trivia (max-width: 1040px) {
   .rg-trivia-screen[data-mode="categorize-images"] .rg-category-item-grid,
   .rg-trivia-screen[data-mode="image-grid"] #rg-stage-items { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .rg-trivia-screen[data-round="21"][data-mode="match-pairs"] .rg-pair-columns > div { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @container rg-trivia (max-width: 680px) {
   .rg-trivia-screen[data-mode="categorize-images"] .rg-category-item-grid,
   .rg-trivia-screen[data-mode="image-grid"] #rg-stage-items { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .rg-trivia-screen[data-round="21"][data-mode="match-pairs"] .rg-pair-columns > div { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .rg-trivia-screen[data-mode="categorize-images"] .rg-category-buckets { grid-template-columns: 1fr; }
 }
 

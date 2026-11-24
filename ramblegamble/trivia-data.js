@@ -87,9 +87,19 @@ export function resolveRoundFormat(roundId, difficulty = 1) {
 
 export function resolveTimelineReorder(roundId, difficulty = 1, levelDrafts = {}) {
   const targetDifficulty = Math.max(1, Math.min(5, Number(difficulty) || 1));
-  const override = levelDrafts?.[targetDifficulty]?.reorder;
-  if (typeof override === "boolean") return override;
-  return resolveRoundFormat(roundId, targetDifficulty).reorder === true;
+  if (resolveRoundMode(roundId, targetDifficulty, levelDrafts) !== "timeline") return false;
+
+  // A timeline is a player-arranged puzzle by default. Tier rules and explicit
+  // host overrides can still turn arranging off or back on at a given tier.
+  const roundNumber = Number.parseInt(roundId, 10);
+  let reorder = true;
+  for (let level = 1; level <= targetDifficulty; level += 1) {
+    const ruleValue = ROUND_RULES[roundNumber]?.[level]?.reorder;
+    const draftValue = levelDrafts?.[level]?.reorder;
+    if (typeof ruleValue === "boolean") reorder = ruleValue;
+    if (typeof draftValue === "boolean") reorder = draftValue;
+  }
+  return reorder;
 }
 
 export function resolveRoundMode(roundId, difficulty = 1, levelDrafts = {}) {

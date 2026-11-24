@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, normalizeGuessLimit, scoreFourDigitGuess } from "./trivia-game.mjs";
+import { compareNumberGuess, hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, normalizeGuessLimit, scoreFourDigitGuess } from "./trivia-game.mjs";
 
 test("blank round templates stay blank until the host adds visible content", () => {
   assert.equal(hasAuthoredTriviaContent({
@@ -29,6 +29,17 @@ test("guess limit defaults to four and only allows a lower positive attempt coun
   assert.equal(normalizeGuessLimit(0), 1);
   assert.equal(normalizeGuessLimit(8), 4);
   assert.equal(normalizeGuessLimit("invalid"), 4);
+});
+
+test("changeable-number rounds give higher/lower feedback and validate numeric guesses", () => {
+  assert.equal(compareNumberGuess(42, "17"), "higher");
+  assert.equal(compareNumberGuess(42, "68"), "lower");
+  assert.equal(compareNumberGuess(42, "42"), "correct");
+  assert.equal(compareNumberGuess(0, "-1"), "higher");
+  assert.equal(compareNumberGuess(17.5, "17.25"), "higher");
+  assert.equal(compareNumberGuess(17.5, ""), null);
+  assert.equal(compareNumberGuess(17.5, "not a number"), null);
+  assert.equal(compareNumberGuess(Infinity, "1"), null);
 });
 
 test("number guesses mark exact positions green, misplaced digits yellow, and absent digits grey", () => {

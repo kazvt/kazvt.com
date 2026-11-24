@@ -18,7 +18,7 @@ import {
   exportTriviaText,
   parseTriviaText,
 } from "./trivia-text.mjs?v=number-grid-guess-limit-20261121-v1";
-import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, normalizeGuessLimit, scoreFourDigitGuess } from "./trivia-game.mjs?v=number-grid-guess-limit-20261121-v1";
+import { compareNumberGuess, hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, normalizeGuessLimit, scoreFourDigitGuess } from "./trivia-game.mjs?v=changeable-number-feedback-20261124-v1";
 
 (() => {
   "use strict";
@@ -74,6 +74,7 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, nor
   let matchedPairIndexes = new Set();
   let drawingData = new Map();
   let numberGuessState = { key: "", guesses: [], solved: false };
+  let changeableNumberState = { key: "", solved: false };
   let audioContext = null;
   let lastWrongAt = 0;
   let drafts = loadDrafts();
@@ -1554,33 +1555,47 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, nor
       answerArea.append(imageToggle);
       promptImage.hidden = !content.imageVisible;
     }
-    const reveal = document.createElement("button");
-    reveal.type = "button";
-    reveal.className = "rg-stage-button";
-    reveal.textContent = content.numberVisible ? "HIDE NUMBER" : "REVEAL NUMBER";
-    reveal.addEventListener("click", () => {
-      writeLevelField("numberVisible", !content.numberVisible);
-      render();
-    });
-    answerArea.append(reveal);
-    if (content.numberVisible || !memory) {
-      const output = document.createElement("strong");
-      output.className = "rg-question-text";
-      output.textContent = String(Number(content.numberValue) || 0);
-      answerArea.append(output);
-      for (const delta of [-1, 1]) {
-        const step = document.createElement("button");
-        step.type = "button";
-        step.className = "rg-stepper-button";
-        step.textContent = delta < 0 ? "-" : "+";
-        step.setAttribute("aria-label", delta < 0 ? "Decrease number" : "Increase number");
-        step.addEventListener("click", () => {
-          writeLevelField("numberValue", (Number(content.numberValue) || 0) + delta);
-          render();
-        });
-        answerArea.append(step);
+    const key = JSON.stringify([currentRound, currentDifficulty, memory, content.question, content.numberValue]);
+    if (changeableNumberState.key !== key) changeableNumberState = { key, solved: false };
+
+    const form = document.createElement("form");
+    form.className = "rg-number-guess-form rg-changeable-number-form";
+    form.noValidate = true;
+    const input = document.createElement("input");
+    input.type = "number";
+    input.step = "any";
+    input.inputMode = "decimal";
+    input.autocomplete = "off";
+    input.placeholder = "NUMBER";
+    input.setAttribute("aria-label", "Enter a number");
+    const check = document.createElement("button");
+    check.type = "submit";
+    check.className = "rg-stage-button";
+    check.textContent = "CHECK";
+    input.disabled = changeableNumberState.solved;
+    check.disabled = changeableNumberState.solved;
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (changeableNumberState.solved) return;
+      const result = compareNumberGuess(content.numberValue, input.value);
+      if (!result) {
+        setAnswerStatus("ENTER A NUMBER", "neutral");
+        input.focus();
+        return;
       }
-    }
+      if (result === "correct") {
+        changeableNumberState.solved = true;
+        setAnswerStatus("CORRECT!", "correct");
+        input.disabled = true;
+        check.disabled = true;
+        return;
+      }
+      setAnswerStatus(result.toUpperCase(), "neutral");
+      input.value = "";
+      input.focus();
+    });
+    form.append(input, check);
+    answerArea.append(form);
   }
 
   function renderDrawing(content) {
@@ -1697,6 +1712,7 @@ import { hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, nor
     $("#rg-round-badge").textContent = currentRound === "0" ? "HOST NOTE 0" : "ROUND " + currentRound;
     $("#rg-format-badge").textContent = currentRound === "00" ? "BLANK" : currentRound === "0" ? "SPECIAL INSTRUCTIONS" : (modeNames[format.mode] || "Question").toUpperCase();
     screen.dataset.mode = format.mode;
+    screen.dataset.round = currentRound;
     setQuestionContent(effective);
     stageItems.replaceChildren();
     answerArea.replaceChildren();
