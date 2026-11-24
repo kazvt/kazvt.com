@@ -1229,6 +1229,8 @@ import {
     });
     slotsModel?.traverse((object) => {
       if (object.isMesh) slotTargets.push(object);
+      const name = String(object.name || "").toLowerCase();
+      if (name === "arm" || /^button[1-5]$/.test(name)) slotControlTargets.set(name, object);
     });
     cardTableModel = stageModel?.getObjectByName("table") || null;
     cardTableModel?.traverse((object) => {
@@ -2122,9 +2124,7 @@ import {
       prepareModel(slotsModel);
       slotRig.add(slotsModel);
       slotsModel.traverse((object) => {
-        const name = String(object.name || "").toLowerCase();
-        if (name === "arm") lever = object;
-        if (name === "arm" || /^button[1-5]$/.test(name)) slotControlTargets.set(name, object);
+        if (String(object.name || "").toLowerCase() === "arm") lever = object;
       });
       createSlotReelDisplay();
 
