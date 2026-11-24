@@ -1,9 +1,9 @@
 // Geometry values are in the supplied rg_roulette.gltf model's local units.
 export const ROULETTE_BALL_COLOR = 0x212068; // sampled from stage.png's dark floor checker
 export const ROULETTE_BALL_TRACK_RADIUS = Math.hypot(13, 1); // authored ball offset (-13, 1)
-export const ROULETTE_BALL_LANDING_RADIUS = 8.2;
+export const ROULETTE_BALL_LANDING_RADIUS = 9.1;
 export const ROULETTE_BALL_GEOMETRY_RADIUS = 0.84; // maximum vertex radius in the supplied ball mesh
-export const ROULETTE_INNER_YELLOW_RING = Object.freeze({ innerRadius: 6, outerRadius: 10 });
+export const ROULETTE_INNER_YELLOW_RING = Object.freeze({ innerRadius: 6.37, outerRadius: 10.03 });
 
 const OUTWARD_RAMP_END = 0.12;
 const INWARD_SETTLE_START = 0.76;
