@@ -127,6 +127,259 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     return JSON.parse(JSON.stringify(value));
   }
 
+  function readSessionArray(key) {
+    try {
+      const value = JSON.parse(sessionStorage.getItem(key) || "[]");
+      return Array.isArray(value) ? value : [];
+    } catch { return []; }
+  }
+
+  function persistClientSessionState() {
+    try {
+      sessionStorage.setItem(CLIENT_ISSUED_KEY, JSON.stringify(issuedClientActivities.slice(0, 40)));
+      sessionStorage.setItem(CLIENT_ANSWERS_KEY, JSON.stringify(clientSubmissions.slice(0, 120)));
+      return true;
+    } catch (error) {
+      console.warn("Player handoff data could not be saved to this tab session:", error);
+      return false;
+    }
+  }
+
+  function taskItems(content) {
+    return (content.items || []).filter((item) => item && [item.label, item.image, item.asset].some((value) => String(value || "").trim()));
+  }
+
+  function getClientTaskSpec() {
+    if (currentRound === "00" || currentRound === "0") return null;
+    const effective = effectiveNow();
+    const mode = effective.format.mode;
+    if (!Object.hasOwn(CLIENT_ACTIVITY_ROUTES, mode)) return null;
+    const items = taskItems(effective.content);
+    const content = { ...effective.content, items };
+    const needsPicture = mode === "draw-over-image" || mode === "compose-image";
+    const hasPicture = Boolean(content.backgroundImage || content.promptImage || content.promptAsset);
+    if (!items.length) return { ...effective, content, error: "Add at least one task item before exporting." };
+    if (needsPicture && !hasPicture) return { ...effective, content, error: "Add the prompt picture before exporting this task." };
+    return { ...effective, content, error: "" };
+  }
+
+  function syncClientActivityControls() {
+    const spec = getClientTaskSpec();
+    const mode = spec?.format.mode;
+    const supported = Boolean(mode && Object.hasOwn(CLIENT_ACTIVITY_ROUTES, mode));
+    clientOpenLink.hidden = !supported;
+    clientExportTask.disabled = !supported || Boolean(spec?.error);
+    if (!supported) {
+      clientTaskStatus.textContent = "Choose a sort, picture-placement, or drawing task.";
+    } else {
+      const route = CLIENT_ACTIVITY_ROUTES[mode];
+      clientOpenLink.href = "/rg/" + route + "/";
+      const names = { "categorize-images": "SORT INTO THREE GROUPS", "compose-image": "PLACE IMAGES ON THE PICTURE", "draw-over-image": "DRAW OVER THE PICTURE" };
+      clientTaskStatus.textContent = spec.error || (names[mode] + " - ROUND " + currentRound + " / DIFFICULTY " + currentDifficulty + " - " + spec.content.items.length + " item" + (spec.content.items.length === 1 ? "" : "s"));
+    }
+    clientExportAnswers.disabled = clientSubmissions.length === 0;
+    clientClearAnswers.disabled = clientSubmissions.length === 0;
+  }
+
+  function downloadClientJson(value, filename) {
+    const blob = new Blob([JSON.stringify(value, null, 2)], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.hidden = true;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  async function exportClientTask() {
+    readEditor();
+    const spec = getClientTaskSpec();
+    if (!spec || spec.error) {
+      clientTransferStatus.textContent = spec?.error || "Select a supported player task first.";
+      return;
+    }
+    clientExportTask.disabled = true;
+    clientTransferStatus.textContent = "Preparing the task file and its images...";
+    try {
+      const media = {};
+      const assetIds = new Set([spec.content.promptAsset, ...spec.content.items.map((item) => item.asset)].filter(Boolean));
+      for (const id of assetIds) media[id] = await blobToDataUrl(await readMediaBlob(id));
+      const packet = buildClientActivity({
+        activityId: newQuestionId(), round: currentRound, difficulty: currentDifficulty,
+        mode: spec.format.mode, content: spec.content, format: spec.format, media,
+      });
+      const byteLength = new TextEncoder().encode(JSON.stringify(packet)).byteLength;
+      if (byteLength > CLIENT_PACKET_MAX_BYTES) throw new Error("The task file is larger than 50 MB. Reduce the image sizes before exporting it.");
+      const record = {
+        activityId: packet.activityId,
+        mode: packet.mode,
+        round: packet.round,
+        difficulty: packet.difficulty,
+        itemCount: packet.content.items.length,
+        createdAt: packet.createdAt,
+      };
+      issuedClientActivities = [record, ...issuedClientActivities.filter((entry) => entry.activityId !== record.activityId)].slice(0, 40);
+      persistClientSessionState();
+      const slug = CLIENT_ACTIVITY_ROUTES[packet.mode];
+      downloadClientJson(packet, "rg-" + slug + "-round-" + packet.round + "-task.json");
+      clientOpenLink.href = "/rg/" + slug + "/";
+      clientTransferStatus.textContent = "Task file exported. Give it to players, then import their answer files here.";
+    } catch (error) {
+      clientTransferStatus.textContent = "Task export failed. " + error.message;
+      console.warn("Ramble Gamble player task export failed:", error);
+    } finally {
+      syncClientActivityControls();
+    }
+  }
+
+  async function previewClientAnswerFiles() {
+    const files = [...(clientAnswerFiles.files || [])];
+    pendingClientSubmissions = [];
+    clientImportAnswers.disabled = true;
+    clientImportPreview.hidden = true;
+    if (!files.length) {
+      clientTransferStatus.textContent = "Choose one or more player answer JSON files.";
+      return;
+    }
+    try {
+      const issued = new Map(issuedClientActivities.map((record) => [record.activityId, record]));
+      const parsed = [];
+      const errors = [];
+      for (const file of files) {
+        if (file.size > CLIENT_PACKET_MAX_BYTES) {
+          errors.push(file.name + ": file exceeds 50 MB.");
+          continue;
+        }
+        let submission;
+        try { submission = JSON.parse(await file.text()); }
+        catch { errors.push(file.name + ": invalid JSON."); continue; }
+        const record = issued.get(submission?.activityId);
+        if (!record) {
+          errors.push(file.name + ": task ID was not exported in this host tab session.");
+          continue;
+        }
+        const validation = validateClientSubmission(submission, record);
+        if (submission.round !== record.round || submission.difficulty !== record.difficulty) validation.errors.push("The round details do not match the exported task.");
+        if (!validation.ok || validation.errors.length) {
+          errors.push(file.name + ": " + [...new Set(validation.errors)].join(" "));
+          continue;
+        }
+        parsed.push(submission);
+      }
+      if (errors.length) {
+        clientImportPreview.textContent = "No files were imported. Fix or remove the following:\n- " + errors.join("\n- ");
+        clientImportPreview.hidden = false;
+        clientTransferStatus.textContent = "Some files need attention.";
+        return;
+      }
+      pendingClientSubmissions = parsed;
+      clientImportPreview.textContent = parsed.map((submission) =>
+        submission.participant.toUpperCase() + " - ROUND " + submission.round + " / DIFFICULTY " + submission.difficulty + " - " +
+        ({ "categorize-images": "SORT", "compose-image": "PLACEMENT", "draw-over-image": "DRAWING" }[submission.mode])
+      ).join("\n");
+      clientImportPreview.hidden = false;
+      clientImportAnswers.disabled = parsed.length === 0;
+      clientTransferStatus.textContent = parsed.length + " answer file" + (parsed.length === 1 ? "" : "s") + " ready to import.";
+    } catch (error) {
+      clientTransferStatus.textContent = "Could not read the selected answer files.";
+      clientImportPreview.textContent = error.message;
+      clientImportPreview.hidden = false;
+    }
+  }
+
+  function renderClientSubmissions() {
+    clientSubmissionsNode.replaceChildren();
+    clientSubmissions.forEach((submission) => {
+      const details = document.createElement("details");
+      details.className = "rg-client-submission";
+      const summary = document.createElement("summary");
+      summary.textContent = submission.participant.toUpperCase() + " - ROUND " + submission.round + " / DIFFICULTY " + submission.difficulty + " - " + (submission.snapshot.question || "Untitled task");
+      details.append(summary);
+      const answer = document.createElement("div");
+      answer.className = "rg-client-submission-answer";
+      const question = document.createElement("p");
+      question.textContent = submission.snapshot.question || "";
+      answer.append(question);
+      if (submission.mode === "categorize-images") {
+        const list = document.createElement("ol");
+        submission.answer.assignments.forEach((group, index) => {
+          const row = document.createElement("li");
+          const item = submission.snapshot.items[index];
+          row.textContent = (item?.label || "Image " + (index + 1)) + " - " + (submission.snapshot.categories[group] || "Group " + (group + 1));
+          if (item?.image || item?.asset) addImageToNode(row, item.image, item.asset, "rg-client-result-thumb");
+          list.append(row);
+        });
+        answer.append(list);
+      } else if (submission.mode === "compose-image") {
+        const list = document.createElement("ol");
+        submission.answer.placements.forEach((placement) => {
+          const row = document.createElement("li");
+          const item = submission.snapshot.items[placement.itemIndex];
+          row.textContent = (item?.label || "Image " + (placement.itemIndex + 1)) + " - " + Math.round(placement.x) + "% across, " + Math.round(placement.y) + "% down";
+          if (item?.image || item?.asset) addImageToNode(row, item.image, item.asset, "rg-client-result-thumb");
+          list.append(row);
+        });
+        answer.append(list);
+      } else if (submission.mode === "draw-over-image") {
+        const preview = document.createElement("div");
+        preview.className = "rg-client-result-drawing";
+        addImageToNode(preview, submission.snapshot.backgroundImage || submission.snapshot.promptImage, submission.snapshot.promptAsset, "rg-client-result-background");
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("viewBox", "0 0 1000 1000");
+        svg.setAttribute("aria-label", "Player drawing");
+        for (const stroke of submission.answer.strokes) {
+          const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          path.setAttribute("d", stroke.map((point, index) => (index ? "L" : "M") + point.x + " " + point.y).join(" "));
+          path.setAttribute("fill", "none");
+          path.setAttribute("stroke", "#ed1010");
+          path.setAttribute("stroke-width", "8");
+          path.setAttribute("stroke-linecap", "round");
+          path.setAttribute("stroke-linejoin", "round");
+          svg.append(path);
+        }
+        preview.append(svg);
+        answer.append(preview);
+      }
+      const meta = document.createElement("small");
+      meta.textContent = "Downloaded " + new Date(submission.submittedAt).toLocaleString();
+      answer.append(meta);
+      details.append(answer);
+      clientSubmissionsNode.append(details);
+    });
+    if (!clientSubmissions.length) {
+      const empty = document.createElement("p");
+      empty.className = "rg-client-empty";
+      empty.textContent = "No player answers imported in this tab yet.";
+      clientSubmissionsNode.append(empty);
+    }
+    syncClientActivityControls();
+  }
+
+  function importClientAnswers() {
+    if (!pendingClientSubmissions.length) return;
+    const merged = new Map(clientSubmissions.map((submission) => [submission.activityId + ":" + submission.participant, submission]));
+    pendingClientSubmissions.forEach((submission) => merged.set(submission.activityId + ":" + submission.participant, submission));
+    clientSubmissions = [...merged.values()].slice(-120);
+    const persisted = persistClientSessionState();
+    clientTransferStatus.textContent = pendingClientSubmissions.length + " answer" + (pendingClientSubmissions.length === 1 ? "" : "s") + " imported." + (persisted ? " Saved in this tab session." : " Visible until this page closes; session storage was unavailable.");
+    pendingClientSubmissions = [];
+    clientAnswerFiles.value = "";
+    clientImportPreview.hidden = true;
+    clientImportAnswers.disabled = true;
+    renderClientSubmissions();
+  }
+
+  function clearClientAnswers() {
+    if (!clientSubmissions.length || !window.confirm("Clear imported player answers from this tab? Export Results first if you want a backup.")) return;
+    clientSubmissions = [];
+    persistClientSessionState();
+    clientTransferStatus.textContent = "Imported answers cleared.";
+    renderClientSubmissions();
+  }
+
   function listDraftAssetIds(roundDrafts) {
     const ids = new Set();
     for (const levels of Object.values(roundDrafts || {})) {
