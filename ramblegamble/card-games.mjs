@@ -2,6 +2,7 @@ export const CARD_GAME_PLAYERS = Object.freeze(["faroe", "erin", "kaz"]);
 export const CARD_GAME_CATEGORIES = Object.freeze(["penalty", "challenge", "instant"]);
 export const CARD_GAME_STORAGE_KEY = "ramblegamble.card-games.v1";
 const ROUND_PHASES = new Set(["submissions", "voting", "results", "shopping"]);
+const SMEEMO_PHASES = new Set(["preview", "stacking", "stacked", "dealing", "ready", "complete"]);
 const MAX_LIST_ITEMS = 500;
 const MAX_TEXT_LENGTH = 800;
 
@@ -99,18 +100,59 @@ function normalizeRound(value) {
 
 function normalizeSmeemo(value) {
   if (!value || typeof value !== "object" || !["playing", "complete"].includes(value.status)) return null;
-  const piles = Object.fromEntries(CARD_GAME_PLAYERS.map((player) => [player, Array.isArray(value.piles?.[player])
-    ? value.piles[player].slice(0, 3).flatMap((card, index) => card && typeof card === "object"
-      ? [{ id: cleanText(card.id) || `${player}-${index}`, smeemo: Boolean(card.smeemo) }]
-      : [])
-    : []]));
-  const draws = Array.isArray(value.draws) ? value.draws.slice(0, 9).flatMap((draw) => {
-    if (!CARD_GAME_PLAYERS.includes(draw?.player)) return [];
-    return [{ id: cleanText(draw.id), player: draw.player, smeemo: Boolean(draw.smeemo) }];
-  }) : [];
-  const winner = CARD_GAME_PLAYERS.includes(value.winner) ? value.winner : null;
-  const status = winner ? "complete" : value.status;
-  return { status, piles, draws, winner, turnCursor: Math.max(0, Number.isSafeInteger(value.turnCursor) ? value.turnCursor : 0) };
+  const legacy = !Array.isArray(value.cards) && value.piles && typeof value.piles === "object";
+  const sourceCards = Array.isArray(value.cards)
+    ? value.cards
+    : legacy
+      ? [
+          ...(Array.isArray(value.draws) ? value.draws : []),
+          ...CARD_GAME_PLAYERS.flatMap((player) => Array.isArray(value.piles[player]) ? value.piles[player] : []),
+        ]
+      : [];
+  const cards = sourceCards.slice(0, 9).flatMap((card, index) => {
+    if (!card || typeof card !== "object") return [];
+    return [{ id: cleanText(card.id) || `scramble-${index + 1}`, smeemo: Boolean(card.smeemo) }];
+  });
+  if (cards.length !== 9 || new Set(cards.map(({ id }) => id)).size !== 9 || cards.filter(({ smeemo }) => smeemo).length !== 1) return null;
+
+  const cardById = new Map(cards.map((card) => [card.id, card]));
+  const sourceDraws = Array.isArray(value.draws) ? value.draws.slice(0, 9) : [];
+  const draws = [];
+  const drawnIds = new Set();
+  for (const draw of sourceDraws) {
+    const id = cleanText(draw?.id);
+    const card = cardById.get(id);
+    if (!card || drawnIds.has(id)) continue;
+    drawnIds.add(id);
+    draws.push({ id, smeemo: card.smeemo });
+  }
+  if (legacy) {
+    for (const draw of sourceDraws) {
+      const id = cleanText(draw?.id);
+      if (id && cardById.has(id) && !drawnIds.has(id)) {
+        drawnIds.add(id);
+        draws.push({ id, smeemo: cardById.get(id).smeemo });
+      }
+    }
+  }
+
+  const cardIds = new Set(cards.map(({ id }) => id));
+  const previewOrder = Array.isArray(value.previewOrder)
+    ? value.previewOrder.map(cleanText).filter((id, index, all) => cardIds.has(id) && all.indexOf(id) === index)
+    : [];
+  const normalizedPreviewOrder = previewOrder.length === 9 ? previewOrder : cards.map(({ id }) => id);
+  const found = draws.some(({ smeemo }) => smeemo);
+  let phase = SMEEMO_PHASES.has(value.phase) ? value.phase : legacy ? "ready" : "preview";
+  if (found) phase = "complete";
+  else if (phase === "complete") phase = "ready";
+  return {
+    id: cleanText(value.id) || `legacy-${cards[0].id}`,
+    status: found ? "complete" : "playing",
+    phase,
+    cards,
+    previewOrder: normalizedPreviewOrder,
+    draws,
+  };
 }
 
 export function normalizeCardGamesState(value) {
@@ -260,28 +302,40 @@ export function buyShopCard(roundValue, cardId, buyer, scoresValue) {
 }
 
 export function createSmeemoGame(random = secureRandomUnit) {
-  const shuffled = shuffle(Array.from({ length: 9 }, (_, index) => ({ id: `scramble-${index + 1}`, smeemo: index === 0 })), random);
-  const piles = Object.fromEntries(CARD_GAME_PLAYERS.map((player, index) => [player, shuffled.slice(index * 3, index * 3 + 3)]));
-  return { status: "playing", piles, draws: [], winner: null, turnCursor: 0 };
+  const cards = Array.from({ length: 9 }, (_, index) => ({ id: `scramble-${index + 1}`, smeemo: index === 0 }));
+  const previewCards = shuffle(cards, random);
+  const shuffledCards = shuffle(previewCards, random);
+  if (shuffledCards.every((card, index) => card.id === previewCards[index].id)) shuffledCards.push(shuffledCards.shift());
+  const id = globalThis.crypto?.randomUUID?.() || `smeemo-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+  return {
+    id,
+    status: "playing",
+    phase: "preview",
+    cards: shuffledCards,
+    previewOrder: previewCards.map(({ id: cardId }) => cardId),
+    draws: [],
+  };
 }
 
-export function drawSmeemoCard(value) {
+export function advanceSmeemoPhase(value, expectedPhase) {
+  const game = normalizeSmeemo(value);
+  const nextPhase = { preview: "stacking", stacking: "stacked", stacked: "dealing", dealing: "ready" }[expectedPhase];
+  if (!game || game.status !== "playing" || game.phase !== expectedPhase || !nextPhase) return value;
+  return { ...game, phase: nextPhase };
+}
+
+export function drawSmeemoCard(value, cardId) {
   const game = normalizeSmeemo(value);
   if (!game || game.status !== "playing") return { game: value, draw: null, error: "not-playing" };
-  for (let offset = 0; offset < CARD_GAME_PLAYERS.length; offset += 1) {
-    const playerIndex = (game.turnCursor + offset) % CARD_GAME_PLAYERS.length;
-    const player = CARD_GAME_PLAYERS[playerIndex];
-    const pile = game.piles[player];
-    if (!pile.length) continue;
-    const card = pile.pop();
-    const draw = { id: card.id, player, smeemo: card.smeemo };
-    game.draws.push(draw);
-    game.turnCursor = playerIndex + 1;
-    if (card.smeemo) {
-      game.winner = player;
-      game.status = "complete";
-    }
-    return { game, draw, error: "" };
+  if (game.phase !== "ready") return { game: value, draw: null, error: "not-ready" };
+  const card = game.cards.find((entry) => entry.id === cardId);
+  if (!card) return { game: value, draw: null, error: "unknown-card" };
+  if (game.draws.some((draw) => draw.id === card.id)) return { game: value, draw: null, error: "already-revealed" };
+  const draw = { id: card.id, smeemo: card.smeemo };
+  game.draws.push(draw);
+  if (card.smeemo) {
+    game.phase = "complete";
+    game.status = "complete";
   }
-  return { game: { ...game, status: "complete" }, draw: null, error: "no-cards" };
+  return { game, draw, error: "" };
 }
