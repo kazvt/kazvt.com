@@ -218,6 +218,27 @@
             <p class="rg-import-status" id="rg-import-status" role="status" aria-live="polite">No file selected.</p>
             <pre class="rg-import-preview" id="rg-import-preview" hidden></pre>
           </section>
+          <section class="rg-client-transfer" aria-labelledby="rg-client-transfer-title">
+            <div class="rg-client-transfer-heading">
+              <div><h3 id="rg-client-transfer-title">PLAYER HANDOFF</h3><p>Send the task file to players. They return an answer file for import here.</p></div>
+              <span class="rg-client-transfer-badge">CLIENT-SIDE</span>
+            </div>
+            <div class="rg-client-task-row">
+              <span id="rg-client-task-status" role="status" aria-live="polite">Choose a sort, picture-placement, or drawing task.</span>
+              <a class="rg-secondary-button rg-client-open-link" id="rg-client-open-link" href="/rg/sort3/" target="_blank" rel="noopener" hidden>OPEN PLAYER PAGE</a>
+              <button class="rg-secondary-button" id="rg-client-export-task" type="button" disabled>EXPORT TASK .JSON</button>
+            </div>
+            <div class="rg-client-import-row">
+              <label class="rg-upload-button rg-client-file-label">CHOOSE ANSWER FILES<input id="rg-client-answer-files" type="file" accept=".json,application/json" multiple></label>
+              <button class="rg-secondary-button" id="rg-client-import-answers" type="button" disabled>IMPORT ANSWERS</button>
+              <button class="rg-secondary-button" id="rg-client-export-answers" type="button" disabled>EXPORT RESULTS</button>
+              <button class="rg-secondary-button" id="rg-client-clear-answers" type="button" disabled>CLEAR RESULTS</button>
+            </div>
+            <p class="rg-client-transfer-status" id="rg-client-transfer-status" role="status" aria-live="polite">Nothing to import yet.</p>
+            <pre class="rg-client-import-preview" id="rg-client-import-preview" hidden></pre>
+            <div class="rg-client-submissions" id="rg-client-submissions" aria-label="Imported player answers"></div>
+            <details class="rg-client-transfer-help"><summary>HOW THE HANDOFF WORKS</summary><p>Export the task JSON and give it to the players. They open its matching player page, load the task, choose their name, and download an answer JSON. Import those answer files here. No answers are sent automatically; this page uses no server.</p></details>
+          </section>
           <section class="rg-question-bank" aria-labelledby="rg-question-bank-title">
             <div class="rg-question-bank-heading">
               <div><h3 id="rg-question-bank-title">SESSION QUESTION BANK</h3><p>Questions here are drawn at random by the wheel and slot machine. They last for this browser tab's session.</p></div>
