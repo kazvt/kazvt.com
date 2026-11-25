@@ -202,7 +202,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     return result;
   }
 
-  const smeemoPhaseDurations = { preview: 1850, stacking: 830, stacked: 220, dealing: 1520 };
+  const smeemoPhaseDurations = { preview: 1650, stacking: 1100, stacked: 780, dealing: 1230 };
   const smeemoNextPhase = { preview: "stacking", stacking: "stacked", stacked: "dealing", dealing: "ready" };
 
   function scheduleSmeemoAdvance(game) {
@@ -442,15 +442,17 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     for (const [index, card] of order.entries()) {
       const revealed = revealIds.has(card.id);
       const showingFront = faceUp || revealed;
-      const button = element("button", `rg-smeemo-card${showingFront ? " is-face-up" : " is-face-down"}${revealed ? " is-revealed" : ""}${card.smeemo ? " is-smeemo" : ""}`);
+      const isAvailable = game.phase === "ready" && game.status === "playing" && !revealed;
+      const button = element("button", `rg-smeemo-card${showingFront ? " is-face-up" : " is-face-down"}${revealed ? " is-revealed" : ""}${isAvailable ? " is-available" : ""}${card.smeemo ? " is-smeemo" : ""}`);
       button.type = "button";
       button.disabled = game.phase !== "ready" || game.status !== "playing" || revealed;
       button.setAttribute("aria-label", showingFront
         ? `Card ${index + 1}: ${card.smeemo ? "Smeemoberry" : "blank"}`
         : `Reveal card ${index + 1}`);
       button.style.setProperty("--card-index", String(index));
-      button.style.setProperty("--deal-delay", `${index * 92}ms`);
-      button.style.setProperty("--flip-delay", `${index * 92 + 130}ms`);
+      button.style.setProperty("--stack-delay", `${index * 38}ms`);
+      button.style.setProperty("--deal-delay", `${index * 54}ms`);
+      button.style.setProperty("--flip-delay", `${index * 48 + 90}ms`);
       button.style.setProperty("--home-rotation", `${((index % 3) - 1) * 1.4}deg`);
       const inner = element("span", "rg-smeemo-card-inner");
       const front = element("span", `rg-smeemo-card-front${card.smeemo ? " is-berry" : ""}`);
@@ -479,6 +481,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
         const rect = card.getBoundingClientRect();
         const dx = stackCenter - (rect.left + rect.width / 2);
         card.style.setProperty("--stack-x", `${dx}px`);
+        card.style.setProperty("--mid-x", `${dx * 0.42}px`);
         card.style.setProperty("--stack-layer-x", `${(index - 4) * 1.25}px`);
         card.style.setProperty("--stack-layer-y", `${(4 - index) * 1.25}px`);
         card.style.setProperty("--stack-rotation", `${(index - 4) * 3}deg`);
