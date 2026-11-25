@@ -132,6 +132,9 @@ export function createClientSubmission(activity, participant, answer, submittedA
       promptImage: snapshot.promptImage,
       promptAsset: snapshot.promptAsset,
       backgroundImage: snapshot.backgroundImage,
+      imageAspect: snapshot.imageAspect,
+      gridSize: snapshot.gridSize,
+      pieceSize: snapshot.pieceSize,
     },
     answer,
   };
@@ -153,11 +156,21 @@ export function validateClientSubmission(submission, expected = {}) {
   if (!answer || typeof answer !== "object" || Array.isArray(answer)) errors.push("The answer data is missing.");
   if (errors.length) return { ok: false, errors };
 
+  if (typeof snapshot.question !== "string" || snapshot.question.length > 5000 ||
+      !Array.isArray(snapshot.categories) || snapshot.categories.length > 3 ||
+      snapshot.items.some((item) => !item || typeof item !== "object" || typeof item.label !== "string" || item.label.length > 500 ||
+        typeof item.image !== "string" || (item.image && !isSafeImageReference(item.image)) || typeof item.asset !== "string" || item.asset.length > 200)) {
+    errors.push("The answer task summary contains invalid text or images.");
+  }
+  if (snapshot.promptImage && !isSafeImageReference(snapshot.promptImage)) errors.push("The answer summary has an invalid prompt image.");
+  if (snapshot.backgroundImage && !isSafeImageReference(snapshot.backgroundImage)) errors.push("The answer summary has an invalid picture image.");
+  if (typeof snapshot.promptAsset !== "string" || snapshot.promptAsset.length > 200) errors.push("The answer summary has an invalid prompt asset reference.");
+
   const itemCount = expected.itemCount ?? snapshot.items.length;
   if (itemCount !== snapshot.items.length) errors.push("The task item count does not match this exported task.");
   if (submission.mode === "categorize-images") {
     const assignments = answer.assignments;
-    if (!Array.isArray(assignments) || assignments.length !== itemCount || assignments.some((group) => !Number.isInteger(group) || group < 0 || group > 2)) errors.push("The sort answer must place every item into one of the three groups.");
+    if (!Array.isArray(snapshot.categories) || snapshot.categories.length !== 3 || !Array.isArray(assignments) || assignments.length !== itemCount || assignments.some((group) => !Number.isInteger(group) || group < 0 || group > 2)) errors.push("The sort answer must place every item into one of the three groups.");
   } else if (submission.mode === "compose-image") {
     const placements = answer.placements;
     if (!Array.isArray(placements) || placements.length > 500 || placements.some((placement) =>
