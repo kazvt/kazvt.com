@@ -4,6 +4,7 @@ import {
   createQuiplashRound,
   createRedHandedRound,
   createShopRound,
+  advanceSmeemoPhase,
   normalizeTextList,
   parseShopCardList,
   recordAudienceVote,
@@ -71,7 +72,8 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   let dismissedActive = false;
   let selectedBuyer = "faroe";
   let lastActiveMode = null;
-  let lastSmeemoSignal = "";
+  let smeemoPhaseTimer = 0;
+  let smeemoScheduledSignal = "";
   let menuTimer = 0;
 
   function element(tag, className = "", text = "") {
@@ -198,6 +200,34 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     const result = writeCardGames(next);
     updateFromState(result.state);
     return result;
+  }
+
+  const smeemoPhaseDurations = { preview: 1850, stacking: 830, stacked: 220, dealing: 1520 };
+  const smeemoNextPhase = { preview: "stacking", stacking: "stacked", stacked: "dealing", dealing: "ready" };
+
+  function scheduleSmeemoAdvance(game) {
+    const duration = smeemoPhaseDurations[game.phase];
+    const nextPhase = smeemoNextPhase[game.phase];
+    if (!duration || !nextPhase || game.status !== "playing") {
+      window.clearTimeout(smeemoPhaseTimer);
+      smeemoPhaseTimer = 0;
+      smeemoScheduledSignal = "";
+      return;
+    }
+    const signal = `${game.id}:${game.phase}`;
+    if (smeemoScheduledSignal === signal) return;
+    window.clearTimeout(smeemoPhaseTimer);
+    smeemoScheduledSignal = signal;
+    const wait = reducedMotion.matches ? 70 : duration;
+    smeemoPhaseTimer = window.setTimeout(() => {
+      smeemoPhaseTimer = 0;
+      smeemoScheduledSignal = "";
+      const latest = state.smeemo;
+      if (!latest || latest.id !== game.id || latest.phase !== game.phase) return;
+      const advanced = advanceSmeemoPhase(latest, game.phase);
+      if (advanced === latest) return;
+      sync({ ...state, smeemo: advanced });
+    }, wait);
   }
 
   function closeHostPanel() {
@@ -401,52 +431,69 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     hostButton.hidden = true;
     setStageTitle("SMEEMO SCRAMBLE", "smeemo");
     content.replaceChildren();
-    const initialShuffle = game.draws.length === 0 && lastSmeemoSignal !== `${game.status}:0:${game.winner || ""}`;
-    lastSmeemoSignal = `${game.status}:${game.draws.length}:${game.winner || ""}`;
-    const board = element("div", `rg-smeemo-board${initialShuffle ? " is-shuffling" : ""}`);
-    const nextPlayer = game.status === "playing" ? CARD_GAME_PLAYERS[game.turnCursor % CARD_GAME_PLAYERS.length] : null;
-    for (const [playerIndex, player] of CARD_GAME_PLAYERS.entries()) {
-      const section = element("section", `rg-smeemo-player${nextPlayer === player ? " is-turn" : ""}`);
-      const name = element("h2", "", playerNames[player]);
-      const pile = element("div", "rg-smeemo-pile");
-      const cards = game.piles[player] || [];
-      cards.forEach((card, index) => {
-        const back = element("span", "rg-smeemo-card");
-        back.style.setProperty("--card-angle", `${(index - 1) * 7}deg`);
-        back.style.setProperty("--deal-delay", `${playerIndex * 110 + index * 75}ms`);
-        back.setAttribute("aria-hidden", "true");
-        pile.append(back);
+    const board = element("div", `rg-smeemo-board is-${game.phase}`);
+    const rail = element("div", "rg-smeemo-rail");
+    const revealIds = new Set(game.draws.map(({ id }) => id));
+    const faceUp = game.phase === "preview" || game.phase === "stacking";
+    const order = ["preview", "stacking", "stacked"].includes(game.phase)
+      ? game.previewOrder.map((id) => game.cards.find((card) => card.id === id)).filter(Boolean)
+      : game.cards;
+
+    for (const [index, card] of order.entries()) {
+      const revealed = revealIds.has(card.id);
+      const showingFront = faceUp || revealed;
+      const button = element("button", `rg-smeemo-card${showingFront ? " is-face-up" : " is-face-down"}${revealed ? " is-revealed" : ""}${card.smeemo ? " is-smeemo" : ""}`);
+      button.type = "button";
+      button.disabled = game.phase !== "ready" || game.status !== "playing" || revealed;
+      button.setAttribute("aria-label", showingFront
+        ? `Card ${index + 1}: ${card.smeemo ? "Smeemoberry" : "blank"}`
+        : `Reveal card ${index + 1}`);
+      button.style.setProperty("--card-index", String(index));
+      button.style.setProperty("--deal-delay", `${index * 92}ms`);
+      button.style.setProperty("--flip-delay", `${index * 92 + 130}ms`);
+      button.style.setProperty("--home-rotation", `${((index % 3) - 1) * 1.4}deg`);
+      const inner = element("span", "rg-smeemo-card-inner");
+      const front = element("span", `rg-smeemo-card-front${card.smeemo ? " is-berry" : ""}`);
+      front.append(element("span", "rg-smeemo-berry-mark", card.smeemo ? "✦" : ""));
+      front.append(element("span", "rg-smeemo-face-label", card.smeemo ? "SMEEMO!" : "BLANK"));
+      const back = element("span", "rg-smeemo-card-back");
+      back.setAttribute("aria-hidden", "true");
+      inner.append(front, back);
+      button.append(inner);
+      button.addEventListener("click", () => {
+        const current = state.smeemo;
+        if (!current || current.id !== game.id) return;
+        const result = drawSmeemoCard(current, card.id);
+        if (result.error) return;
+        sync({ ...state, smeemo: result.game });
       });
-      const berry = element("img", "rg-smeemo-berry");
-      berry.src = berryImages[player];
-      berry.alt = "";
-      section.append(name, berry, pile, element("span", "rg-smeemo-count", `${cards.length} LEFT`));
-      board.append(section);
+      rail.append(button);
     }
+
+    board.append(rail);
     content.append(board);
-    if (game.draws.length) {
-      const history = element("div", "rg-smeemo-draw-list");
-      for (const [index, draw] of game.draws.entries()) {
-        const item = element("div", "rg-smeemo-draw");
-        const face = element("span", `rg-smeemo-draw-card${draw.smeemo ? " is-smeemo" : ""}`, draw.smeemo ? "SMEEMO!" : "BLANK");
-        item.append(element("span", "", playerNames[draw.player]), face);
-        if (index === game.draws.length - 1) item.classList.add("is-latest");
-        history.append(item);
+    if (["stacking", "stacked", "dealing"].includes(game.phase)) {
+      const railRect = rail.getBoundingClientRect();
+      const stackCenter = railRect.left + railRect.width / 2;
+      for (const [index, card] of [...rail.children].entries()) {
+        const rect = card.getBoundingClientRect();
+        const dx = stackCenter - (rect.left + rect.width / 2);
+        card.style.setProperty("--stack-x", `${dx}px`);
+        card.style.setProperty("--stack-layer-x", `${(index - 4) * 1.25}px`);
+        card.style.setProperty("--stack-layer-y", `${(4 - index) * 1.25}px`);
+        card.style.setProperty("--stack-rotation", `${(index - 4) * 3}deg`);
       }
-      content.append(history);
-    } else {
-      content.append(element("p", "rg-card-round-status", "Shuffled and dealt - waiting for console draw."));
     }
-    if (game.status === "complete" && game.winner) {
-      content.append(element("p", "rg-smeemo-winner", `${playerNames[game.winner]} FOUND SMEEMO!`));
-      liveStatus.textContent = `${playerNames[game.winner]} found Smeemo.`;
-    } else if (nextPlayer) {
-      content.append(element("p", "rg-card-round-status", `${playerNames[nextPlayer]} UP`));
-      const latestDraw = game.draws[game.draws.length - 1];
-      liveStatus.textContent = latestDraw
-        ? `${playerNames[latestDraw.player]} drew ${latestDraw.smeemo ? "Smeemo" : "a blank"}. ${playerNames[nextPlayer]} up.`
-        : "Smeemo Scramble started. Waiting for a console draw.";
-    }
+
+    let statusText = `${game.draws.length} / 9 REVEALED`;
+    if (game.phase === "preview") statusText = "FIND THE SMEEMOBERRY";
+    else if (["stacking", "stacked", "dealing"].includes(game.phase)) statusText = "SHUFFLING...";
+    else if (game.phase === "ready" && game.status === "playing") statusText += " - CHOOSE A CARD";
+    else if (game.status === "complete") statusText = "SMEEMOBERRY FOUND!";
+    content.append(element("p", `rg-card-round-status rg-smeemo-status${game.status === "complete" ? " is-complete" : ""}`, statusText));
+    liveStatus.textContent = statusText;
+    if (game.status === "complete") content.append(element("p", "rg-smeemo-winner", "SMEEMOBERRY FOUND!"));
+    scheduleSmeemoAdvance(game);
   }
 
   function setStatusMessage(message) {
