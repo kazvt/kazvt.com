@@ -65,7 +65,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     kaz: "/ramblegamble/assets/berries/kazberry.png",
   };
   const playerNames = { faroe: "FAROE", erin: "ERIN", kaz: "KAZ" };
-  const modeNames = { "red-handed": "RED HANDED", quiplash: "QUIPLASH BUT IT'S BERRY", shop: "THE SHOP" };
+  const modeNames = { "red-handed": "RED HANDED", quiplash: "BERRYBLAST", shop: "THE SHOP" };
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let state = readCardGames();
   let pointScores = readPointScores();
@@ -272,7 +272,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     const grid = element("div", "rg-card-menu-grid");
     grid.append(
       makeModeChoice("red-handed", "menu-red-handed.png", "Red Handed"),
-      makeModeChoice("quiplash", "menu-quiplash.png", "Quiplash but it's berry"),
+      makeModeChoice("quiplash", "menu-quiplash.png", "Berryblast"),
       makeModeChoice("shop", "menu-shop.png", "The Shop"),
     );
     content.append(grid);
