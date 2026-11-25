@@ -6,7 +6,9 @@ import {
   createRedHandedRound,
   createShopRound,
   createSmeemoGame,
+  advanceSmeemoPhase,
   drawSmeemoCard,
+  normalizeCardGamesState,
   parseShopCardList,
   recordAudienceVote,
   revealAudienceResults,
@@ -80,31 +82,60 @@ test("shop round exposes one card per category and does not reveal or charge bef
   assert.equal(createShopRound({ penalty: [], challenge: [{ name: "x", price: 1 }], instant: [{ name: "y", price: 2 }] }), null);
 });
 
-test("Smeemo is exactly one of nine cards distributed three per fixed player", () => {
+test("Smeemo preview shows nine cards and exactly one berry before a distinct shuffle order", () => {
   const game = createSmeemoGame(stableRandom);
-  assert.deepEqual(Object.keys(game.piles), CARD_GAME_PLAYERS);
-  assert.ok(CARD_GAME_PLAYERS.every((player) => game.piles[player].length === 3));
-  assert.equal(CARD_GAME_PLAYERS.flatMap((player) => game.piles[player]).filter((card) => card.smeemo).length, 1);
+  assert.equal(game.phase, "preview");
+  assert.equal(game.cards.length, 9);
+  assert.equal(game.cards.filter((card) => card.smeemo).length, 1);
+  assert.equal(new Set(game.previewOrder).size, 9);
+  assert.deepEqual([...game.previewOrder].sort(), game.cards.map(({ id }) => id).sort());
+  assert.notDeepEqual(game.previewOrder, game.cards.map(({ id }) => id));
 });
 
-test("Smeemo draws advance in player order, skip empty piles, and stop immediately on the berry", () => {
-  let game = createSmeemoGame(() => 0.5);
-  const total = CARD_GAME_PLAYERS.flatMap((player) => game.piles[player]).length;
-  const order = [];
-  let smeemoDrawn = false;
-  for (let count = 0; count < total; count += 1) {
-    const result = drawSmeemoCard(game);
-    assert.ok(result.draw);
-    order.push(result.draw.player);
-    game = result.game;
-    if (result.draw.smeemo) {
-      smeemoDrawn = true;
-      assert.equal(game.status, "complete");
-      assert.equal(game.winner, result.draw.player);
-      break;
-    }
+test("Smeemo advances through its host-controlled reveal animation phases", () => {
+  let game = createSmeemoGame(stableRandom);
+  assert.equal(drawSmeemoCard(game, game.cards[0].id).error, "not-ready");
+  for (const [phase, next] of [["preview", "stacking"], ["stacking", "stacked"], ["stacked", "dealing"], ["dealing", "ready"]]) {
+    const old = game;
+    assert.equal(advanceSmeemoPhase(game, "wrong-phase"), old);
+    game = advanceSmeemoPhase(game, phase);
+    assert.equal(game.phase, next);
   }
-  assert.equal(smeemoDrawn, true);
-  assert.deepEqual(order.slice(0, 3), ["faroe", "erin", "kaz"]);
-  assert.equal(drawSmeemoCard(game).draw, null);
+  assert.equal(advanceSmeemoPhase(game, "ready"), game);
+});
+
+test("Smeemo reveals only the host-selected card, with no player or turn assignment", () => {
+  let game = createSmeemoGame(() => 0.5);
+  for (const phase of ["preview", "stacking", "stacked", "dealing"]) game = advanceSmeemoPhase(game, phase);
+  const blank = game.cards.find((card) => !card.smeemo);
+  const first = drawSmeemoCard(game, blank.id);
+  assert.equal(first.error, "");
+  assert.deepEqual(first.draw, { id: blank.id, smeemo: false });
+  assert.equal("player" in first.draw, false);
+  assert.deepEqual(first.game.draws.map(({ id }) => id), [blank.id]);
+  assert.equal(drawSmeemoCard(first.game, blank.id).error, "already-revealed");
+
+  const smeemo = first.game.cards.find((card) => card.smeemo);
+  const found = drawSmeemoCard(first.game, smeemo.id);
+  assert.deepEqual(found.draw, { id: smeemo.id, smeemo: true });
+  assert.equal(found.game.status, "complete");
+  assert.equal(found.game.phase, "complete");
+  assert.equal(drawSmeemoCard(found.game, game.cards[2].id).error, "not-playing");
+});
+
+test("legacy Smeemo state migrates without carrying player-turn labels forward", () => {
+  const cards = Array.from({ length: 9 }, (_, index) => ({ id: `legacy-${index + 1}`, smeemo: index === 6 }));
+  const migrated = normalizeCardGamesState({
+    smeemo: {
+      status: "playing",
+      piles: { faroe: cards.slice(0, 3), erin: cards.slice(3, 6), kaz: cards.slice(6, 9) },
+      draws: [{ id: "legacy-1", player: "faroe", smeemo: false }],
+      turnCursor: 1,
+    },
+  }).smeemo;
+  assert.equal(migrated.cards.length, 9);
+  assert.equal(migrated.phase, "ready");
+  assert.deepEqual(migrated.draws, [{ id: "legacy-1", smeemo: false }]);
+  assert.equal("turnCursor" in migrated, false);
+  assert.equal("winner" in migrated, false);
 });
