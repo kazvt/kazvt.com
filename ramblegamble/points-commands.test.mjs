@@ -22,10 +22,10 @@ test("console rejects unsafe totals and malformed commands", () => {
   assert.equal(parsePointsCommand("clear now").action, "error");
 });
 
-test("the console exposes only explicit Smeemo start, draw, and reset actions", () => {
+test("the console starts and resets Smeemo; card reveals remain manual on the room page", () => {
   assert.deepEqual(parsePointsCommand("smeemo start"), { action: "smeemo-start" });
-  assert.deepEqual(parsePointsCommand("smeemo draw"), { action: "smeemo-draw" });
   assert.deepEqual(parsePointsCommand("smeemo reset"), { action: "smeemo-reset" });
   assert.equal(parsePointsCommand("smeemo").action, "error");
+  assert.equal(parsePointsCommand("smeemo draw").action, "error");
   assert.equal(parsePointsCommand("smeemo cheat").action, "error");
 });
