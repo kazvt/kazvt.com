@@ -11,8 +11,8 @@ import {
   revealAudienceResults,
   submitRoundAnswer,
   buyShopCard,
-} from "./card-games.mjs?v=rg-card-games-20261124-v1";
-import { readCardGames, writeCardGames, subscribeCardGames } from "./card-games-store.mjs?v=rg-card-games-20261124-v1";
+} from "./card-games.mjs?v=rg-smeemo-manual-20261125-v1";
+import { readCardGames, writeCardGames, subscribeCardGames } from "./card-games-store.mjs?v=rg-smeemo-manual-20261125-v1";
 import { readPointScores, subscribePointScores, writePointScores } from "./points-store.mjs?v=points-console-20261120-v1";
 
 (() => {
