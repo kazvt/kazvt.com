@@ -5,6 +5,7 @@ import {
   createRedHandedRound,
   createShopRound,
   advanceSmeemoPhase,
+  drawSmeemoCard,
   normalizeTextList,
   parseShopCardList,
   recordAudienceVote,
