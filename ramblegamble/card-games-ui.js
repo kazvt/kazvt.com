@@ -464,9 +464,11 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       button.style.setProperty("--home-rotation", `${((index % 3) - 1) * 1.4}deg`);
       const inner = element("span", "rg-smeemo-card-inner");
       const front = element("span", `rg-smeemo-card-front${card.smeemo ? " is-berry" : ""}`);
-      const berryMark = element("span", "rg-smeemo-berry-mark");
-      berryMark.setAttribute("aria-hidden", "true");
-      front.append(berryMark);
+      if (card.smeemo) {
+        const berryMark = element("span", "rg-smeemo-berry-mark");
+        berryMark.setAttribute("aria-hidden", "true");
+        front.append(berryMark);
+      }
       front.append(element("span", "rg-smeemo-face-label", card.smeemo ? "SMEEMO!" : "BLANK"));
       const back = element("span", "rg-smeemo-card-back");
       back.setAttribute("aria-hidden", "true");
