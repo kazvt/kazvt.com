@@ -1251,6 +1251,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     readEditor();
     queueSave();
     renderStage();
+    syncClientActivityControls();
   }
 
   function addImageToNode(node, url, assetId, className) {
@@ -2187,16 +2188,19 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
       $("#rg-round-badge").textContent = "ROUND 00";
       $("#rg-format-badge").textContent = "BLANK SLATE";
       renderStage();
+      syncClientActivityControls();
       return;
     }
     if (special?.kind === "host-instructions") {
       renderEditor(resolveRoundFormat("0", 1), { question: "", subtitle: "", promptImage: "", promptAsset: "", mode: "short-answer", acceptedAnswers: [], options: [], items: [], pairs: [], categories: [], videoUrl: "", numberValue: 0 });
       renderStage();
+      syncClientActivityControls();
       return;
     }
     const effective = effectiveNow();
     renderEditor(effective.format, effective.content);
     renderStage();
+    syncClientActivityControls();
   }
 
   ROUND_IDS.forEach((round) => {
@@ -2290,6 +2294,16 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     saveDrafts();
     render();
   });
+
+  clientExportTask.addEventListener("click", exportClientTask);
+  clientAnswerFiles.addEventListener("change", previewClientAnswerFiles);
+  clientImportAnswers.addEventListener("click", importClientAnswers);
+  clientExportAnswers.addEventListener("click", () => {
+    if (!clientSubmissions.length) return;
+    downloadClientJson({ format: "kazvt.rg.client-results", version: 1, exportedAt: new Date().toISOString(), submissions: clientSubmissions }, "rg-player-results.json");
+  });
+  clientClearAnswers.addEventListener("click", clearClientAnswers);
+  renderClientSubmissions();
 
   window.addEventListener("pagehide", () => {
     objectUrls.forEach((url) => URL.revokeObjectURL(url));
