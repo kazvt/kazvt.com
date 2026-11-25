@@ -341,6 +341,8 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
           marker.dataset.resultPlacement = String(placementIndex);
           marker.style.left = placement.x + "%";
           marker.style.top = placement.y + "%";
+          marker.style.width = "3.7%";
+          marker.style.height = "13.4%";
           marker.setAttribute("aria-label", item.label || "Placed image " + (placement.itemIndex + 1));
           if (item.image || item.asset) addImageToNode(marker, item.image, item.asset, "rg-client-result-place-image");
           else marker.textContent = item.label || "IMAGE";
