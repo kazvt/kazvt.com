@@ -360,7 +360,6 @@
 .rg-smeemo-card.is-revealed { cursor: default; }
 .rg-smeemo-board.is-stacking .rg-smeemo-card { animation: rg-smeemo-stack 760ms cubic-bezier(.2,.76,.22,1) both; animation-delay: var(--stack-delay); }
 .rg-smeemo-board.is-stacked .rg-smeemo-card { transform: translate3d(calc(var(--stack-x) + var(--stack-layer-x)), var(--stack-layer-y), 0) rotate(var(--stack-rotation)) scale(.84); animation: rg-smeemo-stack-settle 220ms ease-out both; }
-.rg-smeemo-board.is-stacked .rg-smeemo-card-inner { animation: rg-smeemo-flip-down 460ms cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--stack-delay); }
 .rg-smeemo-board.is-dealing .rg-smeemo-card { animation: rg-smeemo-deal 760ms cubic-bezier(.16,.82,.2,1) both; animation-delay: var(--deal-delay); }
 .rg-smeemo-board.is-dealing .rg-smeemo-card-inner { animation: rg-smeemo-flip-down 500ms cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--flip-delay); }
 .rg-smeemo-status { margin-top: clamp(17px, 2.5vw, 28px); color: #8b2626; font-size: clamp(12px, 1.8vw, 19px); letter-spacing: .08em; text-shadow: 1px 1px #ffdf00; }

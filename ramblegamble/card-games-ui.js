@@ -441,7 +441,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     const railViewport = element("div", "rg-smeemo-rail-viewport");
     const rail = element("div", "rg-smeemo-rail");
     const revealIds = new Set(game.draws.map(({ id }) => id));
-    const faceUp = game.phase === "preview" || game.phase === "stacking";
+    const faceUp = ["preview", "stacking", "stacked"].includes(game.phase);
     const order = ["preview", "stacking", "stacked"].includes(game.phase)
       ? game.previewOrder.map((id) => game.cards.find((card) => card.id === id)).filter(Boolean)
       : game.cards;
