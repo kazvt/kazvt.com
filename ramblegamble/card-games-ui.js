@@ -432,6 +432,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     setStageTitle("SMEEMO SCRAMBLE", "smeemo");
     content.replaceChildren();
     const board = element("div", `rg-smeemo-board is-${game.phase}`);
+    const railViewport = element("div", "rg-smeemo-rail-viewport");
     const rail = element("div", "rg-smeemo-rail");
     const revealIds = new Set(game.draws.map(({ id }) => id));
     const faceUp = game.phase === "preview" || game.phase === "stacking";
@@ -445,6 +446,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       const isAvailable = game.phase === "ready" && game.status === "playing" && !revealed;
       const button = element("button", `rg-smeemo-card${showingFront ? " is-face-up" : " is-face-down"}${revealed ? " is-revealed" : ""}${isAvailable ? " is-available" : ""}${card.smeemo ? " is-smeemo" : ""}`);
       button.type = "button";
+      button.dataset.cardId = card.id;
       button.disabled = game.phase !== "ready" || game.status !== "playing" || revealed;
       button.setAttribute("aria-label", showingFront
         ? `Card ${index + 1}: ${card.smeemo ? "Smeemoberry" : "blank"}`
@@ -468,14 +470,16 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
         const result = drawSmeemoCard(current, card.id);
         if (result.error) return;
         sync({ ...state, smeemo: result.game });
+        window.queueMicrotask(() => content.querySelector(".rg-smeemo-card.is-available")?.focus({ preventScroll: true }));
       });
       rail.append(button);
     }
 
-    board.append(rail);
+    railViewport.append(rail);
+    board.append(railViewport);
     content.append(board);
     if (["stacking", "stacked", "dealing"].includes(game.phase)) {
-      const railRect = rail.getBoundingClientRect();
+      const railRect = railViewport.getBoundingClientRect();
       const stackCenter = railRect.left + railRect.width / 2;
       for (const [index, card] of [...rail.children].entries()) {
         const rect = card.getBoundingClientRect();
