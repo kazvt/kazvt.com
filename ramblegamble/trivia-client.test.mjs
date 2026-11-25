@@ -25,7 +25,7 @@ const activity = (mode = "categorize-images", extra = {}) => buildClientActivity
 test("activity packets are versioned, portable, and omit unused empty editor slots", () => {
   const packet = buildClientActivity({
     activityId: "activity-123", round: "14", difficulty: 1, mode: "categorize-images",
-    content: { question: "Sort", categories: ["A", "B", "C"], items: [{ label: "A", image: "a.png" }, { label: "", image: "" }] },
+    content: { question: "Sort", categories: ["A", "B", "C"], items: [{ label: "A", image: "/a.png" }, { label: "", image: "" }] },
   });
   assert.equal(packet.format, CLIENT_ACTIVITY_FORMAT);
   assert.equal(packet.version, 1);
