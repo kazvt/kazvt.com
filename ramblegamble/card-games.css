@@ -301,39 +301,83 @@
 .rg-shop-card-owner { max-width: 18ch; font-size: 12px; font-weight: 900; text-align: center; }
 .rg-shop-balance { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 8px 0 14px; font-size: 12px; font-weight: 900; }
 
-.rg-smeemo-board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(9px, 2vw, 24px); align-items: start; }
-.rg-smeemo-player { display: grid; justify-items: center; gap: 10px; min-width: 0; padding: clamp(8px, 1.5vw, 16px); border: 3px solid #8b2626; background: rgb(242 242 218 / 86%); box-shadow: 4px 5px 0 #1e0b01; }
-.rg-smeemo-player.is-turn { border-color: #ffdf00; box-shadow: 0 0 0 4px #b77beb, 0 0 18px #ffdf00, 4px 5px 0 #1e0b01; }
-.rg-smeemo-player h2 { margin: 0; color: #8b2626; font-size: clamp(12px, 2vw, 20px); text-transform: uppercase; }
-.rg-smeemo-pile { display: flex; min-height: clamp(78px, 12vw, 135px); align-items: center; justify-content: center; }
-.rg-smeemo-card {
-  display: grid;
-  width: clamp(42px, 6.4vw, 76px);
-  aspect-ratio: .68;
-  place-items: center;
-  margin-left: clamp(-24px, -2vw, -8px);
-  border: 2px solid #1e0b01;
-  border-radius: 5px 5px 10px 10px;
-  color: #1e0b01;
-  background: #9a88ff url("/ramblegamble/assets/provided/card_deck.png") repeat;
-  background-size: 30px 46px;
-  box-shadow: 2px 3px 0 #8b2626;
-  image-rendering: pixelated;
-  transform: rotate(var(--card-angle, 0deg));
-  transition: transform 440ms cubic-bezier(.15,.8,.25,1), background 240ms ease;
+.rg-smeemo-board {
+  position: relative;
+  width: 100%;
+  padding: clamp(14px, 2.4vw, 28px) clamp(8px, 1.6vw, 18px);
+  border: 3px ridge #8b2626;
+  background: linear-gradient(135deg, rgb(255 255 255 / 78%), rgb(183 123 235 / 25%)), #f2f2da;
+  box-shadow: inset 0 0 0 4px #ffdf00, 0 8px 0 #1e0b01, 0 0 30px rgb(183 123 235 / 70%);
 }
-.rg-smeemo-card:first-child { margin-left: 0; }
-.rg-smeemo-card.is-drawn { z-index: 2; color: #1e0b01; background: #f2f2da; transform: translateY(-14px) rotate(0); animation: rg-card-flip 620ms cubic-bezier(.2,.8,.2,1); }
-.rg-smeemo-card.is-smeemo { color: #b20000; box-shadow: 0 0 20px #ffdf00; font-size: 10px; font-weight: 900; }
-.rg-smeemo-board.is-shuffling .rg-smeemo-card { animation: rg-scramble-deal 920ms cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--deal-delay); }
-@keyframes rg-scramble-deal { 0% { opacity: .15; transform: translateY(-85px) rotate(34deg) scale(.7); } 38% { opacity: 1; transform: translateY(-22px) rotate(-20deg) scale(1.1); } 72% { transform: translateY(8px) rotate(12deg) scale(.96); } 100% { transform: translateY(0) rotate(var(--card-angle, 0deg)) scale(1); } }
-.rg-smeemo-draw-list { display: flex; justify-content: center; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
-.rg-smeemo-draw { display: grid; min-width: 70px; justify-items: center; gap: 2px; padding: 5px; border: 1px solid #8b2626; background: #f2f2da; font-size: 10px; font-weight: 900; }
-.rg-smeemo-draw-card { display: grid; min-width: 54px; min-height: 28px; place-items: center; color: #486c2f; font-size: 9px; }
-.rg-smeemo-draw-card.is-smeemo { color: #b20000; text-shadow: 1px 1px 0 #ffdf00; }
-.rg-smeemo-draw.is-latest .rg-smeemo-draw-card { animation: rg-card-flip 520ms cubic-bezier(.2,.8,.2,1); }
-.rg-smeemo-winner { margin: 18px 0 0; color: #8b2626; font-size: clamp(21px, 4vw, 42px); font-weight: 900; text-align: center; text-shadow: 3px 3px 0 #ffdf00, 5px 5px 0 #b77beb; animation: rg-berry-pop 580ms cubic-bezier(.18,.9,.3,1.4); }
-@keyframes rg-card-flip { 50% { transform: translateY(-24px) rotateY(90deg) scale(1.08); } }
+.rg-smeemo-rail {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(62px, 1fr));
+  gap: clamp(5px, 1vw, 12px);
+  width: 100%;
+  min-width: 650px;
+  margin: 0 auto;
+  perspective: 1500px;
+}
+.rg-smeemo-card {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  aspect-ratio: 415 / 618;
+  padding: 0;
+  border: 0;
+  color: #1e0b01;
+  background: transparent;
+  box-shadow: none;
+  cursor: default;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.rg-smeemo-card-inner,
+.rg-smeemo-card-front,
+.rg-smeemo-card-back { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 10px; }
+.rg-smeemo-card-inner { transform-style: preserve-3d; transition: transform 560ms cubic-bezier(.2,.8,.2,1); }
+.rg-smeemo-card.is-face-down .rg-smeemo-card-inner { transform: rotateY(180deg); }
+.rg-smeemo-card-front,
+.rg-smeemo-card-back { overflow: hidden; border: 3px ridge #8b2626; backface-visibility: hidden; box-shadow: 3px 4px 0 #1e0b01, 0 0 12px rgb(151 110 255 / 55%); }
+.rg-smeemo-card-front { align-content: center; gap: 7%; padding: 9%; background: linear-gradient(145deg, #fffbe1 0 48%, #f2f2da 48% 100%); }
+.rg-smeemo-card-front::before,
+.rg-smeemo-card-front::after { position: absolute; width: 20%; height: 8%; content: ""; background: #b20000; }
+.rg-smeemo-card-front::before { top: 0; left: 0; clip-path: polygon(0 0,100% 0,0 100%); }
+.rg-smeemo-card-front::after { right: 0; bottom: 0; clip-path: polygon(100% 0,100% 100%,0 100%); }
+.rg-smeemo-card-front.is-berry { color: #fff5c7; background: linear-gradient(145deg, #b20000 0 48%, #8b2626 48% 100%); box-shadow: inset 0 0 0 4px #ffdf00, 0 0 24px #ffdf00, 3px 4px 0 #1e0b01; }
+.rg-smeemo-berry-mark { position: relative; display: block; width: 34%; aspect-ratio: 1; filter: drop-shadow(2px 3px 0 #1e0b01); }
+.rg-smeemo-berry-mark::before { position: absolute; inset: 13% 7% 0; content: ""; background: linear-gradient(135deg, #ffdf00, #ff62bd 52%, #9a67ff); clip-path: polygon(36% 0,64% 0,64% 12%,82% 12%,82% 22%,96% 22%,96% 39%,100% 39%,100% 67%,83% 67%,83% 84%,66% 84%,66% 100%,34% 100%,34% 84%,17% 84%,17% 67%,0 67%,0 39%,4% 39%,4% 22%,18% 22%,18% 12%,36% 12%); }
+.rg-smeemo-berry-mark::after { position: absolute; top: 0; left: 41%; width: 28%; height: 22%; content: ""; background: #56ce72; clip-path: polygon(50% 100%,0 28%,30% 0,55% 38%,100% 12%,82% 74%); }
+.rg-smeemo-face-label { position: relative; z-index: 1; color: #8b2626; font-size: clamp(8px, 1vw, 14px); font-weight: 1000; letter-spacing: .04em; line-height: 1; text-align: center; text-shadow: 1px 1px #ffdf00; }
+.rg-smeemo-card-front.is-berry .rg-smeemo-face-label { color: #fff5c7; font-size: clamp(9px, 1.1vw, 16px); text-shadow: 2px 2px #1e0b01; }
+.rg-smeemo-card-back { transform: rotateY(180deg); background: #9a88ff url("/ramblegamble/assets/provided/card_deck.png") repeat; background-size: 36px 54px; image-rendering: pixelated; }
+.rg-smeemo-card-back::after { position: absolute; inset: 9%; content: ""; border: 2px dashed #fff6ac; box-shadow: inset 0 0 0 2px #493080; }
+.rg-smeemo-card:focus-visible { z-index: 2; outline: 4px solid #ffdf00; outline-offset: 5px; }
+.rg-smeemo-card.is-available { cursor: pointer; transition: filter 180ms ease, transform 180ms ease; }
+.rg-smeemo-card.is-available:hover { z-index: 2; filter: drop-shadow(0 0 13px #ffdf00); transform: translateY(-9px) rotate(var(--home-rotation)); }
+.rg-smeemo-card.is-revealed { cursor: default; }
+.rg-smeemo-board.is-stacking .rg-smeemo-card { animation: rg-smeemo-stack 930ms cubic-bezier(.2,.76,.22,1) both; animation-delay: var(--deal-delay); }
+.rg-smeemo-board.is-stacked .rg-smeemo-card { transform: translate3d(calc(var(--stack-x) + var(--stack-layer-x)), var(--stack-layer-y), 0) rotate(var(--stack-rotation)) scale(.84); animation: rg-smeemo-stack-settle 220ms ease-out both; }
+.rg-smeemo-board.is-stacked .rg-smeemo-card-inner { animation: rg-smeemo-flip-down 470ms cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--deal-delay); }
+.rg-smeemo-board.is-dealing .rg-smeemo-card { animation: rg-smeemo-deal 870ms cubic-bezier(.16,.82,.2,1) both; animation-delay: var(--deal-delay); }
+.rg-smeemo-board.is-dealing .rg-smeemo-card-inner { animation: rg-smeemo-flip-down 500ms cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--flip-delay); }
+.rg-smeemo-status { margin-top: clamp(17px, 2.5vw, 28px); color: #8b2626; font-size: clamp(12px, 1.8vw, 19px); letter-spacing: .08em; text-shadow: 1px 1px #ffdf00; }
+.rg-smeemo-status.is-complete { color: #b20000; }
+.rg-smeemo-winner { margin: 14px 0 0; color: #8b2626; font-size: clamp(22px, 4vw, 46px); font-weight: 1000; text-align: center; text-shadow: 3px 3px 0 #ffdf00, 5px 5px 0 #b77beb; animation: rg-berry-pop 580ms cubic-bezier(.18,.9,.3,1.4); }
+@keyframes rg-smeemo-stack {
+  0% { transform: translate3d(0,0,0) rotate(0deg) scale(1); }
+  42% { transform: translate3d(var(--mid-x),-62px,0) rotate(190deg) scale(1.1); }
+  72% { transform: translate3d(var(--stack-x),8px,0) rotate(370deg) scale(.91); }
+  100% { transform: translate3d(calc(var(--stack-x) + var(--stack-layer-x)),var(--stack-layer-y),0) rotate(var(--stack-rotation)) scale(.84); }
+}
+@keyframes rg-smeemo-stack-settle { 0% { filter: brightness(1.7); } 100% { filter: brightness(1); } }
+@keyframes rg-smeemo-flip-down { 0% { transform: rotateY(0); } 100% { transform: rotateY(180deg); } }
+@keyframes rg-smeemo-deal {
+  0% { opacity: .95; transform: translate3d(calc(var(--stack-x) + var(--stack-layer-x)),var(--stack-layer-y),0) rotate(var(--stack-rotation)) scale(.84); }
+  22% { opacity: 1; transform: translate3d(var(--stack-x),-42px,0) rotate(12deg) scale(1.12); }
+  100% { opacity: 1; transform: translate3d(0,0,0) rotate(var(--home-rotation)) scale(1); }
+}
 
 .rg-card-admin { --card-ink: #1e0b01; }
 .rg-card-admin-toolbar { display: flex; align-items: end; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
@@ -406,12 +450,13 @@
   .rg-shop-card-type { padding: 3px; font-size: 9px; }
   .rg-shop-card-name { font-size: 13px; }
   .rg-shop-card-price { font-size: 12px; }
-  .rg-smeemo-player { padding: 5px; }
-  .rg-smeemo-pile { min-height: 65px; }
-  .rg-smeemo-card { width: clamp(32px, 8vw, 50px); margin-left: -12px; }
+  .rg-smeemo-board { padding: 12px 7px; }
+  .rg-smeemo-rail { grid-template-columns: repeat(9, minmax(58px, 1fr)); min-width: 540px; gap: 5px; }
+  .rg-smeemo-card-front, .rg-smeemo-card-back { border-width: 2px; border-radius: 7px; }
+  .rg-smeemo-card-back { background-size: 28px 42px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .rg-mode-choice, .rg-mode-card, .rg-mode-card img, .rg-card-answer, .rg-shop-card, .rg-smeemo-card { transition: none; animation: none !important; }
+  .rg-mode-choice, .rg-mode-card, .rg-mode-card img, .rg-card-answer, .rg-shop-card, .rg-smeemo-card, .rg-smeemo-card-inner { transition: none; animation: none !important; }
 }
 
 .rg-console.is-card-host {
