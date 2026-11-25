@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en" data-theme="p2">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#8B2626">
+    <meta name="description" content="Complete a Ramble Gamble picture-placement task on your own device.">
+    <title>Place images - Ramble Gamble</title>
+    <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
+    <link rel="stylesheet" href="/ramblegamble/player-activities.css?v=player-handoff-20261125-v1">
+    <script type="module" src="/ramblegamble/trivia-client-page.js?v=player-handoff-20261125-v1"></script>
+  </head>
+  <body class="rg-client-page" data-rg-client-mode="compose-image">
+    <main class="rg-client-shell">
+      <header class="rg-client-header"><a href="/rg/">RAMBLE GAMBLE</a><span>PLAYER TASK</span></header>
+      <section class="rg-client-card" aria-labelledby="rg-client-title">
+        <p class="rg-client-kicker">ROUND 28 TYPE</p>
+        <h1 id="rg-client-title">PLACE IMAGES ON THE PICTURE</h1>
+        <div class="rg-client-load-row">
+          <label class="rg-client-upload">OPEN TASK .JSON<input id="rg-client-task-file" type="file" accept=".json,application/json"></label>
+          <label class="rg-client-player-label" for="rg-client-player">PLAYER<select id="rg-client-player"><option value="">CHOOSE NAME</option><option value="faroe">FAROE</option><option value="erin">ERIN</option><option value="kaz">KAZ</option></select></label>
+        </div>
+        <p class="rg-client-status" id="rg-client-status" role="status" aria-live="polite">Load the task JSON from the host to begin.</p>
+        <section class="rg-client-activity" id="rg-client-activity" hidden>
+          <p class="rg-client-subtitle" id="rg-client-subtitle" hidden></p>
+          <h2 class="rg-client-question" id="rg-client-question"></h2>
+          <div class="rg-client-work" id="rg-client-work"></div>
+          <div class="rg-client-save-row">
+            <button class="rg-client-button" id="rg-client-save" type="button" disabled>DOWNLOAD ANSWER .JSON</button>
+            <button class="rg-client-button rg-client-button-secondary" id="rg-client-copy" type="button" disabled>COPY ANSWER JSON</button>
+          </div>
+          <p class="rg-client-handoff-note">Send the downloaded answer file back to the host.</p>
+        </section>
+      </section>
+      <footer class="rg-client-footer">This task runs in your browser. Your answer is not sent automatically.</footer>
+    </main>
+  </body>
+</html>
