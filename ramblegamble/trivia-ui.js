@@ -20,6 +20,7 @@ import {
 } from "./trivia-text.mjs?v=number-grid-guess-limit-20261121-v1";
 import { compareNumberGuess, hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, normalizeGuessLimit, scoreFourDigitGuess } from "./trivia-game.mjs?v=changeable-number-feedback-20261124-v1";
 import { migrateLegacyComposePlacements, normalizeComposePlacements, snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-place-20261124-v1";
+import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, validateClientSubmission } from "./trivia-client.mjs?v=player-handoff-20261125-v1";
 
 (() => {
   "use strict";
@@ -63,6 +64,18 @@ import { migrateLegacyComposePlacements, normalizeComposePlacements, snapCompose
   const importStatus = $("#rg-import-status");
   const importPreview = $("#rg-import-preview");
   const exportButton = $("#rg-export-trivia");
+  const clientTaskStatus = $("#rg-client-task-status");
+  const clientOpenLink = $("#rg-client-open-link");
+  const clientExportTask = $("#rg-client-export-task");
+  const clientAnswerFiles = $("#rg-client-answer-files");
+  const clientImportAnswers = $("#rg-client-import-answers");
+  const clientExportAnswers = $("#rg-client-export-answers");
+  const clientClearAnswers = $("#rg-client-clear-answers");
+  const clientTransferStatus = $("#rg-client-transfer-status");
+  const clientImportPreview = $("#rg-client-import-preview");
+  const clientSubmissionsNode = $("#rg-client-submissions");
+  const CLIENT_ISSUED_KEY = "ramblegamble.client-activities.v1";
+  const CLIENT_ANSWERS_KEY = "ramblegamble.client-answers.v1";
 
   let currentRound = "01";
   let currentDifficulty = 1;
@@ -85,6 +98,9 @@ import { migrateLegacyComposePlacements, normalizeComposePlacements, snapCompose
   let slotGrid = loadGrid();
   let selectedBerry = "kazberry";
   let placementMode = "column";
+  let issuedClientActivities = readSessionArray(CLIENT_ISSUED_KEY).filter((entry) => entry && typeof entry.activityId === "string");
+  let clientSubmissions = readSessionArray(CLIENT_ANSWERS_KEY).filter((entry) => validateClientSubmission(entry).ok);
+  let pendingClientSubmissions = [];
 
   function esc(value) {
     return String(value ?? "").replace(/[&<>"']/g, (character) => ({
