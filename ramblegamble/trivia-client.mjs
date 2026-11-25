@@ -173,13 +173,13 @@ export function validateClientSubmission(submission, expected = {}) {
     if (!Array.isArray(snapshot.categories) || snapshot.categories.length !== 3 || !Array.isArray(assignments) || assignments.length !== itemCount || assignments.some((group) => !Number.isInteger(group) || group < 0 || group > 2)) errors.push("The sort answer must place every item into one of the three groups.");
   } else if (submission.mode === "compose-image") {
     const placements = answer.placements;
-    if (!Array.isArray(placements) || placements.length > 500 || placements.some((placement) =>
+    if (!Array.isArray(placements) || placements.length < 1 || placements.length > 500 || placements.some((placement) =>
       !placement || !Number.isInteger(placement.itemIndex) || placement.itemIndex < 0 || placement.itemIndex >= itemCount ||
       !Number.isFinite(placement.x) || placement.x < 0 || placement.x > 100 || !Number.isFinite(placement.y) || placement.y < 0 || placement.y > 100)) errors.push("The picture-placement answer contains invalid positions.");
   } else if (submission.mode === "draw-over-image") {
     const strokes = answer.strokes;
     const pointCount = Array.isArray(strokes) ? strokes.reduce((count, stroke) => count + (Array.isArray(stroke) ? stroke.length : 0), 0) : 0;
-    if (!Array.isArray(strokes) || strokes.length > 500 || pointCount > 40000 || strokes.some((stroke) =>
+    if (!Array.isArray(strokes) || strokes.length < 1 || strokes.length > 500 || pointCount > 40000 || strokes.some((stroke) =>
       !Array.isArray(stroke) || stroke.length < 1 || stroke.some((point) =>
         !point || !Number.isFinite(point.x) || point.x < 0 || point.x > 1000 || !Number.isFinite(point.y) || point.y < 0 || point.y > 1000))) errors.push("The drawing answer contains invalid strokes.");
   }
