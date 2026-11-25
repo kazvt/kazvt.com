@@ -128,7 +128,7 @@ test("legacy Smeemo state migrates without carrying player-turn labels forward",
   const migrated = normalizeCardGamesState({
     smeemo: {
       status: "playing",
-      piles: { faroe: cards.slice(0, 3), erin: cards.slice(3, 6), kaz: cards.slice(6, 9) },
+      piles: { faroe: cards.slice(1, 3), erin: cards.slice(3, 6), kaz: cards.slice(6, 9) },
       draws: [{ id: "legacy-1", player: "faroe", smeemo: false }],
       turnCursor: 1,
     },

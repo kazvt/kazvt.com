@@ -170,6 +170,11 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     setAdminState(state);
 
     const activeSmeemo = state.smeemo && ["playing", "complete"].includes(state.smeemo.status);
+    if (!activeSmeemo) {
+      window.clearTimeout(smeemoPhaseTimer);
+      smeemoPhaseTimer = 0;
+      smeemoScheduledSignal = "";
+    }
     const nextMode = activeSmeemo ? "smeemo" : state.round?.mode || null;
     if (nextMode && nextMode !== lastActiveMode) {
       lastActiveMode = nextMode;
@@ -458,7 +463,9 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       button.style.setProperty("--home-rotation", `${((index % 3) - 1) * 1.4}deg`);
       const inner = element("span", "rg-smeemo-card-inner");
       const front = element("span", `rg-smeemo-card-front${card.smeemo ? " is-berry" : ""}`);
-      front.append(element("span", "rg-smeemo-berry-mark", card.smeemo ? "✦" : ""));
+      const berryMark = element("span", "rg-smeemo-berry-mark");
+      berryMark.setAttribute("aria-hidden", "true");
+      front.append(berryMark);
       front.append(element("span", "rg-smeemo-face-label", card.smeemo ? "SMEEMO!" : "BLANK"));
       const back = element("span", "rg-smeemo-card-back");
       back.setAttribute("aria-hidden", "true");
