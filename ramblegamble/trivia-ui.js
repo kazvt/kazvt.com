@@ -314,6 +314,40 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
         });
         answer.append(list);
       } else if (submission.mode === "compose-image") {
+        const picture = document.createElement("div");
+        picture.className = "rg-client-result-compose";
+        picture.style.aspectRatio = submission.snapshot.imageAspect && submission.snapshot.imageAspect !== "auto" ? submission.snapshot.imageAspect.replace(/\s/g, "") : "11 / 3";
+        const background = document.createElement("img");
+        background.className = "rg-client-result-background";
+        background.alt = "";
+        background.draggable = false;
+        const backgroundUrl = safeUrl(submission.snapshot.backgroundImage || submission.snapshot.promptImage);
+        const placeResultImages = () => {
+          if (!background.naturalWidth || !background.naturalHeight) return;
+          picture.style.aspectRatio = background.naturalWidth + " / " + background.naturalHeight;
+          picture.querySelectorAll("[data-result-placement]").forEach((marker) => {
+            marker.style.width = Math.min(100, (Number(submission.snapshot.pieceSize) || 32) / background.naturalWidth * 100) + "%";
+            marker.style.height = Math.min(100, (Number(submission.snapshot.pieceSize) || 32) / background.naturalHeight * 100) + "%";
+          });
+        };
+        background.addEventListener("load", placeResultImages);
+        if (backgroundUrl) background.src = backgroundUrl;
+        else if (submission.snapshot.promptAsset) readMedia(submission.snapshot.promptAsset).then((url) => { if (url) background.src = url; });
+        picture.append(background);
+        submission.answer.placements.forEach((placement, placementIndex) => {
+          const item = submission.snapshot.items[placement.itemIndex];
+          if (!item) return;
+          const marker = document.createElement("span");
+          marker.dataset.resultPlacement = String(placementIndex);
+          marker.style.left = placement.x + "%";
+          marker.style.top = placement.y + "%";
+          marker.setAttribute("aria-label", item.label || "Placed image " + (placement.itemIndex + 1));
+          if (item.image || item.asset) addImageToNode(marker, item.image, item.asset, "rg-client-result-place-image");
+          else marker.textContent = item.label || "IMAGE";
+          picture.append(marker);
+        });
+        answer.append(picture);
+        if (background.complete && background.naturalWidth) placeResultImages();
         const list = document.createElement("ol");
         submission.answer.placements.forEach((placement) => {
           const row = document.createElement("li");
