@@ -6,6 +6,7 @@ import {
   normalizeReelColumns,
   normalizeSlotGrid,
   sampleSlotReelColumn,
+  slotCellIndexAtUv,
   slotScreenPoint,
 } from "./slot-reels.mjs";
 
@@ -38,6 +39,30 @@ test("reel motion preserves the configured stop, staggers columns, and settles e
   assert.equal(sampleSlotReelColumn(first, motion, 1900).spinning, false);
   assert.deepEqual(sampleSlotReelColumn(first, motion, 1900).symbols, ["kazberry", null, "erinberry"]);
   assert.deepEqual(motion.grid, normalizeSlotGrid(grid));
+});
+
+test("reel animation lands on its computed board outcome", () => {
+  const starting = Array(15).fill(null);
+  const target = starting.slice();
+  target[7] = "erinberry";
+  target[14] = "kazberry";
+  const motion = createSlotReelMotion(starting, [2, 4], {
+    targetGrid: target,
+    startedAt: 0,
+    duration: 100,
+    random: () => 0.5,
+  });
+  assert.deepEqual(motion.columns.map((column) => column.target), [[null, "erinberry", null], [null, null, "kazberry"]]);
+  assert.deepEqual(motion.targetGrid, target);
+});
+
+test("screen UV coordinates map to the correct top-left-origin row and column", () => {
+  assert.equal(slotCellIndexAtUv({ x: 0.01, y: 0.99 }), 0);
+  assert.equal(slotCellIndexAtUv({ x: 0.99, y: 0.99 }), 4);
+  assert.equal(slotCellIndexAtUv({ x: 0.01, y: 0.01 }), 10);
+  assert.equal(slotCellIndexAtUv({ x: 0.99, y: 0.01 }), 14);
+  assert.equal(slotCellIndexAtUv({ x: 1, y: 0 }), 14);
+  assert.equal(slotCellIndexAtUv({ x: -0.1, y: 0.5 }), -1);
 });
 
 test("a column's texture-space quad maps to the machine's front panel and stays in front", () => {
