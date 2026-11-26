@@ -2,9 +2,9 @@ import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { showBurst } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 // Console uses the private read-only renderer without installing audio listeners.
 const foley = globalThis.location?.pathname?.replace(/\/$/, '') === '/rg/console'
- ? {play(){}} : (await import('./game-foley.mjs?v=show-energy-20261127-v1')).foley;
+ ? {play(){}} : (await import('./game-foley.mjs?v=theatre-20261127-v1')).foley;
 import { snapComposePlacement } from './compose-placement.mjs';
-import { CHOICE_MODES, publicMedia, validTriviaAnswer, MAX_TRIVIA_ANSWER, answerSummary } from './live-trivia.mjs?v=show-stage-20261126-v1';
+import { CHOICE_MODES, publicMedia, validTriviaAnswer, MAX_TRIVIA_ANSWER, answerSummary, NUMERIC_MODES, numericProgress } from './live-trivia.mjs?v=theatre-20261127-v1';
 const node=(tag,cls='',text='')=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text)e.textContent=text;return e;};
 const button=(text,fn)=>{const b=node('button','rg-live-button',text);b.type='button';b.addEventListener('click',fn);return b;};
 function image(src,alt='') {const url=publicMedia(src);if(!url)return null;const e=node('img','rg-live-image');e.src=url;e.alt=alt;e.referrerPolicy='no-referrer';e.draggable=false;return e;}
@@ -77,8 +77,17 @@ export function renderTriviaResponses(root,round){
  root.replaceChildren();if(!round)return;
  for(const p of ['kaz','faroe','erin']){
   const row=node('div','rg-live-response');const summary=answerSummary(round,p);
-  row.append(node('strong','',p.toUpperCase()),node('span','',summary==='—'?(round.phase==='submissions'?'Waiting':'No answer'):summary));
   const raw=round.submissions[p],q=round.question;
+  row.append(node('strong','',p.toUpperCase()));
+  if(NUMERIC_MODES.includes(q.kind)){
+    const progress=numericProgress(round,p);
+    row.append(node('span','rg-numeric-status',`${progress.status} · ${progress.attempts.length}/${progress.limit} guesses`));
+    if(q.kind==='number-grid'){
+      const history=node('div','rg-live-number-grid rg-host-number-history');
+      for(const attempt of progress.attempts){for(let i=0;i<4;i++){const digit=node('span','rg-live-digit',attempt.guess[i]);digit.dataset.result=attempt.result[i];digit.setAttribute('aria-label',`${attempt.guess[i]} ${attempt.result[i]}`);history.append(digit);}}
+      if(progress.attempts.length)row.append(history);
+    }else if(progress.attempts.length){const history=node('ol','rg-host-number-attempts');for(const attempt of progress.attempts)history.append(node('li','',`${attempt.guess} — ${attempt.result}`));row.append(history);}
+  }else row.append(node('span','',summary==='—'?(round.phase==='submissions'?'Waiting':'No answer'):summary));
   if(raw){try{
    const a=JSON.parse(raw);
    if(['draw-over-image','compose-image'].includes(q.kind))artboard(row,q,a);

@@ -27,7 +27,7 @@ test('actual player ignores a late prior ACK while the next numeric guess is pen
  const snapshot=()=>h.conn.emit('data',{v:ROOM_VERSION,type:'round',round});snapshot();const root=h.get('trivia-player-content');
  const guess=value=>{root.querySelector('input').value=value;root.children.at(-2).events.click();return h.conn.sent.at(-1);};
  const first=guess('12'),firstAnswer=JSON.parse(first.answer);round={...round,attempts:[{id:firstAnswer.id,guess:'12',result:'higher'}]};snapshot();
- const second=guess('13');assert.notEqual(first.requestId,second.requestId);assert.equal(root.hidden,true);h.conn.emit('data',{v:ROOM_VERSION,type:'ack',roundId:round.id,requestId:first.requestId,status:'invalid-answer'});assert.equal(root.hidden,true);assert.equal(h.get('submission').textContent,'Sending…');
+ const second=guess('13');assert.notEqual(first.requestId,second.requestId);assert.equal(root.hidden,false);assert.equal(root.querySelector("input"),null);h.conn.emit('data',{v:ROOM_VERSION,type:'ack',roundId:round.id,requestId:first.requestId,status:'invalid-answer'});assert.equal(root.hidden,false);assert.equal(h.get('submission').textContent,'Sending…');
  const secondAnswer=JSON.parse(second.answer);round={...round,attempts:[...round.attempts,{id:secondAnswer.id,guess:'13',result:'correct'}],submitted:true,savedAnswer:second.answer};snapshot();assert.equal(root.hidden,false);assert.equal(h.get('submission').textContent,'Answer saved.');
 });
 test('actual player retains outbox when ACK never arrives and retries same request after reconnect',async t=>{

@@ -110,6 +110,15 @@ export function acceptTriviaAnswer(round,player,raw) {
   }
   return {round:{...round,submissions:{...round.submissions,[player]:raw}},status:'accepted'};
 }
+export const NUMERIC_MODES = Object.freeze(['number-grid','number-stepper','memory-number']);
+export function numericProgress(round,player) {
+  const q=round.question, attempts=round.attempts[player]||[];
+  const last=attempts.at(-1), grid=q.kind==='number-grid';
+  const solved=grid?Array.isArray(last?.result)&&last.result.length===4&&last.result.every(x=>x==='green'):last?.result==='correct';
+  const limit=grid?q.guessLimit:100;
+  const status=solved?'Solved':round.submissions[player]?'No guesses left':round.phase!=='submissions'?'Closed':attempts.length?'In progress':'Waiting';
+  return {attempts,limit,solved,status};
+}
 export function answerSummary(round,player) {
   const q=round.question,raw=round.submissions[player],attempts=round.attempts[player]||[];
   if(attempts.length)return attempts.map(x=>`${x.guess} (${Array.isArray(x.result)?x.result.join('/') : x.result})`).join(' · ');

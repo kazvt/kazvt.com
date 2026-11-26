@@ -69,3 +69,9 @@ Two independently looping HTML media streams feed low-gain channels into the exi
 ### Audience emotes
 
 `audience-cheer.mp3` is an in-game derivative of the already bundled Mixkit #476 conference audience applause (`cheer.ogg`, license above). It is band-limited for distance, edited with a 1.2-second wrap crossfade, and encoded as MP3. The cheer layer fades with the active emote, alongside the two independently looping real crowd beds; all layers share the ambience toggle, visibility/mute lifecycle and master compressor. It is a short applause recording, not a new long crowd recording. No synthetic audio or runtime hotlinks. Install the two original long beds and Smeemo scream using the previous installer if not already present.
+
+### Theatrical drum cues (install-stage-drums.py)
+- `foley/stage-drum-roll.ogg`: [Drum Roll Intro.ogg](https://commons.wikimedia.org/wiki/File:Drum_Roll_Intro.ogg), Iwan Sounds and DIY, CC0 1.0; edited for short attack/end fades, original SHA-1 `e5109afea058cbc4a631fb6d05c72353bfa54ac3`.
+- `foley/stage-drum-hit.ogg`: [Snare drum unmuffled.ogg](https://commons.wikimedia.org/wiki/File:Snare_drum_unmuffled.ogg), Clngre~commonswiki, [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/); first recorded strike trimmed and faded, adapted audio remains CC BY-SA 3.0; original SHA-1 `d8d5767eb1b289f25a8d29d0e53f2522347b6e73`.
+- `foley/cheer.ogg` cue continues to use the project's existing `assets/sfx/cheer.ogg` licensed recording; no generated audio.
+- Run `python3 ramblegamble/assets/sfx/install-stage-drums.py` from the project root before deployment. If downloads are unavailable, save the exact originals from the Commons pages into a local directory and use `--downloads DIRECTORY`. No drum substitute is played if files are absent.

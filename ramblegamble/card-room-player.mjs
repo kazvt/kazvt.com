@@ -1,8 +1,8 @@
 import { ACK_TIMEOUT_MS, matchesAck, pendingReceipt, validRequestId } from "./card-room-delivery.mjs?v=submission-audit-20261126-v1";
-import { foley } from "./game-foley.mjs?v=show-energy-20261127-v1";
-import { renderLiveQuestion } from "./trivia-live-view.mjs?v=show-energy-20261127-v1";
+import { foley } from "./game-foley.mjs?v=theatre-20261127-v1";
+import { renderLiveQuestion } from "./trivia-live-view.mjs?v=theatre-20261127-v1";
 import { nonce, validNonce, validPublicKey, channelBinding, transcript, verifyHost, proveSeat } from "./card-room-auth.mjs?v=room-recovery-20261127-v1";
-import { ROOM_VERSION, isPlayer, decodePacket, encodePacket } from "./card-room-protocol.mjs?v=show-stage-20261126-v1";
+import { ROOM_VERSION, isPlayer, decodePacket, encodePacket } from "./card-room-protocol.mjs?v=theatre-20261127-v1";
 import { loadPeer } from "./card-room-peer.mjs?v=room-recovery-20261127-v1";
 import { connectLocal } from "./card-room-local.mjs?v=room-recovery-20261127-v1";
 const $ = id => document.getElementById(id);
@@ -20,7 +20,8 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
   function loadDraft(id) { try {const d=JSON.parse(sessionStorage.getItem(draftKey));return d?.roundId===id&&d.token===invite.token?d.value:null;}catch{return null;} }
   function clearDraft(){try{sessionStorage.removeItem(draftKey);}catch{}}
   function clearPending() { clearTimeout(ackTimer); ackTimer=null; pending=null; remember(null); }
-  function showPending() { if(!pending)return; $('packet').value=encodePacket(pending); $('fallback').hidden=online; $('form').hidden=true; $('trivia-player-content').hidden=true; $('submission').textContent=online?'Sending…':invite.round?'Copy the packet and send it to the host.':'Waiting for connection…'; }
+  const isNumeric=()=>round?.mode==='trivia'&&['number-grid','number-stepper','memory-number'].includes(round.question?.kind);
+  function showPending() { if(!pending)return; $('packet').value=encodePacket(pending); $('fallback').hidden=online; $('form').hidden=true; $('trivia-player-content').hidden=!isNumeric(); $('submission').textContent=online?'Sending…':invite.round?'Copy the packet and send it to the host.':'Waiting for connection…'; }
   function resolvePending(next) { const receipt=pendingReceipt(pending,next); if(!receipt)return null; clearPending(); if(receipt==='accepted')foley.play('confirm'); return receipt; }
   function showPacket() { if(!pending)return; showPending(); $('fallback').hidden=false; $('submission').textContent='Waiting for host confirmation.'; }
 
@@ -63,7 +64,7 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
     if ((!invite.round && terminal) || !round || round.phase !== 'submissions' || round.submitted || pending) return;
     foley.play("submit");
     pending={...envelope,type:'submit',roundId:round.id,requestId:crypto.randomUUID(),answer}; remember(pending);
-    showPending();sendPending();
+    if(isNumeric())renderTrivia(round,false);else {showPending();sendPending();}
   }
   function renderTrivia(next, changed) {
     $('mode').hidden=true; $('prompt').hidden=true; $('form').hidden=true;
@@ -78,10 +79,10 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
       triviaRenderKey=key;
       renderLiveQuestion(root,q,{interactive:open,attempts:next.attempts||[],initialAnswer:draft,onDraft:saveDraft,onSubmit:queueAnswer});
     }
-    root.hidden=!!pending;
+    root.hidden=!!pending&&!isNumeric();
     $('fallback').hidden=!pending||online;
     if(pending){showPending();sendPending();}
-    else if(next.submitted)$('submission').textContent='Answer saved.';
+    else if(next.submitted){const result=next.attempts?.at(-1)?.result;$('submission').textContent=q.kind==='number-grid'?(Array.isArray(result)&&result.length===4&&result.every(x=>x==='green')?'Solved — answer saved.':'No guesses left — answer saved.'):'Answer saved.';}
     else if(next.phase!=='submissions')$('submission').textContent='Round closed.';
     else $('submission').textContent='';
   }

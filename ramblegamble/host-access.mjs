@@ -19,11 +19,11 @@ const unlock=gate.querySelector('[data-host-unlock]');
 let promptOpen=false;
 let access, booted=false, bootPromise=null, busy=false, locked=true, inertBefore=new Map();
 const isConsole=location.pathname.replace(/\/$/,'').endsWith('/console');
-const appModules=isConsole? ['/rg/console/console.js?v=show-energy-20261127-v1'] : [
-  '/ramblegamble/ramblegamble.js?v=standing-characters-20261127-v1',
-  '/ramblegamble/dice-mode.js?v=show-energy-20261127-v1',
-  '/ramblegamble/trivia-ui.js?v=show-energy-20261127-v1',
-  '/ramblegamble/card-games-ui.js?v=show-energy-20261127-v1',
+const appModules=isConsole? ['/rg/console/console.js?v=theatre-20261127-v1'] : [
+  '/ramblegamble/ramblegamble.js?v=theatre-20261127-v1',
+  '/ramblegamble/dice-mode.js?v=theatre-20261127-v1',
+  '/ramblegamble/trivia-ui.js?v=theatre-20261127-v1',
+  '/ramblegamble/card-games-ui.js?v=theatre-20261127-v1',
 ];
 function renderLockedGate({focus=false}={}) {
   const setup=access?.profile()===null;

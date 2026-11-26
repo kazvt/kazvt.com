@@ -136,3 +136,21 @@ test('storage failure is never confirmed as saved; same request can be retried a
  const h=harness();try{const t=h.tab('/rg/console/');await t.room.ready;t.click('start');await flush();h.peers[0].emit('open');await flush();const invite=t.invites().kaz;const c=await join(h.peers[0],invite);const answer=h.round.hands.kaz[0],id=h.round.id;const msg={v:ROOM_VERSION,type:'submit',roundId:id,requestId:'retry-me',answer};h.failSave=true;c.emit('data',msg);await until(()=>c.sent.some(m=>m.type==='ack'&&m.status==='storage-error'));assert.equal(h.round.submissions.kaz,null);assert.equal(c.sent.filter(m=>m.type==='round').at(-1).round.submitted,false);h.failSave=false;c.emit('data',msg);await until(()=>c.sent.some(m=>m.type==='ack'&&m.status==='accepted'&&m.requestId==='retry-me'));assert.equal(h.round.submissions.kaz,answer);assert.equal(c.sent.filter(m=>m.type==='round').at(-1).round.savedAnswer,answer);}
  finally{h.dispose();await flush();}
 });
+
+test('number-grid guesses persist privately across failed saves, retransmission and elected reader handoff',async()=>{
+ const {createLiveTrivia,numericProgress}=await import('./live-trivia.mjs');const h=harness();try{
+ const a=h.tab('/rg/'),b=h.tab('/rg/console/');await Promise.all([a.room.ready,b.room.ready]);const invites=a.invites();a.click('start');await until(()=>h.peers.length===1);h.peers[0].emit('open');await flush();
+ h.round=createLiveTrivia({round:'25',difficulty:5,format:{mode:'number-grid'},content:{question:'Guess',numberCode:'0012',guessLimit:3},cards:{}});
+ const id=h.round.id,k=await join(h.peers[0],invites.kaz),f=await join(h.peers[0],invites.faroe);
+ const msg=(guess,attempt,request=attempt)=>({v:ROOM_VERSION,type:'submit',roundId:id,requestId:request,answer:JSON.stringify({guess,id:attempt})});
+ const latest=c=>c.sent.filter(m=>m.type==='round').at(-1).round;
+ const send=async(c,m,status='accepted')=>{c.emit('data',m);await until(()=>c.sent.some(x=>x.type==='ack'&&x.requestId===m.requestId&&x.status===status));};
+ const first=msg('0000','k1');h.failSave=true;await send(k,first,'storage-error');assert.equal(h.round.attempts.kaz.length,0);h.failSave=false;await send(k,first);
+ assert.deepEqual(h.round.attempts.kaz[0].result,['green','green','grey','grey']);assert.equal(h.round.submissions.kaz,null);assert.equal(numericProgress(h.round,'kaz').status,'In progress');assert.equal(latest(f).attempts.length,0);assert.equal('secret'in latest(k),false);assert.equal('numberCode'in latest(k).question,false);
+ await send(f,msg('1234','f1'));assert.equal(latest(k).attempts.length,1);assert.equal(latest(k).attempts[0].guess,'0000');
+ a.room.dispose();await until(()=>h.peers.length===2);h.peers[1].emit('open');await flush();const k2=await join(h.peers[1],invites.kaz),f2=await join(h.peers[1],invites.faroe);
+ assert.equal(latest(k2).attempts[0].guess,'0000');await send(k2,{...first,requestId:'retry'});assert.equal(h.round.attempts.kaz.length,1);await send(k2,msg('1111','k1','bad-reuse'),'invalid-answer');
+ await send(k2,msg('0012','k2'));assert.equal(numericProgress(h.round,'kaz').status,'Solved');assert.ok(latest(k2).submitted);assert.equal(latest(f2).attempts.length,1);await send(f2,msg('5555','f2'));await send(f2,msg('9999','f3'));assert.equal(numericProgress(h.round,'faroe').status,'No guesses left');assert.ok(latest(f2).submitted);await send(f2,msg('0012','f4'),'already-submitted');
+ assert.equal(numericProgress(h.round,'erin').status,'Waiting');assert.equal(h.round.attempts.erin.length,0);
+ }finally{h.dispose();await flush();}
+});

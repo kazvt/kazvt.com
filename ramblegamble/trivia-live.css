@@ -91,3 +91,9 @@
   height: clamp(140px, 30vh, 300px); width: auto; max-height: none; max-width: 100%; aspect-ratio: auto; object-fit: contain;
 }
 @media(max-width:600px){#trivia-player-content:is([data-kind="choice-image"],[data-kind="choice-image-wide"],[data-kind="image-grid"]) .rg-live-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+
+/* Private host numeric history: never rendered on the audience stage. */
+.rg-host-number-history{max-width:176px;gap:3px;}
+.rg-host-number-history .rg-live-digit{min-width:0;font-size:14px;}
+.rg-host-number-attempts{margin:0;padding-left:1.5em;max-height:180px;overflow:auto;}
+.rg-numeric-status{font-size:.9em;}

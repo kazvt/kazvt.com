@@ -1,3 +1,5 @@
+import { createStageShow } from "./stage-show.mjs?v=theatre-20261127-v1";
+import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state.mjs?v=theatre-20261127-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { createAudienceRenderer } from "./audience-render.mjs?v=half-opacity-20261127-v1";
@@ -7,7 +9,7 @@ import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { createExteriorMist } from "./exterior-mist.mjs?v=exterior-mist-20261126-v1";
 import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=standing-characters-20261127-v1";
-import { foley } from "./game-foley.mjs?v=show-energy-20261127-v1";
+import { foley } from "./game-foley.mjs?v=theatre-20261127-v1";
 import {
   resolvePointClickAction,
   resolvePointClickBack,
@@ -119,7 +121,7 @@ import {
     label: "Lillie - Host",
     source: "https://reactive.fugi.tech/basic/185073584211755008",
   };
-  let audience, showFX;
+  let audience, showFX, stageShow;
   let crowdClock=0,crowdLastFrame=null;
   const crowdState=createAudienceState(crowdClock,readAudienceMode());
   const audienceControls=document.getElementById("rg-audience-controls");
@@ -674,7 +676,7 @@ import {
   }
 
   function startSlotAction(targetGrid, axis, indexes, { pullCrank = false, kind = "spin" } = {}) {
-    if (playing || slotReelMotion) return false;
+    if (playing || slotReelMotion || stageShow?.busy) return false;
     const startedAt = performance.now();
     const startingGrid = slotReelGrid.slice();
     const settledGrid = normalizeSlotGrid(targetGrid);
@@ -727,7 +729,7 @@ import {
   }
 
   function placeSelectedSlotSymbolAtCell(index) {
-    if (playing || slotReelMotion || slotCellPop || currentView.kind !== "slot" || document.documentElement.hasAttribute("data-rg-host-locked")) return false;
+    if (playing || slotReelMotion || slotCellPop || stageShow?.busy || currentView.kind !== "slot" || document.documentElement.hasAttribute("data-rg-host-locked")) return false;
     const placement = placeSlotSymbolAtCell(slotReelGrid, selectedSlotBerry, index);
     if (placement.placedIndex < 0) return false;
     const startedAt = performance.now();
@@ -1438,7 +1440,16 @@ import {
     freecam?.stop();
     if (nextView.kind !== "roulette") {stopRouletteSettlement(); showFX?.clearRoulette();}
     const viewChanged=currentView.kind!==nextView.kind||currentView.contestantId!==nextView.contestantId;
-    if(viewChanged&&!immediate&&sceneReady){preview.dataset.showArrival=nextView.kind;preview.classList.remove("rg-show-arrival");void preview.offsetWidth;preview.classList.add("rg-show-arrival");if(nextView.kind==="overview")crowdState.react("idle",crowdClock);}
+    if(stageShow?.busy&&!viewChanged&&nextView.kind==="slot"&&!immediate)return;
+    const openingSlot=currentView.kind!=="slot"&&nextView.kind==="slot";
+    const closingSlot=currentView.kind==="slot"&&nextView.kind!=="slot";
+    if(stageShow&&viewChanged){
+      const now=performance.now();
+      if(immediate)stageShow.reset(nextView.kind==="slot");
+      else if(openingSlot||closingSlot)stageShow.slot(openingSlot,now);
+      else if(stageShow.manual)stageShow.dismiss(now);
+    }
+    if(viewChanged&&!immediate&&sceneReady){preview.dataset.showArrival=nextView.kind;preview.classList.remove("rg-show-arrival");void preview.offsetWidth;preview.classList.add("rg-show-arrival");if(nextView.kind==="overview"&&!closingSlot)crowdState.react("idle",crowdClock);}
     if (!immediate && sceneReady && (currentView.kind !== nextView.kind || currentView.look !== (nextView.look ?? 0) || currentView.contestantId !== nextView.contestantId)) foley.play(nextView.kind === "overview" ? "back" : "navigate");
     currentView = { ...nextView, look: nextView.kind === "overview" ? nextView.look ?? 0 : 0 };
     focusOrbit.reset(currentView.kind);
@@ -1454,7 +1465,8 @@ import {
 
     cameraTransition = {
       started: performance.now(),
-      duration: 520,
+      duration: stageShow&&(openingSlot||closingSlot) ? (openingSlot?REVEAL_MS:RETRACT_MS) : 520,
+      theatre: Boolean(stageShow&&(openingSlot||closingSlot)),
       fromPosition: camera.position.clone(),
       fromTarget: cameraTarget.clone(),
       toPosition: pose.position,
@@ -1933,7 +1945,7 @@ import {
     pointer.y = -((clientY - bounds.top) / bounds.height) * 2 + 1;
     raycaster.setFromCamera(pointer, camera);
     const wheelHit = raycaster.intersectObjects(rouletteTargets, true)[0];
-    const slotIntersections = raycaster.intersectObjects(slotTargets, true);
+    const slotIntersections = raycaster.intersectObjects([...(slotsModel?.visible ? slotTargets : []), ...(stageShow?.curtains||[])], true);
     const slotHit = slotIntersections[0];
     const projectedSlotControl = getProjectedSlotControlAt(clientX, clientY, bounds);
     const cardTableHit = raycaster.intersectObjects(cardTableTargets, true)[0];
@@ -2137,7 +2149,7 @@ import {
   updateMarqueeMotionPreference();
 
   function setMenuSceneVisibility(visible) {
-    for (const object of [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group]) {
+    for (const object of [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group, stageShow?.group]) {
       if (object) object.visible = visible;
     }
     billboardLayer.classList.toggle("rg-billboards-fading", !visible);
@@ -2146,6 +2158,7 @@ import {
   function showPauseMenu() {
     if (pauseMenuOpen) return;
     freecam?.stop();
+    stageShow?.reset(currentView.kind==="slot");
     foley.setRoomAmbience(false);
     foley.stopAll();
     focusDrag?.clearHover(); lastScenePointer = null;
@@ -2243,7 +2256,7 @@ import {
   window.addEventListener("rg:slot-action-finish",event=>{if(gameStarted&&!pauseMenuOpen&&!diceModeOpen&&!document.hidden&&currentView.kind==="slot"&&Object.values(event.detail?.totals||{}).some(v=>v>0))crowdState.react("cheer",crowdClock);});
 
   function pointClickAt(clientX, clientY) {
-    if (freecam?.active || !gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen || cameraTransition) return;
+    if (freecam?.active || !gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen || cameraTransition || stageShow?.busy) return;
     const rect = preview.getBoundingClientRect();
     if(currentView.kind==="trivia") { if(clientY>=rect.bottom-Math.min(84,Math.max(48,rect.height*.11)))goBack(); return; }
     const interaction = getSceneInteractionAt(clientX, clientY);
@@ -2316,7 +2329,7 @@ import {
     else if (action === "show-trivia") window.dispatchEvent(new Event("rg:show-latest-trivia"));
   }
 
-  const canFreecam = () => gameStarted && sceneReady && camera && !pauseMenuOpen && !diceModeOpen
+  const canFreecam = () => gameStarted && sceneReady && camera && !stageShow?.busy && !pauseMenuOpen && !diceModeOpen
     && !document.hidden && !document.querySelector("dialog[open]") && !document.documentElement.hasAttribute("data-rg-host-locked");
   freecam = bindHoldFreecam({
     surface: canvas, viewport: preview, eligible: canFreecam,
@@ -2345,7 +2358,7 @@ import {
     },
   });
   window.addEventListener("rg:open-host-panel", () => freecam.stop());
-  const canOrbit = () => !freecam.active && gameStarted && sceneReady && !pauseMenuOpen && !diceModeOpen && !cameraTransition
+  const canOrbit = () => !freecam.active && !stageShow?.busy && gameStarted && sceneReady && !pauseMenuOpen && !diceModeOpen && !cameraTransition
     && currentView.kind !== "overview" && !document.hidden && !document.querySelector("dialog[open]") && !document.documentElement.hasAttribute("data-rg-host-locked");
   focusDrag = bindFocusDrag(canvas, {
     enabled: canOrbit, hoverSurface: preview,
@@ -2361,8 +2374,31 @@ import {
   canvas.addEventListener("pointerup", rememberPointer);
   canvas.addEventListener("pointercancel", () => { lastScenePointer = null; hideGameCursor(); });
   reducedMotion.addEventListener?.("change", () => { if (reducedMotion.matches) focusDrag.clearHover(); });
+  // Shift-click is a presentation gesture, never a machine activation.
+  function spotlightAt(clientX,clientY){
+    if(!stageShow||!canFreecam()||freecam.active||cameraTransition)return;
+    const character=getBillboardAtScreen(clientX,clientY);
+    const entry=character?.machine==="host"?hostBillboard:character?.machine==="contestant"?contestants.find(c=>c.id===character.contestantId):null;
+    let point=entry?.anchor;
+    if(!point){
+      const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return;
+      pointer.set((clientX-rect.left)/rect.width*2-1,-(clientY-rect.top)/rect.height*2+1);
+      raycaster.setFromCamera(pointer,camera);
+      const roots=[stageModel,rouletteModel,slotsModel?.visible?slotsModel:null,...stageShow.curtains].filter(Boolean);
+      point=raycaster.intersectObjects(roots,true).find(h=>{
+        if(!h.object.isMesh)return false;
+        for(let o=h.object;o;o=o.parent)if(!o.visible)return false;
+        const material=Array.isArray(h.object.material)?h.object.material[h.face?.materialIndex??0]:h.object.material;
+        return material?.visible!==false&&material?.colorWrite!==false;
+      })?.point;
+    }
+    if(point){stageShow.toggle(point,performance.now());hideGameCursor();}
+    else if(stageShow.manual)stageShow.dismiss(performance.now());
+  }
   canvas.addEventListener("click", (event) => {
-    if (!freecam.active && event.button === 0 && !focusDrag.consumeClick()) pointClickAt(event.clientX, event.clientY);
+    if (freecam.active || event.button !== 0 || focusDrag.consumeClick()) return;
+    if(event.shiftKey){event.preventDefault();spotlightAt(event.clientX,event.clientY);return;}
+    pointClickAt(event.clientX, event.clientY);
   });
   canvas.addEventListener("contextmenu", (event) => {
     if (freecam.active || !gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen || cameraTransition || document.documentElement.hasAttribute("data-rg-host-locked")) return;
@@ -2382,7 +2418,7 @@ import {
     }
     // Do not open a browser menu over a slot cell, even if it is empty or busy.
     event.preventDefault();
-    if (playing || slotReelMotion || slotCellPop) return;
+    if (playing || slotReelMotion || slotCellPop || stageShow?.busy) return;
     const removal = removeSlotSymbol(slotReelGrid, index);
     if (!removal.removed) return;
     try { saveSlotGrid(removal.grid, { requirePersistence: true }); }
@@ -2405,7 +2441,7 @@ import {
   window.addEventListener("rg:dice-mode-state", (event) => {
     const open = Boolean(event.detail?.open);
     if (open === diceModeOpen) return;
-    if (open) freecam?.stop();
+    if (open) { freecam?.stop(); stageShow?.reset(currentView.kind==="slot"); }
     diceModeOpen = open;
     // The modal is in the browser top layer: keep the one live score strip
     // inside it while playing Dice, then restore it to the room on exit.
@@ -2416,7 +2452,7 @@ import {
     updateLiquidPortal();
     if (open) {
       focusDrag.clearHover(); lastScenePointer = null; stopRouletteSettlement();
-      diceModeVisibility = [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group]
+      diceModeVisibility = [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group, stageShow?.group]
         .filter(Boolean)
         .map((object) => [object, object.visible]);
       for (const [object] of diceModeVisibility) object.visible = false;
@@ -2514,7 +2550,7 @@ import {
     if (!cameraTransition) return;
     const transition = cameraTransition;
     const progress = Math.min(1, (time - transition.started) / transition.duration);
-    const eased = 1 - Math.pow(1 - progress, 3);
+    const eased = transition.theatre ? theatreEase(progress) : 1 - Math.pow(1 - progress, 3);
     camera.position.lerpVectors(transition.fromPosition, transition.toPosition, eased);
     cameraTarget.lerpVectors(transition.fromTarget, transition.toTarget, eased);
     camera.lookAt(cameraTarget);
@@ -2545,6 +2581,8 @@ import {
         continue;
       }
       billboard.panel.style.transform = transform;
+      const brightness=stageShow?.brightnessAt(billboard.anchor)??1;
+      billboard.panel.style.filter=brightness===1?"":`brightness(${brightness.toFixed(3)})`;
       billboard.panel.style.visibility = "visible";
       visible.push(billboard);
     }
@@ -2556,7 +2594,7 @@ import {
 
   function updateSlotPlacementControlProjection() {
     if (freecam?.active || !slotControlLayer || !camera || !sceneReady || preview.clientWidth < 1 || preview.clientHeight < 1) return;
-    const visible = gameStarted && !pauseMenuOpen && !diceModeOpen && !cameraTransition && currentView.kind === "slot";
+    const visible = gameStarted && !pauseMenuOpen && !diceModeOpen && !cameraTransition && !stageShow?.busy && currentView.kind === "slot";
     slotControlLayer.hidden = !visible;
     if (!visible || !slotPlacementControls.length) return;
 
@@ -2637,6 +2675,7 @@ import {
     if (!renderer || !scene || !camera) return;
 
     const roomVisible=gameStarted&&sceneReady&&!pauseMenuOpen&&!document.hidden&&!document.documentElement.hasAttribute("data-rg-host-locked");
+    stageShow?.update(time,roomVisible&&!diceModeOpen,currentView.kind==="slot");
     if(roomVisible){if(crowdLastFrame!==null)crowdClock+=Math.max(0,Math.min(250,time-crowdLastFrame));crowdLastFrame=time;}else crowdLastFrame=null;
     const emotion=crowdState.step(crowdClock); updateCrowdStatus();
     foley.setRoomAmbience(roomVisible,diceModeOpen ? .28 : 1,emotion);
@@ -2831,6 +2870,8 @@ import {
       sceneReady = true;
       // Fit the overview only after all machines have their final world placement.
       overviewCameraBounds = getArcadeBounds();
+      try { stageShow=createStageShow(THREE,scene,{slotRig,slotsModel,roots:[stageModel,rouletteModel,slotsModel,audience?.group],foley,onEmotion:emotion=>crowdState.react(emotion,crowdClock),reduced:()=>reducedMotion.matches});stageShow.group.visible=!pauseMenuOpen; }
+      catch(error){scene.getObjectByName("rg-stage-theatre")?.removeFromParent();slotsModel.visible=true;console.warn("Stage theatre unavailable",error);}
       fitCamera();
       if (pendingCardGameMode) {
         const mode = pendingCardGameMode;
@@ -2854,6 +2895,7 @@ import {
   }
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
+      stageShow?.reset(currentView.kind==="slot");
       crowdLastFrame=null;
       showFX?.clearRoulette();
       focusDrag?.clearHover(); lastScenePointer = null;
@@ -2872,7 +2914,7 @@ import {
     resizeObserver?.disconnect();
     liquidPortal?.dispose();
     exteriorMist?.dispose();
-    audience?.dispose(); showFX?.dispose();
+    audience?.dispose(); showFX?.dispose(); stageShow?.dispose();
     renderer?.dispose();
   }, { once: true });
 })();

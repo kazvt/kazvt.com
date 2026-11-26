@@ -4,6 +4,8 @@ import { createRoomAmbience } from "./room-ambience.mjs?v=show-energy-20261127-v
 const ROOT = new URL("./assets/sfx/foley/", import.meta.url);
 export const FOLEY_CUES = Object.freeze({
   switch: { files: ["switch.mp3"], fallback: ["click-1.ogg"], volume: .44 },
+  stageDrumRoll: { files: ["stage-drum-roll.ogg"], volume: .58, maxDuration: 4 },
+  stageDrumHit: { files: ["stage-drum-hit.ogg"], volume: .66, maxDuration: .8 },
   cheer: { files: ["cheer.ogg"], volume: .8 },
   lever: { files: ["lever.mp3"], fallback: ["switch.mp3"], volume: .46 },
   reel: { files: ["spinner.mp3"], fallback: ["reel.mp3"], volume: .28 },

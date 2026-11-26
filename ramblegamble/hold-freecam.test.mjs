@@ -73,7 +73,7 @@ test('room animation, resize, view transition, Dice and pause preserve the indep
  assert.match(src,/if \(!sceneReady \|\| freecam\?\.active\) return;/);
  assert.match(src,/function transitionToView[^\n]+\n[^\n]+\n\s+freecam\?\.stop\(\)/);
  assert.match(src,/function showPauseMenu\(\) \{\s+if \(pauseMenuOpen\) return;\s+freecam\?\.stop\(\)/);
- assert.match(src,/if \(open\) freecam\?\.stop\(\);\s+diceModeOpen = open/);
+ assert.match(src,/if \(open\) \{ freecam\?\.stop\(\); stageShow\?\.reset\(currentView.kind==="slot"\); \}\s+diceModeOpen = open/);
  assert.match(src,/if \(!cardLayer \|\| freecam\?\.active\) return;/);
  assert.match(src,/if \(freecam\?\.active \|\| !slotControlLayer/);
 });
@@ -84,7 +84,7 @@ test('production room wiring snapshots camera direction, suspends orbit and rest
  const extract=(a,b)=>src.slice(src.indexOf(a),src.indexOf(b,src.indexOf(a)));
  let callbacks,applied,position,lookAt,projection=0,draws=0,resize=0;
  const currentView={kind:'card-table',look:0},classes=new Set();
- const ctx={freecam:null,gameStarted:true,sceneReady:true,pauseMenuOpen:false,diceModeOpen:false,document:{hidden:false,querySelector:()=>null,documentElement:{hasAttribute:()=>false}},
+ const ctx={stageShow:{busy:false},freecam:null,gameStarted:true,sceneReady:true,pauseMenuOpen:false,diceModeOpen:false,document:{hidden:false,querySelector:()=>null,documentElement:{hasAttribute:()=>false}},
   camera:{position:{x:7,y:4,z:6,set(...v){position=v;}},aspect:1.2,getWorldDirection:()=>forward,lookAt:t=>lookAt=t.values,updateMatrixWorld(){},updateProjectionMatrix(){projection++;}},
   THREE:{Vector3:class{}},cameraTarget:{set(...v){this.values=v;}},canvas:{},preview:{clientWidth:1200,clientHeight:600,classList:{add:k=>classes.add(k),remove:k=>classes.delete(k)}},
   currentView,cameraTransition:{},focusDrag:{reset(){}},focusOrbit:{reset(){}},lastScenePointer:{},slotHoverCell:4,slotHoverLine:{},drawSlotReelDisplay(){draws++;},hideGameCursor(){},
@@ -93,7 +93,7 @@ test('production room wiring snapshots camera direction, suspends orbit and rest
   renderer:{setPixelRatio(){},setSize(){resize++;}},window:{devicePixelRatio:1,addEventListener(){}},
   bindHoldFreecam:opts=>{callbacks=opts;return {active:false,stop(){}};}};
  runInNewContext(extract('  const canFreecam =','  const canOrbit =')+extract('  function fitCamera()','  function getCameraPoseForView(')+'\nthis.fit=fitCamera;',ctx);
- assert.equal(callbacks.eligible(),true);
+ assert.equal(callbacks.eligible(),true);ctx.stageShow.busy=true;assert.equal(callbacks.eligible(),false);ctx.stageShow.busy=false;
  assert.deepEqual({...callbacks.readPose().position},{x:7,y:4,z:6});
  assert.equal(callbacks.readPose().direction,forward);
  ctx.freecam.active=true;callbacks.onStart();assert.equal(ctx.cameraTransition,null);assert.equal(ctx.slotHoverCell,-1);assert.equal(ctx.slotHoverLine,null);assert.equal(draws,1);assert.ok(classes.has('is-freecam'));

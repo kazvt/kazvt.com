@@ -187,3 +187,12 @@ test('standing host and three contestants clear chairs and remain framed across 
  assert.match(js,/const target = character\.anchor\.clone\(\);/);
  assert.match(js,/distance = fitCharacterCloseup\(/);
 });
+
+import {cabinetPose} from './stage-show-state.mjs';
+test('the measured slot cabinet and its open curtain folds fit the authored bay with positive opening clearance',()=>{
+ const {cabinet}=slotGeometry();const w=cabinet.max[0]-cabinet.min[0],d=cabinet.max[2]-cabinet.min[2],curtainWidth=w+.48;
+ assert.ok(curtainWidth+.1<14.48-9.14,`cabinet ${w}, curtain ${curtainWidth}`);
+ assert.ok(curtainWidth*.86>w,`open curtain opening ${curtainWidth*.86} > ${w}`);
+ const retract=Math.min(.85,Math.max(.38,d*.75));assert.ok(retract>0&&retract<=.85);
+ for(let i=0;i<=1000;i++){const p=cabinetPose(i/1000);assert.ok(p.travel>=0&&p.travel<=1&&p.curtain>=p.travel);assert.ok(cabinet.max[2]-retract*(1-p.travel)<=cabinet.max[2]);}
+});

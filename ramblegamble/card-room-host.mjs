@@ -1,6 +1,6 @@
 import { validRequestId } from "./card-room-delivery.mjs?v=submission-audit-20261126-v1";
 import { loadHostIdentity, nonce, validNonce, transcript, channelBinding, signHost, verifySeat } from "./card-room-auth.mjs?v=room-recovery-20261127-v1";
-import { ROOM_VERSION, createRoom, validRoom, playerRound, encodePacket, decodePacket, acceptSubmission, isPlayer, randomToken } from "./card-room-protocol.mjs?v=show-stage-20261126-v1";
+import { ROOM_VERSION, createRoom, validRoom, playerRound, encodePacket, decodePacket, acceptSubmission, isPlayer, randomToken } from "./card-room-protocol.mjs?v=theatre-20261127-v1";
 import { loadPeer } from "./card-room-peer.mjs?v=room-recovery-20261127-v1";
 import { openLocalHost } from "./card-room-local.mjs?v=room-recovery-20261127-v1";
 import { CARD_GAME_PLAYERS } from "./card-games.mjs?v=show-stage-20261126-v1";
@@ -41,7 +41,7 @@ export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/
       const row = doc.createElement('div');
       row.className = active && current?.connected?.includes(player) ? 'rg-room-seat is-connected' : 'rg-room-seat';
       const link = doc.createElement('a'); link.href = url.href; link.target = '_blank'; link.rel = 'noopener noreferrer';
-      link.textContent = `${player.toUpperCase()} — ${active && current?.connected?.includes(player) ? 'connected' : active ? 'not connected' : 'offline'}${round?.submitted ? ' · saved' : round?.phase === 'submissions' ? ' · waiting' : ''}`;
+      link.textContent = `${player.toUpperCase()} — ${active && current?.connected?.includes(player) ? 'connected' : active ? 'not connected' : 'offline'}${round?.submitted ? ' · saved' : round?.phase === 'submissions' ? round.attempts?.length ? ` · ${round.attempts.length} guesses` : ' · waiting' : ''}`;
       function copyButton(label, value, message) {
         const copy = doc.createElement('button'); copy.type = 'button'; copy.textContent = label;
         copy.addEventListener('click', async () => {
