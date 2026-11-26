@@ -69,6 +69,7 @@ function randomSymbol(random) {
 }
 
 export function createSlotReelMotion(grid, columns, {
+  targetGrid = grid,
   startedAt = 0,
   duration = 1850,
   stagger = 115,
@@ -76,6 +77,7 @@ export function createSlotReelMotion(grid, columns, {
   reducedMotion = false,
 } = {}) {
   const currentGrid = normalizeSlotGrid(grid);
+  const settledGrid = normalizeSlotGrid(targetGrid);
   const activeColumns = normalizeReelColumns(columns);
   if (!activeColumns.length) return null;
   const safeDuration = Math.max(0, Number(duration) || 0);
@@ -88,7 +90,7 @@ export function createSlotReelMotion(grid, columns, {
       const randomRows = reducedMotion ? 5 : 18 + Math.floor(clamp01(Number(random()) || 0) * 9);
       const start = Array.from({ length: SLOT_REEL_ROWS }, (_, row) => currentGrid[row * SLOT_REEL_COLUMNS + column]);
       const stop = Array.from({ length: randomRows }, () => randomSymbol(random));
-      const target = start.map((_, row) => currentGrid[row * SLOT_REEL_COLUMNS + column]);
+      const target = start.map((_, row) => settledGrid[row * SLOT_REEL_COLUMNS + column]);
       return {
         column,
         delay: order * safeStagger,
@@ -100,6 +102,7 @@ export function createSlotReelMotion(grid, columns, {
         targetOffset: SLOT_REEL_ROWS + stop.length,
       };
     }),
+    targetGrid: settledGrid,
   };
 }
 
