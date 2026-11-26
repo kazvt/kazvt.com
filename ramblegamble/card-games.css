@@ -352,7 +352,7 @@
 .rg-smeemo-berry-mark::after { position: absolute; top: 0; left: 41%; width: 28%; height: 22%; content: ""; background: #56ce72; clip-path: polygon(50% 100%,0 28%,30% 0,55% 38%,100% 12%,82% 74%); }
 .rg-smeemo-face-label { position: relative; z-index: 1; color: #8b2626; font-size: clamp(8px, 1vw, 14px); font-weight: 1000; letter-spacing: .04em; line-height: 1; text-align: center; text-shadow: 1px 1px #ffdf00; white-space: nowrap; }
 .rg-smeemo-card-front.is-berry .rg-smeemo-face-label { color: #fff5c7; font-size: clamp(9px, 1.1vw, 16px); text-shadow: 2px 2px #1e0b01; }
-.rg-smeemo-card-back { transform: rotateY(180deg); background: #9a88ff url("/ramblegamble/assets/provided/card_deck.png") repeat; background-size: 36px 54px; image-rendering: pixelated; }
+.rg-smeemo-card-back { transform: rotateY(180deg); background: #9a88ff url("/ramblegamble/assets/provided/card_deck.png") no-repeat center / 100% 100%; image-rendering: pixelated; }
 .rg-smeemo-card-back::after { position: absolute; inset: 9%; content: ""; border: 2px dashed #fff6ac; box-shadow: inset 0 0 0 2px #493080; }
 .rg-smeemo-card:focus-visible { z-index: 2; outline: 4px solid #ffdf00; outline-offset: 5px; }
 .rg-smeemo-card.is-available { cursor: pointer; transition: filter 180ms ease, transform 180ms ease; }
@@ -454,7 +454,6 @@
   .rg-smeemo-rail-viewport { padding: 56px 5px 9px; }
   .rg-smeemo-rail { grid-template-columns: repeat(9, minmax(58px, 1fr)); min-width: 540px; gap: 5px; }
   .rg-smeemo-card-front, .rg-smeemo-card-back { border-width: 2px; border-radius: 7px; }
-  .rg-smeemo-card-back { background-size: 28px 42px; }
 }
 @media (max-width: 640px) {
   .rg-smeemo-rail-viewport { padding: 52px 2px 8px; overflow-x: hidden; }
@@ -462,7 +461,6 @@
   .rg-smeemo-card-front, .rg-smeemo-card-back { border-width: 1px; border-radius: 4px; box-shadow: 1px 2px 0 #1e0b01; }
   .rg-smeemo-card-front { gap: 6%; padding: 2%; }
   .rg-smeemo-face-label { font-size: clamp(4px, 1.35vw, 8px); letter-spacing: 0; text-shadow: 1px 1px #ffdf00; }
-  .rg-smeemo-card-back { background-size: 20px 30px; }
   .rg-smeemo-card-back::after { inset: 7%; border-width: 1px; }
 }
 @media (prefers-reduced-motion: reduce) {

@@ -302,11 +302,16 @@ export function buyShopCard(roundValue, cardId, buyer, scoresValue) {
 }
 
 export function createSmeemoGame(random = secureRandomUnit) {
-  const cards = Array.from({ length: 9 }, (_, index) => ({ id: `scramble-${index + 1}`, smeemo: index === 0 }));
+  const id = globalThis.crypto?.randomUUID?.() || `smeemo-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+  const randomPosition = Number(random());
+  const smeemoIndex = Math.min(8, Math.max(0, Number.isFinite(randomPosition) ? Math.floor(randomPosition * 9) : 0));
+  const cards = Array.from({ length: 9 }, (_, index) => ({
+    id: `${id}-card-${index + 1}`,
+    smeemo: index === smeemoIndex,
+  }));
   const previewCards = shuffle(cards, random);
   const shuffledCards = shuffle(previewCards, random);
   if (shuffledCards.every((card, index) => card.id === previewCards[index].id)) shuffledCards.push(shuffledCards.shift());
-  const id = globalThis.crypto?.randomUUID?.() || `smeemo-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
   return {
     id,
     status: "playing",

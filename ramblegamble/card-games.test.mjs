@@ -82,14 +82,30 @@ test("shop round exposes one card per category and does not reveal or charge bef
   assert.equal(createShopRound({ penalty: [], challenge: [{ name: "x", price: 1 }], instant: [{ name: "y", price: 2 }] }), null);
 });
 
-test("Smeemo preview shows nine cards and exactly one berry before a distinct shuffle order", () => {
+test("Smeemo creates nine cards with one hidden result and a shuffled order", () => {
   const game = createSmeemoGame(stableRandom);
   assert.equal(game.phase, "preview");
   assert.equal(game.cards.length, 9);
   assert.equal(game.cards.filter((card) => card.smeemo).length, 1);
+  assert.equal(new Set(game.cards.map(({ id }) => id)).size, 9);
   assert.equal(new Set(game.previewOrder).size, 9);
   assert.deepEqual([...game.previewOrder].sort(), game.cards.map(({ id }) => id).sort());
   assert.notDeepEqual(game.previewOrder, game.cards.map(({ id }) => id));
+});
+
+test("a completed Smeemo game can be started again as a fresh round", () => {
+  let first = createSmeemoGame(stableRandom);
+  for (const phase of ["preview", "stacking", "stacked", "dealing"]) first = advanceSmeemoPhase(first, phase);
+  const smeemo = first.cards.find((card) => card.smeemo);
+  first = drawSmeemoCard(first, smeemo.id).game;
+  assert.equal(first.status, "complete");
+
+  const next = createSmeemoGame(stableRandom);
+  assert.notEqual(next.id, first.id);
+  assert.equal(next.status, "playing");
+  assert.equal(next.phase, "preview");
+  assert.deepEqual(next.draws, []);
+  assert.equal(next.cards.filter((card) => card.smeemo).length, 1);
 });
 
 test("Smeemo advances through its host-controlled reveal animation phases", () => {
