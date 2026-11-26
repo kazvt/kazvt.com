@@ -46,16 +46,21 @@ export function secureRandomIndex(maximum, cryptoSource = globalThis.crypto, fal
   return Math.min(max - 1, Math.floor(Math.max(0, Math.min(0.9999999999999999, Number(fallback()) || 0)) * max));
 }
 
-export function placeSlotBerry(grid, berry, { axis = "column", index, randomIndex = secureRandomIndex } = {}) {
+export function getSlotEligibleIndexes(grid, berry, { axis = "column", index } = {}) {
+  if (!SLOT_REEL_SYMBOLS.includes(berry)) return [];
   const current = normalizeSlotGrid(grid);
-  if (!SLOT_REEL_SYMBOLS.includes(berry)) return { grid: current, placedIndex: -1, eligibleIndexes: [] };
   const lineIndex = Number(index);
   const cells = axis === "row"
     ? (Number.isInteger(lineIndex) && lineIndex >= 0 && lineIndex < SLOT_REEL_ROWS ? row(lineIndex) : [])
     : axis === "column"
       ? (Number.isInteger(lineIndex) && lineIndex >= 0 && lineIndex < SLOT_REEL_COLUMNS ? column(lineIndex) : [])
       : [];
-  const eligibleIndexes = cells.filter((cellIndex) => current[cellIndex] !== berry);
+  return cells.filter((cellIndex) => current[cellIndex] !== berry);
+}
+
+export function placeSlotBerry(grid, berry, { axis = "column", index, randomIndex = secureRandomIndex } = {}) {
+  const current = normalizeSlotGrid(grid);
+  const eligibleIndexes = getSlotEligibleIndexes(current, berry, { axis, index });
   if (!eligibleIndexes.length) return { grid: current, placedIndex: -1, eligibleIndexes };
   const choice = Number(randomIndex(eligibleIndexes.length));
   const chosenOffset = Number.isInteger(choice) && choice >= 0 && choice < eligibleIndexes.length ? choice : 0;
