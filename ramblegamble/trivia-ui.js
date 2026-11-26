@@ -1,7 +1,7 @@
 import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { gradeSimpleAnswer, isSimpleGradeMode } from "./trivia-simple-grade.mjs?v=room-recovery-20261127-v1";
-import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, newTriviaId, updateTrivia, activeRoomRound, publicMedia } from "./live-trivia.mjs?v=theatre-20261127-v1";
-import { renderLiveQuestion, renderTriviaResponses } from "./trivia-live-view.mjs?v=theatre-20261127-v1";
+import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, newTriviaId, updateTrivia, activeRoomRound, publicMedia } from "./live-trivia.mjs?v=spectator-20261127-v1";
+import { renderLiveQuestion, renderTriviaResponses, createTriviaSpectator, SPECTATOR_MODES } from "./trivia-live-view.mjs?v=spectator-20261127-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
 import { readCardGames, subscribeCardGames } from "./card-games-store.mjs?v=show-stage-20261126-v1";
 import { removeSlotSymbol } from "./slot-game.mjs?v=host-cell-cards-20261127-v1";
@@ -2396,7 +2396,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
   render();
   // Presentation is transient; persisted questions never auto-open on reload.
   const liveLayer=$("#rg-live-trivia"), liveContent=$("#rg-live-trivia-content"), liveAnswers=$("#rg-live-host-answers");
-  let lastLiveId=readLiveTrivia()?.id||"", lastRenderedQuestion="";
+  let lastLiveId=readLiveTrivia()?.id||"", lastRenderedQuestion="", spectator=null, spectatorRoundId="", lastPrivateKey="";
   async function portableImage(url,asset,max=220000) {
     if(asset){
       const blob=await readMediaBlob(asset); let data=await blobToDataUrl(blob);
@@ -2423,8 +2423,12 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     const q=publicQuestion(round);const key=JSON.stringify([round.id,q]);
     if(key!==lastRenderedQuestion){
       const hostCheck=isSimpleGradeMode(q.kind)?answer=>gradeSimpleAnswer(q,round.secret,answer):null;
-      renderLiveQuestion(liveContent,q,{interactive:!!hostCheck,hostCheck});lastRenderedQuestion=key;
+      const selection=spectatorRoundId===round.id?spectator?.selection():undefined;
+      spectator=null;spectatorRoundId=round.id;liveContent.classList.remove('rg-spectator');
+      if(SPECTATOR_MODES.includes(q.kind))spectator=createTriviaSpectator(liveContent,q,selection);
+      else renderLiveQuestion(liveContent,q,{interactive:!!hostCheck,hostCheck});lastRenderedQuestion=key;
     }
+    spectator?.update(round);
     liveLayer.dataset.ready="true";
     if(open){ audienceReact("suspense"); foley.play("question"); closeConsole(); window.dispatchEvent(new Event("rg:show-trivia-stage")); }
   }
@@ -2439,9 +2443,10 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
       else if(round.phase!==before.phase) foley.play("close");
       else if(JSON.stringify(publicQuestion(round))!==JSON.stringify(publicQuestion(before))) foley.play("navigate");
     }
-    renderTriviaResponses(liveAnswers,round);
+    const privateKey=JSON.stringify([round.id,round.phase,round.submissions,round.attempts,publicQuestion(round)]);
+    if(privateKey!==lastPrivateKey){lastPrivateKey=privateKey;renderTriviaResponses(liveAnswers,round);}
     const fresh=round.id!==lastLiveId;lastLiveId=round.id;
-    if(fresh||lastRenderedQuestion)renderLive(round,fresh);
+    if(activeRoomRound()?.id===round.id&&(fresh||lastRenderedQuestion))renderLive(round,fresh);
   }
   subscribeLiveTrivia(refreshLive);
   renderTriviaResponses(liveAnswers,readLiveTrivia());

@@ -2,10 +2,10 @@ import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { showBurst, voteFlight, purchaseFlight } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createSmeemoImpact, smeemoImpactTransition } from "./smeemo-impact.mjs?v=room-audio-20261127-v1";
 import { applyCardShowAction } from "./card-show-actions.mjs?v=card-polish-20261127-v1";
-import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia } from "./live-trivia.mjs?v=theatre-20261127-v1";
+import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia, writeLiveTriviaDraft } from "./live-trivia.mjs?v=spectator-20261127-v1";
 import { activeCardStage, cardStageChange } from "./card-stage-state.mjs?v=wildcard-shared-20261126-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
-import { mountCardRoom } from "./card-room-host.mjs?v=theatre-20261127-v1";
+import { mountCardRoom } from "./card-room-host.mjs?v=spectator-20261127-v1";
 import { foley } from "./game-foley.mjs?v=theatre-20261127-v1";
 import {
   CARD_GAME_CATEGORIES,
@@ -837,11 +837,11 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     renderMenu();
   });
 
-  network = mountCardRoom($("#rg-card-network"), { getRound: () => activeRoomRound(), commitRound: round => { if(round.mode==='trivia')return writeLiveTrivia(round); const result = writeCardGames({ ...readCardGames(), round }, { requirePersistence: true }); if (result.persisted) { updateFromState(result.state); } return result.persisted; }, onStatus: message => { adminStatus.textContent = message; } });
+  network = mountCardRoom($("#rg-card-network"), { getRound: () => activeRoomRound(), commitDraft:writeLiveTriviaDraft, commitRound: round => { if(round.mode==='trivia')return writeLiveTrivia(round); const result = writeCardGames({ ...readCardGames(), round }, { requirePersistence: true }); if (result.persisted) { updateFromState(result.state); } return result.persisted; }, onStatus: message => { adminStatus.textContent = message; } });
   loadDeckInputs(state.decks);
   setDeckVisibility();
   subscribeCardGames(updateFromState);
-  subscribeLiveTrivia(()=>network.publish());
+  subscribeLiveTrivia(()=>network.publish(),{drafts:false});
   window.addEventListener("rg:trivia-stage-open",()=>{ impact.stop(); foley.stop("card-menu-hover"); menuOpen=false; dismissedActive=Boolean(activeCardStage(state)); window.clearTimeout(smeemoPhaseTimer); smeemoPhaseTimer=0; window.clearTimeout(menuTimer); menuTimer=0; layer.hidden=true; });
   subscribePointScores((scores) => {
     pointScores = scores;

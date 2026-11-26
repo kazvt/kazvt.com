@@ -1,12 +1,13 @@
+import { acceptTriviaDraft, MAX_TRIVIA_ANSWER } from "./live-trivia.mjs?v=spectator-20261127-v1";
 import { validRequestId } from "./card-room-delivery.mjs?v=submission-audit-20261126-v1";
 import { loadHostIdentity, nonce, validNonce, transcript, channelBinding, signHost, verifySeat } from "./card-room-auth.mjs?v=room-recovery-20261127-v1";
-import { ROOM_VERSION, createRoom, validRoom, playerRound, encodePacket, decodePacket, acceptSubmission, isPlayer, randomToken } from "./card-room-protocol.mjs?v=theatre-20261127-v1";
+import { ROOM_VERSION, createRoom, validRoom, playerRound, encodePacket, decodePacket, acceptSubmission, isPlayer, randomToken } from "./card-room-protocol.mjs?v=spectator-20261127-v1";
 import { loadPeer } from "./card-room-peer.mjs?v=room-recovery-20261127-v1";
 import { openLocalHost } from "./card-room-local.mjs?v=room-recovery-20261127-v1";
 import { CARD_GAME_PLAYERS } from "./card-games.mjs?v=show-stage-20261126-v1";
 import { electReader, withRoomSubmissionLock, ROOM_KEY, ENABLED_KEY, STATUS_KEY } from "./card-room-election.mjs";
 
-export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/rg/', env = globalThis, peerLoader = loadPeer, identityLoader = loadHostIdentity }) {
+export function mountCardRoom(root, { getRound, commitRound, commitDraft=commitRound, onStatus, role = '/rg/', env = globalThis, peerLoader = loadPeer, identityLoader = loadHostIdentity }) {
   let storage; try { storage = env.localStorage; } catch {}
   const locks = env.navigator?.locks;
   const doc = env.document;
@@ -29,7 +30,7 @@ export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/
     const current = leader ? { connected: [...clients.keys()] } : read(STATUS_KEY);
     const activeRound = getRound(), active=enabled();
     const projections = CARD_GAME_PLAYERS.map(player=>playerRound(activeRound,player));
-    const key=JSON.stringify([room.id,room.tokens,active,current?.connected||[],projections]);
+    const key=JSON.stringify([room.id,room.tokens,active,current?.connected||[],projections.map(r=>r?{...r,savedDraft:undefined}:r)]);
     if(key===linksKey)return;linksKey=key;
     links.replaceChildren();
     for (const player of CARD_GAME_PLAYERS) {
@@ -75,7 +76,7 @@ export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/
     refreshStatus();
   }
   function sendState(conn, player, force=false) {
-    if (leader && enabled() && conn.open && room && read(ROOM_KEY)?.id === room.id && read(ROOM_KEY)?.tokens?.[player] === room.tokens[player]) { try { const payload={v:ROOM_VERSION,type:"round",round:playerRound(getRound(),player)};const key=JSON.stringify(payload);if(force||sentStates.get(conn)!==key){conn.send(payload);sentStates.set(conn,key);} } catch { try { conn.close(); } catch {} } }
+    if (leader && enabled() && conn.open && room && read(ROOM_KEY)?.id === room.id && read(ROOM_KEY)?.tokens?.[player] === room.tokens[player]) { try { const payload={v:ROOM_VERSION,type:"round",round:playerRound(getRound(),player)};const key=JSON.stringify({...payload,round:payload.round?{...payload.round,savedDraft:undefined}:null});if(force||sentStates.get(conn)!==key){conn.send(payload);sentStates.set(conn,key);} } catch { try { conn.close(); } catch {} } }
   }
   function publish() {
     refreshLinks();
@@ -98,7 +99,7 @@ export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/
     const active = () => leader && (local ? localHost === epoch : epoch === generation);
     if (!active() || incomingConnections.size >= 24) { conn.close(); return; }
     
-    let identity = null, seatToken = null, phase = 'hello', challenge = null, closed = false;
+    let identity = null, seatToken = null, phase = 'hello', challenge = null, closed = false, draftBusy=false, lastDraftAt=-Infinity;
     const timeout = setTimeout(() => { if (!identity) { cleanup(); conn.close(); } }, 12000);
     const alive = () => !closed && active() && conn.open && enabled() && !!room && read(ROOM_KEY)?.id === room.id;
     const current = () => alive() && clients.get(identity) === conn && read(ROOM_KEY)?.tokens?.[identity] === seatToken;
@@ -132,6 +133,25 @@ export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/
           report(); publish(); return;
         }
         if (phase === 'joined' && !current()) return;
+        if (phase==='joined' && message.type==='draft') {
+          // At most one queued storage transaction per authenticated connection.
+          // The client retries the latest snapshot on a busy/failed acknowledgement.
+          if(!current()||typeof message.roundId!=='string'||message.roundId.length>160||!validRequestId(message.requestId)||typeof message.answer!=='string'||message.answer.length>MAX_TRIVIA_ANSWER)return;
+          const reply=status=>{if(current())try{conn.send({v:ROOM_VERSION,type:'draft-ack',roundId:message.roundId,requestId:message.requestId,status});}catch{}};
+          if(draftBusy||Date.now()-lastDraftAt<100){reply('busy');return;}
+          draftBusy=true;lastDraftAt=Date.now();
+          try{
+            const result=await withRoomSubmissionLock(()=>{
+              if(!current())return 'reader-changed';
+              const r=getRound();if(r?.id!==message.roundId)return 'stale-round';
+              const next=acceptTriviaDraft(r,identity,message.answer);
+              if(next.round!==r&&commitDraft(next.round)===false)return 'storage-error';
+              return next.status;
+            },locks||null);
+            reply(result);
+          }catch{reply('storage-error');}finally{draftBusy=false;}
+          return;
+        }
         if (phase !== 'joined' || message.type !== 'submit' || typeof message.roundId!=='string' || message.roundId.length>160 || (message.requestId!==undefined&&!validRequestId(message.requestId))) { conn.close(); return; }
         const submission={v:ROOM_VERSION,type:'submit',room:room.id,player:identity,token:seatToken,roundId:message.roundId,answer:message.answer,requestId:message.requestId};
         let result;

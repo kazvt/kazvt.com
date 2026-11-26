@@ -97,3 +97,60 @@
 .rg-host-number-history .rg-live-digit{min-width:0;font-size:14px;}
 .rg-host-number-attempts{margin:0;padding-left:1.5em;max-height:180px;overflow:auto;}
 .rg-numeric-status{font-size:.9em;}
+
+/* Live show spectator HUD: no opaque screen/panel; scene remains visible. */
+.rg-live-stage-content.rg-spectator{justify-content:flex-start;gap:clamp(5px,1vh,12px);}
+.rg-spectator .rg-live-question{font-size:clamp(20px,3.2vw,42px);}
+.rg-spectator-seats{display:flex;justify-content:center;gap:clamp(10px,2vw,30px);flex:none;max-width:100%;padding:4px 8px;}
+.rg-spectator-seat{position:relative;display:grid;place-items:center;width:clamp(48px,7vh,76px);height:clamp(48px,7vh,76px);background:transparent;border:2px solid transparent;padding:3px;cursor:pointer;color:#fff5da;filter:drop-shadow(2px 3px 0 #291b4c);}
+.rg-spectator-seat img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;transition:transform .18s ease;}
+.rg-spectator-seat[aria-pressed=true]{border-color:#ffe567;box-shadow:0 3px 0 #8b2626;}
+.rg-spectator-seat[aria-pressed=true] img,.rg-spectator-seat:hover img{transform:translateY(-3px) scale(1.09);}
+.rg-spectator-seat[data-state=waiting] img{opacity:.72;}
+.rg-spectator-marker{position:absolute;right:-5px;bottom:-4px;color:#72f3ae;font-size:clamp(14px,2.5vh,23px);font-weight:900;text-shadow:2px 2px #211844;line-height:1;}
+.rg-spectator-seat[data-state=working] .rg-spectator-marker{color:#ffe567;}
+.rg-spectator-body{flex:1 1 0;min-height:0;overflow:auto;justify-content:safe center;}
+.rg-spectator-content{width:100%;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:safe center;gap:8px;flex:none;}
+.rg-spectator-status{font-weight:900;flex:none;min-height:1.2em;color:#fff5da;text-shadow:2px 2px #3f2178;font-size:clamp(14px,2.2vh,22px);}
+.rg-spectator-status[data-state=solved]{color:#75f4a9;text-shadow:2px 3px #234332;}
+.rg-spectator-prompt{max-width:100%;max-height:18vh;object-fit:contain;flex:none;}
+.rg-spectator-grid{width:min(100%,460px,calc(56vh * 4 / var(--rg-guess-rows,4)));max-width:none;gap:clamp(4px,1vh,9px);padding:6px;}
+.rg-spectator-grid .rg-live-digit{font-size:clamp(18px,5vh,52px);border:3px solid #a6a1fa;background:#302451b3;color:#fff5da;text-shadow:2px 2px #211844;box-shadow:3px 4px #251a49;}
+.rg-spectator-grid .rg-live-digit[data-result]{color:#211844;text-shadow:1px 1px #ffffff55;}
+.rg-spectator-grid .rg-live-digit[data-result=green]{background:#65c489;border-color:#8ef4ad;}
+.rg-spectator-grid .rg-live-digit[data-result=yellow]{background:#ffde5a;border-color:#fff2a7;}
+.rg-spectator-grid .rg-live-digit[data-result=grey]{background:#999;border-color:#ccc;}
+.rg-spectator-guess-hero{display:flex;align-items:center;justify-content:center;gap:clamp(10px,3vw,42px);color:#fff5da;text-shadow:3px 4px #302451;font-size:clamp(36px,10vh,100px);font-weight:900;max-width:100%;overflow-wrap:anywhere;}
+.rg-spectator-guess-value{min-width:0;overflow-wrap:anywhere;}
+.rg-spectator-guess-direction{color:#ffe567;flex:none;}.rg-spectator-guess-hero[data-result=correct] .rg-spectator-guess-direction{color:#72f3ae;}
+.rg-spectator-guess-history{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:100%;}
+.rg-spectator-guess-token{border-bottom:3px solid #bda4ff;color:#fff5da;font-weight:900;text-shadow:2px 2px #211844;padding:4px 8px;overflow-wrap:anywhere;max-width:100%;}
+.rg-spectator-groups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;gap:clamp(5px,1.4vw,18px);align-items:start;}
+.rg-spectator-group{min-width:0;border-top:3px solid #ffe567;padding:3px;min-height:70px;}
+.rg-spectator-group:nth-child(2){border-color:#a6a1fa;}.rg-spectator-group:nth-child(3){border-color:#72f3ae;}
+.rg-spectator-group:last-child{grid-column:1/-1;border-top:2px dashed #c9b0ef;min-height:0;}.rg-spectator-group:last-child:has(.rg-spectator-group-items:empty){display:none;}
+.rg-spectator-group-title{font-size:clamp(13px,2vw,24px);color:#fff5da;text-shadow:2px 2px #211844;margin:4px 0 7px;overflow-wrap:anywhere;}
+.rg-spectator-group-items{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;}
+.rg-spectator-object{width:min(100%,clamp(52px,9vw,120px));color:#fff5da;font-weight:800;font-size:clamp(10px,1.3vw,18px);text-shadow:2px 2px #211844;overflow-wrap:anywhere;}
+.rg-spectator-object .rg-live-image{width:auto;height:clamp(40px,11vh,110px);max-width:100%;max-height:none;object-fit:contain;filter:drop-shadow(2px 3px 0 #302451);}
+/* One aspect-ratio source for the picture and its normalized canvas. No independent height clamp. */
+.rg-live-artboard,.rg-live-stage-content[data-kind="compose-image"] .rg-live-artboard{width:min(100%,880px,calc(var(--rg-art-ratio,1.5) * 58vh));height:auto;max-height:none;flex:none;}
+#trivia-player-content .rg-live-artboard{width:min(100%,880px);height:auto;max-height:none;}
+.rg-live-response .rg-live-artboard{width:min(100%,520px,calc(var(--rg-art-ratio,1.5) * 200px));max-height:none;}
+.rg-spectator .rg-live-artboard{box-shadow:3px 4px #302451;}
+@media(prefers-reduced-motion:no-preference){
+ .rg-spectator-slide{animation:rg-spectator-slide-in .34s cubic-bezier(.2,.9,.2,1) both;}
+ .rg-spectator-tile-pop{animation:rg-spectator-pop .46s cubic-bezier(.2,.8,.2,1.1) var(--rg-tile-delay,0ms) both;}
+ .rg-spectator-object-pop{animation:rg-spectator-pop .4s cubic-bezier(.2,.8,.2,1.1) both;}
+ .rg-spectator-seat[data-state=working] .rg-spectator-marker{animation:rg-spectator-live-pulse 1.2s ease-in-out infinite alternate;}
+ @keyframes rg-spectator-slide-in{from{opacity:.3;transform:translateX(12px) scale(.98)}to{opacity:1;transform:none}}
+ @keyframes rg-spectator-pop{0%{opacity:.35;transform:scale(.78) rotateY(-55deg)}65%{opacity:1;transform:scale(1.06)}100%{opacity:1;transform:none}}
+ @keyframes rg-spectator-live-pulse{from{opacity:.6}to{opacity:1}}
+}
+@media(prefers-reduced-motion:reduce){.rg-spectator-seat img{transition:none;}.rg-spectator-seat[aria-pressed=true] img,.rg-spectator-seat:hover img{transform:none;}}
+.rg-spectator-content{position:relative;}
+@media(prefers-reduced-motion:no-preference){
+ .rg-spectator-placement-pop .rg-live-artboard{animation:rg-spectator-placement .24s ease-out;}
+ @keyframes rg-spectator-placement{0%{filter:drop-shadow(0 0 9px #ffe567)}100%{filter:none}}
+}
+.rg-live-stage:has(.rg-spectator){row-gap:6px;}

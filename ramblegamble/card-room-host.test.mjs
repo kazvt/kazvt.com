@@ -154,3 +154,20 @@ test('number-grid guesses persist privately across failed saves, retransmission 
  assert.equal(numericProgress(h.round,'erin').status,'Waiting');assert.equal(h.round.attempts.erin.length,0);
  }finally{h.dispose();await flush();}
 });
+
+test('authenticated draft messages are private, rate-limited, recover across reader handoff and never replace final answers',async()=>{
+ const {createLiveTrivia}=await import('./live-trivia.mjs');const h=harness();try{
+ const a=h.tab('/rg/'),b=h.tab('/rg/console/');await Promise.all([a.room.ready,b.room.ready]);const invites=a.invites();a.click('start');await until(()=>h.peers.length===1);h.peers[0].emit('open');await flush();
+ h.round=createLiveTrivia({round:'25',difficulty:5,format:{mode:'draw-over-image'},content:{question:'Draw',promptImage:'https://example.test/picture.png'},cards:{}});
+ const id=h.round.id,k=await join(h.peers[0],invites.kaz),f=await join(h.peers[0],invites.faroe);
+ const packet=(requestId,answer,roundId=id)=>({v:ROOM_VERSION,type:'draft',roundId,requestId,answer:JSON.stringify(answer)});
+ const send=async(c,m,status)=>{c.emit('data',m);await until(()=>c.sent.some(x=>x.type==='draft-ack'&&x.requestId===m.requestId&&x.status===status));};
+ const one={strokes:[[[101,203],[304,405]]]},two={strokes:[[[701,805]]]},latest=c=>c.sent.filter(m=>m.type==='round').at(-1).round;
+ h.failSave=true;await send(k,packet('fail',one),'storage-error');assert.equal(h.round.drafts.kaz,undefined);h.failSave=false;
+ await send(k,packet('busy',one),'busy');await new Promise(r=>setTimeout(r,110));await send(k,packet('one',one),'accepted');assert.deepEqual(h.round.drafts.kaz,one);assert.equal(h.round.submissions.kaz,null);assert.equal(latest(f).savedDraft,null);
+ await send(f,packet('two',two),'accepted');assert.deepEqual(h.round.drafts.faroe,two);assert.equal(latest(k).savedDraft,null); // draft-only snapshots are not pushed
+ a.room.dispose();await until(()=>h.peers.length===2);h.peers[1].emit('open');await flush();const k2=await join(h.peers[1],invites.kaz),f2=await join(h.peers[1],invites.faroe);assert.deepEqual(latest(k2).savedDraft,one);assert.deepEqual(latest(f2).savedDraft,two);
+ await send(k2,packet('clear',{strokes:[]}),'accepted');assert.deepEqual(h.round.drafts.kaz,{strokes:[]});await new Promise(r=>setTimeout(r,110));await send(k2,packet('stale',one,'old'),'stale-round');
+ const final={strokes:[[[1,2],[3,4]]]};k2.emit('data',{...packet('final',final),type:'submit'});await until(()=>k2.sent.some(m=>m.type==='ack'&&m.requestId==='final'&&m.status==='accepted'));assert.deepEqual(JSON.parse(h.round.submissions.kaz),final);await new Promise(r=>setTimeout(r,110));await send(k2,packet('late',one),'closed');assert.equal(h.round.drafts.kaz,undefined);assert.equal(latest(f2).savedAnswer,null);
+ }finally{h.dispose();await flush();}
+});

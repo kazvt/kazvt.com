@@ -51,3 +51,36 @@ test('rejects unsendable incomplete authored activities and nested placement met
  assert.throws(()=>make('match-pairs',{pairs:[{left:'A',right:''}]}),/matching pairs/);
  assert.equal(submit(make('compose-image'),'kaz',{placements:[{item:0,at:[10,20],extra:'no'}]}).status,'invalid-answer');
 });
+
+import {validTriviaDraft,acceptTriviaDraft,writeLiveTriviaDraft,LIVE_TRIVIA_KEY,LIVE_TRIVIA_DRAFT_KEY,MAX_TRIVIA_ANSWER} from './live-trivia.mjs';
+test('partial drafts support empty/undo and unassigned sort items; do not count as submissions',()=>{
+ const cases=[['draw-over-image',{strokes:[[[0,1000],[1000,0]]]}, {strokes:[]}],['compose-image',{placements:[{item:0,at:[42,79]}]},{placements:[]}],['categorize-images',{groups:[-1,1]},{groups:[-1,-1]}]];
+ for(const [kind,a,empty] of cases){let r=make(kind);for(const draft of [a,empty]){assert.ok(validTriviaDraft(r.question,draft));const res=acceptTriviaDraft(r,'kaz',JSON.stringify(draft));assert.equal(res.status,'accepted');r=res.round;assert.deepEqual(r.drafts.kaz,draft);assert.equal(r.submissions.kaz,null);assert.equal(publicTriviaRound(r,'faroe').savedDraft,null);assert.deepEqual(publicTriviaRound(r,'kaz').savedDraft,draft);assert.equal(acceptTriviaDraft(r,'kaz',JSON.stringify(draft)).round,r);}assert.equal(acceptTriviaDraft(r,'kaz',JSON.stringify({...a,secret:'bad'})).status,'invalid-answer');assert.equal(acceptTriviaDraft({...r,phase:'closed'},'kaz',JSON.stringify(a)).status,'closed');}
+ assert.equal(acceptTriviaDraft(make('number-grid'),'kaz','{"guess":"0000"}').status,'invalid-answer');
+});
+test('draft sidecar is bounded, excludes media and final submissions win over stale drafts',()=>{
+ const vals=new Map(),storage={getItem:k=>vals.get(k),setItem:(k,v)=>vals.set(k,v)};
+ let r=make('draw-over-image',{promptImage:'data:image/png;base64,'+'A'.repeat(100000)});assert.ok(writeLiveTrivia(r,storage));const question=vals.get(LIVE_TRIVIA_KEY);const a={strokes:[[[123,456],[200,300]]]};
+ for(const p of ['kaz','faroe','erin']){r=acceptTriviaDraft(readLiveTrivia(storage),p,JSON.stringify(a)).round;assert.ok(writeLiveTriviaDraft(r,storage));assert.equal(vals.get(LIVE_TRIVIA_KEY),question);}
+ assert.ok(vals.get(LIVE_TRIVIA_DRAFT_KEY).length<1000);assert.deepEqual(readLiveTrivia(storage).drafts.faroe,a);
+ const final={strokes:[[[3,4]]]};r=submit(readLiveTrivia(storage),'kaz',final).round;assert.ok(writeLiveTrivia(r,storage));assert.equal(readLiveTrivia(storage).drafts.kaz,undefined);assert.deepEqual(readLiveTrivia(storage).drafts.erin,a);assert.equal(acceptTriviaDraft(readLiveTrivia(storage),'kaz',JSON.stringify(a)).status,'closed');
+ assert.ok(writeLiveTrivia({...make('draw-over-image'),id:'next'},storage));assert.deepEqual(readLiveTrivia(storage).drafts,{});assert.equal(writeLiveTriviaDraft(r,storage),false);assert.equal(acceptTriviaDraft(readLiveTrivia(storage),'kaz','x'.repeat(MAX_TRIVIA_ANSWER+1)).status,'invalid-answer');
+});
+test('strict draft validation rejects forged nested fields, invalid points and out-of-range groups',()=>{
+ assert.equal(validTriviaDraft(make('draw-over-image').question,{strokes:[[[1.5,2]]]}),false);
+ assert.equal(validTriviaDraft(make('compose-image').question,{placements:[{item:0,at:[1,2],extra:true}]}),false);
+ assert.equal(validTriviaDraft(make('categorize-images').question,{groups:[-2,0]}),false);
+ assert.equal(validTriviaDraft(make('categorize-images').question,{groups:[0]}),false);
+ assert.equal(validTriviaDraft(make('draw-over-image').question,{strokes:Array.from({length:81},()=>[[0,0]])}),false);
+});
+
+test('draft-only notifications update host stage locally and from another tab without publishing full question',async t=>{
+ const {subscribeLiveTrivia,TRIVIA_DRAFT_CHANGE,TRIVIA_CHANGE}=await import('./live-trivia.mjs');const target=new EventTarget(),vals=new Map();const storage={getItem:k=>vals.get(k),setItem:(k,v)=>vals.set(k,v)};
+ const env={localStorage:storage,addEventListener:target.addEventListener.bind(target),removeEventListener:target.removeEventListener.bind(target),dispatchEvent:target.dispatchEvent.bind(target)};
+ for(const [k,v] of Object.entries(env)){const original=Object.getOwnPropertyDescriptor(globalThis,k);Object.defineProperty(globalThis,k,{value:v,configurable:true,writable:true});t.after(()=>original?Object.defineProperty(globalThis,k,original):delete globalThis[k]);}
+ const stage=[],network=[];const unsub=subscribeLiveTrivia(r=>stage.push(r));const unsubNet=subscribeLiveTrivia(r=>network.push(r),{drafts:false});t.after(()=>{unsub();unsubNet();});
+ const r=make('draw-over-image');assert.ok(writeLiveTrivia(r));assert.equal(stage.length,1);assert.equal(network.length,1);
+ const next=acceptTriviaDraft(r,'erin','{"strokes":[[[9,10]]]}').round;assert.ok(writeLiveTriviaDraft(next));assert.equal(stage.length,2);assert.equal(network.length,1);assert.deepEqual(stage.at(-1).drafts.erin,{strokes:[[[9,10]]]});
+ const event=new Event('storage');Object.defineProperty(event,'key',{value:LIVE_TRIVIA_DRAFT_KEY});target.dispatchEvent(event);assert.equal(stage.length,3);assert.equal(network.length,1);
+ const final=submit(readLiveTrivia(),'erin',{strokes:[[[9,10]]]}).round;assert.ok(writeLiveTrivia(final));assert.equal(stage.length,4);assert.equal(network.length,2);assert.equal(stage.at(-1).drafts.erin,undefined);
+});

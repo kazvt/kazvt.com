@@ -1,4 +1,4 @@
-import { ROOM_VERSION, decodePacket, isPlayer } from './card-room-protocol.mjs?v=theatre-20261127-v1';
+import { ROOM_VERSION, decodePacket, isPlayer } from './card-room-protocol.mjs?v=spectator-20261127-v1';
 import { validNonce, validPublicKey } from './card-room-auth.mjs?v=host-security-20261126-v1';
 import { foley } from "./game-foley.mjs?v=theatre-20261127-v1";
 import { createClientSubmission, validateClientActivity, CLIENT_PACKET_MAX_BYTES } from "./trivia-client.mjs?v=player-handoff-20261125-v1";
@@ -402,7 +402,6 @@ import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-p
     image.alt = "";
     image.draggable = false;
     image.src = imageSource(activity.content.backgroundImage || activity.content.promptImage, activity.content.promptAsset);
-    image.addEventListener("load", () => { board.style.aspectRatio = image.naturalWidth + " / " + image.naturalHeight; });
     image.addEventListener("error", () => { status.textContent = "The picture could not be loaded. Re-open the task file or tell the host."; });
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.classList.add("rg-client-draw-svg");
@@ -420,7 +419,7 @@ import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-p
       };
     };
     board.addEventListener("pointerdown", (event) => {
-      if (!event.isPrimary || (event.button != null && event.button !== 0) || answer.strokes.length >= 500) return;
+      if (!event.isPrimary || !image.naturalWidth || drawingPointer!==null || (event.button != null && event.button !== 0) || answer.strokes.length >= 500) return;
       event.preventDefault();
       drawingPointer = event.pointerId;
       activePath = [svgPoint(event)];
@@ -452,6 +451,7 @@ import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-p
     };
     board.addEventListener("pointerup", finish);
     board.addEventListener("pointercancel", finish);
+    board.addEventListener("lostpointercapture", finish);
     work.append(tools, board);
     paintStrokes();
   }
@@ -462,7 +462,7 @@ import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-p
     answer.strokes.forEach((stroke) => {
       if (!stroke.length) return;
       const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      const d = stroke.map((point, index) => (index ? "L" : "M") + point.x + " " + point.y).join(" ");
+      const d = stroke.map((point, index) => (index ? "L" : "M") + point.x + " " + point.y).join(" ") + (stroke.length===1 ? " L"+stroke[0].x+" "+stroke[0].y : "");
       path.setAttribute("d", stroke.length === 1 ? d + " l0.1 0" : d);
       drawingSvg.append(path);
     });

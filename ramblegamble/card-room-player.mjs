@@ -1,8 +1,10 @@
+import { createDraftDelivery } from "./trivia-draft-delivery.mjs?v=spectator-20261127-v1";
+import { LIVE_DRAFT_MODES, validTriviaDraft, MAX_TRIVIA_ANSWER } from "./live-trivia.mjs?v=spectator-20261127-v1";
 import { ACK_TIMEOUT_MS, matchesAck, pendingReceipt, validRequestId } from "./card-room-delivery.mjs?v=submission-audit-20261126-v1";
 import { foley } from "./game-foley.mjs?v=theatre-20261127-v1";
-import { renderLiveQuestion } from "./trivia-live-view.mjs?v=theatre-20261127-v1";
+import { renderLiveQuestion } from "./trivia-live-view.mjs?v=spectator-20261127-v1";
 import { nonce, validNonce, validPublicKey, channelBinding, transcript, verifyHost, proveSeat } from "./card-room-auth.mjs?v=room-recovery-20261127-v1";
-import { ROOM_VERSION, isPlayer, decodePacket, encodePacket } from "./card-room-protocol.mjs?v=theatre-20261127-v1";
+import { ROOM_VERSION, isPlayer, decodePacket, encodePacket } from "./card-room-protocol.mjs?v=spectator-20261127-v1";
 import { loadPeer } from "./card-room-peer.mjs?v=room-recovery-20261127-v1";
 import { connectLocal } from "./card-room-local.mjs?v=room-recovery-20261127-v1";
 const $ = id => document.getElementById(id);
@@ -15,8 +17,11 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
   const pendingKey = `rg-card-pending:${invite.room}:${invite.player}`;
   function remember(value) { try { if (value) sessionStorage.setItem(pendingKey, JSON.stringify(value)); else sessionStorage.removeItem(pendingKey); } catch {} }
   function recover(roundId) { try { const saved = JSON.parse(sessionStorage.getItem(pendingKey)); if(saved?.roundId !== roundId || saved?.room !== invite.room || saved?.token !== invite.token || typeof saved.answer !== 'string')return null; if(!validRequestId(saved.requestId))saved.requestId=crypto.randomUUID(); return saved; } catch { return null; } }
+  const draftDelivery=createDraftDelivery({ready:()=>online&&!!conn?.open&&!pending&&round?.phase==='submissions'&&!round.submitted,
+    send:packet=>{if((conn.dataChannel?.bufferedAmount||0)>65536)return false;conn.send({v:ROOM_VERSION,type:'draft',...packet});return true;}});
+  function offerDraft(value){if(round?.mode!=='trivia'||round.liveDrafts!==true||!LIVE_DRAFT_MODES.includes(round.question?.kind)||!validTriviaDraft(round.question,value))return;const raw=JSON.stringify(value);if(raw.length<=MAX_TRIVIA_ANSWER)draftDelivery.offer(round.id,raw);}
   const draftKey = `rg-player-draft:${invite.room}:${invite.player}`;
-  function saveDraft(value) { if(!round || pending || round.submitted || round.phase!=='submissions')return; try { sessionStorage.setItem(draftKey,JSON.stringify({roundId:round.id,token:invite.token,value})); }catch{} }
+  function saveDraft(value) { if(!round || pending || round.submitted || round.phase!=='submissions')return; try { sessionStorage.setItem(draftKey,JSON.stringify({roundId:round.id,token:invite.token,value})); }catch{} offerDraft(value); }
   function loadDraft(id) { try {const d=JSON.parse(sessionStorage.getItem(draftKey));return d?.roundId===id&&d.token===invite.token?d.value:null;}catch{return null;} }
   function clearDraft(){try{sessionStorage.removeItem(draftKey);}catch{}}
   function clearPending() { clearTimeout(ackTimer); ackTimer=null; pending=null; remember(null); }
@@ -41,6 +46,8 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
     if (changed && next) foley.play("question");
     if (changed) { clearTimeout(ackTimer); ackTimer=null; pending = next ? recover(next.id) : null; if (next && !pending) remember(null); $('answer').value = next?.mode==='quiplash'?(loadDraft(next.id)?.text||''):''; $('submission').textContent = ''; $('fallback').hidden = true; $('choices').replaceChildren(); }
     round = next;
+    draftDelivery.setRound(next?.id||null);
+    if(next?.submitted||next?.phase!=='submissions')draftDelivery.pause();
     const receipt=resolvePending(next); if(next?.submitted||receipt==='accepted'||(next && next.phase!=='submissions'))clearDraft();
     $('round').hidden = !round;
     if (!round) { $('trivia-player-content').hidden=true; triviaRenderKey=''; return; }
@@ -63,6 +70,7 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
   function queueAnswer(answer) {
     if ((!invite.round && terminal) || !round || round.phase !== 'submissions' || round.submitted || pending) return;
     foley.play("submit");
+    draftDelivery.pause();
     pending={...envelope,type:'submit',roundId:round.id,requestId:crypto.randomUUID(),answer}; remember(pending);
     if(isNumeric())renderTrivia(round,false);else {showPending();sendPending();}
   }
@@ -74,11 +82,12 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
     const open=next.phase==='submissions'&&!next.submitted&&!pending;
     const key=JSON.stringify([next.id,q,next.attempts,open]);
     if(changed||key!==triviaRenderKey){
-      let draft=open?loadDraft(next.id):null; if(draft&&typeof draft!=='object')draft=null;
+      let draft=open?(loadDraft(next.id)||next.savedDraft):null; if(draft&&typeof draft!=='object')draft=null;
       if(next.submitted&&next.savedAnswer){try{draft=JSON.parse(next.savedAnswer);}catch{}}
       triviaRenderKey=key;
       renderLiveQuestion(root,q,{interactive:open,attempts:next.attempts||[],initialAnswer:draft,onDraft:saveDraft,onSubmit:queueAnswer});
     }
+    if(open){const draft=loadDraft(next.id)||next.savedDraft;if(draft)offerDraft(draft);}
     root.hidden=!!pending&&!isNumeric();
     $('fallback').hidden=!pending||online;
     if(pending){showPending();sendPending();}
@@ -93,6 +102,7 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
     try{channel?.close?.();}catch{} try{old?.destroy();}catch{}
   }
   function disconnect(message, retry = true) {
+    draftDelivery.pause();
     ++attempt; online=false; terminal=!retry; clearTimeout(ackTimer);ackTimer=null;
     closeTransport(); clearTimeout(retryTimer);retryTimer=null;
     if(pending)showPacket(); $('connect').disabled=false; $('connect').textContent='RETRY NOW';
@@ -101,6 +111,7 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
     retryTimer=setTimeout(connect,retryDelay);retryTimer?.unref?.();retryDelay=Math.min(retryDelay*2,15000);
   }
   async function connect() {
+    draftDelivery.pause();
     clearTimeout(retryTimer);retryTimer=null; clearTimeout(ackTimer);ackTimer=null;
     const generation=++attempt; online=false;terminal=false;closeTransport();
     const abort=controller=new AbortController();
@@ -133,7 +144,8 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
           if (message.type === 'superseded' && online) { disconnect('This seat is open in another window. Reconnect here to take over.',false); return; }
           if (message.type === 'denied' && !online) { clearTimeout(connectionTimer); disconnect('Invitation invalid or revoked. Ask the host for a replacement link.',false); return; }
           if (message.type !== 'round' && !online) { fail('Host did not confirm your seat.'); return; }
-          if (message.type === 'round') { online = true; terminal=false; retryDelay = 1000; clearTimeout(connectionTimer); $('connect').textContent='RECONNECT'; status(message.round ? 'Connected' : 'Connected — waiting for round'); render(message.round); }
+          if (message.type === 'round') { const rejoined=!online; online = true; terminal=false; retryDelay = 1000; clearTimeout(connectionTimer); $('connect').textContent='RECONNECT'; status(message.round ? 'Connected' : 'Connected — waiting for round'); render(message.round); if(rejoined)draftDelivery.reconnect(); }
+          if(message.type==='draft-ack')draftDelivery.ack(message);
           if (message.type === 'ack' && matchesAck(pending,message)) {
             if (message.status === 'accepted' || message.status === 'already-submitted') {
               // Keep the outbox until the authoritative snapshot confirms the exact
@@ -143,7 +155,7 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
               disconnect('Host could not save yet.');
             } else {
               const rejected=pending; clearPending(); if(round?.mode==='trivia'){try{saveDraft(JSON.parse(rejected.answer));}catch{}} foley.play('error'); $('fallback').hidden=true;
-              triviaRenderKey=''; render(round); if(round?.mode==='quiplash')$('answer').value=rejected.answer;
+              triviaRenderKey=''; render(round);draftDelivery.reconnect(); if(round?.mode==='quiplash')$('answer').value=rejected.answer;
               $('submission').textContent=message.status==='stale-round'?'Question changed.':message.status==='closed'?'Round closed.':'Answer not accepted. Try again.';
             }
           }
@@ -165,7 +177,7 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
   }
   $('connect').addEventListener('click',connect);
   window.addEventListener('online',()=>{if(!online&&!invite.round&&!terminal)connect();});
-  window.addEventListener('pagehide',()=>{++attempt;online=false;clearTimeout(retryTimer);clearTimeout(ackTimer);ackTimer=null;closeTransport();});
+  window.addEventListener('pagehide',()=>{draftDelivery.pause();++attempt;online=false;clearTimeout(retryTimer);clearTimeout(ackTimer);ackTimer=null;closeTransport();});
   window.addEventListener('pageshow',event=>{if(event.persisted&&!invite.round&&!terminal)connect();});
   $('answer').addEventListener('input',()=>saveDraft({text:$('answer').value}));
   $('form').addEventListener('submit', event => {
