@@ -129,24 +129,18 @@ function seatAnswer(round,p){
 }
 // Audience-only, deliberately receives the private host round rather than the
 // player projection. No answer keys, private links, or grading controls appear.
-export function createTriviaSpectator(root,q,{seat="faroe",manualChoice=false}={}){
- root.replaceChildren();root.classList.remove('rg-live-wrong','rg-live-correct');root.onkeydown=root.oninput=root.onchange=root.onclick=root.onpointerup=null;
- root.dataset.kind=q.kind;root.classList.remove('rg-question-dealt');void root.offsetWidth;root.classList.add('rg-spectator','rg-question-dealt');
- if(q.prompt)root.append(node('h1','rg-live-question',q.prompt));
- if(q.subtitle)root.append(node('p','rg-live-subtitle',q.subtitle));
- const nav=node('nav','rg-spectator-seats');nav.setAttribute('aria-label','Contestant perspective');
+const SPECTATOR_COLORS={faroe:'#72f3ae',erin:'#c5a0ff',kaz:'#ffe567'};
+function spectatorBerry(p){const im=node('img');im.src=`/ramblegamble/assets/berries/${p}berry.png`;im.alt='';im.draggable=false;return im;}
+function pulse(el,cls){el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);}
+// A separate persistent presentation per seat. No transport or scoring state is
+// owned by these views; switching perspective never replays old submissions.
+function createSpectatorPanel(deck,q,p,choose){
  const numeric=NUMERIC_MODES.includes(q.kind),art=['compose-image','draw-over-image'].includes(q.kind);
- let current=null,selected=SPECTATOR_PLAYERS.includes(seat)?seat:'faroe',manual=manualChoice,lastKey='',lastSeat='',lastAttempts=[],lastAnswer=null,lastSubmitted=false,initialized=false;const observedSolved=new Set();
- const seats=new Map();
- for(const p of SPECTATOR_PLAYERS){const b=button('',()=>{manual=true;selected=p;paint();});b.className='rg-spectator-seat';b.setAttribute('aria-label',p.toUpperCase());
-  const im=node('img');im.src=`/ramblegamble/assets/berries/${p}berry.png`;im.alt='';im.draggable=false;
-  const marker=node('span','rg-spectator-marker');marker.setAttribute('aria-hidden','true');b.append(im,marker);nav.append(b);seats.set(p,{b,marker});}
- root.append(nav);const body=node('div','rg-live-body rg-spectator-body');root.append(body);
- const prompt=!art&&q.imageVisible!==false?image(q.promptImage,'Question image'):null;if(prompt){prompt.classList.add('rg-spectator-prompt');body.append(prompt);}
- const content=node('div','rg-spectator-content');body.append(content);
- const status=node('div','rg-spectator-status');status.setAttribute('role','status');root.append(status);
- let drawArt=null;
- if(art)drawArt=artboard(content,q,null,false,q.kind==='compose-image');
+ const panel=node('section','rg-spectator-panel');panel.dataset.seat=p;panel.style.setProperty('--rg-seat-color',SPECTATOR_COLORS[p]);panel.setAttribute('aria-label',p.toUpperCase());
+ const heading=button('',()=>choose(p));heading.className='rg-spectator-panel-heading';heading.setAttribute('aria-label',`Focus ${p.toUpperCase()}`);heading.append(spectatorBerry(p),node('span','',p.toUpperCase()));
+ const content=node('div','rg-spectator-content'),status=node('div','rg-spectator-status');status.setAttribute('role','status');panel.append(heading,content,status);deck.append(panel);
+ let drawArt=null,palette=null;
+ if(art){drawArt=artboard(content,q,null,false,q.kind==='compose-image'&&p===SPECTATOR_PLAYERS[0]);palette=content.querySelector('.rg-live-compose-palette');}
  const cells=[],history=node('div','rg-spectator-guess-history'),hero=node('div','rg-spectator-guess-hero');
  if(q.kind==='number-grid'){
   const grid=node('div','rg-live-number-grid rg-spectator-grid');grid.style.setProperty('--rg-guess-rows',String(q.guessLimit));
@@ -155,44 +149,71 @@ export function createTriviaSpectator(root,q,{seat="faroe",manualChoice=false}={
  const groups=[],tiles=[];
  if(q.kind==='categorize-images'){
   const buckets=node('div','rg-spectator-groups');
-  for(const label of [...q.categories,'']){const section=node('section','rg-spectator-group');const heading=node('h2','rg-spectator-group-title',label||'—');const list=node('div','rg-spectator-group-items');section.append(heading,list);buckets.append(section);groups.push(list);}
+  for(const label of [...q.categories,'']){const section=node('section','rg-spectator-group');const title=node('h2','rg-spectator-group-title',label||'—');const list=node('div','rg-spectator-group-items');section.append(title,list);buckets.append(section);groups.push(list);}
   content.append(buckets);
   q.items.forEach((item,i)=>{const tile=node('div','rg-spectator-object');tile.append(itemView(item,i));tiles.push(tile);groups.at(-1).append(tile);});
  }
+ let lastKey=null,lastAttempts=[],lastAnswer=null,lastSubmitted=false,wasSolved=false;
+ function update(round,visible,animate){
+  const answer=seatAnswer(round,p),attempts=round.attempts?.[p]||[],submitted=!!round.submissions?.[p];
+  const key=JSON.stringify([answer,attempts,submitted,round.phase]);if(key===lastKey)return false;
+  const live=visible&&animate&&lastKey!==null;lastKey=key;
+  const last=attempts.at(-1),previous=lastAttempts.at(-1),newGuess=live&&last&&last.id!==previous?.id;
+  if(q.kind==='number-grid'){
+   cells.forEach((cell,i)=>{const a=attempts[Math.floor(i/4)],digit=a?.guess?.[i%4]||'',result=a?.result?.[i%4]||'';const changed=cell.textContent!==digit||cell.dataset.result!==result;cell.textContent=digit;if(result){cell.dataset.result=result;cell.setAttribute('aria-label',`${digit} ${result}`);}else{delete cell.dataset.result;cell.setAttribute('aria-label','Empty');}if(changed&&digit&&live){cell.style.setProperty('--rg-tile-delay',`${(i%4)*75}ms`);pulse(cell,'rg-spectator-tile-pop');}});
+  }else if(numeric){
+   hero.replaceChildren();hero.dataset.result=last?.result||'';
+   hero.append(node('span','rg-spectator-guess-value',last?.guess||'—'),node('span','rg-spectator-guess-direction',last?.result==='higher'?'↑':last?.result==='lower'?'↓':last?.result==='correct'?'✓':''));
+   if(last&&['higher','lower','correct'].includes(last.result))hero.append(node('span','rg-spectator-guess-word',last.result.toUpperCase()));
+   history.replaceChildren();for(const a of attempts.slice(-8,-1)){const token=node('span','rg-spectator-guess-token',`${a.guess} ${a.result==='higher'?'↑':a.result==='lower'?'↓':a.result==='correct'?'✓':''}`);token.dataset.result=a.result;history.append(token);}
+   if(newGuess)pulse(hero,'rg-spectator-tile-pop');
+  }else if(art){drawArt.setAnswer(answer);if(live&&q.kind==='compose-image'&&(answer?.placements?.length||0)>(lastAnswer?.placements?.length||0))pulse(content,'rg-spectator-placement-pop');}
+  else if(groups.length){tiles.forEach((tile,i)=>{const idx=answer?.groups?.[i];const target=groups[Number.isInteger(idx)&&idx>=0&&idx<q.categories.length?idx:groups.length-1];if(tile.parentNode!==target){target.append(tile);if(live)pulse(tile,'rg-spectator-object-pop');}});}
+  const progress=numeric?numericProgress(round,p):null;
+  status.textContent=progress?(progress.solved?'SOLVED':submitted?'NO GUESSES LEFT':`${attempts.length} / ${progress.limit}`):submitted?'SUBMITTED':round.phase!=='submissions'?'CLOSED':'';
+  status.dataset.state=progress?.solved?'solved':submitted?'done':'';panel.dataset.state=status.dataset.state;
+  const solved=!!progress?.solved,celebrate=live&&solved&&!wasSolved;
+  if(celebrate){pulse(panel,'rg-spectator-panel-win');showBurst(content,{color:SPECTATOR_COLORS[p],count:24});}
+  if(live&&!numeric&&submitted&&!lastSubmitted){pulse(status,'rg-spectator-tile-pop');showBurst(content,{color:SPECTATOR_COLORS[p],count:16});}
+  lastAnswer=answer;lastSubmitted=submitted;lastAttempts=attempts;wasSolved=solved;return celebrate;
+ }
+ return {panel,palette,update};
+}
+export function createTriviaSpectator(root,q,{seat="faroe",manualChoice=false}={}){
+ root.replaceChildren();root.classList.remove('rg-live-wrong','rg-live-correct','rg-spectator-all');root.onkeydown=root.oninput=root.onchange=root.onclick=root.onpointerup=null;
+ root.dataset.kind=q.kind;root.classList.remove('rg-question-dealt');void root.offsetWidth;root.classList.add('rg-spectator','rg-question-dealt');
+ if(q.prompt)root.append(node('h1','rg-live-question',q.prompt));
+ if(q.subtitle)root.append(node('p','rg-live-subtitle',q.subtitle));
+ const nav=node('nav','rg-spectator-seats');nav.setAttribute('aria-label','Contestant perspective');
+ const numeric=NUMERIC_MODES.includes(q.kind),art=['compose-image','draw-over-image'].includes(q.kind);
+ let current=null,selected=[...SPECTATOR_PLAYERS,'all'].includes(seat)?seat:'faroe',manual=manualChoice||selected==='all',lastSeat='';
+ const seats=new Map();
+ function choose(p){manual=true;selected=p;paint();}
+ for(const p of SPECTATOR_PLAYERS){const b=button('',()=>choose(p));b.className='rg-spectator-seat';b.setAttribute('aria-label',p.toUpperCase());
+  const marker=node('span','rg-spectator-marker');marker.setAttribute('aria-hidden','true');b.append(spectatorBerry(p),marker);nav.append(b);seats.set(p,{b,marker});}
+ const all=button('ALL',()=>choose('all'));all.className='rg-spectator-seat rg-spectator-all-button';all.setAttribute('aria-label','ALL');nav.append(all);
+ root.append(nav);const body=node('div','rg-live-body rg-spectator-body');root.append(body);
+ const prompt=!art&&q.imageVisible!==false?image(q.promptImage,'Question image'):null;if(prompt){prompt.classList.add('rg-spectator-prompt');body.append(prompt);}
+ const deck=node('div','rg-spectator-deck');body.append(deck);
+ const panels=new Map(SPECTATOR_PLAYERS.map(p=>[p,createSpectatorPanel(deck,q,p,choose)]));
+ // One shared object legend for both the individual and combined views.
+ const palette=panels.get(SPECTATOR_PLAYERS[0]).palette;if(palette)body.insertBefore(palette,deck);
  function hasActivity(p){return !!current?.submissions?.[p]||!!current?.drafts?.[p]||!!current?.attempts?.[p]?.length;}
- function pulse(el,cls){el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);}
  function paint(){
   if(!current)return;
   if(!manual){
    if(numeric&&q.kind!=='number-grid'&&SPECTATOR_PLAYERS.includes(current.lastPlayer))selected=current.lastPlayer;
    else if(!hasActivity(selected))selected=SPECTATOR_PLAYERS.find(hasActivity)||selected;
   }
-  const newlySolved=[];
-  for(const [p,{b,marker}] of seats){const progress=numeric?numericProgress(current,p):null;if(progress?.solved&&!observedSolved.has(p)){observedSolved.add(p);newlySolved.push(p);}
+  const combined=selected==='all',switched=lastSeat!==selected;lastSeat=selected;
+  root.classList.toggle('rg-spectator-all',combined);all.setAttribute('aria-pressed',String(combined));
+  for(const [p,{b,marker}] of seats){const progress=numeric?numericProgress(current,p):null;
    const state=progress?.solved?'solved':current.submissions?.[p]?'done':hasActivity(p)?'working':'waiting';b.dataset.state=state;b.setAttribute('aria-pressed',String(p===selected));b.title=`${p.toUpperCase()} · ${state}`;b.setAttribute('aria-description',state);marker.textContent=state==='solved'||state==='done'?'✓':state==='working'?'●':'';}
-  const answer=seatAnswer(current,selected),attempts=current.attempts?.[selected]||[],switched=lastSeat!==selected;
-  const key=JSON.stringify([selected,answer,attempts,current.submissions?.[selected],current.phase]);
-  if(key===lastKey)return;lastKey=key;lastSeat=selected;
-  if(switched)pulse(content,'rg-spectator-slide');
-  const last=attempts.at(-1),previous=lastAttempts.at(-1),newGuess=initialized&&!switched&&last&&last.id!==previous?.id;
-  if(q.kind==='number-grid'){
-   cells.forEach((cell,i)=>{const a=attempts[Math.floor(i/4)],digit=a?.guess?.[i%4]||'',result=a?.result?.[i%4]||'';const changed=cell.textContent!==digit||cell.dataset.result!==result;cell.textContent=digit;if(result){cell.dataset.result=result;cell.setAttribute('aria-label',`${digit} ${result}`);}else{delete cell.dataset.result;cell.setAttribute('aria-label','Empty');}if(changed&&digit){cell.style.setProperty('--rg-tile-delay',`${(i%4)*75}ms`);pulse(cell,'rg-spectator-tile-pop');}});
-  }else if(numeric){
-   hero.replaceChildren();hero.dataset.result=last?.result||'';
-   hero.append(node('span','rg-spectator-guess-value',last?.guess||'—'),node('span','rg-spectator-guess-direction',last?.result==='higher'?'↑':last?.result==='lower'?'↓':last?.result==='correct'?'✓':''));
-   if(last&&['higher','lower','correct'].includes(last.result))hero.append(node('span','rg-spectator-guess-word',last.result.toUpperCase()));
-   history.replaceChildren();for(const a of attempts.slice(-8,-1)){const token=node('span','rg-spectator-guess-token',`${a.guess} ${a.result==='higher'?'↑':a.result==='lower'?'↓':a.result==='correct'?'✓':''}`);token.dataset.result=a.result;history.append(token);}
-   if(newGuess||switched)pulse(hero,'rg-spectator-tile-pop');
-  }else if(art){drawArt.setAnswer(answer);if(!switched&&q.kind==='compose-image'&&(answer?.placements?.length||0)>(lastAnswer?.placements?.length||0))pulse(content,'rg-spectator-placement-pop');}
-  else if(groups.length){tiles.forEach((tile,i)=>{const idx=answer?.groups?.[i];const target=groups[Number.isInteger(idx)&&idx>=0&&idx<q.categories.length?idx:groups.length-1];if(tile.parentNode!==target){target.append(tile);pulse(tile,'rg-spectator-object-pop');}});}
-  const progress=numeric?numericProgress(current,selected):null;
-  const text=progress?(progress.solved?'SOLVED':current.submissions?.[selected]?'NO GUESSES LEFT':`${attempts.length} / ${progress.limit}`):current.submissions?.[selected]?'SUBMITTED':current.phase!=='submissions'?'CLOSED':'';
-  status.textContent=text;status.dataset.state=progress?.solved?'solved':current.submissions?.[selected]?'done':'';
-  const visible=!root.closest('[hidden],.is-freecam')&&!document.hidden&&!document.documentElement.hasAttribute('data-rg-host-locked');
-  const submitted=!!current.submissions?.[selected];
-  if(initialized&&visible&&newlySolved.includes(selected)){showBurst(content,{color:'#ffe567',count:24});audienceReact('cheer');foley.play('confirm');}
-  if(initialized&&visible&&!switched&&!numeric&&submitted&&!lastSubmitted){pulse(status,'rg-spectator-tile-pop');showBurst(content,{color:'#72f3ae',count:16});}
-  lastAnswer=answer;lastSubmitted=submitted;lastAttempts=attempts;initialized=true;
+  const stageVisible=!root.closest('[hidden],.is-freecam')&&!document.hidden&&!document.documentElement.hasAttribute('data-rg-host-locked');
+  let celebrated=false;
+  for(const [p,view] of panels){const visible=combined||p===selected;view.panel.hidden=!visible;if(switched&&visible)pulse(view.panel,'rg-spectator-slide');
+   celebrated=view.update(current,visible,stageVisible)||celebrated;}
+  if(celebrated){audienceReact('cheer');foley.play('confirm');}
  }
  return {update(round){current=round;paint();},selection(){return {seat:selected,manualChoice:manual};}};
 }

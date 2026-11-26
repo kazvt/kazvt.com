@@ -6,8 +6,9 @@ const clamp = x => Math.max(0, Math.min(1,x));
 export const smooth = x => {x=clamp(x);return x*x*(3-2*x);};
 export function cabinetPose(progress) {
   const p=clamp(progress);
-  // Curtains clear the path before the cabinet advances. Reversal follows the same path.
-  return { curtain:smooth(p/.64), travel:smooth((p-.32)/.68) };
+  // Fully clear the opening before travel. On reversal, the cabinet is fully
+  // backstage before the curtain starts closing. A brief dead band is intentional.
+  return { curtain:smooth(p/.48), travel:smooth((p-.52)/.48) };
 }
 export function createStageShowState({ cue=()=>{} }={}) {
   let pose=0, slot=null, lighting=null, target=null, owner=null;

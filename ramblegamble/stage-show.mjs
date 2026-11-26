@@ -1,4 +1,5 @@
-import { createStageShowState } from './stage-show-state.mjs?v=theatre-20261127-v1';
+import { createStageShowState } from './stage-show-state.mjs?v=all-curtain-20261127-v1';
+import { curtainLayout, createCurtainProfile, curtainVertex } from './stage-curtain.mjs?v=all-curtain-20261127-v1';
 // Unlit GLTF art deliberately stays unlit outside a show. A world-space cone
 // mask illuminates the original texels rather than replacing all room materials.
 export function installStageLighting(THREE, roots, uniforms){
@@ -27,25 +28,24 @@ float rgBeam(vec3 origin, vec3 aim){
   return ()=>{uniforms.rgShow.value=0;};
 }
 export function createStageShow(THREE,scene,{slotRig,slotsModel,roots,foley,onEmotion=()=>{},reduced=()=>false}){
+  const bounds=new THREE.Box3().setFromObject(slotsModel), center=bounds.getCenter(new THREE.Vector3());
+  const base=slotRig.position.clone(), layout=curtainLayout(bounds), profile=createCurtainProfile(layout);
   const group=new THREE.Group();group.name='rg-stage-theatre';scene.add(group);
-  const bounds=new THREE.Box3().setFromObject(slotsModel), center=bounds.getCenter(new THREE.Vector3()), size=bounds.getSize(new THREE.Vector3());
-  const base=slotRig.position.clone();
-  const curtainZ=bounds.max.z+.08, height=size.y+.26, width=size.x+.48;
-  const retract=Math.min(.85,Math.max(.38,size.z*.75));
+  const {trackZ,bottom,height,outer,retract}=layout;
   const texture=new THREE.TextureLoader().load('/ramblegamble/assets/provided/slot-curtain.png');
   texture.colorSpace=THREE.SRGBColorSpace;texture.magFilter=THREE.NearestFilter;texture.minFilter=THREE.NearestFilter;texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
   const cloth=new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide,vertexColors:true,toneMapped:false});
-  const curtains=[]; const segments=48,rows=12;
+  const curtains=[]; const segments=84,rows=18;
   for(const side of [-1,1]){
     const geo=new THREE.PlaneGeometry(1,1,segments,rows), colors=new Float32Array(geo.attributes.position.count*3);
     const uv=geo.attributes.uv;
-    for(let i=0;i<uv.count;i++){const u=uv.getX(i);uv.setXY(i,u*6,uv.getY(i)*2);const shade=.62+.38*(.5+.5*Math.cos(u*Math.PI*12));colors.set([shade,shade,shade],i*3);}
-    geo.setAttribute('color',new THREE.BufferAttribute(colors,3));
-    const mesh=new THREE.Mesh(geo,cloth);mesh.name='slot-curtain';mesh.position.set(center.x,bounds.min.y,curtainZ);mesh.frustumCulled=false;group.add(mesh);curtains.push({mesh,side});
+    for(let i=0;i<uv.count;i++){const u=uv.getX(i);uv.setXY(i,u*6,uv.getY(i)*2);colors.set([1,1,1],i*3);}
+    geo.setAttribute('color',new THREE.BufferAttribute(colors,3));geo.attributes.position.setUsage?.(THREE.DynamicDrawUsage);geo.attributes.color.setUsage?.(THREE.DynamicDrawUsage);
+    const mesh=new THREE.Mesh(geo,cloth);mesh.name='slot-curtain';mesh.position.set(layout.center,bottom,trackZ);mesh.frustumCulled=false;group.add(mesh);curtains.push({mesh,side,colors});
   }
   // A quiet valance in the identical authored texture, not another light strip.
   const valanceMaterial=new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide,toneMapped:false});
-  const valance=new THREE.Mesh(new THREE.BoxGeometry(width+.1,.16,.14),valanceMaterial);valance.position.set(center.x,bounds.min.y+height+.055,curtainZ);group.add(valance);
+  const valance=new THREE.Mesh(new THREE.BoxGeometry(outer*2+.06,.15,.15),valanceMaterial);valance.position.set(layout.center,bottom+height-.045,trackZ+.015);group.add(valance);
   const uniforms={rgShow:{value:0},rgLamp:{value:[0,1,2].map(()=>new THREE.Vector3())},rgAim:{value:[0,1,2].map(()=>new THREE.Vector3())}};
   const restoreLighting=installStageLighting(THREE,[...roots,group],uniforms);
   const beamGeo=new THREE.ConeGeometry(1,1,24,1,true), palette=[0xffedb8,0xe2c4ff,0xffd5ef];
@@ -54,7 +54,7 @@ export function createStageShow(THREE,scene,{slotRig,slotsModel,roots,foley,onEm
   const temp=new THREE.Object3D(), up=new THREE.Vector3(0,1,0), delta=new THREE.Vector3();
   const confettiColors=[0xffe567,0xff76c9,0xc5a0ff,0x60e3a8,0xfff5d6];
   const pieces=Array.from({length:180},(_,i)=>{const a=i*2.39996323;const r=.4+((i*37)%101)/101*2;confetti.setColorAt(i,new THREE.Color(confettiColors[i%5]));return {a,r,vy:1.1+((i*71)%97)/97*2.1,spin:1+((i*19)%17)/5,phase:i*.45};});
-  let burst=null,lastTime=0,lightTarget=null,lastPose=-1,lastTravel=-1,wasActive=true;
+  let burst=null,lastTime=0,lightTarget=null,lastPose=-1,lastTravel=-1,lastClothPose=-1,wasActive=true;
   function cue(name){
     if(name==='stop-roll'){foley.stop('stage-roll');return;}
     if(name==='roll'){foley.stop('stage-hit');foley.stop('stage-cheer');foley.start('stage-roll','stageDrumRoll',{maxDelay:450});onEmotion('suspense');return;}
@@ -67,18 +67,19 @@ export function createStageShow(THREE,scene,{slotRig,slotsModel,roots,foley,onEm
   const state=createStageShowState({cue});
   function updateCurtains(p,travel,time){
     slotRig.position.copy(base);slotRig.position.z-=retract*(1-travel);slotRig.updateMatrixWorld(true);
-    // Never raycast invisible cabinet geometry. The curtains themselves remain the entry target.
-    slotsModel.visible=p>.015;
-    for(const {mesh,side} of curtains){
+    // Only hide after BOTH the cabinet and the cloth reach the closed pose.
+    // Opening begins with the fully recessed cabinet already visible.
+    slotsModel.visible=p>0||travel>0;
+    if(p===lastClothPose&&(p===0||p===1))return;
+    lastClothPose=p;
+    for(const {mesh,side,colors} of curtains){
       const pos=mesh.geometry.attributes.position;
-      const panel=width*.5*(1-.86*p);const outer=side*width*.5;
       for(let i=0;i<pos.count;i++){
         const u=(i%(segments+1))/segments,v=Math.floor(i/(segments+1))/rows;
-        const x=outer-side*panel*u, fold=Math.sin(u*Math.PI*12)*(.045+.075*p);
-        const ripple=Math.sin(u*11+v*4-time*.005)*.028*(p>0&&p<1?Math.sin(p*Math.PI):0);
-        pos.setXYZ(i,x,height*(1-v)-.035*Math.sin(u*Math.PI*6)*v,fold+ripple);
+        const {x,y,z,shade}=curtainVertex(profile,side,u,v,p,time);
+        pos.setXYZ(i,x,y,z);colors[i*3]=colors[i*3+1]=colors[i*3+2]=shade;
       }
-      pos.needsUpdate=true;mesh.geometry.computeBoundingSphere();
+      pos.needsUpdate=true;mesh.geometry.attributes.color.needsUpdate=true;mesh.geometry.computeBoundingSphere();
     }
   }
   function slot(open,time){lastTime=time;

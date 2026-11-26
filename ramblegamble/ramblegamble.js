@@ -1,5 +1,5 @@
-import { createStageShow } from "./stage-show.mjs?v=theatre-20261127-v1";
-import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state.mjs?v=theatre-20261127-v1";
+import { createStageShow } from "./stage-show.mjs?v=all-curtain-20261127-v1";
+import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state.mjs?v=all-curtain-20261127-v1";
 import { createCharacterOcclusion } from "./character-occlusion.mjs?v=freecam-depth-20261127-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
@@ -2846,7 +2846,7 @@ import {
       }
       const loader = new GLTFLoader();
       const [stageGltf, rouletteGltf, slotsGltf] = await Promise.all([
-        loader.loadAsync("/ramblegamble/assets/provided/rg_stage.gltf"),
+        loader.loadAsync("/ramblegamble/assets/provided/rg_stage.gltf?v=all-curtain-20261127-v1"),
         loader.loadAsync("/ramblegamble/assets/provided/rg_roulette.gltf"),
         loader.loadAsync("/ramblegamble/assets/provided/rg_slots.gltf"),
       ]);

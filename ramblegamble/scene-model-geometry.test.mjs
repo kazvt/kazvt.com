@@ -189,10 +189,27 @@ test('standing host and three contestants clear chairs and remain framed across 
 });
 
 import {cabinetPose} from './stage-show-state.mjs';
-test('the measured slot cabinet and its open curtain folds fit the authored bay with positive opening clearance',()=>{
- const {cabinet}=slotGeometry();const w=cabinet.max[0]-cabinet.min[0],d=cabinet.max[2]-cabinet.min[2],curtainWidth=w+.48;
- assert.ok(curtainWidth+.1<14.48-9.14,`cabinet ${w}, curtain ${curtainWidth}`);
- assert.ok(curtainWidth*.86>w,`open curtain opening ${curtainWidth*.86} > ${w}`);
- const retract=Math.min(.85,Math.max(.38,d*.75));assert.ok(retract>0&&retract<=.85);
- for(let i=0;i<=1000;i++){const p=cabinetPose(i/1000);assert.ok(p.travel>=0&&p.travel<=1&&p.curtain>=p.travel);assert.ok(cabinet.max[2]-retract*(1-p.travel)<=cabinet.max[2]);}
+import { SLOT_CURTAIN_BAY, curtainLayout, createCurtainProfile, curtainVertex } from './stage-curtain.mjs';
+test('the measured cabinet fits through the curtain opening and fully inside the deeper recess',()=>{
+ const {cabinet}=slotGeometry(),bay=SLOT_CURTAIN_BAY,center=(bay.left+bay.right)/2;
+ const w=cabinet.max[0]-cabinet.min[0],d=cabinet.max[2]-cabinet.min[2],floor=0;
+ const bounds={min:{x:center-w/2,y:floor,z:-6.10+.025},max:{x:center+w/2,y:floor+2.52,z:-6.10+.025+d}};
+ const layout=curtainLayout(bounds),profile=createCurtainProfile(layout);
+ assert.ok(bounds.min.z-layout.retract>bay.backZ+.04);assert.ok(bounds.max.z-layout.retract<bay.frontZ-.1);
+ // At every progress where the cabinet moves the fabric is fully open,
+ // including its weighted hem. During opening/closing the cabinet is backstage.
+ for(let i=0;i<=1000;i++){
+  const p=cabinetPose(i/1000);assert.ok(p.travel>=0&&p.travel<=1&&p.curtain>=p.travel);
+  if(p.travel>0){assert.equal(p.curtain,1);for(let j=0;j<=18;j++){
+   const left=layout.center+curtainVertex(profile,-1,1,j/18,1,0).x,right=layout.center+curtainVertex(profile,1,1,j/18,1,0).x;
+   assert.ok(left<bounds.min.x-.16&&right>bounds.max.x+.16);
+  }}else assert.ok(bounds.max.z-layout.retract<bay.frontZ);
+ }
+ const m=model('rg_stage'),stage=nodePoints(m,m.d.nodes[0]);
+ for(const x of [bay.left,bay.right])for(const y of [0,bay.top])for(const z of [bay.frontZ,bay.backZ])assert.ok(stage.some(p=>Math.hypot(p[0]-x,p[1]-y,p[2]-z)<.002),`bay vertex ${x},${y},${z}`);
+ // Verify a real floor triangle reaches the rear of the recess and the floor
+ // covers both sides of the full cabinet footprint; do not rely on AABB alone.
+ const n=m.d.nodes[0],floorTris=[];for(const prim of m.d.meshes[n.mesh].primitives){const points=m.values(prim.attributes.POSITION).map(v=>add(rotateQuaternion(v,n.rotation),n.translation)),ids=m.values(prim.indices).flat();for(let i=0;i<ids.length;i+=3){const tri=ids.slice(i,i+3).map(j=>points[j]);if(tri.every(v=>Math.abs(v[1])<.002)&&tri.some(v=>v[2]<bay.backZ+.002))floorTris.push(tri);}}
+ function inside(x,z,t){const a=t.map(([xx,,zz])=>[xx,zz]);const signs=a.map((v,i)=>{const b=a[(i+1)%3];return (b[0]-v[0])*(z-v[1])-(b[1]-v[1])*(x-v[0]);});return signs.every(v=>v>=-1e-6)||signs.every(v=>v<=1e-6);}
+ for(const x of [bounds.min.x,center,bounds.max.x])for(const z of [bounds.min.z-layout.retract,bounds.max.z-layout.retract])assert.ok(floorTris.some(t=>inside(x,z,t)),`floor supports ${x},${z}`);
 });
