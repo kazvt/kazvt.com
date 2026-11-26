@@ -822,12 +822,18 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     window.dispatchEvent(new CustomEvent("rg:slot-grid-updated", { detail: { grid: slotGrid.slice() } }));
   }
 
+  function publishSlotSettings() {
+    window.dispatchEvent(new CustomEvent("rg:slot-settings-updated", {
+      detail: { berry: selectedBerry, axis: placementMode },
+    }));
+  }
+
   function updateGridStatus() {
     const filled = slotGrid.filter(Boolean).length;
-    $("#rg-slot-count").textContent = filled + (filled === 1 ? " BERRY" : " BERRIES") + " / 15";
-    $("#rg-slot-help").textContent = placementMode === "blank"
-      ? "Click a square to clear that space."
-      : "Click a square to fill its whole " + placementMode + " with the selected berry.";
+    $("#rg-slot-count").textContent = filled + " / 15";
+    $("#rg-slot-help").textContent = placementMode === "row"
+      ? "Click a row on the machine screen to place one berry."
+      : "Click a column on the machine screen to place one berry.";
   }
 
   function renderGrid() {
