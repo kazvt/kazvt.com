@@ -33,6 +33,7 @@ test("roulette parts distinguish direct play from opening trivia", () => {
 
 test("the slot cabinet opens its host editor, five hardware buttons spin reels, and arm spins all", () => {
   assert.equal(resolvePointClick("slot", "machine"), "open-slots");
+  assert.equal(resolvePointClick("slot", "slot-reel-display"), "place-slot-berry");
   assert.equal(resolvePointClick("slot", "button1"), "spin-column-0");
   assert.equal(resolvePointClick("slot", "button3"), "spin-column-2");
   assert.equal(resolvePointClick("slot", "button5"), "spin-column-4");

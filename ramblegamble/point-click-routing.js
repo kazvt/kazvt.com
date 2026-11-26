@@ -15,6 +15,7 @@ export function resolvePointClick(machine, part = "", focused = false) {
   if (machine === "roulette") return ROULETTE_MENU_PARTS.has(part) ? "open-trivia" : "spin-wheel";
   if (machine === "slot") {
     if (part === "arm") return "pull-lever";
+    if (part === "slot-reel-display") return "place-slot-berry";
     const button = /^button([1-5])$/.exec(part);
     if (button) return `spin-column-${Number(button[1]) - 1}`;
     return "open-slots";
