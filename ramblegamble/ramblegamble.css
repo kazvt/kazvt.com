@@ -1004,3 +1004,8 @@ body.ramble-page *::after {
 @media (prefers-reduced-motion: reduce) {
   .rg-dice-dialog .rg-dice-status[data-state="complete"] { animation: none; }
 }
+
+/* Temporary flight hides projected interaction UI, not its state or timers. */
+.rg-preview.is-freecam :is(#rg-card-games-layer, #rg-live-trivia, #rg-slot-control-layer, #rg-result) { visibility: hidden !important; pointer-events: none !important; }
+.rg-preview.is-freecam :is(#rg-card-games-layer, #rg-live-trivia, #rg-slot-control-layer) * { visibility: hidden !important; pointer-events: none !important; }
+.rg-preview.is-freecam #rg-canvas { cursor: move; }

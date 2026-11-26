@@ -290,8 +290,8 @@ test("scene wiring preloads one plane, updates it before every room render, and 
   assert.match(js, /liquidPortal\?\.dispose\(\)/);
   assert.match(css, /#rg-canvas \{[^}]*z-index: 1;/);
   assert.match(css, /\.rg-liquid-portal-layer \{[^}]*z-index: 0;[^}]*pointer-events: none;/);
-  assert.match(readFileSync(new URL("./host-access.mjs", import.meta.url), "utf8"), /ramblegamble\.js\?v=show-energy-20261127-v1/);
-  assert.match(html, /ramblegamble\.css\?v=vip-focus-20261127-v1/);
+  assert.match(readFileSync(new URL("./host-access.mjs", import.meta.url), "utf8"), /ramblegamble\.js\?v=hold-freecam-20261127-v1/);
+  assert.match(html, /ramblegamble\.css\?v=hold-freecam-20261127-v1/);
 });
 
 
@@ -354,7 +354,7 @@ test("VIP doorway has 80% opacity and Dice liquid has 50% opacity over the exist
   const gate = readFileSync(new URL("./host-access.mjs", import.meta.url), "utf8");
   const html = readFileSync(new URL("../rg/index.html", import.meta.url), "utf8");
   assert.match(gate, /dice-mode\.js\?v=show-energy-20261127-v1/);
-  assert.match(html, /host-access\.mjs\?v=show-energy-20261127-v1/);
+  assert.match(html, /host-access\.mjs\?v=hold-freecam-20261127-v1/);
 });
 
 import { runInNewContext } from 'node:vm';
@@ -366,7 +366,7 @@ test('Dice mode swaps the existing room canvas to sky-only immediately and resto
  const events=[],listeners={},classes=new Set(),billboardClasses=new Set(),portalStates=[];
  const classList=set=>({add:v=>set.add(v),remove:v=>set.delete(v)});
  const pointsHud={};
- const context={diceModeOpen:false,pointsHud,diceHeader:{prepend:h=>events.push(['hud-in',h])},preview:{classList:classList(classes),insertBefore:h=>events.push(['hud-out',h])},result:{hidden:false},updateLiquidPortal:()=>portalStates.push(context.diceModeOpen),focusDrag:{clearHover(){}},lastScenePointer:null,stopRouletteSettlement(){},diceModeVisibility:null,stageModel:objects[0],rouletteRig:objects[1],slotRig:objects[2],exteriorMist:{group:objects[3]},audience:{group:objects[4]},showFX:{group:objects[5]},billboardLayer:{classList:classList(billboardClasses)},hideGameCursor(){},renderer:{render(){events.push(['render',...objects.map(o=>o.visible),skyRoot.visible]);}},scene:{},camera:{updateMatrixWorld(){}},suppressElapsedWheelCue(){},pendingTrivia:false,pendingCardGameMode:'',window:{addEventListener:(key,fn)=>listeners[key]=fn}};
+ const context={freecam:{stop(){}},diceModeOpen:false,pointsHud,diceHeader:{prepend:h=>events.push(['hud-in',h])},preview:{classList:classList(classes),insertBefore:h=>events.push(['hud-out',h])},result:{hidden:false},updateLiquidPortal:()=>portalStates.push(context.diceModeOpen),focusDrag:{clearHover(){}},lastScenePointer:null,stopRouletteSettlement(){},diceModeVisibility:null,stageModel:objects[0],rouletteRig:objects[1],slotRig:objects[2],exteriorMist:{group:objects[3]},audience:{group:objects[4]},showFX:{group:objects[5]},billboardLayer:{classList:classList(billboardClasses)},hideGameCursor(){},renderer:{render(){events.push(['render',...objects.map(o=>o.visible),skyRoot.visible]);}},scene:{},camera:{updateMatrixWorld(){}},suppressElapsedWheelCue(){},pendingTrivia:false,pendingCardGameMode:'',window:{addEventListener:(key,fn)=>listeners[key]=fn}};
  runInNewContext(src.slice(start,end),context);
  const change=open=>listeners['rg:dice-mode-state']({detail:{open}});
  change(true);assert.deepEqual(objects.map(o=>o.visible),[false,false,false,false,false,false]);assert.equal(skyRoot.visible,true);assert.ok(classes.has('is-dice-mode'));assert.ok(context.result.hidden);

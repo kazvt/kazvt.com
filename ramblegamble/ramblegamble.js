@@ -1,3 +1,4 @@
+import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { createAudienceRenderer } from "./audience-render.mjs?v=show-energy-20261127-v1";
 import { createShowFX } from "./show-fx.mjs?v=show-energy-20261127-v1";
@@ -201,6 +202,7 @@ import {
   const focusOrbit = createFocusOrbit();
   let focusBase = null;
   let focusDrag = null;
+  let freecam = null;
   let lastScenePointer = null;
   let overviewCameraBounds = null;
   let pendingCardGameMode = "";
@@ -1225,7 +1227,7 @@ import {
     camera.updateProjectionMatrix();
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
     renderer.setSize(width, height, false);
-    if (!sceneReady) return;
+    if (!sceneReady || freecam?.active) return;
 
     const pose = getCameraPoseForView(currentView, aspect);
     if (!pose) return;
@@ -1426,6 +1428,7 @@ import {
 
   function transitionToView(nextView, { immediate = false } = {}) {
     hideGameCursor(); lastScenePointer = null;
+    freecam?.stop();
     if (nextView.kind !== "roulette") {stopRouletteSettlement(); showFX?.clearRoulette();}
     const viewChanged=currentView.kind!==nextView.kind||currentView.contestantId!==nextView.contestantId;
     if(viewChanged&&!immediate&&sceneReady){preview.dataset.showArrival=nextView.kind;preview.classList.remove("rg-show-arrival");void preview.offsetWidth;preview.classList.add("rg-show-arrival");if(nextView.kind==="overview")crowdState.react("idle",crowdClock);}
@@ -2084,7 +2087,7 @@ import {
   }
 
   function updatePointer(event) {
-    if (!gameStarted || pauseMenuOpen || diceModeOpen || !sceneReady || event.pointerType === "touch" || !camera || event.buttons || cameraTransition || document.documentElement.hasAttribute("data-rg-host-locked")) {
+    if (freecam?.active || !gameStarted || pauseMenuOpen || diceModeOpen || !sceneReady || event.pointerType === "touch" || !camera || event.buttons || cameraTransition || document.documentElement.hasAttribute("data-rg-host-locked")) {
       hideGameCursor();
       return;
     }
@@ -2199,6 +2202,7 @@ import {
 
   function showPauseMenu() {
     if (pauseMenuOpen) return;
+    freecam?.stop();
     foley.setRoomAmbience(false);
     foley.stopAll();
     focusDrag?.clearHover(); lastScenePointer = null;
@@ -2296,7 +2300,7 @@ import {
   window.addEventListener("rg:slot-action-finish",event=>{if(gameStarted&&!pauseMenuOpen&&!diceModeOpen&&!document.hidden&&currentView.kind==="slot"&&Object.values(event.detail?.totals||{}).some(v=>v>0))crowdState.react("cheer",crowdClock);});
 
   function pointClickAt(clientX, clientY) {
-    if (!gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen || cameraTransition) return;
+    if (freecam?.active || !gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen || cameraTransition) return;
     const rect = preview.getBoundingClientRect();
     if(currentView.kind==="trivia") { if(clientY>=rect.bottom-Math.min(84,Math.max(48,rect.height*.11)))goBack(); return; }
     const interaction = getSceneInteractionAt(clientX, clientY);
@@ -2369,7 +2373,36 @@ import {
     else if (action === "show-trivia") window.dispatchEvent(new Event("rg:show-latest-trivia"));
   }
 
-  const canOrbit = () => gameStarted && sceneReady && !pauseMenuOpen && !diceModeOpen && !cameraTransition
+  const canFreecam = () => gameStarted && sceneReady && camera && !pauseMenuOpen && !diceModeOpen
+    && !document.hidden && !document.querySelector("dialog[open]") && !document.documentElement.hasAttribute("data-rg-host-locked");
+  freecam = bindHoldFreecam({
+    surface: canvas, viewport: preview, eligible: canFreecam,
+    readPose: () => ({ position: {x:camera.position.x,y:camera.position.y,z:camera.position.z},
+      direction: camera.getWorldDirection(new THREE.Vector3()) }),
+    writePose: ({position,direction}) => {
+      camera.position.set(position.x,position.y,position.z);
+      cameraTarget.set(position.x+direction.x,position.y+direction.y,position.z+direction.z);
+      camera.lookAt(cameraTarget); camera.updateMatrixWorld(true);
+    },
+    onStart: () => {
+      cameraTransition = null;
+      focusDrag?.reset(); focusOrbit.reset(currentView.kind); lastScenePointer = null;
+      slotHoverCell = -1; slotHoverLine = null; drawSlotReelDisplay(); hideGameCursor();
+      preview.classList.add("is-freecam");
+    },
+    onStop: () => {
+      preview.classList.remove("is-freecam");
+      focusDrag?.reset(); focusOrbit.reset(currentView.kind); lastScenePointer = null; hideGameCursor();
+      // Restore the current authored activity at the latest viewport aspect.
+      if (camera && sceneReady) {
+        const pose = getCameraPoseForView(currentView, camera.aspect);
+        if (pose) applyCameraPose(pose);
+        updateCardTableProjection(); updateSlotPlacementControlProjection(); updateBillboardProjection();
+      }
+    },
+  });
+  window.addEventListener("rg:open-host-panel", () => freecam.stop());
+  const canOrbit = () => !freecam.active && gameStarted && sceneReady && !pauseMenuOpen && !diceModeOpen && !cameraTransition
     && currentView.kind !== "overview" && !document.hidden && !document.querySelector("dialog[open]") && !document.documentElement.hasAttribute("data-rg-host-locked");
   focusDrag = bindFocusDrag(canvas, {
     enabled: canOrbit, hoverSurface: preview,
@@ -2378,7 +2411,7 @@ import {
     follow: (x,y) => focusOrbit.follow(x,y), hold: () => focusOrbit.hold(),
     onMove: hideGameCursor,
   });
-  const rememberPointer = event => { lastScenePointer = event; updatePointer(event); };
+  const rememberPointer = event => { if (freecam.active) return; lastScenePointer = event; updatePointer(event); };
   canvas.addEventListener("pointerenter", rememberPointer);
   canvas.addEventListener("pointermove", rememberPointer);
   canvas.addEventListener("pointerdown", () => { lastScenePointer = null; });
@@ -2386,10 +2419,10 @@ import {
   canvas.addEventListener("pointercancel", () => { lastScenePointer = null; hideGameCursor(); });
   reducedMotion.addEventListener?.("change", () => { if (reducedMotion.matches) focusDrag.clearHover(); });
   canvas.addEventListener("click", (event) => {
-    if (event.button === 0 && !focusDrag.consumeClick()) pointClickAt(event.clientX, event.clientY);
+    if (!freecam.active && event.button === 0 && !focusDrag.consumeClick()) pointClickAt(event.clientX, event.clientY);
   });
   canvas.addEventListener("contextmenu", (event) => {
-    if (!gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen || cameraTransition || document.documentElement.hasAttribute("data-rg-host-locked")) return;
+    if (freecam.active || !gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen || cameraTransition || document.documentElement.hasAttribute("data-rg-host-locked")) return;
     if(event.button!==2)return;
     const interaction=getSceneInteractionAt(event.clientX,event.clientY);
     const index = resolveSlotContextCell({
@@ -2429,6 +2462,7 @@ import {
   window.addEventListener("rg:dice-mode-state", (event) => {
     const open = Boolean(event.detail?.open);
     if (open === diceModeOpen) return;
+    if (open) freecam?.stop();
     diceModeOpen = open;
     // The modal is in the browser top layer: keep the one live score strip
     // inside it while playing Dice, then restore it to the room on exit.
@@ -2463,6 +2497,7 @@ import {
   });
 
   window.addEventListener("keydown", (event) => {
+    if (freecam.active) return;
     if (event.altKey || event.ctrlKey || event.metaKey) return;
     if (diceModeOpen || document.querySelector("dialog[open]") || (event.target instanceof Element && event.target.closest("dialog[open]"))) return;
     if (event.target instanceof Element && event.target.closest("input, textarea, select, [contenteditable='true']")) return;
@@ -2592,7 +2627,7 @@ import {
   }
 
   function updateSlotPlacementControlProjection() {
-    if (!slotControlLayer || !camera || !sceneReady || preview.clientWidth < 1 || preview.clientHeight < 1) return;
+    if (freecam?.active || !slotControlLayer || !camera || !sceneReady || preview.clientWidth < 1 || preview.clientHeight < 1) return;
     const visible = gameStarted && !pauseMenuOpen && !diceModeOpen && !cameraTransition && currentView.kind === "slot";
     slotControlLayer.hidden = !visible;
     if (!visible || !slotPlacementControls.length) return;
@@ -2649,7 +2684,7 @@ import {
   const cardLayer = document.getElementById("rg-card-games-layer");
   let cardTableBounds = null;
   function updateCardTableProjection() {
-    if (!cardLayer) return;
+    if (!cardLayer || freecam?.active) return;
     const active = gameStarted && !pauseMenuOpen && !diceModeOpen && !cameraTransition && currentView.kind === "card-table" && cardTableModel;
     cardLayer.classList.toggle("is-off-table", !active);
     if (!active || cardLayer.hidden) return;
@@ -2679,7 +2714,8 @@ import {
     foley.setRoomAmbience(roomVisible,diceModeOpen ? .28 : 1,emotion);
     if(audience){audience.group.visible=roomVisible&&!diceModeOpen;audience.update(crowdClock,emotion,reducedMotion.matches);}
     if(diceModeOpen)showFX?.update(time,{active:false});
-    updateCameraTransition(time);
+    freecam.step(time);
+    if (!freecam.active) updateCameraTransition(time);
     if (focusBase && canOrbit()) {
       const {yaw,pitch,moving} = focusOrbit.step(time, reducedMotion.matches);
       const pos = orbitPosition(focusBase, cameraTarget, yaw, pitch);
