@@ -299,7 +299,7 @@ import {
     slotResultToken += 1;
     window.clearTimeout(slotResultTimeout);
     slotResultTimeout = 0;
-    result.hidden = true;
+    hideResult();
   }
 
   function showSlotPayout(totals) {
@@ -568,6 +568,7 @@ import {
     playing = false;
     preview.classList.remove("is-playing");
     drawSlotReelDisplay();
+    showSlotPayout(outcome.totals);
     window.dispatchEvent(new CustomEvent("rg:slot-action-finish", {
       detail: {
         kind: motion.action,
