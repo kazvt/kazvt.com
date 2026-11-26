@@ -12,8 +12,8 @@ import {
   revealAudienceResults,
   submitRoundAnswer,
   buyShopCard,
-} from "./card-games.mjs?v=rg-smeemo-secret-repeat-20261126-v3";
-import { readCardGames, writeCardGames, subscribeCardGames } from "./card-games-store.mjs?v=rg-smeemo-secret-repeat-20261126-v3";
+} from "./card-games.mjs?v=rg-smeemo-secret-repeat-20261126-v4";
+import { readCardGames, writeCardGames, subscribeCardGames } from "./card-games-store.mjs?v=rg-smeemo-secret-repeat-20261126-v4";
 import { readPointScores, subscribePointScores, writePointScores } from "./points-store.mjs?v=points-console-20261120-v1";
 
 (() => {
