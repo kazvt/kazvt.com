@@ -41,6 +41,7 @@
         ></iframe>
       </div>
       <div class="rg-billboard-layer" id="rg-billboard-layer" aria-label="Host and contestant browser-source billboards"></div>
+      <div class="rg-slot-control-layer" id="rg-slot-control-layer" aria-label="Slot machine berry placement controls" hidden></div>
       <div class="rg-game-cursor" id="rg-game-cursor" aria-hidden="true" hidden>
         <img id="rg-game-cursor-image" alt="" draggable="false">
       </div>
@@ -164,7 +165,7 @@
             <div><p class="rg-kicker">MACHINE CONTROLS</p><h2>Slot machine</h2></div>
             <span class="rg-theme-lock">5 COLUMNS / 3 ROWS</span>
           </div>
-          <p class="rg-panel-copy">Your berries cannot be replaced. Opponents and blanks can. Buttons spin one reel; the crank spins all five.</p>
+          <p class="rg-panel-copy">Pick a berry, then use the machine markers to place it. Its buttons spin the reels.</p>
           <div class="rg-slot-layout">
             <div class="rg-slot-config">
               <fieldset class="rg-control-group"><legend>PLAY AS</legend>
@@ -174,13 +175,6 @@
                   <button class="rg-berry-choice" type="button" data-berry="erinberry" aria-label="Erinberry" aria-pressed="false"><img class="rg-berry-choice-image" src="/ramblegamble/assets/berries/erinberry.png" alt="" aria-hidden="true" draggable="false"></button>
                 </div>
               </fieldset>
-              <fieldset class="rg-control-group"><legend>PLACE BY</legend>
-                <div class="rg-placement-picker" role="group" aria-label="Choose grid placement mode">
-                  <button class="rg-placement-choice" type="button" data-placement="column" aria-pressed="true">COLUMN</button>
-                  <button class="rg-placement-choice" type="button" data-placement="row" aria-pressed="false">ROW</button>
-                </div>
-              </fieldset>
-              <p class="rg-slot-help" id="rg-slot-help">Choose a berry, then click a line on the machine's screen.</p>
               <button class="rg-secondary-button" id="rg-slot-clear" type="button">RESET BOARD</button>
             </div>
             <div class="rg-slot-board-wrap">
