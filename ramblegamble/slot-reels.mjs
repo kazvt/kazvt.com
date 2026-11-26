@@ -6,8 +6,9 @@ export const SLOT_REEL_SYMBOLS = Object.freeze([
   "erinberry",
   "kazberry",
 ]);
+export const SLOT_REEL_WILDCARD = "star";
 
-const ALLOWED_SYMBOLS = new Set(SLOT_REEL_SYMBOLS);
+const ALLOWED_SYMBOLS = new Set([...SLOT_REEL_SYMBOLS, SLOT_REEL_WILDCARD]);
 const DISPLAY_TEXTURE = Object.freeze({
   width: 128,
   panelLeftX: -5.1,
@@ -75,6 +76,18 @@ function randomSymbol(random) {
   )];
 }
 
+function chooseTravelRows(column, random, previousSpinRows, reducedMotion) {
+  const minimum = reducedMotion ? 2 : 12;
+  const maximum = reducedMotion ? 5 : 32;
+  const range = maximum - minimum + 1;
+  const previous = Number(previousSpinRows?.[column]);
+  const hasPrevious = Number.isInteger(previous) && previous >= minimum && previous <= maximum;
+  const available = range - Number(hasPrevious);
+  let offset = Math.floor(clamp01(Number(random()) || 0) * available);
+  if (hasPrevious && offset >= previous - minimum) offset += 1;
+  return minimum + offset;
+}
+
 export function createSlotReelMotion(grid, columns, {
   targetGrid = grid,
   startedAt = 0,
@@ -82,6 +95,7 @@ export function createSlotReelMotion(grid, columns, {
   stagger = 115,
   random = Math.random,
   reducedMotion = false,
+  previousSpinRows = {},
 } = {}) {
   const currentGrid = normalizeSlotGrid(grid);
   const settledGrid = normalizeSlotGrid(targetGrid);
@@ -94,19 +108,20 @@ export function createSlotReelMotion(grid, columns, {
     startedAt: Number(startedAt) || 0,
     grid: currentGrid,
     columns: activeColumns.map((column, order) => {
-      const randomRows = reducedMotion ? 5 : 18 + Math.floor(clamp01(Number(random()) || 0) * 9);
+      const travelRows = chooseTravelRows(column, random, previousSpinRows, reducedMotion);
       const start = Array.from({ length: SLOT_REEL_ROWS }, (_, row) => currentGrid[row * SLOT_REEL_COLUMNS + column]);
-      const stop = Array.from({ length: randomRows }, () => randomSymbol(random));
+      const stop = Array.from({ length: travelRows }, () => randomSymbol(random));
       const target = start.map((_, row) => settledGrid[row * SLOT_REEL_COLUMNS + column]);
       return {
         column,
         delay: order * safeStagger,
         duration: reducedMotion ? Math.min(safeDuration, 360) : safeDuration,
+        travelRows,
         start,
         stop,
         target,
         strip: [...start, ...stop, ...target],
-        targetOffset: SLOT_REEL_ROWS + stop.length,
+        targetOffset: SLOT_REEL_ROWS + travelRows,
       };
     }),
     targetGrid: settledGrid,
