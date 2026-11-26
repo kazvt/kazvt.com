@@ -63,3 +63,31 @@
 
 /* The generic image thumbnail height must not crop the picture under the placement canvas. */
 .rg-live-artboard > img{max-height:none;max-width:none;}
+
+/* Image answers use the space that remains after the prompt and controls.
+   The grid has an equal share per row and can scroll on short/narrow screens. */
+.rg-live-stage-content:is([data-kind="choice-image"],[data-kind="choice-image-wide"],[data-kind="image-grid"]) > .rg-live-body {
+  flex: 1 1 0; min-height: 0; width: 100%; overflow: auto;
+}
+.rg-live-stage-content:is([data-kind="choice-image"],[data-kind="choice-image-wide"],[data-kind="image-grid"]) > .rg-live-body > .rg-live-grid {
+  flex: none; height: 100%; grid-auto-rows: minmax(86px, 1fr);
+}
+.rg-live-stage-content:is([data-kind="choice-image"],[data-kind="choice-image-wide"],[data-kind="image-grid"]) .rg-live-grid > .rg-live-tile {
+  min-width: 0; min-height: 0; justify-content: center; overflow: auto;
+}
+.rg-live-stage-content:is([data-kind="choice-image"],[data-kind="choice-image-wide"],[data-kind="image-grid"]) .rg-live-tile > .rg-live-item:has(> img) {
+  height: 100%; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; justify-items: center; align-items: center;
+}
+.rg-live-stage-content:is([data-kind="choice-image"],[data-kind="choice-image-wide"],[data-kind="image-grid"]) .rg-live-item > .rg-live-image {
+  width: auto; height: 100%; min-height: 0; max-width: 100%; max-height: none; aspect-ratio: auto; object-fit: contain;
+}
+.rg-live-stage-content:is([data-kind="choice-image"],[data-kind="choice-image-wide"],[data-kind="image-grid"]) .rg-live-item > span {max-width:100%; overflow-wrap:anywhere;}
+/* Private player pages scroll normally; give each answer more space without
+   imposing the fixed-height stage's flex layout on the page. */
+#trivia-player-content:is([data-kind="choice-image"],[data-kind="choice-image-wide"],[data-kind="image-grid"]) .rg-live-grid {
+  grid-template-columns: repeat(var(--rg-columns,3), minmax(0,1fr));
+}
+#trivia-player-content:is([data-kind="choice-image"],[data-kind="choice-image-wide"],[data-kind="image-grid"]) .rg-live-grid .rg-live-image {
+  height: clamp(140px, 30vh, 300px); width: auto; max-height: none; max-width: 100%; aspect-ratio: auto; object-fit: contain;
+}
+@media(max-width:600px){#trivia-player-content:is([data-kind="choice-image"],[data-kind="choice-image-wide"],[data-kind="image-grid"]) .rg-live-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}

@@ -581,3 +581,18 @@
 .rg-compose-type > span { overflow-wrap: anywhere; }
 
 .rg-compose-type > img { order: -1; }
+
+/* Give image answers a natural aspect ratio and taller preview/presentation
+   area. The editor's own scrolling keeps long questions and controls reachable. */
+.rg-trivia-screen:is([data-mode="choice-image"],[data-mode="choice-image-wide"]) .rg-answer-option img {
+  width: auto; height: clamp(135px, 25vh, 290px); max-width: 100%; max-height: none; aspect-ratio: auto; object-fit: contain;
+}
+.rg-trivia-screen[data-mode="image-grid"] #rg-stage-items .rg-answer-option {
+  width: 100%; aspect-ratio: auto; grid-template-rows: auto auto; justify-items: center; overflow: visible;
+}
+.rg-trivia-screen[data-mode="image-grid"] #rg-stage-items .rg-answer-option img {
+  width: auto; height: clamp(100px, 22vh, 250px); max-width: 100%; max-height: none; aspect-ratio: auto; object-fit: contain;
+}
+.rg-console.is-presenting .rg-trivia-screen:is([data-mode="choice-image"],[data-mode="choice-image-wide"]) .rg-stage-items {width: min(100%,1600px);}
+.rg-console.is-presenting .rg-trivia-screen:is([data-mode="choice-image"],[data-mode="choice-image-wide"]) .rg-answer-option img {height:clamp(145px,30vh,360px);}
+.rg-trivia-screen:is([data-mode="choice-image"],[data-mode="choice-image-wide"],[data-mode="image-grid"]) .rg-answer-option > span {max-width:100%;white-space:normal;overflow-wrap:anywhere;}

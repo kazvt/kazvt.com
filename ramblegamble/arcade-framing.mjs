@@ -65,18 +65,17 @@ export function fitSlotColumnArrow({ x, size, screenBottom, spinButtons, index }
   return { x, y: (top + bottom) / 2, size: low };
 }
 
-// Close-ups frame the visible screen-facing character, not its generous chair
-// hit volume. The DOM panel uses centre-depth width and projected vertical
-// endpoints, so fit those exact dimensions at every supported pitch extreme.
+// Fit the upright, partially camera-facing character quad at the worst
+// supported orbit angle. Include horizontal perspective depth as well as pitch.
 export function fitCharacterCloseup({worldWidth, worldHeight, aspect, fov = 42, near = .1,
-  elevation = .12, pitchCap = .064}) {
+  elevation = .12, pitchCap = .064, relativeYaw = 0}) {
   const tanY = Math.tan(fov * Math.PI / 360), tanX = tanY * Math.max(.01, aspect);
-  const halfHeight = worldHeight / 2;
+  const halfHeight = worldHeight / 2, halfWidth = worldWidth / 2;
   const basePitch = Math.asin(elevation);
-  // A conservative bound valid for the entire continuous orbit, including
-  // intermediate angles: projected height numerator <= halfHeight; its
-  // closest endpoint depth >= distance - max vertical offset.
   const maxSin = Math.max(Math.abs(Math.sin(basePitch-pitchCap)), Math.abs(Math.sin(basePitch+pitchCap)));
-  const depth = halfHeight * maxSin;
-  return Math.max(worldWidth / (2*tanX*.76), halfHeight / (tanY*.70) + depth, near + depth + .08);
+  const horizontalDepth = halfWidth * Math.sin(Math.min(Math.PI/2,Math.abs(relativeYaw)));
+  const depth = halfHeight * maxSin + horizontalDepth;
+  const vertical = halfHeight + horizontalDepth * maxSin;
+  return Math.max(halfWidth / (tanX*.76) + depth,
+    vertical / (tanY*.74) + depth, near + depth + .08);
 }

@@ -1,5 +1,5 @@
 // Render-only world accents. No physics, point calculation, hit targets or camera pose changes.
-export function createShowFX(THREE,scene,{wheel, wheelPivot,ball,slot,host,contestants,door}) {
+export function createShowFX(THREE,scene,{wheel, wheelPivot,ball,door}) {
   const group=new THREE.Group();group.name='rg-show-fx';scene.add(group);
   const basic=(color,opacity=1)=>new THREE.MeshBasicMaterial({color,transparent:true,opacity,depthWrite:false,toneMapped:false,fog:false,side:THREE.DoubleSide});
   const ring=(radius,width,color)=>{const m=new THREE.Mesh(new THREE.RingGeometry(radius-width,radius,48),basic(color));m.rotation.x=-Math.PI/2;group.add(m);m.visible=false;return m;};
@@ -19,11 +19,6 @@ export function createShowFX(THREE,scene,{wheel, wheelPivot,ball,slot,host,conte
   const trailPoints=[];const direction=new THREE.Vector3(),axis=new THREE.Vector3(0,0,1);let lastTrail=-Infinity,impactAt=-Infinity,settleAt=-Infinity;const impactPos=new THREE.Vector3(),settlePos=new THREE.Vector3(),temp=new THREE.Vector3();
   // Draw a gold/pink pocket burst at the actual ball, not the computed winner index.
   function impact(time,settled=false){if(!ball)return;ball.getWorldPosition(temp);impactPos.copy(temp);impactAt=time;if(settled){settleAt=time;settlePos.copy(temp);trailPoints.length=0;}}
-  const podiums=[host,...contestants].filter(Boolean).map((entry,i)=>{
-    const bounds=new THREE.Box3().setFromObject(entry.chair);const p=bounds.getCenter(new THREE.Vector3());p.y=bounds.max.y+.025;
-    const r=ring(Math.max(.43,(bounds.max.x-bounds.min.x)*.6),.045,[0xffdd6b,0x6dff9b,0xb39cff,0xffdb59][i%4]);ringAt(r,p);return {r,entry};
-  });
-  const slotBounds=new THREE.Box3().setFromObject(slot);
   // Each set is one instanced draw call with independent chase colors, instead of a mesh per bulb.
   function lights(geometry,positions,colors,opacity){
     const mesh=new THREE.InstancedMesh(geometry,basic(0xffffff,opacity),positions.length);const color=new THREE.Color();
@@ -36,15 +31,9 @@ export function createShowFX(THREE,scene,{wheel, wheelPivot,ball,slot,host,conte
     for(let i=0;i<count;i++){const intensity=reduced?.72:base+(1-base)*(.5+.5*Math.sin(time*rate-i*.56));mesh.setColorAt(i,color.setHex(colors[i%colors.length]).multiplyScalar(intensity));}
     mesh.instanceColor.needsUpdate=true;
   }
-  const cabinetPositions=Array.from({length:24},(_,i)=>[THREE.MathUtils.lerp(slotBounds.min.x+.08,slotBounds.max.x-.08,i/23),slotBounds.max.y-.075,slotBounds.max.z+.02]);
-  const bulbs=lights(new THREE.BoxGeometry(.075,.075,.035),cabinetPositions,[0xff80cf,0xffe67d],.83);
-  const marquee=lights(new THREE.BoxGeometry(.095,.055,.028),Array.from({length:24},(_,i)=>[5.94+i*.198,2.72,-4.84]),[0xffe67d,0xf8b0ed],.85);
   const portal=lights(new THREE.BoxGeometry(.035,.075,.075),Array.from({length:36},(_,i)=>{const a=i/36*Math.PI*2;return [door.wallX-.07,(door.minY+door.maxY)/2+Math.sin(a)*(door.maxY-door.minY)*.48,(door.minZ+door.maxZ)/2+Math.cos(a)*(door.maxZ-door.minZ)*.49];}),[0xffffff,0xcda8ff],.5);
   // Closed cubes should blend once, rather than layering their back faces.
   portal.mesh.material.side=THREE.FrontSide;
-  const stageLights=lights(new THREE.BoxGeometry(.14,.055,.055),Array.from({length:26},(_,i)=>[.2+i*.58,.045,.25]),[0xf38bdb,0xffdf71],.65);
-  // Unlit authored materials cannot receive real spotlights; restrained floor pools simulate their visible sweep.
-  const pools=[0xb199ff,0xff9dd5].map(color=>{const m=new THREE.Mesh(new THREE.CircleGeometry(.72,40),basic(color,.12));m.rotation.x=-Math.PI/2;group.add(m);return m;});
   function clearRoulette(){if(wheelPivot)wheelPivot.position.y=wheelRestY;trailPoints.length=0;trail.visible=pocket.visible=wave.visible=sparks.visible=halo.visible=outer.visible=beam.visible=winnerEcho.visible=false;impactAt=settleAt=-Infinity;lastTrail=-Infinity;}
   function update(time,{active=true,spinning=false,view={},reduced=false}={}){
     group.visible=active;if(!active){clearRoulette();return;}
@@ -67,9 +56,8 @@ export function createShowFX(THREE,scene,{wheel, wheelPivot,ball,slot,host,conte
         ringAt(winnerEcho,settlePos);winnerEcho.position.y+=.017;winnerEcho.scale.setScalar(1+(since%700)/700);winnerEcho.material.opacity=.68*(1-since/2200)*(1-(since%700)/700);
       }
     }
-    chase(bulbs,time,reduced,.0042);chase(marquee,time,reduced,.005);chase(stageLights,time,reduced,.0023);chase(portal,time,reduced,.005,view.kind==='dice-door'?.35:.72);
-    pools.forEach((m,i)=>{m.position.set(4.1+i*4+Math.sin(reduced?i:time/1700+i)*1.15,.035,-.55+Math.cos(reduced?i:time/2000+i)*.45);m.scale.set(1.15,.75,1);m.material.opacity=.08;});
-    for(const {r,entry} of podiums){r.visible=view.kind==='host'&&entry===host||view.kind==='contestant'&&entry.id===view.contestantId||view.kind==='contestants'&&entry!==host;r.material.opacity=reduced?.55:.48+.24*Math.sin(time/420);r.scale.setScalar(reduced?1:1+.045*Math.sin(time/420));}
+    // Only the VIP oval remains as decorative scene lighting.
+    chase(portal,time,reduced,.005,view.kind==='dice-door'?.35:.72);
   }
   function dispose(){clearRoulette();const geometry=new Set(),materials=new Set();group.traverse(m=>{if(m.isInstancedMesh)m.dispose?.();if(m.geometry)geometry.add(m.geometry);if(m.material)materials.add(m.material);});for(const g of geometry)g.dispose();for(const m of materials)m.dispose();scene.remove(group);}
   return {group,impact,clearRoulette,update,dispose};

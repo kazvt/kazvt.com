@@ -63,6 +63,8 @@ test('portal squares stay at half opacity across views and chase animation',()=>
   const fx=createShowFX(THREE,new Group(),{wheel:{},slot:{},contestants:[],door:{wallX:1,minY:0,maxY:2,minZ:0,maxZ:1}});
   const portal=fx.group.children.find(m=>m instanceof InstancedMesh&&m.count===36);
   assert.ok(portal);
+  // Decorative light instances other than the VIP oval must not return.
+  assert.equal(fx.group.children.filter(m=>m instanceof InstancedMesh&&m!==portal&&m.visible).length,0);
   const initial=portal.colors.slice();
   for(const kind of ['overview','dice-door','slot'])for(const reduced of [false,true])for(const time of [0,250,1000]){
     fx.update(time,{view:{kind},reduced});

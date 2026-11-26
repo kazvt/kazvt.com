@@ -127,13 +127,15 @@ test("focused slot decorative body allows navigation bands without stealing inte
 
 import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
+import { pointInCharacterQuad } from './character-billboards.mjs';
 const roomSource=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
 const roomSection=(a,b)=>roomSource.slice(roomSource.indexOf(a),roomSource.indexOf(b,roomSource.indexOf(a)));
 test('visible character artwork is directly clickable, respects overlap order, and never hijacks dedicated machine views',()=>{
  const rect={left:100,right:300,top:100,bottom:300,width:200,height:200};
- const panel=(visibility='visible')=>({style:{visibility},getBoundingClientRect:()=>rect});
- const host={id:'lillie-host',panel:panel()},faroe={id:'faroe',panel:panel()},erin={id:'erin',panel:panel('hidden')};
- const ctx={billboards:[faroe,erin,host],hostBillboard:host,diceModeOpen:false,pauseMenuOpen:false,currentView:{kind:'overview'},billboardLayer:{classList:{contains:()=>false}}};
+ const panel=(visibility='visible',zIndex=1)=>({style:{visibility,zIndex}});
+ const projectedQuad={corners:[{x:100,y:100},{x:300,y:100},{x:300,y:300},{x:100,y:300}]};
+ const host={id:'lillie-host',panel:panel('visible',3),projectedQuad},faroe={id:'faroe',panel:panel(),projectedQuad},erin={id:'erin',panel:panel('hidden'),projectedQuad};
+ const ctx={billboards:[faroe,erin,host],hostBillboard:host,diceModeOpen:false,pauseMenuOpen:false,currentView:{kind:'overview'},preview:{clientWidth:400,clientHeight:400},pointInCharacterQuad,billboardLayer:{getBoundingClientRect:()=>({left:0,top:0,width:400,height:400}),classList:{contains:()=>false}}};
  runInNewContext(roomSection('  function getBillboardAtScreen(', '  function getSeatAtScreen(')+'\nthis.pick=getBillboardAtScreen;',ctx);
  assert.equal(ctx.pick(180,180).machine,'host');assert.equal(ctx.pick(90,180),null);
  host.panel.style.visibility='hidden';assert.equal(ctx.pick(180,180).contestantId,'faroe');

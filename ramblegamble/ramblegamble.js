@@ -1,11 +1,12 @@
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { createAudienceRenderer } from "./audience-render.mjs?v=half-opacity-20261127-v1";
-import { createShowFX } from "./show-fx.mjs?v=half-opacity-20261127-v1";
+import { createShowFX } from "./show-fx.mjs?v=standing-characters-20261127-v1";
+import { CHARACTER_SOURCE_SIZE, CHARACTER_YAW_LIMIT, characterYaw, standingCharacterPose, projectCharacterQuad, pointInCharacterQuad } from "./character-billboards.mjs?v=standing-characters-20261127-v1";
 import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { createExteriorMist } from "./exterior-mist.mjs?v=exterior-mist-20261126-v1";
-import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=vip-focus-20261127-v1";
+import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=standing-characters-20261127-v1";
 import { foley } from "./game-foley.mjs?v=show-energy-20261127-v1";
 import {
   resolvePointClickAction,
@@ -21,6 +22,7 @@ import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs
 import { readPointScores, subscribePointScores, writePointScores, withPointScoresLock } from "./points-store.mjs?v=card-score-sync-20261127-v1";
 import {
   createLiquidPortal,
+  createCssProjectiveQuad,
   isLiquidPortalActive,
 } from "./liquid-portal.mjs?v=vip-opacity-20261126-v1";
 import {
@@ -1256,7 +1258,11 @@ import {
       const horizontal = Math.sqrt(1-elevation*elevation);
       const direction = new THREE.Vector3(Math.sin(yaw)*horizontal, elevation, Math.cos(yaw)*horizontal);
       const distance = fitCharacterCloseup({worldWidth: character.worldWidth, worldHeight: character.worldHeight,
-        aspect, fov: camera.fov, near: camera.near, elevation, pitchCap: focusLimits(view.kind)[1]});
+        aspect, fov: camera.fov, near: camera.near, elevation, pitchCap: focusLimits(view.kind)[1],
+        relativeYaw: Math.max(...[-1,1].map(sign => {
+          const eyeYaw = yaw + sign * focusLimits(view.kind)[0];
+          return Math.abs(eyeYaw-characterYaw(Math.sin(eyeYaw),Math.cos(eyeYaw)));
+        }))});
       return {target, position: target.clone().addScaledVector(direction, distance)};
     }
     const bounds = view.kind === "slot" && slotFocusPoints.length
@@ -1414,8 +1420,9 @@ import {
     const halfWidth = contestant.worldWidth / 2;
     const halfHeight = contestant.worldHeight / 2;
     const { x, y, z } = contestant.anchor;
-    bounds.expandByPoint(new THREE.Vector3(x - halfWidth, y - halfHeight, z));
-    bounds.expandByPoint(new THREE.Vector3(x + halfWidth, y + halfHeight, z));
+    const halfDepth = halfWidth * Math.sin(CHARACTER_YAW_LIMIT);
+    bounds.expandByPoint(new THREE.Vector3(x - halfWidth, y - halfHeight, z - halfDepth));
+    bounds.expandByPoint(new THREE.Vector3(x + halfWidth, y + halfHeight, z + halfDepth));
   }
 
   function applyCameraPose(pose) {
@@ -1735,6 +1742,8 @@ import {
     const panel = document.createElement("div");
     panel.className = source.source ? "rg-billboard rg-billboard-live" : "rg-billboard";
     panel.dataset[kind] = source.id;
+    panel.style.width = panel.style.height = `${CHARACTER_SOURCE_SIZE}px`;
+    panel.style.visibility = "hidden";
     panel.setAttribute("aria-label", `${source.label} browser-source billboard`);
 
     if (source.source) {
@@ -1758,68 +1767,6 @@ import {
 
     billboardLayer.append(panel);
     return panel;
-  }
-
-  function findSeatSurfaceCenterLocal(chair) {
-    const position = chair.geometry?.getAttribute("position");
-    if (!position) return null;
-
-    const index = chair.geometry.index;
-    const vertexCount = index ? index.count : position.count;
-    const planes = new Map();
-    for (let offset = 0; offset + 2 < vertexCount; offset += 3) {
-      const aIndex = index ? index.getX(offset) : offset;
-      const bIndex = index ? index.getX(offset + 1) : offset + 1;
-      const cIndex = index ? index.getX(offset + 2) : offset + 2;
-      const ax = position.getX(aIndex);
-      const ay = position.getY(aIndex);
-      const az = position.getZ(aIndex);
-      const bx = position.getX(bIndex);
-      const by = position.getY(bIndex);
-      const bz = position.getZ(bIndex);
-      const cx = position.getX(cIndex);
-      const cy = position.getY(cIndex);
-      const cz = position.getZ(cIndex);
-      if (Math.max(ay, by, cy) - Math.min(ay, by, cy) > 1e-4) continue;
-
-      // The signed Y component of the triangle normal distinguishes the top
-      // of the seat from its underside. Group coplanar top faces, then use the
-      // largest upward-facing surface (the seat, not the arms or backrest).
-      const upwardArea = ((bz - az) * (cx - ax) - (bx - ax) * (cz - az)) / 2;
-      if (upwardArea <= 1e-6) continue;
-      const y = (ay + by + cy) / 3;
-      const planeKey = Math.round(y * 1000);
-      let plane = planes.get(planeKey);
-      if (!plane) {
-        plane = { area: 0, x: 0, y: 0, z: 0 };
-        planes.set(planeKey, plane);
-      }
-      plane.area += upwardArea;
-      plane.x += ((ax + bx + cx) / 3) * upwardArea;
-      plane.y += y * upwardArea;
-      plane.z += ((az + bz + cz) / 3) * upwardArea;
-    }
-
-    let seat = null;
-    for (const plane of planes.values()) {
-      if (!seat || plane.area > seat.area) seat = plane;
-    }
-    if (!seat) return null;
-    return new THREE.Vector3(
-      seat.x / seat.area,
-      seat.y / seat.area,
-      seat.z / seat.area,
-    );
-  }
-
-  function getBillboardSeatAnchor(chair, worldHeight, fallbackSeatCenter) {
-    chair.updateWorldMatrix(true, false);
-    const seatCenter = findSeatSurfaceCenterLocal(chair) || fallbackSeatCenter;
-    const anchor = chair.localToWorld(seatCenter.clone());
-    // Billboards remain upright in world space; their bottom edge lands on
-    // the horizontal seat plane rather than floating above the chair back.
-    anchor.y += worldHeight / 2;
-    return anchor;
   }
 
   function setupContestants() {
@@ -1861,14 +1808,9 @@ import {
       scene.add(hitProxy);
       contestantTargets.push(hitProxy);
 
-      const worldWidth = 1.04;
-      const worldHeight = worldWidth;
-      const anchor = getBillboardSeatAnchor(
-        chair,
-        worldHeight,
-        // Fallback seat-plane centroid measured from the supplied stage GLTF.
-        new THREE.Vector3(0, 0.099, 0.0263),
-      );
+      const pose = standingCharacterPose(chairBounds);
+      const { worldWidth, worldHeight } = pose;
+      const anchor = new THREE.Vector3(pose.anchor.x, pose.anchor.y, pose.anchor.z);
       const panel = createBillboardPanel(source, "contestant");
 
       return {
@@ -1901,8 +1843,8 @@ import {
     });
     if (!chair || !highestBounds) return;
 
-    const worldWidth = 1.04;
-    const worldHeight = worldWidth;
+    const pose = standingCharacterPose(highestBounds, true);
+    const { worldWidth, worldHeight } = pose;
     const chairCenter = highestBounds.getCenter(new THREE.Vector3());
     const chairSize = highestBounds.getSize(new THREE.Vector3());
     const hitSize = new THREE.Vector3(
@@ -1922,12 +1864,7 @@ import {
     scene.add(hitProxy);
     hostTargets.push(hitProxy);
 
-    const anchor = getBillboardSeatAnchor(
-      chair,
-      worldHeight,
-      // Fallback seat-plane centroid measured from the supplied stage GLTF.
-      new THREE.Vector3(-0.0306, 0.055, -0.0004),
-    );
+    const anchor = new THREE.Vector3(pose.anchor.x, pose.anchor.y, pose.anchor.z);
     const panel = createBillboardPanel(HOST_BILLBOARD_SOURCE, "host");
     hostBillboard = {
       ...HOST_BILLBOARD_SOURCE,
@@ -2038,18 +1975,24 @@ import {
   }
 
   function getBillboardAtScreen(clientX, clientY) {
-    // The rect matches the most recently displayed frame (including CSS
-    // translation and responsive width cap); iframe content is cross-origin.
     if (diceModeOpen || pauseMenuOpen || !["overview","host","contestant","contestants"].includes(currentView.kind)
       || billboardLayer.classList.contains("rg-billboards-fading")) return null;
-    // Later DOM panels are painted on top if two rectangles overlap.
-    for (const entry of [...billboards].reverse()) {
-      if (entry.panel.style.visibility !== "visible") continue;
-      const r = entry.panel.getBoundingClientRect();
-      if (r.width <= 0 || r.height <= 0 || clientX < r.left || clientX > r.right || clientY < r.top || clientY > r.bottom) continue;
-      return entry === hostBillboard ? {machine:"host",hostId:entry.id} : {machine:"contestant",contestantId:entry.id};
-    }
-    return null;
+    const rect = billboardLayer.getBoundingClientRect();
+    if (!rect.width || !rect.height) return null;
+    const x = (clientX-rect.left)*preview.clientWidth/rect.width;
+    const y = (clientY-rect.top)*preview.clientHeight/rect.height;
+    // Use the actual projected quadrilateral, not an oversized rectangle.
+    // Where transparent browser-source panels overlap, prefer the closest
+    // projected centre; break ties with the actual paint order.
+    const hits = billboards.filter(entry=>entry.panel.style.visibility==="visible"
+      && pointInCharacterQuad(entry.projectedQuad?.corners,x,y)).map(entry=>{
+      const corners=entry.projectedQuad.corners;
+      const cx=corners.reduce((sum,p)=>sum+p.x,0)/4, cy=corners.reduce((sum,p)=>sum+p.y,0)/4;
+      return {entry,distance:Math.hypot(x-cx,y-cy)};
+    }).sort((a,b)=>a.distance-b.distance || Number(b.entry.panel.style.zIndex)-Number(a.entry.panel.style.zIndex));
+    const entry = hits[0]?.entry;
+    if (!entry) return null;
+    return entry === hostBillboard ? {machine:"host",hostId:entry.id} : {machine:"contestant",contestantId:entry.id};
   }
 
   function getSeatAtScreen(clientX, clientY, canvasBounds) {
@@ -2585,45 +2528,30 @@ import {
   function updateBillboardProjection() {
     if (!camera || !billboardLayer || preview.clientWidth < 1 || preview.clientHeight < 1) return;
     camera.updateMatrixWorld(true);
-    const width = preview.clientWidth;
-    const height = preview.clientHeight;
-    const pixelsPerWorldUnitAtOne = height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
-    const worldUp = new THREE.Vector3(0, 1, 0);
-
+    const viewport = {width: preview.clientWidth, height: preview.clientHeight};
+    const visible = [];
+    const project = p => {
+      const v = new THREE.Vector3(p.x,p.y,p.z);
+      const depth = -camera.worldToLocal(v.clone()).z;
+      const ndc = v.project(camera);
+      return {x:ndc.x,y:ndc.y,z:ndc.z,depth};
+    };
     for (const billboard of billboards) {
-      const cameraSpace = camera.worldToLocal(billboard.anchor.clone());
-      const depth = -cameraSpace.z;
-      const projected = billboard.anchor.clone().project(camera);
-      const halfHeight = billboard.worldHeight / 2;
-      const projectedTop = billboard.anchor.clone().addScaledVector(worldUp, halfHeight).project(camera);
-      const projectedBottom = billboard.anchor.clone().addScaledVector(worldUp, -halfHeight).project(camera);
-      const visible = depth > camera.near
-        && projected.z >= -1 && projected.z <= 1
-        && projectedTop.z >= -1 && projectedTop.z <= 1
-        && projectedBottom.z >= -1 && projectedBottom.z <= 1;
-      if (!visible) {
+      const quad = projectCharacterQuad(billboard,camera.position,project,viewport,camera.near);
+      const transform = quad && createCssProjectiveQuad(CHARACTER_SOURCE_SIZE,CHARACTER_SOURCE_SIZE,quad.corners);
+      billboard.projectedQuad = transform ? quad : null;
+      if (!transform) {
         billboard.panel.style.visibility = "hidden";
         continue;
       }
-
-      const x = (projected.x + 1) * 0.5 * width;
-      const top = (1 - projectedTop.y) * 0.5 * height;
-      const bottom = (1 - projectedBottom.y) * 0.5 * height;
-      const y = (top + bottom) / 2;
-      const rawWidth = billboard.worldWidth * pixelsPerWorldUnitAtOne / depth;
-      const panelWidth = Math.min(rawWidth, width * 0.78);
-      const panelHeight = Math.abs(bottom - top);
-      if (panelHeight < 1) {
-        billboard.panel.style.visibility = "hidden";
-        continue;
-      }
-      billboard.panel.style.left = `${x}px`;
-      billboard.panel.style.top = `${y}px`;
-      billboard.panel.style.width = `${panelWidth}px`;
-      billboard.panel.style.height = `${panelHeight}px`;
+      billboard.panel.style.transform = transform;
       billboard.panel.style.visibility = "visible";
-      billboard.panel.classList.toggle("rg-character-focused", currentView.kind==="host"&&billboard===hostBillboard||currentView.kind==="contestant"&&billboard.id===currentView.contestantId);
+      visible.push(billboard);
     }
+    // DOM overlays have no shared WebGL depth buffer. Paint farther character
+    // planes first, so overlapping live sources remain correctly ordered.
+    visible.sort((a,b)=>b.projectedQuad.depth-a.projectedQuad.depth);
+    visible.forEach((entry,index)=>{entry.panel.style.zIndex=String(index+1);});
   }
 
   function updateSlotPlacementControlProjection() {
@@ -2897,7 +2825,7 @@ import {
       captureSlotFocusPoints();
       try { audience=createAudienceRenderer(THREE,scene); audience.group.visible=!pauseMenuOpen; }
       catch(error){scene.getObjectByName("rg-audience")?.removeFromParent(); console.warn("Audience presentation unavailable",error);}
-      try { showFX=createShowFX(THREE,scene,{wheel:rouletteModel,wheelPivot,ball:ballOrbitObject,slot:slotsModel,host:hostBillboard,contestants,door:DICE_DOOR_OPENING}); showFX.group.visible=!pauseMenuOpen; }
+      try { showFX=createShowFX(THREE,scene,{wheel:rouletteModel,wheelPivot,ball:ballOrbitObject,door:DICE_DOOR_OPENING}); showFX.group.visible=!pauseMenuOpen; }
       catch(error){scene.getObjectByName("rg-show-fx")?.removeFromParent(); console.warn("Show effects unavailable",error);}
       applyTheme();
       sceneReady = true;
