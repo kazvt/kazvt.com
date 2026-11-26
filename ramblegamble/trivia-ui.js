@@ -1,9 +1,9 @@
 import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, newTriviaId, updateTrivia, activeRoomRound, publicMedia } from "./live-trivia.mjs";
-import { renderLiveQuestion, renderTriviaResponses } from "./trivia-live-view.mjs";
+import { renderLiveQuestion, renderTriviaResponses } from "./trivia-live-view.mjs?v=expanded-foley-20261126-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
 import { readCardGames, subscribeCardGames } from "./card-games-store.mjs?v=live-trivia-20261126-v1";
 import { removeSlotSymbol } from "./slot-game.mjs?v=wildcard-shared-20261126-v1";
-import { foley } from "./game-foley.mjs?v=slot-foley-20261126-v3";
+import { foley } from "./game-foley.mjs?v=expanded-foley-20261126-v1";
 import {
   MODE_NAMES,
   ROUND_IDS,
@@ -96,7 +96,6 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
   let drawingData = new Map();
   let numberGuessState = { key: "", guesses: [], solved: false };
   let changeableNumberState = { key: "", solved: false };
-  let audioContext = null;
   let lastWrongAt = 0;
   let drafts = loadDrafts();
   let questionBank = readSessionQuestionBank();
@@ -789,6 +788,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
       : tabs.findIndex((tab) => tab.id === "rg-tab-" + requestedTab);
     setTab(tabIndex >= 0 ? tabIndex : activeTab);
     if (!dialog.open) {
+      foley.play("open");
       if (activeTab === 3 && typeof dialog.show === "function") dialog.show();
       else if (typeof dialog.showModal === "function") dialog.showModal();
       else dialog.setAttribute("open", "");
@@ -797,6 +797,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
   }
 
   function closeConsole() {
+    if (dialog.open) foley.play("close");
     setPresentation(false);
     dialog.classList.remove("is-card-host");
     if (typeof dialog.close === "function" && dialog.open) dialog.close();
@@ -913,6 +914,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
   });
   $("#rg-slot-clear").addEventListener("click", () => {
     if (slotBoardBusy) return;
+    if (slotGrid.some(Boolean)) foley.play("erase");
     slotGrid = Array(gridSize).fill(null);
     persistGrid();
     renderGrid();
@@ -1429,33 +1431,14 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
       interfaceRoot.classList.add("is-error");
       playErrorSound();
       window.setTimeout(() => interfaceRoot.classList.remove("is-error"), 360);
-    } else if (state === "correct") interfaceRoot.classList.add("is-correct");
+    } else if (state === "correct") { interfaceRoot.classList.add("is-correct"); foley.play("confirm"); }
   }
 
   function playErrorSound() {
     const now = performance.now();
     if (now - lastWrongAt < 260) return;
     lastWrongAt = now;
-    try {
-      const AudioCtor = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtor) return;
-      if (!audioContext) audioContext = new AudioCtor();
-      if (audioContext.state === "suspended") audioContext.resume();
-      const oscillator = audioContext.createOscillator();
-      const gain = audioContext.createGain();
-      const start = audioContext.currentTime;
-      oscillator.type = "square";
-      oscillator.frequency.setValueAtTime(190, start);
-      oscillator.frequency.exponentialRampToValueAtTime(110, start + 0.13);
-      gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(0.055, start + 0.012);
-      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.16);
-      oscillator.connect(gain).connect(audioContext.destination);
-      oscillator.start(start);
-      oscillator.stop(start + 0.17);
-    } catch (error) {
-      console.warn("The local error tone could not play:", error);
-    }
+    foley.play("error");
   }
 
   function normalizeAnswer(value) {
@@ -1716,7 +1699,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     previous.className = "rg-stage-button";
     previous.textContent = "PREVIOUS";
     previous.disabled = activeSequenceIndex === 0;
-    previous.addEventListener("click", () => { activeSequenceIndex -= 1; renderStage(); });
+    previous.addEventListener("click", () => { foley.play("back"); activeSequenceIndex -= 1; renderStage(); });
     const count = document.createElement("span");
     count.textContent = (activeSequenceIndex + 1) + " / " + items.length;
     const next = document.createElement("button");
@@ -1724,7 +1707,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     next.className = "rg-stage-button";
     next.textContent = "NEXT";
     next.disabled = activeSequenceIndex >= items.length - 1;
-    next.addEventListener("click", () => { activeSequenceIndex += 1; renderStage(); });
+    next.addEventListener("click", () => { foley.play("navigate"); activeSequenceIndex += 1; renderStage(); });
     controls.append(previous, count, next);
     answerArea.append(controls);
   }
@@ -2011,6 +1994,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     canvas.addEventListener("pointerdown", (event) => {
       if (!restored || !event.isPrimary || (event.button != null && event.button !== 0)) return;
       drawing = true;
+      foley.play("draw");
       try { canvas.setPointerCapture(event.pointerId); } catch { /* Pointer capture can fail if a device cancels immediately. */ }
       const p = point(event);
       context.beginPath();
@@ -2036,6 +2020,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     clear.className = "rg-stage-button";
     clear.textContent = "CLEAR DRAWING";
     clear.addEventListener("click", () => {
+      foley.play("erase");
       context.clearRect(0, 0, canvas.width, canvas.height);
       drawingData.delete(currentRound + ":" + currentDifficulty);
       writeLevelField("drawing", "");
@@ -2151,6 +2136,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
       else placed.textContent = name;
       placed.addEventListener("click", (event) => {
         event.stopPropagation();
+        foley.play("remove");
         const next = placements.filter((_, placementIndex) => placementIndex !== index);
         writeLevelField("placements", next);
         renderStage();
@@ -2175,6 +2161,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     };
     const placeSelected = (placement) => {
       if (selectedComposePiece < 0 || !content.items[selectedComposePiece]) return;
+      foley.play("place");
       writeLevelField("placements", [...placements, { itemIndex: selectedComposePiece, ...placement }]);
       renderStage();
     };
@@ -2403,8 +2390,6 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
   window.addEventListener("pagehide", () => {
     objectUrls.forEach((url) => URL.revokeObjectURL(url));
     objectUrls.clear();
-    if (audioContext && audioContext.state !== "closed") audioContext.close();
-    audioContext = null;
   }, { once: true });
 
   window.addEventListener("pageshow", (event) => { if (event.persisted) render(); });
@@ -2439,10 +2424,19 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     const q=publicQuestion(round);const key=JSON.stringify(q);
     if(key!==lastRenderedQuestion){renderLiveQuestion(liveContent,q);lastRenderedQuestion=key;}
     liveLayer.dataset.ready="true";
-    if(open){ closeConsole(); window.dispatchEvent(new Event("rg:show-trivia-stage")); }
+    if(open){ foley.play("question"); closeConsole(); window.dispatchEvent(new Event("rg:show-trivia-stage")); }
   }
+  let previousAudioRound = readLiveTrivia();
   function refreshLive(round) {
-    if(!round)return;
+    if(!round){previousAudioRound=null;return;}
+    const before=previousAudioRound;
+    previousAudioRound=round;
+    if(before?.id===round.id && !liveLayer.hidden) {
+      const count=r=>Object.values(r.submissions||{}).filter(Boolean).length + Object.values(r.attempts||{}).reduce((sum,items)=>sum+items.length,0);
+      if(count(round)>count(before)) foley.play("submit");
+      else if(round.phase!==before.phase) foley.play("close");
+      else if(JSON.stringify(publicQuestion(round))!==JSON.stringify(publicQuestion(before))) foley.play("navigate");
+    }
     renderTriviaResponses(liveAnswers,round);
     const fresh=round.id!==lastLiveId;lastLiveId=round.id;
     if(fresh||lastRenderedQuestion)renderLive(round,fresh);

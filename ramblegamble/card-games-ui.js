@@ -2,7 +2,7 @@ import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia } from "./live-tr
 import { activeCardStage, cardStageChange } from "./card-stage-state.mjs?v=wildcard-shared-20261126-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
 import { mountCardRoom } from "./card-room-host.mjs?v=live-trivia-20261126-v1";
-import { foley } from "./game-foley.mjs?v=slot-foley-20261126-v3";
+import { foley } from "./game-foley.mjs?v=expanded-foley-20261126-v1";
 import {
   CARD_GAME_CATEGORIES,
   CARD_GAME_PLAYERS,
@@ -64,6 +64,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   const shopRefreshButton = $("#rg-card-shop-refresh");
   const adminStatus = $("#rg-card-admin-status");
   const resetButton = $("#rg-card-reset");
+  for (const control of [startButton, submitButton, shopRefreshButton, resetButton]) control.dataset.foley = "off";
   const deckEditors = [...document.querySelectorAll(".rg-card-deck")];
   const berryImages = {
     faroe: "/ramblegamble/assets/berries/faroeberry.png",
@@ -176,6 +177,12 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   }
 
   function updateFromState(next) {
+    const before = state?.round, after = next?.round;
+    if (!dismissedActive && !menuOpen && before?.id && before.id === after?.id && !layer.hidden) {
+      const prior = Object.values(before.submissions || {}).filter(Boolean).length;
+      const current = Object.values(after.submissions || {}).filter(Boolean).length;
+      if (current > prior) foley.play(after.phase === "voting" ? "cardFan" : "submit");
+    }
     state = next;
     loadDeckInputs(state.decks);
     setDeckVisibility();
@@ -191,6 +198,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       smeemoScheduledSignal = "";
     }
     if (opened) {
+      foley.start("cards-motion", "deal");
       menuOpen = false;
       dismissedActive = false;
       window.clearTimeout(menuTimer);
@@ -319,6 +327,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
 
   function chooseMode(mode, choice) {
     if (!menuOpen || menuTimer) return;
+    foley.play("flip");
     const grid = choice.parentElement;
     menuSelection = mode;
     grid.classList.add("is-choosing", "is-animating");
@@ -397,6 +406,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
         answer.addEventListener("click", () => {
           const updated = recordAudienceVote(state.round, response.id);
           if (updated === state.round) return;
+          foley.play("vote");
           sync({ ...state, round: updated });
         });
         answers.append(answer);
@@ -434,6 +444,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       image.alt = "";
       button.append(image, element("span", "", playerNames[player]));
       button.addEventListener("click", () => {
+        if (selectedBuyer !== player) foley.play("select");
         selectedBuyer = player;
         renderShop(state.round);
       });
@@ -458,11 +469,12 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
         const purchase = buyShopCard(state.round, card.id, selectedBuyer, pointScores);
         if (purchase.error) {
           const message = purchase.error === "not-enough-points" ? `${playerNames[selectedBuyer]} needs more points.` : "That card is no longer available.";
+          foley.play("error");
           setStatusMessage(message);
           return;
         }
         foley.play("flip");
-        foley.play("payout", { volume: .65 });
+        foley.play("purchase");
         pointScores = writePointScores(purchase.scores).scores;
         sync({ ...state, round: purchase.round });
         setStatusMessage(`${playerNames[selectedBuyer]} bought ${card.name}.`);
@@ -529,6 +541,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
         const result = drawSmeemoCard(current, card.id);
         if (result.error) return;
         foley.play("flip");
+        if (card.smeemo) foley.play("jackpot");
         sync({ ...state, smeemo: result.game });
         window.queueMicrotask(() => content.querySelector(".rg-smeemo-card.is-available")?.focus({ preventScroll: true }));
       });
@@ -587,6 +600,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     if (modeSelect.value === "quiplash") round = createQuiplashRound(decks.quiplash);
     if (modeSelect.value === "shop") round = createShopRound(decks.shop);
     if (!round) {
+      foley.play("error");
       adminStatus.textContent = modeSelect.value === "red-handed"
         ? "Add at least one A-card and one B-card."
         : modeSelect.value === "quiplash"
@@ -597,7 +611,6 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     const next = { ...readCardGames(), decks, round, smeemo: null };
     menuOpen = false;
     dismissedActive = false;
-    foley.start("cards-motion", "deal");
     sync(next);
     closeHostPanel();
   }
@@ -612,17 +625,18 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     if (!expectedId || round?.id !== expectedId) { adminStatus.textContent = "Round changed; choose the answer again."; return; }
     const updated = submitRoundAnswer(round, player, answer);
     if (updated === round) {
+      foley.play("error");
       adminStatus.textContent = "Choose an A-card or enter an answer first.";
       return;
     }
     answerText.value = "";
-    foley.play("place");
     sync({ ...latest, round: updated });
     closeHostPanel();
     });
   }
 
   function openCardMenu() {
+    foley.play("cardFan");
     menuOpen = true;
     dismissedActive = false;
     renderMenu();
@@ -642,23 +656,25 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     const round = revealAudienceResults(state.round);
     if (round === state.round) return;
     foley.play("flip");
+    foley.play(round.winnerIds?.length ? "confirm" : "close");
     sync({ ...state, round });
   });
   resetButton.addEventListener("click", () => runRoomMutation(() => {
     foley.stop("cards-motion");
+    foley.play("erase");
     sync({ ...readCardGames(), round: null });
     adminStatus.textContent = "Current card game reset.";
   }));
   shopRefreshButton.addEventListener("click", () => {
     const round = createShopRound(state.decks.shop);
     if (!round) {
+      foley.play("error");
       adminStatus.textContent = "Add at least one priced card to each shop list.";
       return;
     }
     selectedBuyer = "faroe";
     menuOpen = false;
     dismissedActive = false;
-    foley.start("cards-motion", "deal");
     sync({ ...state, round });
     closeHostPanel();
   });
@@ -681,7 +697,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     renderMenu();
   });
 
-  network = mountCardRoom($("#rg-card-network"), { getRound: () => activeRoomRound(), commitRound: round => { if(round.mode==='trivia')return writeLiveTrivia(round); const result = writeCardGames({ ...readCardGames(), round }, { requirePersistence: true }); if (result.persisted) { foley.play("place"); updateFromState(result.state); } return result.persisted; }, onStatus: message => { adminStatus.textContent = message; } });
+  network = mountCardRoom($("#rg-card-network"), { getRound: () => activeRoomRound(), commitRound: round => { if(round.mode==='trivia')return writeLiveTrivia(round); const result = writeCardGames({ ...readCardGames(), round }, { requirePersistence: true }); if (result.persisted) { updateFromState(result.state); } return result.persisted; }, onStatus: message => { adminStatus.textContent = message; } });
   loadDeckInputs(state.decks);
   setDeckVisibility();
   subscribeCardGames(updateFromState);

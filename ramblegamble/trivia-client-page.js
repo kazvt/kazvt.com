@@ -1,3 +1,4 @@
+import { foley } from "./game-foley.mjs?v=expanded-foley-20261126-v1";
 import { createClientSubmission, validateClientActivity, CLIENT_PACKET_MAX_BYTES } from "./trivia-client.mjs?v=player-handoff-20261125-v1";
 import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-place-20261124-v1";
 
@@ -117,6 +118,7 @@ import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-p
 
   function assignItem(itemIndex, categoryIndex) {
     if (!activity || !Number.isInteger(itemIndex) || itemIndex < 0 || itemIndex >= activity.content.items.length) return;
+    if (answer.assignments[itemIndex] !== categoryIndex) foley.play("place");
     answer.assignments[itemIndex] = categoryIndex;
     selectedItem = -1;
     renderSort();
@@ -191,7 +193,7 @@ import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-p
         const label = document.createElement("span");
         label.textContent = item.label || "IMAGE " + String(index + 1).padStart(2, "0");
         assigned.append(label);
-        assigned.addEventListener("click", () => { answer.assignments[index] = null; renderSort(); saveDraft(); });
+        assigned.addEventListener("click", () => { foley.play("remove"); answer.assignments[index] = null; renderSort(); saveDraft(); });
         assigned.addEventListener("dragstart", (event) => { event.dataTransfer?.setData("text/plain", String(index)); });
         group.append(assigned);
       });
@@ -297,6 +299,7 @@ import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-p
         else button.textContent = item.label || "IMAGE";
         button.addEventListener("click", (event) => {
           event.stopPropagation();
+          foley.play("remove");
           answer.placements.splice(placementIndex, 1);
           renderPlaced();
           saveDraft();
@@ -321,6 +324,7 @@ import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-p
 
     const placeAt = (position) => {
       if (selectedPiece < 0 || !pieces.has(selectedPiece)) return;
+      foley.play("place");
       answer.placements.push({ itemIndex: selectedPiece, x: position.x, y: position.y });
       renderPlaced();
       saveDraft();
@@ -373,12 +377,12 @@ import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-p
     undo.type = "button";
     undo.className = "rg-client-button rg-client-button-secondary";
     undo.textContent = "UNDO";
-    undo.addEventListener("click", () => { answer.strokes.pop(); paintStrokes(); saveDraft(); });
+    undo.addEventListener("click", () => { if(answer.strokes.length) foley.play("erase"); answer.strokes.pop(); paintStrokes(); saveDraft(); });
     const clear = document.createElement("button");
     clear.type = "button";
     clear.className = "rg-client-button rg-client-button-secondary";
     clear.textContent = "CLEAR";
-    clear.addEventListener("click", () => { answer.strokes = []; paintStrokes(); saveDraft(); });
+    clear.addEventListener("click", () => { if(answer.strokes.length) foley.play("erase"); answer.strokes = []; paintStrokes(); saveDraft(); });
     tools.append(undo, clear);
 
     const board = document.createElement("div");
@@ -413,6 +417,7 @@ import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-p
       drawingPointer = event.pointerId;
       activePath = [svgPoint(event)];
       answer.strokes.push(activePath);
+      foley.play("draw");
       try { board.setPointerCapture(event.pointerId); } catch { /* Pointer capture can be unavailable. */ }
       paintStrokes();
     });
@@ -516,6 +521,7 @@ import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-p
     link.click();
     link.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    foley.play("submit");
     status.textContent = "Answer file downloaded. Send it to the host.";
   }
 
@@ -525,6 +531,7 @@ import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-p
     const text = JSON.stringify(submission, null, 2);
     try {
       await navigator.clipboard.writeText(text);
+      foley.play("confirm");
       status.textContent = "Answer JSON copied. Send it to the host.";
     } catch {
       const fallback = document.createElement("textarea");

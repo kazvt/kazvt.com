@@ -1,4 +1,5 @@
-import { renderLiveQuestion } from "./trivia-live-view.mjs";
+import { foley } from "./game-foley.mjs?v=expanded-foley-20261126-v1";
+import { renderLiveQuestion } from "./trivia-live-view.mjs?v=expanded-foley-20261126-v1";
 import { nonce, validNonce, validPublicKey, channelBinding, transcript, verifyHost, proveSeat } from "./card-room-auth.mjs?v=host-security-20261126-v1";
 import { ROOM_VERSION, isPlayer, decodePacket, encodePacket } from "./card-room-protocol.mjs?v=live-trivia-20261126-v1";
 import { loadPeer } from "./card-room-peer.mjs";
@@ -21,6 +22,8 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
   function render(next) {
     if (next && (!['red-handed','quiplash','trivia'].includes(next.mode) || typeof next.id !== 'string' || typeof next.prompt !== 'string')) return;
     const changed = next?.id !== round?.id;
+    if (changed && next) foley.play("question");
+    else if (next?.submitted && !round?.submitted && pending) foley.play("confirm");
     if (changed) { pending = next ? recover(next.id) : null; if (next && !pending) remember(null); $('answer').value = ''; $('submission').textContent = ''; $('fallback').hidden = true; $('choices').replaceChildren(); }
     round = next;
     $('round').hidden = !round;
@@ -42,6 +45,7 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
   }
   function queueAnswer(answer) {
     if (!round || round.phase !== 'submissions' || round.submitted || pending) return;
+    foley.play("submit");
     pending={...envelope,type:'submit',roundId:round.id,answer}; remember(pending);
     $('form').hidden=true; $('trivia-player-content').hidden=true; $('packet').value=encodePacket(pending); $('fallback').hidden=false;
     $('submission').textContent=online?'Sending…':'Not connected. Copy the packet or reconnect.';sendPending();
@@ -50,7 +54,7 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
     $('mode').hidden=true; $('prompt').hidden=true; $('form').hidden=true;
     const root=$('trivia-player-content'); const q=next.question;
     if(!q || typeof q.kind!=='string'){root.hidden=true;return;}
-    if(pending&&next.attempts?.length){try{const a=JSON.parse(pending.answer);if(next.attempts.some(x=>x.id===a.id)){pending=null;remember(null);}}catch{}}
+    if(pending&&next.attempts?.length){try{const a=JSON.parse(pending.answer);if(next.attempts.some(x=>x.id===a.id)){if(!next.submitted)foley.play("confirm");pending=null;remember(null);}}catch{}}
     if(next.submitted||next.phase!=='submissions'){pending=null;remember(null);}
     const open=next.phase==='submissions'&&!next.submitted&&!pending;
     const key=JSON.stringify([next.id,q,next.attempts,open]);
@@ -106,9 +110,9 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
           if (message.type !== 'round' && !online) { fail('Host did not confirm your seat.'); return; }
           if (message.type === 'round') { online = true; retryDelay = 1000; clearTimeout(timer); $('connect').disabled = false; status(message.round ? 'Connected to verified host.' : 'Verified host — waiting for host to start a round.'); render(message.round); }
           if (message.type === 'ack' && message.roundId === pending?.roundId) {
-            if (message.status === 'accepted' || message.status === 'already-submitted') { const already = message.status === 'already-submitted'; pending = null; remember(null); $('fallback').hidden = true; $('submission').textContent = already ? 'Host already saved an answer for this round.' : 'Answer received by host!'; }
+            if (message.status === 'accepted' || message.status === 'already-submitted') { const already = message.status === 'already-submitted'; foley.play('confirm'); pending = null; remember(null); $('fallback').hidden = true; $('submission').textContent = already ? 'Host already saved an answer for this round.' : 'Answer received by host!'; }
             else if (['storage-error','reader-changed'].includes(message.status)) { showPacket(); status('Host could not save yet. Retrying connection…'); disconnect('Host could not save yet.'); }
-            else { pending = null; remember(null); $('fallback').hidden = true; render(round); $('submission').textContent = `Host rejected answer: ${message.status}.`; }
+            else { foley.play('error'); pending = null; remember(null); $('fallback').hidden = true; render(round); $('submission').textContent = `Host rejected answer: ${message.status}.`; }
           }
         });
         conn.on('close', () => fail('Disconnected. Retry or copy your pending packet.')); conn.on('error', () => fail('Connection error. Retry or copy your packet.'));
@@ -121,6 +125,7 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
     const choice = document.querySelector('input[name=evidence]:checked');
     const answer = round.mode === 'quiplash' ? $('answer').value.trim() : round.hand?.[Number(choice?.value)];
     if (!answer || answer.length > 800) { $('submission').textContent = 'Enter an answer or select a card.'; return; }
+    foley.play('submit');
     pending = {...envelope,type:'submit',roundId:round.id,answer}; remember(pending); $('form').hidden = true; $('packet').value = encodePacket(pending); $('fallback').hidden = false;
     $('submission').textContent = online ? 'Sending — waiting for host confirmation…' : 'Not connected. Copy the packet or reconnect.'; sendPending();
   });

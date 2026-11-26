@@ -51,14 +51,14 @@ function mountUI(saved) {
   get('#rg-card-games-layer').querySelector=get;
   get('#rg-card-mode').value='shop'; get('#rg-card-player').value='kaz';
   let data=normalizeCardGamesState(saved), subscriber;
-  const calls=[];
+  const calls=[], sounds=[];
   const listeners=new Map();
   const timers=new Map();let timerId=0;
   const window={matchMedia:()=>({matches:true}), clearTimeout(id){timers.delete(id);},setTimeout(fn){timers.set(++timerId,fn);return timerId;},addEventListener:(type,fn)=>listeners.set(type,fn),dispatchEvent(event){calls.push(event.type);listeners.get(event.type)?.(event);}};
   class FakeEvent {constructor(type,opts={}){this.type=type;this.detail=opts.detail;}}
   const code=readFileSync(new URL('./card-games-ui.js',import.meta.url),'utf8').replace(/^import\s+[\s\S]*?;\n/gm,'');
-  vm.runInNewContext(code,{...games,activeCardStage,cardStageChange,window,document:{querySelector:get,querySelectorAll:()=>[],createElement:()=>new FakeElement()},CustomEvent:FakeEvent,Event:FakeEvent,readCardGames:()=>data,writeCardGames:value=>({state:data=normalizeCardGamesState(value),persisted:true}),subscribeLiveTrivia:()=>{},activeRoomRound:()=>data.round,subscribeCardGames:fn=>{subscriber=fn;fn(data);},readPointScores:()=>({kaz:0,faroe:0,erin:0}),subscribePointScores:fn=>fn({kaz:0,faroe:0,erin:0}),mountCardRoom:()=>({publish(){}}),foley:{start(){},stop(){},play(){}},withRoomSubmissionLock:async fn=>fn()});
-  return {get,calls,window,update(next){data=normalizeCardGamesState(next);subscriber(data);},flushTimers(){for(const [id,fn] of [...timers]){timers.delete(id);fn();}}};
+  vm.runInNewContext(code,{...games,activeCardStage,cardStageChange,window,document:{querySelector:get,querySelectorAll:()=>[],createElement:()=>new FakeElement()},CustomEvent:FakeEvent,Event:FakeEvent,readCardGames:()=>data,writeCardGames:value=>({state:data=normalizeCardGamesState(value),persisted:true}),subscribeLiveTrivia:()=>{},activeRoomRound:()=>data.round,subscribeCardGames:fn=>{subscriber=fn;fn(data);},readPointScores:()=>({kaz:0,faroe:0,erin:0}),subscribePointScores:fn=>fn({kaz:0,faroe:0,erin:0}),mountCardRoom:()=>({publish(){}}),foley:{start(channel,cue){sounds.push(cue);},stop(){},play(cue){sounds.push(cue);}},withRoomSubmissionLock:async fn=>fn()});
+  return {get,calls,sounds,window,update(next){data=normalizeCardGamesState(next);subscriber(data);},flushTimers(){for(const [id,fn] of [...timers]){timers.delete(id);fn();}}};
 }
 test('actual card UI keeps restored shop hidden, resumes on request, and only opens newly started rounds',()=>{
   const round=createShopRound(decks);
@@ -103,4 +103,15 @@ test('mode menu uses only full authored faces and stays flipped during room upda
   assert.equal(ui.calls.filter(x=>x==='rg:open-host-panel').length,1);
   grid.children[1].click();assert.ok(grid.children[1].classList.contains('is-selected'));assert.ok(!grid.children[0].classList.contains('is-selected'));
   ui.flushTimers();assert.equal(ui.calls.filter(x=>x==='rg:open-host-panel').length,2);
+});
+
+
+test('remote card submissions sound once per state change, restored state is quiet',()=>{
+ const round=createQuiplashRound(['Prompt']);
+ const restored=mountUI({round});assert.deepEqual(restored.sounds,[]);
+ const ui=mountUI({});ui.update({round});assert.deepEqual(ui.sounds,['deal']);
+ const first=games.submitRoundAnswer(round,'kaz','First');ui.update({round:first});ui.update({round:first});
+ const second=games.submitRoundAnswer(first,'faroe','Second');ui.update({round:second});
+ const third=games.submitRoundAnswer(second,'erin','Third');ui.update({round:third});ui.update({round:third});
+ assert.deepEqual(ui.sounds,['deal','submit','submit','cardFan']);
 });

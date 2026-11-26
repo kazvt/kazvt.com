@@ -1,28 +1,50 @@
-# Sound effect source
+# Ramble Gamble sound effects
 
-- `cheer.ogg` is “Conference audience clapping strongly” (8.6 seconds), Mixkit sound effect #476.
-- Downloaded from: https://mixkit.co/free-sound-effects/clapping/
-- License: Mixkit Sound Effects Free License, https://mixkit.co/license/ . It permits use in a larger project, including web projects; the sound must not be redistributed as a standalone stock item.
-- The clip is used as the Ramble Gamble cheer-button sound effect. Attribution is not required.
+All sound playback uses existing sound files. No oscillator, noise generator or runtime composition is used. Physical foley is used for mechanical actions; pre-existing electronic effects are used for arcade and interface feedback. The bundled `cheer.ogg` is the previously installed Mixkit clip.
 
-## Game foley (slots, cards, roulette, dice)
+## Install / update (GitHub Pages)
 
-The patch implements a same-origin audio mixer, not synthesized audio. Asset bytes could not be downloaded in the patch-authoring environment. Run this once from the site root on an Internet-connected machine (as the site owner, not root):
+From the repository root on your own Internet-connected computer, run:
 
 ```sh
 python3 ramblegamble/assets/sfx/install-foley.py
 ```
 
-If the Freesound website does not expose previews to the script, use a free Freesound API token as the `FREESOUND_API_TOKEN` environment variable (not a password and not embedded in site code). Alternatively obtain the original downloads on the linked pages, convert each to MP3 with e.g. `ffmpeg -i ORIGINAL.wav -c:a libmp3lame -q:a 2 OUTPUT.mp3`, put them in a private staging directory with the filenames below, and use `--recordings /path/to/staging`. For a downloaded Kenney archive use `--kenney-zip /path/to/kenney_casino-audio.zip`. No network requests to stock sites are made by the browser; it only fetches local files in `assets/sfx/foley/`. Missing files fail silently in gameplay; installer returns nonzero and lists them. Reload after installation. The host Arcade tab has a mute toggle.
+Commit the resulting `ramblegamble/assets/sfx/foley/` directory to GitHub Pages. Do not commit a Freesound API token. Existing valid files are preserved. To check the inventory without downloading, use `--check`. Reload the deployed pages after committing new samples. The patch authoring environment could not download or audition new binary audio; the installer downloads the actual source files. The site uses same-origin audio only, never hotlinks the stock sites.
 
-| File | Source and attribution | License / intended use |
+If Freesound's public page does not expose the preview URL, use the free API token as `FREESOUND_API_TOKEN` in your shell environment. Alternatively download from the source pages below and put MP3 copies in a private staging directory with the listed names. Convert if necessary with `ffmpeg -i ORIGINAL.wav -c:a libmp3lame -q:a 2 OUTPUT.mp3` (conversion, not synthesis). You can also download both Kenney ZIPs manually and run:
+
+```sh
+python3 ramblegamble/assets/sfx/install-foley.py --kenney-zip /path/to/kenney_casino-audio.zip --interface-zip /path/to/kenney_interface-sounds.zip --recordings /path/to/staging
+```
+
+Missing or undecodable effects use the listed fallback where available; gameplay does not depend on playback. If every candidate is absent, the cue stays silent. The installer checks file signatures and reports missing files, not the subjective quality of the samples.
+
+## Source credits
+
+| Local file(s) | Original source | License and use |
 |---|---|---|
-| `switch.mp3` | [Mechanical Switch — Crinkem](https://freesound.org/people/Crinkem/sounds/496328/) (Sony PCM-A10 recording) | [CC0](https://creativecommons.org/publicdomain/zero/1.0/), physical button and reel stop |
-| `lever.mp3` | [Mechanical switch (latch) 01 — xkeril](https://freesound.org/people/xkeril/sounds/815492/) (recorded wooden latch) | CC0, crank pull proxy |
-| `reel.mp3` | [Spinning ratchet (SoundAction 116) — Alexander Refsum Jensenius (alexarje)](https://freesound.org/people/alexarje/sounds/863094/) (recorded ratchet) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), mechanical reel rotation proxy; gain and playback looping in game |
-| `wheel.mp3` | [Hard_Ball_Rolling_Mono_1.wav — Stagno](https://freesound.org/people/Stagno/sounds/705775/) (field recording of a hard stone ball rolling in a bowl) | CC0, roulette rolling-ball proxy; gain and playback looping in game |
-| `card-place-*`, `card-slide-*`, `card-shuffle`, `chip-lay-*`, `chips-handle-*`, `die-shuffle-*`, `die-throw-*` (OGG) | [Casino Audio — Kenney](https://kenney.nl/assets/casino-audio) | CC0; cards, dice and chips, plus chip clack/handling used as landing and payout proxies |
+| `cheer.ogg` (bundled, parent directory) | [Conference audience clapping strongly, Mixkit #476](https://mixkit.co/free-sound-effects/clapping/) | [Mixkit Free License](https://mixkit.co/license/), applause in this game, not standalone stock redistribution |
+| `switch.mp3` | [Mechanical Switch — Crinkem](https://freesound.org/people/Crinkem/sounds/496328/) | CC0, physical machine button |
+| `lever.mp3` | [Mechanical switch (latch) 01 — xkeril](https://freesound.org/people/xkeril/sounds/815492/) | CC0, mechanical crank proxy |
+| `reel.mp3` | [Spinning ratchet (SoundAction 116) — Alexander Refsum Jensenius (alexarje)](https://freesound.org/people/alexarje/sounds/863094/) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), older physical spin fallback; gain, loop and fades applied at playback |
+| `wheel.mp3` | [Hard_Ball_Rolling_Mono_1.wav — Stagno](https://freesound.org/people/Stagno/sounds/705775/) | CC0, hard stone ball rolling in a bowl, roulette rolling proxy |
+| `spinner.mp3` | [Spinner Sound.mp3 — klc777](https://freesound.org/people/klc777/sounds/562114/) | CC0; 11.926-second repeating high-pitched arpeggio intended for game spinners. Primary slot reel sound; cut/faded when the actual final reel stops. |
+| `jackpot.mp3` | [Jackpot Win — Qvantor](https://freesound.org/people/Qvantor/sounds/878618/) | CC0; existing electronic major-arpeggio chime ending on a chord, 2.892 s; reserved for an individual pattern worth 50,000 or more, and Smeemo discovery |
+| `card-place-*`, `card-slide-*`, `card-fan-*`, `card-shove-*`, `card-shuffle`, `chip-lay-*`, `chips-handle-*`, `chips-stack-*`, `chips-collide-*`, `die-grab-*`, `die-shuffle-*`, `die-throw-*` | [Casino Audio — Kenney](https://kenney.nl/assets/casino-audio) | CC0, physical card/chip/dice sounds; chip collisions are a short hard-object impact proxy for dice and roulette pockets |
+| `tick-*`, `select-*`, `click-*`, `scroll-*`, `open-*`, `close-*`, `back-*`, `toggle-*`, `glass-*`, `pluck-*`, `drop-*`, `confirmation-*`, `question-*`, `error-*`, `maximize-*`, `minimize-*`, `scratch-*` | [Interface Sounds — Kenney](https://kenney.nl/assets/interface-sounds) | CC0, existing interface sounds; exact upstream filenames are in the installer (e.g. `confirmation_001.ogg`) |
 
-The source descriptions and licenses were checked, not the audible clips (download blocked). Preview files remain unmodified; gain, looping and stop fades are playback operations. A genuine spinning ratchet is used instead of synthetic slot audio. Check the mix and source timbres by ear after installation. CC BY credit must remain with distributed game assets; this document is served alongside the recordings.
+CC0: https://creativecommons.org/publicdomain/zero/1.0/ . Keep the CC BY credit when distributing `reel.mp3`. Sources and licenses were selected from the creator pages; filenames were cross-checked against the published pack inventories. No new samples were auditioned in the patch environment. Adjust the per-cue gain and source selection in `game-foley.mjs` after listening in the actual game.
 
-Design references: [MDN Web Audio best practices](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Best_practices), [MDN autoplay guide](https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Autoplay), and [Second Chance recording pipeline](https://www.secondchancegame.com/freesound-sound-effects).
+## Cue design and timing
+
+- **Slots:** physical crank/press, berry selection, star glass chime, removal, arpeggio for row/column/all-line motion, a tick at every actual line stop, chip payout, distinct large-win chime. Failed/no-op actions do not trigger spins or reward sounds.
+- **Roulette:** physical start, rolling-ball loop, rate-limited hard contact ticks during inward settling and landing clack. A question cue only when a question is actually produced.
+- **Cards:** opening fan, menu flip, deal/stack shuffle, accepted submission drop, final answers fan, vote pluck, reveal/confirmation, shop card flip and chip stack purchase; errors distinct. Submissions are observed on the visible display using state changes (including console-reader deliveries), not repeated on every redraw.
+- **VIP Dice:** portal open/exit, dice selection/grab, collision-strength-scaled impacts, confirmation at rest. Existing collision physics remain authoritative.
+- **Trivia / player activities:** question presentation, sequence changes, selection, submission and receipt, wrong/correct feedback, placement/removal, drawing stroke start, undo/clear, JSON handoff. The former oscillator error tone has been removed. Contestant pages have a compact Sound checkbox. No staff-only solutions or answer content is transmitted by audio logic.
+- **Scene and interface:** navigation, back, menus, tabs, selections, switches and ordinary button activation. Explicit game actions take precedence over the generic low-level click. Mouse movement, typing, passive rerenders, empty-space clicks and unsolicited background restoration remain quiet. The separate text console stays quiet to avoid doubling stream audio; game events it sends to the display still use the display's cues.
+
+Playback uses local decoded buffers, per-cue gain, alternating variants, bounded voices, a compressor, loop cancellation, stale-request rejection and shared mute state. It observes user activation and stops on page hide or host lock without changing the running multiplayer reader. It is not a music soundtrack or runtime synth.
+
+Design references: [MDN Web Audio best practices](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Best_practices), [MDN audio for web games](https://developer.mozilla.org/en-US/docs/Games/Techniques/Audio_for_Web_Games), [MDN autoplay guide](https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Autoplay), [Kenney Casino Audio](https://kenney.nl/assets/casino-audio), [Kenney Interface Sounds](https://kenney.nl/assets/interface-sounds). Event-specific cue routing and variations follow the common game-audio event/asset separation rather than tying playback to frame rendering.

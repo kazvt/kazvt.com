@@ -88,3 +88,5 @@ body.rg-client-page {
 @media (prefers-reduced-motion: reduce) {
   .rg-client-page *, .rg-client-page *::before, .rg-client-page *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+.rg-client-header label{display:flex;align-items:center;gap:5px;color:#8b2626;font-size:12px;white-space:nowrap} #rg-foley-enabled{width:auto;margin:0;accent-color:#8b2626}

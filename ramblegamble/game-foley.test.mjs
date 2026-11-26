@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createFoley, FOLEY_CUES } from './game-foley.mjs';
+import { createFoley, FOLEY_CUES, installControlFoley } from './game-foley.mjs';
 
 function fixture({ fetchFile, hidden = () => false } = {}) {
   const started = [], stopped = [];
@@ -58,4 +58,50 @@ test('stopAll invalidates pending one-shots and stops active loops', async () =>
 });
 test('every cue references local recorded file types only', () => {
   assert.ok(Object.values(FOLEY_CUES).every(cue => cue.files.length && cue.files.every(file => /^[a-z0-9-]+\.(ogg|mp3)$/.test(file))));
+});
+
+
+test('arcade spinner is preferred, ratchet is used only if new sample is unavailable', async () => {
+  const primary = fixture();
+  assert.equal(await primary.mixer.start('slots','reel',{loop:true}),true);
+  assert.match(primary.started[0].buffer,/spinner\.mp3$/);
+  const fallback = fixture({fetchFile:async url=>({ok:!url.pathname.endsWith('/spinner.mp3'),arrayBuffer:async()=>url.pathname})});
+  assert.equal(await fallback.mixer.start('slots','reel',{loop:true}),true);
+  assert.match(fallback.started[0].buffer,/reel\.mp3$/);
+  fallback.mixer.stop('slots');
+  assert.equal(fallback.stopped.length,1);
+});
+test('missing primary variant tries other variants before fallback',async()=>{
+  const f=fixture({fetchFile:async url=>({ok:!url.pathname.endsWith('/select-1.ogg'),arrayBuffer:async()=>url.pathname})});
+  await f.mixer.play('select');
+  assert.match(f.started[0].buffer,/select-2\.ogg$/);
+});
+test('late fallback cannot resurrect cancelled spin',async()=>{
+  let resolve;
+  const f=fixture({fetchFile:async url=>url.pathname.endsWith('/spinner.mp3')?new Promise(r=>{resolve=r;}):({ok:true,arrayBuffer:async()=>url.pathname})});
+  const pending=f.mixer.start('slots','reel',{loop:true});
+  await Promise.resolve();
+  f.mixer.stop('slots');resolve({ok:false});
+  assert.equal(await pending,false);
+  assert.equal(f.started.length,0);
+});
+test('ordinary controls use semantic cue and explicit action suppresses extra click',()=>{
+  const events={}, tasks=[], played=[];
+  const mixer={requestCount:0,play(cue){this.requestCount++;played.push(cue);}};
+  installControlFoley({addEventListener(type,cb){events[type]=cb;}},mixer,cb=>tasks.push(cb));
+  const control={disabled:false,dataset:{foley:'back'},closest:()=>null,getAttribute:()=>null,hasAttribute:()=>false};
+  const ev={isTrusted:true,button:0,target:{closest:()=>control}};
+  events.click(ev);tasks.shift()();assert.deepEqual(played,['back']);
+  events.click(ev);mixer.play('flip');tasks.shift()();assert.deepEqual(played,['back','flip']);
+  control.disabled=true;events.click(ev);assert.equal(tasks.length,0);
+  control.disabled=false;control.dataset.foley='off';events.click(ev);assert.equal(tasks.length,0);
+  events.click({...ev,isTrusted:false});assert.equal(tasks.length,0);
+});
+test('voice cap does not discard active spin loop',async()=>{
+  const f=fixture();await f.mixer.start('slots','reel',{loop:true});
+  for(let i=0;i<20;i++)await f.mixer.play('click');
+  assert.equal(f.started.length,21);assert.equal(f.stopped.length,9);assert.ok(!f.stopped.includes(f.started[0]));
+});
+test('applause uses existing bundled file rather than installer directory',async()=>{
+  const f=fixture();await f.mixer.play('cheer');assert.match(f.started[0].buffer,/assets\/sfx\/cheer\.ogg$/);
 });

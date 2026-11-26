@@ -1,5 +1,5 @@
 import { VIP_LIQUID_SOURCE } from "./vip-liquid-preset.mjs?v=vip-black-liquid-20261126-v1";
-import { foley } from "./game-foley.mjs?v=slot-foley-20261126-v3";
+import { foley } from "./game-foley.mjs?v=expanded-foley-20261126-v1";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import {
@@ -66,7 +66,7 @@ import {
       if (rolling) return;
       const next = nextDiceAsset(dieState.assignments[faceIndex]);
       dieState.assignments[faceIndex] = next.id;
-      foley.play("place", { volume: .55 });
+      foley.play("diceFace");
       updateFaceButton(button, face, next.id);
       updateSticker(dieState, faceIndex, next.id);
       status.textContent = "";
@@ -286,6 +286,8 @@ import {
       const asset = dieState.assignments[faceIndex];
       return asset;
     });
+    foley.stop("dice-grab");
+    foley.play("diceLand");
     rolling = false;
     activeRolls = [];
     previousFrameTime = null;
@@ -463,6 +465,7 @@ import {
 
   function openDiceMode() {
     if (isOpen) return;
+    foley.play("portal");
     isOpen = true;
     isClosing = false;
     dialog.classList.remove("rg-dice-exiting");
@@ -487,6 +490,7 @@ import {
     isClosing = true;
     foley.stop("dice-grab");
     foley.stop("dice-impact");
+    foley.play("portalExit");
     dialog.classList.remove("rg-dice-entering");
     dialog.classList.add("rg-dice-exiting");
     if (reducedMotion.matches || wasEntering || !dialog.open) {

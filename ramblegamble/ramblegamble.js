@@ -1,5 +1,5 @@
 import { fitSlotInteractionFrame, rouletteRecessCenter, ROULETTE_RECESS } from "./arcade-framing.mjs?v=arcade-framing-20261126-v1";
-import { foley } from "./game-foley.mjs?v=slot-foley-20261126-v3";
+import { foley } from "./game-foley.mjs?v=expanded-foley-20261126-v1";
 import {
   resolvePointClickAction,
   resolvePointClickBack,
@@ -62,8 +62,6 @@ import {
   const controlsOpenButton = document.getElementById("rg-controls-open");
   const controlsDialog = document.getElementById("rg-controls-dialog");
   const controlsCloseButton = document.getElementById("rg-controls-close");
-  const cheerSound = new Audio("/ramblegamble/assets/sfx/cheer.ogg?v=audience-applause-2");
-  cheerSound.preload = "auto";
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   // Keep the supplied marquee cue, but play it at one fifth of its current level.
   menuMarquee.volume = Math.max(0, Math.min(1, menuMarquee.volume * 0.2));
@@ -231,6 +229,7 @@ import {
     foley.stop("roulette");
     if (!pauseMenuOpen) foley.play("ball");
     const prompt = nextHostQuestion();
+    if (prompt && !pauseMenuOpen) foley.play("question", { volume: .55 });
     slotResultToken += 1;
     window.clearTimeout(slotResultTimeout);
     slotResultTimeout = 0;
@@ -295,6 +294,7 @@ import {
       ballRadiusFrom,
       ballAngle: ballPositionAtStart ? Math.atan2(ballPositionAtStart.z, ballPositionAtStart.x) : Math.atan2(1, -13),
       ballHeight: ballPositionAtStart?.y ?? -7,
+      pocketSector: null, lastPocketSound: -Infinity,
     };
     wheelMotion.ballTo = alignBallToPocket(wheelMotion.ballTo, wheelMotion.wheelTo, wheelMotion.ballAngle);
   }
@@ -546,6 +546,7 @@ import {
       button.type = "button";
       button.className = "rg-slot-sprite-blank";
       button.dataset.slotBerry = berry;
+      button.dataset.foley = "off";
       button.setAttribute("aria-label", label);
       button.title = berry === SLOT_REEL_WILDCARD ? "Star: left-click a cell to place; right-click to remove" : label;
       const img = document.createElement("img");
@@ -555,7 +556,7 @@ import {
       button.append(img);
       button.addEventListener("click", (event) => {
         event.stopPropagation();
-        if (!playing) window.dispatchEvent(new CustomEvent("rg:slot-settings-updated", { detail: { berry } }));
+        if (!playing && berry !== selectedSlotBerry) { foley.play("select"); window.dispatchEvent(new CustomEvent("rg:slot-settings-updated", { detail: { berry } })); }
       });
       slotBerryPicker.append(button);
     }
@@ -585,6 +586,7 @@ import {
       button.type = "button";
       button.className = "rg-slot-placement-marker";
       button.dataset.axis = definition.axis;
+      button.dataset.foley = "off";
       button.dataset.index = String(definition.index);
       button.classList.add("rg-slot-sprite-" + definition.axis);
       button.setAttribute("aria-label", definition.axis + " " + definition.label);
@@ -714,7 +716,7 @@ import {
     hideResult();
     syncSlotPlacementControls();
     saveSlotGrid(placement.grid);
-    foley.play("place");
+    foley.play("wildcard");
     window.dispatchEvent(new CustomEvent("rg:slot-action-start", { detail: { kind: "wildcard-place" } }));
     drawSlotReelDisplay(startedAt);
     return true;
@@ -763,7 +765,10 @@ import {
   function finishSlotAction(motion) {
     foley.stop("slots");
     const outcome = resolveSlotPayouts(motion.targetGrid);
-    if (outcome.payouts.length && !pauseMenuOpen) foley.play("payout");
+    if (outcome.payouts.length && !pauseMenuOpen) {
+      foley.play("payout");
+      if (outcome.payouts.some(payout => payout.points >= 50000)) foley.play("jackpot");
+    }
     saveSlotGrid(outcome.grid);
     const scores = readPointScores();
     for (const [name, amount] of Object.entries(outcome.totals)) {
@@ -1321,6 +1326,7 @@ import {
 
   function transitionToView(nextView, { immediate = false } = {}) {
     hideGameCursor();
+    if (!immediate && sceneReady && (currentView.kind !== nextView.kind || currentView.look !== (nextView.look ?? 0) || currentView.contestantId !== nextView.contestantId)) foley.play(nextView.kind === "overview" ? "back" : "navigate");
     currentView = { ...nextView, look: nextView.look ?? 0 };
     const pose = getCameraPoseForView(currentView, camera.aspect);
     if (!pose) return;
@@ -2070,6 +2076,7 @@ import {
   function showPauseMenu() {
     if (pauseMenuOpen) return;
     foley.stopAll();
+    foley.play("close");
     gameStarted = false;
     pauseMenuOpen = true;
     setMenuSceneVisibility(false);
@@ -2087,6 +2094,7 @@ import {
 
   function startGame() {
     if (!pauseMenuOpen) return;
+    foley.play("open");
     pauseMenuOpen = false;
     gameStarted = true;
     pauseMenu.hidden = true;
@@ -2152,10 +2160,7 @@ import {
   goButton.focus({ preventScroll: true });
 
   function playCheer() {
-    cheerSound.pause();
-    cheerSound.currentTime = 0;
-    const playback = cheerSound.play();
-    if (playback?.catch) playback.catch((error) => console.warn("Cheer sound could not play:", error));
+    foley.start("cheer", "cheer");
   }
 
   subscribePointScores((scores) => {
@@ -2542,6 +2547,15 @@ import {
         wheelMotion.ballTo,
         1 - Math.pow(1 - progress, 2.2),
       );
+      // Audible pocket contacts follow the ball entering the inner ring, not render frames.
+      if (progress >= .76 && progress < .99 && !pauseMenuOpen) {
+        const sector = Math.floor((wheelMotion.ballAngle - ballPivot.rotation.y + wheelPivot.rotation.y) / (Math.PI * 2 / 38));
+        if (sector !== wheelMotion.pocketSector && time - wheelMotion.lastPocketSound >= 95) {
+          wheelMotion.lastPocketSound = time;
+          foley.play("pocket", { volume: 1 - .55 * progress });
+        }
+        wheelMotion.pocketSector = sector;
+      }
       if (ballOrbitObject) {
         const radius = sampleRouletteBallRadius(progress, wheelMotion.ballRadiusFrom);
         const position = rouletteBallPositionAtRadius({
