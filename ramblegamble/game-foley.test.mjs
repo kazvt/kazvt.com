@@ -11,7 +11,7 @@ function fixture({ fetchFile, hidden = () => false } = {}) {
     createGain() { return { gain: parameter(), connect() {}, disconnect() {} }; }
     createDynamicsCompressor() { return { threshold: parameter(), ratio: parameter(), connect() {} }; }
     async decodeAudioData(data) { return data; }
-    createBufferSource() { return { connect() {}, disconnect() {}, start(...args) { this.startArgs=args; started.push(this); }, stop() { stopped.push(this); this.onended?.(); } }; }
+    createBufferSource() { return { playbackRate:{value:1,setValueAtTime(value){this.value=value},linearRampToValueAtTime(value,time){this.ramp=[value,time]}}, connect() {}, disconnect() {}, start(...args) { this.startArgs=args; started.push(this); }, stop() { stopped.push(this); this.onended?.(); } }; }
   }
   const mixer = createFoley({ AudioContext: Context, now: () => clock, random: () => 0, isHidden: hidden,
     fetchFile: fetchFile || (async url => ({ ok: true, arrayBuffer: async () => url.pathname })), });
@@ -114,4 +114,10 @@ test('settlement uses the bundled edited recording and is cancellable before dec
 test('settlement can use original bundled applause if the edited clip is missing, but caps its duration',async()=>{
  const f=fixture({fetchFile:async url=>({ok:url.pathname.endsWith('/sfx/cheer.ogg'),arrayBuffer:async()=>({duration:8.6,path:url.pathname})})});
  assert.equal(await f.mixer.start('roulette-settlement','settlement'),true);assert.match(f.started[0].buffer.path,/sfx\/cheer\.ogg$/);assert.deepEqual(f.started[0].startArgs,[0,0,1.6]);
+});
+
+test('Smeemo recorded hit sweeps upward and replaces stale requests',async()=>{
+ const f=fixture();const first=f.mixer.start('smeemo-hit','smeemoHit',{rate:.8,endRate:.9});const second=f.mixer.start('smeemo-hit','smeemoHit',{rate:1.25,endRate:1.4});
+ assert.equal(await first,false);assert.equal(await second,true);assert.equal(f.started.length,1);assert.equal(f.started[0].playbackRate.value,1.25);assert.equal(f.started[0].playbackRate.ramp[0],1.4);assert.match(f.started[0].buffer,/smeemo-hit\.ogg$/);
+ f.mixer.stop('smeemo-hit');assert.equal(f.stopped.length,1);
 });

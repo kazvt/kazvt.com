@@ -648,3 +648,28 @@
 .rg-smeemo-winner.is-newly-won { animation:rg-smeemo-winner-pop 420ms cubic-bezier(.18,.8,.25,1) both; }
 @keyframes rg-smeemo-winner-pop { 0% { opacity:.4; transform:scale(.95); } 65% { opacity:1; transform:scale(1.025); } 100% { opacity:1; transform:none; } }
 @media(prefers-reduced-motion:reduce) { .rg-smeemo-winner.is-newly-won { animation:none; } }
+
+/* Smeemo earthquake: independent room and board carriers. The shell, header,
+   status, HUD, scroll rail and original card flip transforms remain intact. */
+.rg-preview.is-smeemo-impact > :is(#rg-canvas, #rg-liquid-portal-layer, #rg-billboard-layer) {
+  transform-origin: center;
+  transform: translate3d(var(--quake-x,0px),var(--quake-y,0px),0) scale(var(--quake-scale,1));
+  will-change: transform;
+}
+.rg-preview.is-smeemo-impact .rg-smeemo-board {
+  /* <= 1.2% expansion + 1.5px displacement fits the shell's 8px padding. */
+  transform: translate3d(var(--quake-ui-x,0px),var(--quake-ui-y,0px),0) scale(var(--quake-ui-scale,1));
+  transform-origin: center;
+  will-change: transform;
+}
+.rg-preview.is-smeemo-impact .rg-smeemo-board::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  border: 3px solid #ffe19a;
+  box-shadow: inset 0 0 18px #b77beb, inset 0 0 5px #fff5da;
+  opacity: calc(var(--quake-energy,0) * .48);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rg-preview.is-smeemo-impact > :is(#rg-canvas, #rg-liquid-portal-layer, #rg-billboard-layer),
+  .rg-preview.is-smeemo-impact .rg-smeemo-board { transform: none; will-change: auto; }
+  .rg-preview.is-smeemo-impact .rg-smeemo-board::after { display: none; }
+}

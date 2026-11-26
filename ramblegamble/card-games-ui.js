@@ -1,9 +1,10 @@
+import { createSmeemoImpact, smeemoImpactTransition } from "./smeemo-impact.mjs?v=smeemo-quake-20261127-v1";
 import { applyCardShowAction } from "./card-show-actions.mjs?v=card-polish-20261127-v1";
 import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia } from "./live-trivia.mjs?v=show-stage-20261126-v1";
 import { activeCardStage, cardStageChange } from "./card-stage-state.mjs?v=wildcard-shared-20261126-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
 import { mountCardRoom } from "./card-room-host.mjs?v=room-recovery-20261127-v1";
-import { foley } from "./game-foley.mjs?v=settlement-hover-20261127-v1";
+import { foley } from "./game-foley.mjs?v=smeemo-quake-20261127-v1";
 import {
   CARD_GAME_CATEGORIES,
   CARD_GAME_PLAYERS,
@@ -87,6 +88,33 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
   let lastPresentation = { id: null, visible: [], phase: null };
   let shopPresentation = { id: null, revealed: new Set() };
   let smeemoPresentation = { id: null, revealed: new Set() };
+  const preview = $(".rg-preview");
+  const impact = createSmeemoImpact({
+    requestFrame: fn => window.requestAnimationFrame(fn), cancelFrame: id => window.cancelAnimationFrame(id),
+    now: () => performance.now(),
+    canRun: () => !document.hidden && !document.documentElement?.hasAttribute("data-rg-host-locked")
+      && !dismissedActive && !menuOpen && !layer.hidden && state.smeemo
+      && !preview.classList.contains("is-menu") && !preview.classList.contains("is-dice-mode"),
+    isVisible: () => !layer.classList.contains("is-off-table"),
+    reduced: () => reducedMotion.matches,
+    size: () => ({ width: preview.clientWidth, height: preview.clientHeight }),
+    paint: ({ energy, x, y, scale, uiX, uiY, uiScale }) => {
+      const vars = { "--quake-x": `${x}px`, "--quake-y": `${y}px`, "--quake-scale": scale,
+        "--quake-ui-x": `${uiX}px`, "--quake-ui-y": `${uiY}px`, "--quake-ui-scale": uiScale, "--quake-energy": energy };
+      for (const [key, value] of Object.entries(vars)) preview.style.setProperty(key, String(value));
+      preview.classList.add("is-smeemo-impact");
+    },
+    clear: () => preview.classList.remove("is-smeemo-impact"),
+    sound: (event, spec) => {
+      foley.start("smeemo-rumble", "smeemoRumble", { volume: .75 + spec.strength * .25 });
+      foley.start("smeemo-hit", "smeemoHit", { rate: spec.rate, endRate: spec.rate * 1.12, volume: .8 + spec.strength * .2 });
+      if (event.kind === "win") foley.start("smeemo-win", "smeemoWin", { maxDelay: 350 });
+    },
+    stopSound: () => { for (const channel of ["smeemo-rumble", "smeemo-hit", "smeemo-win"]) foley.stop(channel); },
+  });
+  document.addEventListener("visibilitychange", () => { if (document.hidden) impact.stop(); });
+  window.addEventListener("pagehide", impact.stop);
+
 
   function element(tag, className = "", text = "") {
     const item = document.createElement(tag);
@@ -181,6 +209,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
 
   function updateFromState(next) {
     const before = state?.round, after = next?.round;
+    const previousSmeemo = state?.smeemo;
     if (!dismissedActive && !menuOpen && before?.id && before.id === after?.id && !layer.hidden) {
       const prior = Object.values(before.submissions || {}).filter(Boolean).length;
       const current = Object.values(after.submissions || {}).filter(Boolean).length;
@@ -199,13 +228,16 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     lastActiveStage = active;
     const activeSmeemo = active?.mode === "smeemo";
     if (!activeSmeemo || dismissedActive || menuOpen) {
+      impact.stop();
       window.clearTimeout(smeemoPhaseTimer);
       smeemoPhaseTimer = 0;
       smeemoScheduledSignal = "";
     }
     if (opened) {
+      impact.stop(); // No tail from a previous round may leak into this one.
       foley.stop("card-menu-hover");
-      foley.start("cards-motion", "deal");
+      if (!activeSmeemo) foley.start("cards-motion", "deal");
+      else foley.stop("cards-motion");
       menuOpen = false;
       dismissedActive = false;
       window.clearTimeout(menuTimer);
@@ -219,7 +251,14 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     // The menu has no saved-round controls. Background updates never rebuild it.
     if (menuOpen) return;
     if (dismissedActive || !active) layer.hidden = true;
-    else if (activeSmeemo) renderSmeemo(state.smeemo);
+    else if (activeSmeemo) {
+      const unchanged = !opened && !layer.hidden && previousSmeemo?.id === state.smeemo.id
+        && previousSmeemo.phase === state.smeemo.phase && previousSmeemo.status === state.smeemo.status
+        && JSON.stringify(previousSmeemo.draws) === JSON.stringify(state.smeemo.draws);
+      if (!unchanged) renderSmeemo(state.smeemo);
+      const event = smeemoImpactTransition(previousSmeemo, state.smeemo, opened);
+      if (event) impact.trigger(event);
+    }
     else renderRound(state.round);
   }
 
@@ -336,6 +375,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
   }
 
   function renderMenu() {
+    impact.stop();
     foley.stop("card-menu-hover");
     window.clearTimeout(menuTimer);
     menuTimer = 0;
@@ -599,6 +639,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       const isAvailable = game.phase === "ready" && game.status === "playing" && !revealed;
       const button = element("button", `rg-smeemo-card${showingFront ? " is-face-up" : " is-face-down"}${revealed ? " is-revealed" : ""}${isAvailable ? " is-available" : ""}${smeemoRevealed ? " is-smeemo" : ""}`);
       button.type = "button";
+      button.dataset.foley = "off"; // Only committed reveal emits the impact.
       button.disabled = game.phase !== "ready" || game.status !== "playing" || revealed;
       if (revealed && !priorReveals.has(card.id)) button.classList.add("is-newly-revealed");
       bindCardTilt(button);
@@ -626,11 +667,9 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       button.append(inner);
       button.addEventListener("click", () => runRoomMutation(() => {
         const latest = readCardGames(), current = latest.smeemo;
-        if (!current || current.id !== game.id) return;
+        if (dismissedActive || menuOpen || layer.hidden || layer.classList.contains("is-off-table") || !current || current.id !== game.id) return;
         const result = drawSmeemoCard(current, card.id);
         if (result.error) return;
-        foley.play("flip");
-        if (card.smeemo) foley.play("jackpot");
         sync({ ...latest, smeemo: result.game });
         window.queueMicrotask(() => content.querySelector(".rg-smeemo-card.is-available")?.focus({ preventScroll: true }));
       }));
@@ -749,6 +788,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
   revealButton.addEventListener("click", () => showAction(state.round?.phase === "reveal" ? "reveal" : "results", state.round?.id));
   layer.addEventListener("contextmenu", event => { event.preventDefault(); openHostPanel(menuOpen ? menuSelection || modeSelect.value : state.round?.mode); });
   resetButton.addEventListener("click", () => runRoomMutation(() => {
+    impact.stop();
     foley.stop("cards-motion");
     foley.play("erase");
     sync({ ...readCardGames(), round: null, smeemo: null });
@@ -767,6 +807,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     closeHostPanel();
   }));
   roomButton.addEventListener("click", () => {
+    impact.stop();
     foley.stop("card-menu-hover");
     foley.stop("cards-motion");
     menuOpen = false;
@@ -792,7 +833,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
   setDeckVisibility();
   subscribeCardGames(updateFromState);
   subscribeLiveTrivia(()=>network.publish());
-  window.addEventListener("rg:trivia-stage-open",()=>{ foley.stop("card-menu-hover"); menuOpen=false; dismissedActive=Boolean(activeCardStage(state)); window.clearTimeout(smeemoPhaseTimer); smeemoPhaseTimer=0; window.clearTimeout(menuTimer); menuTimer=0; layer.hidden=true; });
+  window.addEventListener("rg:trivia-stage-open",()=>{ impact.stop(); foley.stop("card-menu-hover"); menuOpen=false; dismissedActive=Boolean(activeCardStage(state)); window.clearTimeout(smeemoPhaseTimer); smeemoPhaseTimer=0; window.clearTimeout(menuTimer); menuTimer=0; layer.hidden=true; });
   subscribePointScores((scores) => {
     pointScores = scores;
     for (const [player, node] of shopBalanceNodes) node.textContent = `${playerNames[player]} ${scores[player]}`;

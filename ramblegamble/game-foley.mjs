@@ -32,6 +32,9 @@ export const FOLEY_CUES = Object.freeze({
   error: { files: ["error-1.ogg", "error-2.ogg"], fallback: ["switch.mp3"], volume: .30 },
   purchase: { files: ["chips-stack-1.ogg", "chips-stack-2.ogg"], fallback: ["chips-handle-1.ogg"], volume: .48 },
   diceFace: { files: ["die-grab-1.ogg", "die-grab-2.ogg"], fallback: ["card-place-1.ogg"], volume: .30 },
+  smeemoHit: { files: ["smeemo-hit.ogg"], fallback: ["chip-lay-1.ogg"], volume: .64, maxDuration: 1.1 },
+  smeemoRumble: { files: ["smeemo-rumble.ogg"], fallback: ["die-throw-1.ogg"], volume: .32, maxDuration: 1.1 },
+  smeemoWin: { files: ["jackpot.mp3"], fallback: ["settlement-cheer.ogg"], volume: .48, maxDuration: 3 },
   settlement: { files: ["settlement-cheer.ogg"], fallback: ["confirmation-2.ogg", "confirmation-1.ogg", "cheer.ogg"], volume: .67, maxDuration: 1.6 },
   portal: { files: ["maximize-1.ogg"], fallback: ["card-slide-1.ogg"], volume: .36 },
   portalExit: { files: ["minimize-1.ogg"], fallback: ["card-slide-2.ogg"], volume: .32 },
@@ -115,7 +118,7 @@ export function createFoley({
     try { storage?.setItem(STORAGE_KEY, muted ? "1" : "0"); } catch {}
     if (!muted) unlock();
   }
-  function play(name, { loop = false, volume = 1, channel = null, maxDelay = 350 } = {}) {
+  function play(name, { loop = false, volume = 1, channel = null, maxDelay = 350, rate = 1, endRate = rate } = {}) {
     const cue = FOLEY_CUES[name];
     if (cue) requestCount++;
     if (!cue || muted || isHidden()) return Promise.resolve(false);
@@ -148,6 +151,16 @@ export function createFoley({
       const gain = context.createGain();
       source.buffer = buffer;
       source.loop = loop;
+      // Resampling the recording changes pitch; no generated oscillator.
+      const safeRate = value => Math.max(.5, Math.min(2, Number.isFinite(value) ? value : 1));
+      const from = safeRate(rate), to = safeRate(endRate);
+      if (source.playbackRate) {
+        source.playbackRate.value = from;
+        if (from !== to) {
+          source.playbackRate.setValueAtTime(from, context.currentTime);
+          source.playbackRate.linearRampToValueAtTime(to, context.currentTime + Math.min(.30, (buffer.duration || .4) / Math.max(from, to) * .65));
+        }
+      }
       gain.gain.value = Math.max(0, Math.min(1, cue.volume * volume));
       source.connect(gain); gain.connect(master);
       const voice = { source, gain };
@@ -160,9 +173,11 @@ export function createFoley({
       };
       // The local celebration edit is already faded. Bound the duration of a
       // longer fallback (such as the full applause recording) as well.
-      if (!loop && Number.isFinite(cue.maxDuration) && buffer.duration > cue.maxDuration) {
+      if (!loop && Number.isFinite(cue.maxDuration) && buffer.duration / Math.min(from, to) > cue.maxDuration) {
         gain.gain.setTargetAtTime(0, context.currentTime + Math.max(0, cue.maxDuration - .35), .07);
-        source.start(0, 0, cue.maxDuration);
+        // start(duration) counts source seconds, not elapsed playback seconds.
+        if (from === 1 && to === 1) source.start(0, 0, cue.maxDuration);
+        else { source.start(); source.stop(context.currentTime + cue.maxDuration); }
       } else source.start();
       return true;
     }).catch(() => false).finally(() => {

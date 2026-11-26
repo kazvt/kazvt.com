@@ -1,7 +1,7 @@
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { createExteriorMist } from "./exterior-mist.mjs?v=exterior-mist-20261126-v1";
 import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=vip-focus-20261127-v1";
-import { foley } from "./game-foley.mjs?v=settlement-hover-20261127-v1";
+import { foley } from "./game-foley.mjs?v=smeemo-quake-20261127-v1";
 import {
   resolvePointClickAction,
   resolvePointClickBack,

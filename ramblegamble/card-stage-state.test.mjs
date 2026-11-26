@@ -34,6 +34,7 @@ import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
 import * as games from './card-games.mjs';
 import { applyCardShowAction } from './card-show-actions.mjs';
+import { smeemoImpactTransition } from './smeemo-impact.mjs';
 class FakeElement {
   constructor() { this.children=[]; this.dataset={}; this.hidden=false; this.value=''; this.events={}; this.attributes={}; this.style={setProperty(){},removeProperty(){}}; const classes=new Set(); this.classList={add:(...items)=>items.forEach(v=>classes.add(v)),remove:(...items)=>items.forEach(v=>classes.delete(v)),contains:v=>classes.has(v),toggle:(v,force= !classes.has(v))=>{if(force)classes.add(v);else classes.delete(v);}}; }
   append(...children){ this.children.push(...children); children.forEach(child=>child.parentElement=this); }
@@ -44,6 +45,7 @@ class FakeElement {
   click(){return this.events.click?.({});}
   querySelector(){return null;}
   focus(){}
+  getBoundingClientRect(){return {left:0,width:100};}
 }
 function mountUI(saved, initialPoints = {kaz:0,faroe:0,erin:0}) {
   const els=new Map();
@@ -52,14 +54,14 @@ function mountUI(saved, initialPoints = {kaz:0,faroe:0,erin:0}) {
   get('#rg-card-games-layer').querySelector=get;
   get('#rg-card-mode').value='shop'; get('#rg-card-player').value='kaz';
   let data=normalizeCardGamesState(saved), subscriber, pointsSubscriber, balances={...initialPoints}, failPoints=false, failCards=false;
-  const calls=[], sounds=[];
+  const calls=[], sounds=[], impacts=[];
   const listeners=new Map();
   const timers=new Map();let timerId=0;
-  const window={matchMedia:()=>({matches:true}), clearTimeout(id){timers.delete(id);},setTimeout(fn){timers.set(++timerId,fn);return timerId;},addEventListener:(type,fn)=>listeners.set(type,fn),dispatchEvent(event){calls.push(event.type);listeners.get(event.type)?.(event);}};
+  const window={queueMicrotask:fn=>fn(),matchMedia:()=>({matches:true}), clearTimeout(id){timers.delete(id);},setTimeout(fn){timers.set(++timerId,fn);return timerId;},addEventListener:(type,fn)=>listeners.set(type,fn),dispatchEvent(event){calls.push(event.type);listeners.get(event.type)?.(event);}};
   class FakeEvent {constructor(type,opts={}){this.type=type;this.detail=opts.detail;}}
   const code=readFileSync(new URL('./card-games-ui.js',import.meta.url),'utf8').replace(/^import\s+[\s\S]*?;\n/gm,'');
-  vm.runInNewContext(code,{...games,applyCardShowAction,activeCardStage,cardStageChange,window,document:{querySelector:get,querySelectorAll:()=>[],createElement:()=>new FakeElement()},CustomEvent:FakeEvent,Event:FakeEvent,readCardGames:()=>data,writeCardGames:value=>failCards?{state:data,persisted:false}:({state:data=normalizeCardGamesState(value),persisted:true}),subscribeLiveTrivia:()=>{},activeRoomRound:()=>data.round,subscribeCardGames:fn=>{subscriber=fn;fn(data);},readPointScores:()=>({...balances}),writePointScores:value=>{if(failPoints)return {scores:{...balances},persisted:false};balances={...value};pointsSubscriber?.({...balances});return {scores:{...balances},persisted:true};},subscribePointScores:fn=>{pointsSubscriber=fn;fn({...balances});},withPointScoresLock:async fn=>fn(),mountCardRoom:()=>({publish(){}}),foley:{start(channel,cue){sounds.push(cue);},stop(){},play(cue){sounds.push(cue);}},withRoomSubmissionLock:async fn=>fn()});
-  return {get,calls,sounds,window,get state(){return data;},get balances(){return balances;},setPoints(next){balances={...next};pointsSubscriber({...balances});},blockPoints(value){failPoints=value;},blockCards(value){failCards=value;},update(next){data=normalizeCardGamesState(next);subscriber(data);},flushTimers(){for(const [id,fn] of [...timers]){timers.delete(id);fn();}}};
+  vm.runInNewContext(code,{...games,applyCardShowAction,activeCardStage,cardStageChange,smeemoImpactTransition,createSmeemoImpact:()=>({trigger:event=>impacts.push(event),stop(){}}),window,document:{querySelector:get,querySelectorAll:()=>[],createElement:()=>new FakeElement(),addEventListener(){}},CustomEvent:FakeEvent,Event:FakeEvent,readCardGames:()=>data,writeCardGames:value=>failCards?{state:data,persisted:false}:({state:data=normalizeCardGamesState(value),persisted:true}),subscribeLiveTrivia:()=>{},activeRoomRound:()=>data.round,subscribeCardGames:fn=>{subscriber=fn;fn(data);},readPointScores:()=>({...balances}),writePointScores:value=>{if(failPoints)return {scores:{...balances},persisted:false};balances={...value};pointsSubscriber?.({...balances});return {scores:{...balances},persisted:true};},subscribePointScores:fn=>{pointsSubscriber=fn;fn({...balances});},withPointScoresLock:async fn=>fn(),mountCardRoom:()=>({publish(){}}),foley:{start(channel,cue){sounds.push(cue);},stop(){},play(cue){sounds.push(cue);}},withRoomSubmissionLock:async fn=>fn()});
+  return {get,calls,sounds,impacts,window,get state(){return data;},get balances(){return balances;},setPoints(next){balances={...next};pointsSubscriber({...balances});},blockPoints(value){failPoints=value;},blockCards(value){failCards=value;},update(next){data=normalizeCardGamesState(next);subscriber(data);},flushTimers(){for(const [id,fn] of [...timers]){timers.delete(id);fn();}}};
 }
 test('restored shop stays hidden, menu has only three choices, and choosing Shop starts fresh',async()=>{
   const round=createShopRound(decks);
@@ -218,4 +220,29 @@ test('Smeemo image is present only for the revealed winning card',()=>{
   assert.equal(findClass(content,'rg-smeemo-berry-mark'),undefined);
   const winner=game.cards.find(c=>c.smeemo);ui.update({smeemo:games.drawSmeemoCard(game,winner.id).game});
   assert.ok(findClass(content,'rg-smeemo-berry-mark').src.endsWith('/smeemo-card-mark.png'));
+});
+
+test('Smeemo impacts follow committed starts and reveals, not phase changes, echoes or dismissed updates',()=>{
+  let game=createSmeemoGame();const ui=mountUI({});ui.update({smeemo:game});
+  assert.deepEqual(ui.impacts,[{kind:'start',count:0}]);
+  for(const phase of ['preview','stacking','stacked','dealing']) {game=games.advanceSmeemoPhase(game,phase);ui.update({smeemo:game});}
+  assert.equal(ui.impacts.length,1);
+  const blank=game.cards.find(c=>!c.smeemo);game=games.drawSmeemoCard(game,blank.id).game;ui.update({smeemo:game});
+  assert.deepEqual(ui.impacts.at(-1),{kind:'reveal',count:1});
+  const board=ui.get('#rg-card-games-content').children[0];ui.update({smeemo:game});
+  assert.equal(ui.get('#rg-card-games-content').children[0],board);assert.equal(ui.impacts.length,2);
+  ui.get('#rg-card-room').click();ui.update({smeemo:games.drawSmeemoCard(game,game.cards.find(c=>c.smeemo).id).game});assert.equal(ui.impacts.length,2);
+  const restored=mountUI({smeemo:game});assert.equal(restored.impacts.length,0);
+});
+
+test('actual Smeemo click produces no impact on failed persistence or duplicate reveal',async()=>{
+  let game=createSmeemoGame();for(const phase of ['preview','stacking','stacked','dealing'])game=games.advanceSmeemoPhase(game,phase);
+  const ui=mountUI({});ui.update({smeemo:game});
+  const content=ui.get('#rg-card-games-content');const index=game.cards.findIndex(c=>!c.smeemo);
+  const card=content.children[0].children[0].children[0].children[index];
+  ui.blockCards(true);await card.click();await Promise.resolve();assert.equal(ui.impacts.length,1);assert.equal(ui.state.smeemo.draws.length,0);
+  ui.blockCards(false);await card.click();await Promise.resolve();assert.equal(ui.impacts.length,2);assert.equal(ui.state.smeemo.draws.length,1);
+  await card.click();await Promise.resolve();assert.equal(ui.impacts.length,2);assert.equal(ui.state.smeemo.draws.length,1);
+  const winnerIndex=game.cards.findIndex(c=>c.smeemo);const winner=content.children[0].children[0].children[0].children[winnerIndex];
+  await winner.click();await Promise.resolve();assert.equal(ui.impacts.length,3);assert.deepEqual(ui.impacts.at(-1),{kind:'win',count:2});
 });
