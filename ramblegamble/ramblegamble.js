@@ -1198,7 +1198,7 @@ import {
       )
       : 1;
     distance = Math.max(distance, 1)
-      * (view.kind === "overview" ? 1.14 : view.kind === "card-table" ? 1.12 : 1.18)
+      * (view.kind === "overview" ? 1.14 : view.kind === "card-table" ? 1.12 : view.kind === "roulette" ? 1.06 : 1.18)
       * overviewDistanceScale;
     return { target, position: target.clone().addScaledVector(direction, distance) };
   }
@@ -1263,7 +1263,8 @@ import {
     }
     if (view.kind === "roulette" && rouletteRig) {
       bounds.setFromObject(rouletteRig);
-      return bounds.expandByScalar(0.38);
+      // A tighter close-up keeps the whole wheel in frame without excess floor.
+      return bounds.expandByScalar(0.06);
     }
     if (view.kind === "card-table" && cardTableModel) {
       bounds.setFromObject(cardTableModel);

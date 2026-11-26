@@ -100,3 +100,27 @@ test('all five bottom arrows stay aligned between the actual reel and spin butto
  assert.match(source,/y: bottom \+ cellHeight \* 0\.5/);
  assert.match(source,/fitSlotColumnArrow\(\{ x: toScreen/);
 });
+
+test('closer roulette camera retains the entire supplied wheel across viewport sizes and look angles',()=>{
+ const m=model('rg_roulette');
+ const points=m.d.nodes.filter(n=>n.mesh!==undefined).flatMap(n=>{
+  const index=m.d.nodes.indexOf(n), parent=m.d.nodes.find(p=>p.children?.includes(index));
+  return nodePoints(m,n).map(p=>mul(add(rotateQuaternion(p,parent?.rotation),parent?.translation||[0,0,0]),.13));
+ });
+ const wheel=box(points),tan=Math.tan(42*Math.PI/360);
+ const source=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
+ assert.match(source,/if \(view.kind === "roulette" && rouletteRig\) \{\s*bounds.setFromObject\(rouletteRig\);[^}]*return bounds.expandByScalar\(0\.06\)/);
+ assert.match(source,/view.kind === "roulette" \? 1\.06 : 1\.18/);
+ for(const [w,h] of [[1366,668],[803,395],[1920,1080],[360,640],[320,240],[2560,720]]) for(const look of [-1,0,1]){
+  const b=basis(-.38-look*.42,.86),p=relative(points,wheel.center,b);
+  const fit=(padding,scale)=>{
+   const expanded=wheel.corners.map(p=>p.map((v,i)=>v+(v<wheel.center[i]?-padding:padding)));
+   const corners=relative(expanded,wheel.center,b);
+   const distance=Math.max(1,...corners.map(p=>Math.max(Math.abs(p.x)/(tan*w/h),Math.abs(p.y)/tan)+p.z))*scale;
+   return {distance,shiftX:0,shiftY:0};
+  };
+  const old=project(p,fit(.38,1.18),w,h),updated=project(p,fit(.06,1.06),w,h);
+  for(const [x,y,depth] of updated){assert.ok(depth>.1);assert.ok(Math.abs(x)<.98);assert.ok(Math.abs(y)<.98);}
+  assert.ok(span(updated,1)>span(old,1)*1.12,`wheel should be noticeably larger at ${w}x${h}, look ${look}`);
+ }
+});
