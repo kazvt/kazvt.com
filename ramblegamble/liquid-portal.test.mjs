@@ -290,7 +290,7 @@ test("scene wiring preloads one plane, updates it before every room render, and 
   assert.match(js, /liquidPortal\?\.dispose\(\)/);
   assert.match(css, /#rg-canvas \{[^}]*z-index: 1;/);
   assert.match(css, /\.rg-liquid-portal-layer \{[^}]*z-index: 0;[^}]*pointer-events: none;/);
-  assert.match(readFileSync(new URL("./host-access.mjs", import.meta.url), "utf8"), /ramblegamble\.js\?v=card-score-sync-20261127-v1/);
+  assert.match(readFileSync(new URL("./host-access.mjs", import.meta.url), "utf8"), /ramblegamble\.js\?v=settlement-hover-20261127-v1/);
   assert.match(html, /ramblegamble\.css\?v=dice-impact-20261127-v1/);
 });
 
@@ -351,6 +351,6 @@ test("VIP doorway has 80% opacity and Dice liquid has 50% opacity over a neutral
   f.dispose();
   const gate = readFileSync(new URL("./host-access.mjs", import.meta.url), "utf8");
   const html = readFileSync(new URL("../rg/index.html", import.meta.url), "utf8");
-  assert.match(gate, /dice-mode\.js\?v=dice-impact-20261127-v1/);
-  assert.match(html, /host-access\.mjs\?v=card-score-sync-20261127-v1/);
+  assert.match(gate, /dice-mode\.js\?v=settlement-hover-20261127-v1/);
+  assert.match(html, /host-access\.mjs\?v=settlement-hover-20261127-v1/);
 });

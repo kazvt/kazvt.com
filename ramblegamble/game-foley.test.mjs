@@ -11,7 +11,7 @@ function fixture({ fetchFile, hidden = () => false } = {}) {
     createGain() { return { gain: parameter(), connect() {}, disconnect() {} }; }
     createDynamicsCompressor() { return { threshold: parameter(), ratio: parameter(), connect() {} }; }
     async decodeAudioData(data) { return data; }
-    createBufferSource() { return { connect() {}, disconnect() {}, start() { started.push(this); }, stop() { stopped.push(this); this.onended?.(); } }; }
+    createBufferSource() { return { connect() {}, disconnect() {}, start(...args) { this.startArgs=args; started.push(this); }, stop() { stopped.push(this); this.onended?.(); } }; }
   }
   const mixer = createFoley({ AudioContext: Context, now: () => clock, random: () => 0, isHidden: hidden,
     fetchFile: fetchFile || (async url => ({ ok: true, arrayBuffer: async () => url.pathname })), });
@@ -104,4 +104,14 @@ test('voice cap does not discard active spin loop',async()=>{
 });
 test('applause uses existing bundled file rather than installer directory',async()=>{
   const f=fixture();await f.mixer.play('cheer');assert.match(f.started[0].buffer,/assets\/sfx\/cheer\.ogg$/);
+});
+
+test('settlement uses the bundled edited recording and is cancellable before decode',async()=>{
+ const f=fixture();const pending=f.mixer.start('dice-settlement','settlement');f.mixer.stop('dice-settlement');assert.equal(await pending,false);assert.equal(f.started.length,0);
+ assert.equal(await f.mixer.start('dice-settlement','settlement'),true);assert.match(f.started[0].buffer,/settlement-cheer\.ogg$/);assert.deepEqual(f.started[0].startArgs,[]);
+ f.mixer.stop('dice-settlement');assert.equal(f.stopped.length,1);
+});
+test('settlement can use original bundled applause if the edited clip is missing, but caps its duration',async()=>{
+ const f=fixture({fetchFile:async url=>({ok:url.pathname.endsWith('/sfx/cheer.ogg'),arrayBuffer:async()=>({duration:8.6,path:url.pathname})})});
+ assert.equal(await f.mixer.start('roulette-settlement','settlement'),true);assert.match(f.started[0].buffer.path,/sfx\/cheer\.ogg$/);assert.deepEqual(f.started[0].startArgs,[0,0,1.6]);
 });

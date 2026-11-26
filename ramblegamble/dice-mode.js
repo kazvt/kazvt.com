@@ -1,6 +1,6 @@
-import { createFocusOrbit, orbitPosition, bindFocusDrag } from "./focus-orbit.mjs?v=show-stage-20261126-v1";
+import { createFocusOrbit, orbitPosition, bindFocusDrag } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { VIP_LIQUID_SOURCE } from "./vip-liquid-preset.mjs?v=vip-black-liquid-20261126-v1";
-import { foley } from "./game-foley.mjs?v=expanded-foley-20261126-v1";
+import { foley } from "./game-foley.mjs?v=settlement-hover-20261127-v1";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import {
@@ -63,8 +63,11 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
     dialog.classList.toggle("is-staff", visible);
   }
   const diceDrag = bindFocusDrag(dialog, {
-    enabled: event => isOpen && !isClosing && !event.target.closest?.("button, .rg-die-picker") && !document.documentElement.hasAttribute("data-rg-host-locked"),
+    enabled: event => isOpen && !isClosing && !graphicsLost && !document.hidden && !event.target.closest?.("button, .rg-die-picker") && !document.documentElement.hasAttribute("data-rg-host-locked"),
+    hoverEnabled: event => isOpen && !isClosing && !graphicsLost && !document.hidden && !reducedMotion.matches
+      && !event.target.closest?.("button, .rg-die-picker") && !document.documentElement.hasAttribute("data-rg-host-locked"),
     move: (dx,dy) => diceOrbit.nudge(dx,dy), onMove: ensureRenderLoop,
+    follow: (x,y) => diceOrbit.follow(x,y), hold: () => diceOrbit.hold(), onHover: ensureRenderLoop,
   });
 
   function makeFaceButton(dieState, face, faceIndex, parent) {
@@ -252,7 +255,7 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
       event.preventDefault();
       graphicsLost = true;
       cancelAnimationFrame(frame); frame = 0; previousFrameTime = null;
-      foley.stop("dice-grab"); foley.stop("dice-impact");
+      foley.stop("dice-grab"); foley.stop("dice-impact"); foley.stop("dice-settlement");
       rollButton.disabled = true;
       status.dataset.state = "error";
       status.textContent = "DICE PAUSED - GRAPHICS CONTEXT LOST";
@@ -297,6 +300,7 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
   }
 
   function setRollResults() {
+    if (!rolling || activeRolls.length !== dieStates.length) return;
     lastFaces = [];
     const labels = activeRolls.map(({ body, dieState }, index) => {
       const faceIndex = getUpwardFaceIndex(body.quaternion, DICE_FACE_ORDER);
@@ -306,7 +310,8 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
       return asset;
     });
     foley.stop("dice-grab");
-    foley.play("diceLand");
+    foley.stop("dice-impact");
+    foley.start("dice-settlement", "settlement");
     rolling = false;
     activeRolls = [];
     previousFrameTime = null;
@@ -343,6 +348,7 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
   function startRoll() {
     if (rolling || !isOpen || isClosing || graphicsLost || !renderer || !CANNON || !physicsWorld
       || dieStates.some(({ body, stickers }) => !body || stickers.length !== DICE_FACE_ORDER.length)) return;
+    foley.stop("dice-settlement");
     rolling = true; lastFaces = null;
     effects?.clear();
     pendingImpacts.clear(); previousImpulses.clear();
@@ -411,7 +417,7 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
   // Exceptional simulation failure is an explicit retry, never a made-up face.
   function abortRoll() {
     rolling=false; lastFaces=null; activeRolls=[]; pendingImpacts.clear(); previousImpulses.clear(); effects?.clear();
-    foley.stop("dice-grab"); foley.stop("dice-impact");
+    foley.stop("dice-grab"); foley.stop("dice-impact"); foley.stop("dice-settlement");
     for (const {body,group,throwOrigin} of dieStates) {
       if (!body) continue;
       prepareDiceBodyForThrow(CANNON,body,{position:throwOrigin,quaternion:[0,0,0,1],velocity:[0,0,0],angularVelocity:[0,0,0]});
@@ -509,7 +515,7 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
     previousFrameTime = null;
     if (dialog.open) dialog.close();
     dialog.classList.remove("rg-dice-entering", "rg-dice-exiting");
-    setStaffVisible(false); diceDrag.reset();
+    setStaffVisible(false); diceDrag.reset(); foley.stop("dice-settlement");
     effects?.clear(); pendingImpacts.clear(); previousImpulses.clear();
     liquid.removeAttribute("src");
     document.body.classList.remove("rg-dice-mode-open");
@@ -555,6 +561,7 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
     effects?.clear(); pendingImpacts.clear(); previousImpulses.clear();
     foley.stop("dice-grab");
     foley.stop("dice-impact");
+    foley.stop("dice-settlement");
     foley.play("portalExit");
     dialog.classList.remove("rg-dice-entering");
     dialog.classList.add("rg-dice-exiting");
@@ -578,11 +585,12 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
     if(event.shiftKey && event.key.toLowerCase()==="d") {event.preventDefault();setStaffVisible(!dialog.classList.contains("is-staff"));}
     else if(event.target === dialog || event.target === returnButton) {
       const moves={ArrowLeft:[.012,0],ArrowRight:[-.012,0],ArrowUp:[0,.012],ArrowDown:[0,-.012]};
-      if(moves[event.key]) {event.preventDefault();diceOrbit.nudge(...moves[event.key]);ensureRenderLoop();}
+      if(moves[event.key]) {event.preventDefault();diceDrag.stopFollowing();diceOrbit.nudge(...moves[event.key]);ensureRenderLoop();}
     }
   });
   dialog.addEventListener("close", () => { if (isOpen && !dialog.open) { isClosing=true; finishClosingDiceMode(); } });
-  reducedMotion.addEventListener?.("change", ensureRenderLoop);
+  reducedMotion.addEventListener?.("change", () => { if (reducedMotion.matches) diceDrag.clearHover(); ensureRenderLoop(); });
+  window.addEventListener("blur", () => diceDrag.clearHover());
   dialog.addEventListener("cancel", (event) => {
     event.preventDefault();
     closeDiceMode();
@@ -591,11 +599,12 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
   window.addEventListener("rg:close-dice-mode", closeDiceMode);
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
+      diceDrag.clearHover();
       cancelAnimationFrame(frame);
       frame = 0;
       previousFrameTime = null;
       pendingImpacts.clear(); previousImpulses.clear();
-      foley.stop("dice-grab"); foley.stop("dice-impact");
+      foley.stop("dice-grab"); foley.stop("dice-impact"); foley.stop("dice-settlement");
     } else {
       previousFrameTime = null;
       ensureRenderLoop();

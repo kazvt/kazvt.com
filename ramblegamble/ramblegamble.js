@@ -1,7 +1,7 @@
-import { createFocusOrbit, orbitPosition, bindFocusDrag } from "./focus-orbit.mjs?v=show-stage-20261126-v1";
+import { createFocusOrbit, orbitPosition, bindFocusDrag } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { createExteriorMist } from "./exterior-mist.mjs?v=exterior-mist-20261126-v1";
 import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS } from "./arcade-framing.mjs?v=bottom-column-arrows-20261126-v1";
-import { foley } from "./game-foley.mjs?v=expanded-foley-20261126-v1";
+import { foley } from "./game-foley.mjs?v=settlement-hover-20261127-v1";
 import {
   resolvePointClickAction,
   resolvePointClickBack,
@@ -184,6 +184,7 @@ import {
   const focusOrbit = createFocusOrbit();
   let focusBase = null;
   let focusDrag = null;
+  let lastScenePointer = null;
   let overviewCameraBounds = null;
   let pendingCardGameMode = "";
   let pendingTrivia = false;
@@ -235,11 +236,17 @@ import {
     return pickQuestion(readSessionQuestionBank());
   }
 
-  function finishTurn() {
+  function finishTurn({ settled = false, audible = false } = {}) {
     foley.stop("roulette");
-    if (!pauseMenuOpen) foley.play("ball");
+    const visible = gameStarted && !pauseMenuOpen && !diceModeOpen && !document.hidden
+      && currentView.kind === "roulette" && !document.documentElement.hasAttribute("data-rg-host-locked");
+    // This is a completed spin, not a claim that a player won points.
+    if (settled && audible && visible) {
+      foley.start("roulette-landing", "ball", { volume: .65 });
+      foley.start("roulette-settlement", "settlement");
+    }
     const prompt = nextHostQuestion();
-    if (prompt && !pauseMenuOpen) foley.play("question", { volume: .55 });
+    if (prompt && !settled && visible) foley.play("question", { volume: .55 });
     slotResultToken += 1;
     window.clearTimeout(slotResultTimeout);
     slotResultTimeout = 0;
@@ -283,11 +290,16 @@ import {
     }, 3200);
   }
 
+  function stopRouletteSettlement() {
+    foley.stop("roulette-landing"); foley.stop("roulette-settlement");
+  }
+
   function startWheelSpin() {
     if (!beginTurn("wheel")) return;
+    stopRouletteSettlement();
     foley.play("switch");
     foley.start("roulette", "wheel", { loop: true });
-    if (!wheelPivot || !ballPivot) {
+    if (!wheelPivot || !ballPivot || !ballOrbitObject) {
       wheelMotion = { started: performance.now(), duration: 700, wheelFrom: 0, wheelTo: 0, ballFrom: 0, ballTo: 0 };
       return;
     }
@@ -1366,7 +1378,8 @@ import {
   }
 
   function transitionToView(nextView, { immediate = false } = {}) {
-    hideGameCursor();
+    hideGameCursor(); lastScenePointer = null;
+    if (nextView.kind !== "roulette") stopRouletteSettlement();
     if (!immediate && sceneReady && (currentView.kind !== nextView.kind || currentView.look !== (nextView.look ?? 0) || currentView.contestantId !== nextView.contestantId)) foley.play(nextView.kind === "overview" ? "back" : "navigate");
     currentView = { ...nextView, look: nextView.kind === "overview" ? nextView.look ?? 0 : 0 };
     focusOrbit.reset(currentView.kind);
@@ -1391,7 +1404,7 @@ import {
   }
 
   function setLookDirection(look) {
-    if (currentView.kind !== "overview") { focusOrbit.nudge(-look * .012, 0); return; }
+    if (currentView.kind !== "overview") { focusDrag?.stopFollowing(); focusOrbit.nudge(-look * .012, 0); return; }
     if (currentView.look === look) return;
     transitionToView({ ...currentView, look });
   }
@@ -2120,6 +2133,7 @@ import {
   function showPauseMenu() {
     if (pauseMenuOpen) return;
     foley.stopAll();
+    focusDrag?.clearHover(); lastScenePointer = null;
     foley.play("close");
     gameStarted = false;
     pauseMenuOpen = true;
@@ -2309,15 +2323,22 @@ import {
     else if (action === "show-trivia") window.dispatchEvent(new Event("rg:show-latest-trivia"));
   }
 
+  const canOrbit = () => gameStarted && sceneReady && !pauseMenuOpen && !diceModeOpen && !cameraTransition
+    && currentView.kind !== "overview" && !document.hidden && !document.querySelector("dialog[open]") && !document.documentElement.hasAttribute("data-rg-host-locked");
   focusDrag = bindFocusDrag(canvas, {
-    enabled: () => gameStarted && sceneReady && !pauseMenuOpen && !diceModeOpen && !cameraTransition
-      && currentView.kind !== "overview" && !document.querySelector("dialog[open]") && !document.documentElement.hasAttribute("data-rg-host-locked"),
+    enabled: canOrbit, hoverSurface: preview,
+    hoverEnabled: event => canOrbit() && !reducedMotion.matches && !event.target?.closest?.("button, input, select, textarea, a, [role=button], [contenteditable]"),
     move: (dx,dy) => focusOrbit.nudge(dx,dy),
+    follow: (x,y) => focusOrbit.follow(x,y), hold: () => focusOrbit.hold(),
     onMove: hideGameCursor,
   });
-  canvas.addEventListener("pointerenter", updatePointer);
-  canvas.addEventListener("pointermove", updatePointer);
-  canvas.addEventListener("pointercancel", hideGameCursor);
+  const rememberPointer = event => { lastScenePointer = event; updatePointer(event); };
+  canvas.addEventListener("pointerenter", rememberPointer);
+  canvas.addEventListener("pointermove", rememberPointer);
+  canvas.addEventListener("pointerdown", () => { lastScenePointer = null; });
+  canvas.addEventListener("pointerup", rememberPointer);
+  canvas.addEventListener("pointercancel", () => { lastScenePointer = null; hideGameCursor(); });
+  reducedMotion.addEventListener?.("change", () => { if (reducedMotion.matches) focusDrag.clearHover(); });
   canvas.addEventListener("click", (event) => {
     if (event.button === 0 && !focusDrag.consumeClick()) pointClickAt(event.clientX, event.clientY);
   });
@@ -2350,12 +2371,13 @@ import {
     window.dispatchEvent(new CustomEvent("rg:slot-symbol-removed", { detail: { index } }));
   });
   canvas.addEventListener("pointerleave", () => {
+    lastScenePointer = null;
     slotHoverLine = null;
     slotHoverCell = -1;
     drawSlotReelDisplay();
     hideGameCursor();
   });
-  window.addEventListener("blur", hideGameCursor);
+  window.addEventListener("blur", () => { focusDrag.clearHover(); lastScenePointer = null; hideGameCursor(); });
 
   window.addEventListener("rg:dice-mode-state", (event) => {
     const open = Boolean(event.detail?.open);
@@ -2369,6 +2391,7 @@ import {
     }
     updateLiquidPortal();
     if (open) {
+      focusDrag.clearHover(); lastScenePointer = null; stopRouletteSettlement();
       diceModeVisibility = [stageModel, rouletteRig, slotRig, exteriorMist?.group]
         .filter(Boolean)
         .map((object) => [object, object.visible]);
@@ -2380,6 +2403,7 @@ import {
     } else {
       for (const [object, visible] of diceModeVisibility || []) object.visible = visible;
       diceModeVisibility = null;
+      suppressElapsedWheelCue();
       billboardLayer.classList.remove("rg-billboards-fading");
       preview.classList.remove("is-dice-mode");
       camera.updateMatrixWorld(true);
@@ -2419,8 +2443,8 @@ import {
     else if (key === "3") transitionToView({ kind: "roulette" });
     else if (key === "arrowleft") setLookDirection(-1);
     else if (key === "arrowright") setLookDirection(1);
-    else if (key === "arrowup" && currentView.kind !== "overview") focusOrbit.nudge(0,.012);
-    else if (key === "arrowdown" && event.shiftKey && currentView.kind !== "overview") focusOrbit.nudge(0,-.012);
+    else if (key === "arrowup" && currentView.kind !== "overview") { focusDrag.stopFollowing(); focusOrbit.nudge(0,.012); }
+    else if (key === "arrowdown" && event.shiftKey && currentView.kind !== "overview") { focusDrag.stopFollowing(); focusOrbit.nudge(0,-.012); }
     else if (key === "arrowdown" || key === "backspace") goBack();
     else if (key === "enter" || key === " ") {
       const bounds = canvas.getBoundingClientRect();
@@ -2599,11 +2623,14 @@ import {
     if (!renderer || !scene || !camera) return;
 
     updateCameraTransition(time);
-    if (!cameraTransition && focusBase && currentView.kind !== "overview" && gameStarted && !pauseMenuOpen && !diceModeOpen && !document.documentElement.hasAttribute("data-rg-host-locked")) {
-      const {yaw,pitch} = focusOrbit.step(time, reducedMotion.matches);
+    if (focusBase && canOrbit()) {
+      const {yaw,pitch,moving} = focusOrbit.step(time, reducedMotion.matches);
       const pos = orbitPosition(focusBase, cameraTarget, yaw, pitch);
+      const changed = camera.position.x !== pos.x || camera.position.y !== pos.y || camera.position.z !== pos.z;
       camera.position.set(pos.x,pos.y,pos.z);
       camera.lookAt(cameraTarget); camera.updateMatrixWorld(true);
+      // Re-pick under a stationary cursor as the damped camera moves, including its final frame.
+      if ((changed || moving) && lastScenePointer && !lastScenePointer.buttons) updatePointer(lastScenePointer);
     }
     preview.classList.toggle("is-trivia",currentView.kind === "trivia");
     if (triviaLayer) triviaLayer.hidden = !(gameStarted && !pauseMenuOpen && !diceModeOpen && sceneReady && !cameraTransition && currentView.kind === "trivia" && triviaLayer.dataset.ready === "true");
@@ -2625,7 +2652,7 @@ import {
       updateSlotPlacementControlProjection();
     }
 
-    if (wheelMotion && wheelPivot && ballPivot) {
+    if (wheelMotion && wheelPivot && ballPivot && ballOrbitObject && Number.isFinite(wheelMotion.ballAngle)) {
       const progress = Math.min(1, (time - wheelMotion.started) / wheelMotion.duration);
       const ease = 1 - Math.pow(1 - progress, 4.6);
       wheelPivot.rotation.y = THREE.MathUtils.lerp(wheelMotion.wheelFrom, wheelMotion.wheelTo, ease);
@@ -2659,8 +2686,9 @@ import {
           const landingPosition = rouletteBallPositionAtRadius(ballOrbitObject.position, ROULETTE_BALL_LANDING_RADIUS);
           if (landingPosition) ballOrbitObject.position.set(landingPosition.x, ROULETTE_BALL_LANDING_HEIGHT, landingPosition.z);
         }
+        const audible = !wheelMotion.silentCompletion;
         wheelMotion = null;
-        finishTurn();
+        finishTurn({ settled: true, audible });
       }
     } else if (wheelMotion && time - wheelMotion.started >= wheelMotion.duration) {
       wheelMotion = null;
@@ -2790,13 +2818,20 @@ import {
 
   boot();
 
+  // The animation clock advances while hidden; do not celebrate a round that
+  // completed off-screen. Foreground frame hitches, however, are real landings.
+  function suppressElapsedWheelCue() {
+    if (wheelMotion && performance.now() >= wheelMotion.started + wheelMotion.duration) wheelMotion.silentCompletion = true;
+  }
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
+      focusDrag?.clearHover(); lastScenePointer = null;
       endSlotCelebration(false);
       liquidPortal?.setActive(false);
       cancelAnimationFrame(animationFrame);
       animationFrame = 0;
     } else if ((gameStarted || pauseMenuOpen) && renderer && !animationFrame) {
+      suppressElapsedWheelCue();
       animationFrame = requestAnimationFrame(animate);
     }
   });

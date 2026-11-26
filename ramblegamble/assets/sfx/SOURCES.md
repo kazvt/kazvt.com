@@ -25,6 +25,7 @@ Missing or undecodable effects use the listed fallback where available; gameplay
 | Local file(s) | Original source | License and use |
 |---|---|---|
 | `cheer.ogg` (bundled, parent directory) | [Conference audience clapping strongly, Mixkit #476](https://mixkit.co/free-sound-effects/clapping/) | [Mixkit Free License](https://mixkit.co/license/), applause in this game, not standalone stock redistribution |
+| `settlement-cheer.ogg` | Edited from the bundled `cheer.ogg` (Mixkit #476 above) | 1.55-second excerpt with short attack and fade-out; included in the game patch, no installer download needed. |
 | `switch.mp3` | [Mechanical Switch — Crinkem](https://freesound.org/people/Crinkem/sounds/496328/) | CC0, physical machine button |
 | `lever.mp3` | [Mechanical switch (latch) 01 — xkeril](https://freesound.org/people/xkeril/sounds/815492/) | CC0, mechanical crank proxy |
 | `reel.mp3` | [Spinning ratchet (SoundAction 116) — Alexander Refsum Jensenius (alexarje)](https://freesound.org/people/alexarje/sounds/863094/) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), older physical spin fallback; gain, loop and fades applied at playback |
@@ -39,11 +40,11 @@ CC0: https://creativecommons.org/publicdomain/zero/1.0/ . Keep the CC BY credit 
 ## Cue design and timing
 
 - **Slots:** physical crank/press, berry selection, star glass chime, removal, arpeggio for row/column/all-line motion, a tick at every actual line stop, chip payout, distinct large-win chime. Failed/no-op actions do not trigger spins or reward sounds.
-- **Roulette:** physical start, rolling-ball loop, rate-limited hard contact ticks during inward settling and landing clack. A question cue only when a question is actually produced.
+- **Roulette:** physical start, rolling-ball loop, rate-limited hard contact ticks during inward settling and a landing clack plus the shared short applause at the committed final pocket pose. The question prompt remains visible; the celebration replaces its generic question cue on a real spin. Off-screen, hidden, locked and missing-model completions do not celebrate.
 - **Cards:** opening fan, menu flip, deal/stack shuffle, accepted submission drop, final answers fan, vote pluck, reveal/confirmation, shop card flip and chip stack purchase; errors distinct. Submissions are observed on the visible display using state changes (including console-reader deliveries), not repeated on every redraw.
-- **VIP Dice:** portal open/exit, dice selection/grab, collision-strength-scaled impacts, confirmation at rest. Existing collision physics remain authoritative.
+- **VIP Dice:** portal open/exit, dice selection/grab, collision-strength-scaled impacts, the same short applause only when both dice sleep and the upward faces are committed. Stop rolling/impact audio first; cancel settlement playback on reroll, close, hide or graphics loss. Existing collision physics remain authoritative.
 - **Trivia / player activities:** question presentation, sequence changes, selection, submission and receipt, wrong/correct feedback, placement/removal, drawing stroke start, undo/clear, JSON handoff. The former oscillator error tone has been removed. Contestant pages have a compact Sound checkbox. No staff-only solutions or answer content is transmitted by audio logic.
-- **Scene and interface:** navigation, back, menus, tabs, selections, switches and ordinary button activation. Explicit game actions take precedence over the generic low-level click. Mouse movement, typing, passive rerenders, empty-space clicks and unsolicited background restoration remain quiet. The separate text console stays quiet to avoid doubling stream audio; game events it sends to the display still use the display's cues.
+- **Scene and interface:** navigation, back, menus, tabs, selections, switches and ordinary button activation. Explicit game actions take precedence over the generic low-level click. Ordinary scene mouse movement, typing, passive rerenders, empty-space clicks and unsolicited background restoration remain quiet (card menu retains its existing explicit hover sound). The separate text console stays quiet to avoid doubling stream audio; game events it sends to the display still use the display's cues.
 
 Playback uses local decoded buffers, per-cue gain, alternating variants, bounded voices, a compressor, loop cancellation, stale-request rejection and shared mute state. It observes user activation and stops on page hide or host lock without changing the running multiplayer reader. It is not a music soundtrack or runtime synth.
 

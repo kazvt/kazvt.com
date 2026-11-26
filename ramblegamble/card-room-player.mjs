@@ -1,6 +1,6 @@
 import { ACK_TIMEOUT_MS, matchesAck, pendingReceipt, validRequestId } from "./card-room-delivery.mjs?v=submission-audit-20261126-v1";
-import { foley } from "./game-foley.mjs?v=expanded-foley-20261126-v1";
-import { renderLiveQuestion } from "./trivia-live-view.mjs?v=show-stage-20261126-v1";
+import { foley } from "./game-foley.mjs?v=settlement-hover-20261127-v1";
+import { renderLiveQuestion } from "./trivia-live-view.mjs?v=settlement-hover-20261127-v1";
 import { nonce, validNonce, validPublicKey, channelBinding, transcript, verifyHost, proveSeat } from "./card-room-auth.mjs?v=host-security-20261126-v1";
 import { ROOM_VERSION, isPlayer, decodePacket, encodePacket } from "./card-room-protocol.mjs?v=show-stage-20261126-v1";
 import { loadPeer } from "./card-room-peer.mjs";

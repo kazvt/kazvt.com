@@ -73,15 +73,17 @@ test('slot frame fits actual screen, arrows, physical buttons and resting crank 
 
 test('all five bottom arrows stay aligned between the actual reel and spin buttons at all slot camera angles',()=>{
  const {points,wp,spinButtons}=slotGeometry(),target=box(points).center;
- for(const [w,h] of [[803,395],[1014,576],[1920,1080],[360,640],[320,240],[2560,720],[575,480]]) for(const look of [-1,0,1]){
-  const b=basis(-.08-look*.42,.14),f=fitSlotInteractionFrame(relative(points,target,b),{width:w,height:h});
-  const px=p=>{const [x,y]=project(relative([p],target,b),f,w,h)[0];return {x:(x+1)*w/2,y:(1-y)*h/2};};
+ for(const [w,h] of [[803,395],[1014,576],[1920,1080],[360,640],[320,240],[2560,720],[575,480]]) for(const look of [-1,0,1]) for(const yaw of [-focusLimits('slot')[0],0,focusLimits('slot')[0]]) for(const pitch of [-focusLimits('slot')[1],0,focusLimits('slot')[1]]){
+  const authored=basis(-.08-look*.42,.14),fit=fitSlotInteractionFrame(relative(points,target,authored),{width:w,height:h});
+  const aim=add(add(target,mul(authored.right,fit.shiftX)),mul(authored.up,fit.shiftY));
+  const b=basis(-.08-look*.42+yaw,Math.sin(Math.asin(.14)+pitch)),f={distance:fit.distance,shiftX:0,shiftY:0};
+  const px=p=>{const [x,y]=project(relative([p],aim,b),f,w,h)[0];return {x:(x+1)*w/2,y:(1-y)*h/2};};
   const screenBottom=[px(wp(5,58,.065)),px(wp(75,58,.065))];
   const buttons=spinButtons.map(corners=>{const p=corners.map(px);return {left:Math.min(...p.map(v=>v.x)),right:Math.max(...p.map(v=>v.x)),top:Math.min(...p.map(v=>v.y))};});
   const edge=x=>screenBottom[0].y+(screenBottom[1].y-screenBottom[0].y)*(x-screenBottom[0].x)/(screenBottom[1].x-screenBottom[0].x);
   const arrows=Array.from({length:5},(_,index)=>{
    const x=5+(index+.5)*14,anchor=wp(x,65),a=px(anchor),adjX=px(wp(x+(index===4?-14:14),65)),adjY=px(wp(x,79));
-   const depth=f.distance-relative([anchor],target,b)[0].z;
+   const depth=f.distance-relative([anchor],aim,b)[0].z;
    const ww=Math.hypot(...sub(wp(x-14*.32,65),wp(x+14*.32,65))),wh=Math.hypot(...sub(wp(x,65-14*.27),wp(x,65+14*.27)));
    const preferred=Math.min(Math.max(22,Math.min(ww,wh)*h/(2*Math.tan(42*Math.PI/360))/depth),Math.hypot(a.x-adjX.x,a.y-adjX.y)*.9,Math.hypot(a.x-adjY.x,a.y-adjY.y)*.9);
    const placement=fitSlotColumnArrow({x:px(wp(x,58,.065)).x,size:preferred,screenBottom,spinButtons:buttons,index});
@@ -122,6 +124,12 @@ test('closer roulette camera retains the entire supplied wheel across viewport s
   const old=project(p,fit(.38,1.18),w,h),updated=project(p,fit(.06,1.06),w,h);
   for(const [x,y,depth] of updated){assert.ok(depth>.1);assert.ok(Math.abs(x)<.98);assert.ok(Math.abs(y)<.98);}
   assert.ok(span(updated,1)>span(old,1)*1.12,`wheel should be noticeably larger at ${w}x${h}, look ${look}`);
+  const [yawCap,pitchCap]=focusLimits('roulette');
+  for(const yaw of [-yawCap,0,yawCap])for(const pitch of [-pitchCap,0,pitchCap]){
+    const actual=basis(-.38-look*.42+yaw,Math.sin(Math.asin(.86)+pitch));
+    for(const [x,y,depth] of project(relative(points,wheel.center,actual),fit(.06,1.06),w,h))
+      assert.ok(depth>.1&&Math.abs(x)<1&&Math.abs(y)<1,`roulette ${w}x${h}, yaw ${yaw}, pitch ${pitch}: ${x},${y}`);
+  }
  }
 });
 

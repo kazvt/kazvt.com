@@ -1,3 +1,4 @@
+import { focusLimits, orbitPosition } from "./focus-orbit.mjs";
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -125,4 +126,20 @@ test('effect lifecycle: bounded burst pool, all six exact local face transforms,
     assert.equal(fx.update(.016,false,true),false);assert.equal(batch.count,0);assert.ok(dies[1].group.children[0].visible);
     assert.equal(fx.update(.016,false,false),false,'turning off reduced motion must not replay celebration');
   }finally{globalThis.document=prior;}
+});
+
+test('doubled dice orbit keeps the full launch and tray envelope in the viewport',()=>{
+  const target={x:0,y:1.65,z:0}, e=Math.atan(.53), tan=Math.tan(43*Math.PI/360), [yawCap,pitchCap]=focusLimits('dice');
+  for(const [w,h] of [[320,640],[390,844],[768,1024],[844,390],[1280,720],[1920,1080],[2560,1080]]){
+    const a=w/h,d=diceCameraDistance(a),base={x:0,y:target.y+d*Math.sin(e),z:d*Math.cos(e)};
+    for(const yaw of [-yawCap,0,yawCap])for(const pitch of [-pitchCap,0,pitchCap]){
+      const position=orbitPosition(base,target,yaw,pitch);
+      const dir=[position.x/d,(position.y-target.y)/d,position.z/d],right=[Math.cos(yaw),0,-Math.sin(yaw)],up=[-Math.sin(yaw)*Math.sin(e+pitch),Math.cos(e+pitch),-Math.cos(yaw)*Math.sin(e+pitch)];
+      const dot=(x,y)=>x.reduce((sum,n,i)=>sum+n*y[i],0);
+      for(const [x,y,z] of [[4.5,0,3.1],[4.5,3.2,3.1],[4.5,5.4,1.2]])for(const sx of [-1,1])for(const sz of [-1,1]){
+        const p=[x*sx,y-target.y,z*sz],depth=d-dot(p,dir);
+        assert.ok(depth>.1&&Math.abs(dot(p,right)/(tan*a*depth))<1&&Math.abs(dot(p,up)/(tan*depth))<1,`${w}x${h}, yaw ${yaw}, pitch ${pitch}`);
+      }
+    }
+  }
 });

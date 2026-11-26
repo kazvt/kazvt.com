@@ -34,10 +34,10 @@ test('native scene cursor has no pointer-intercepting overlay, animated GIF or a
 
 test('cursor clears on entry to a camera transition and on pointer cancellation or leaving',()=>{
   assert.match(js,/function transitionToView\([^\n]+\{\s+hideGameCursor\(\)/);
-  assert.match(js,/canvas\.addEventListener\("pointerenter", updatePointer\)/);
-  assert.match(js,/canvas\.addEventListener\("pointercancel", hideGameCursor\)/);
+  assert.match(js,/canvas\.addEventListener\("pointerenter", rememberPointer\)/);
+  assert.match(js,/canvas\.addEventListener\("pointercancel", \(\) => \{[^}]*hideGameCursor\(\)/);
   assert.match(js,/canvas\.addEventListener\("pointerleave", \(\) => \{[^}]*hideGameCursor\(\)/);
-  assert.match(js,/window\.addEventListener\("blur", hideGameCursor\)/);
+  assert.match(js,/window\.addEventListener\("blur", \(\) => \{[^}]*hideGameCursor\(\)/);
   assert.match(js,/event\.pointerType === "touch"/);
   assert.match(js,/document\.documentElement\.hasAttribute\("data-rg-host-locked"\)/);
 });

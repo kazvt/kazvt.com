@@ -32,7 +32,7 @@ export const FOLEY_CUES = Object.freeze({
   error: { files: ["error-1.ogg", "error-2.ogg"], fallback: ["switch.mp3"], volume: .30 },
   purchase: { files: ["chips-stack-1.ogg", "chips-stack-2.ogg"], fallback: ["chips-handle-1.ogg"], volume: .48 },
   diceFace: { files: ["die-grab-1.ogg", "die-grab-2.ogg"], fallback: ["card-place-1.ogg"], volume: .30 },
-  diceLand: { files: ["confirmation-2.ogg"], fallback: ["chip-lay-3.ogg", "chip-lay-1.ogg"], volume: .30 },
+  settlement: { files: ["settlement-cheer.ogg"], fallback: ["confirmation-2.ogg", "confirmation-1.ogg", "cheer.ogg"], volume: .67, maxDuration: 1.6 },
   portal: { files: ["maximize-1.ogg"], fallback: ["card-slide-1.ogg"], volume: .36 },
   portalExit: { files: ["minimize-1.ogg"], fallback: ["card-slide-2.ogg"], volume: .32 },
   draw: { files: ["scratch-1.ogg", "scratch-2.ogg"], fallback: ["card-slide-1.ogg"], volume: .17 },
@@ -158,7 +158,12 @@ export function createFoley({
         if (channel && channels.get(channel) === entry) channels.delete(channel);
         try { source.disconnect(); gain.disconnect(); } catch {}
       };
-      source.start();
+      // The local celebration edit is already faded. Bound the duration of a
+      // longer fallback (such as the full applause recording) as well.
+      if (!loop && Number.isFinite(cue.maxDuration) && buffer.duration > cue.maxDuration) {
+        gain.gain.setTargetAtTime(0, context.currentTime + Math.max(0, cue.maxDuration - .35), .07);
+        source.start(0, 0, cue.maxDuration);
+      } else source.start();
       return true;
     }).catch(() => false).finally(() => {
       if (channel && channels.get(channel) === entry && !entry.voice) channels.delete(channel);
