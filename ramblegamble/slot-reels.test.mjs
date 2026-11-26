@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   SLOT_REEL_CELL_COUNT,
+  SLOT_REEL_WILDCARD,
   createSlotReelMotion,
   normalizeReelColumns,
   normalizeSlotGrid,
@@ -16,6 +17,12 @@ test("slot grid parsing clamps malformed values to blank and always returns 15 c
   assert.deepEqual(grid.slice(0, 3), ["faroeberry", null, "kazberry"]);
   assert.ok(grid.slice(3).every((value) => value === null));
   assert.deepEqual(normalizeSlotGrid("not json"), Array(SLOT_REEL_CELL_COUNT).fill(null));
+});
+
+test("saved slot grids retain the star wildcard", () => {
+  const grid = Array(15).fill(null);
+  grid[8] = SLOT_REEL_WILDCARD;
+  assert.equal(normalizeSlotGrid(grid)[8], SLOT_REEL_WILDCARD);
 });
 
 test("column selection is unique, numeric, and bounded to the five physical reels", () => {
@@ -54,6 +61,17 @@ test("reel animation lands on its computed board outcome", () => {
   });
   assert.deepEqual(motion.columns.map((column) => column.target), [[null, "erinberry", null], [null, null, "kazberry"]]);
   assert.deepEqual(motion.targetGrid, target);
+});
+
+test("the same reel gets a different travel distance on consecutive spins", () => {
+  const first = createSlotReelMotion(Array(15).fill(null), [2], { random: () => 0 });
+  const second = createSlotReelMotion(Array(15).fill(null), [2], {
+    random: () => 0,
+    previousSpinRows: { 2: first.columns[0].travelRows },
+  });
+  assert.notEqual(second.columns[0].travelRows, first.columns[0].travelRows);
+  assert.equal(first.columns[0].targetOffset, 3 + first.columns[0].travelRows);
+  assert.equal(second.columns[0].targetOffset, 3 + second.columns[0].travelRows);
 });
 
 test("screen UV coordinates map to the correct top-left-origin row and column", () => {

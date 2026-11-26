@@ -83,7 +83,8 @@ function chooseTravelRows(column, random, previousSpinRows, reducedMotion) {
   const previous = Number(previousSpinRows?.[column]);
   const hasPrevious = Number.isInteger(previous) && previous >= minimum && previous <= maximum;
   const available = range - Number(hasPrevious);
-  let offset = Math.floor(clamp01(Number(random()) || 0) * available);
+  const choice = Math.max(0, Math.min(0.999999999999, Number(random()) || 0));
+  let offset = Math.floor(choice * available);
   if (hasPrevious && offset >= previous - minimum) offset += 1;
   return minimum + offset;
 }

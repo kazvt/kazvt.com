@@ -1,4 +1,4 @@
-import { normalizeSlotGrid, SLOT_REEL_COLUMNS, SLOT_REEL_ROWS, SLOT_REEL_SYMBOLS } from "./slot-reels.mjs";
+import { normalizeSlotGrid, SLOT_REEL_COLUMNS, SLOT_REEL_ROWS, SLOT_REEL_SYMBOLS, SLOT_REEL_WILDCARD } from "./slot-reels.mjs";
 
 const OWNER_BY_BERRY = Object.freeze({
   faroeberry: "faroe",
@@ -55,7 +55,8 @@ export function getSlotEligibleIndexes(grid, berry, { axis = "column", index } =
     : axis === "column"
       ? (Number.isInteger(lineIndex) && lineIndex >= 0 && lineIndex < SLOT_REEL_COLUMNS ? column(lineIndex) : [])
       : [];
-  return cells.filter((cellIndex) => current[cellIndex] !== berry);
+  // Protect host-placed wildcards from ordinary berry drops.
+  return cells.filter((cellIndex) => current[cellIndex] !== berry && current[cellIndex] !== SLOT_REEL_WILDCARD);
 }
 
 export function placeSlotBerry(grid, berry, { axis = "column", index, randomIndex = secureRandomIndex } = {}) {
@@ -68,6 +69,17 @@ export function placeSlotBerry(grid, berry, { axis = "column", index, randomInde
   const next = current.slice();
   next[placedIndex] = berry;
   return { grid: next, placedIndex, eligibleIndexes };
+}
+
+export function placeSlotWildcard(grid, index) {
+  const current = normalizeSlotGrid(grid);
+  const placedIndex = Number(index);
+  if (!Number.isInteger(placedIndex) || placedIndex < 0 || placedIndex >= current.length || current[placedIndex] === SLOT_REEL_WILDCARD) {
+    return { grid: current, placedIndex: -1 };
+  }
+  const next = current.slice();
+  next[placedIndex] = SLOT_REEL_WILDCARD;
+  return { grid: next, placedIndex };
 }
 
 export function rotateSlotColumns(grid, columns, { randomIndex = secureRandomIndex } = {}) {
@@ -92,7 +104,8 @@ export function findSlotPayouts(grid) {
   const wins = [];
   for (const berry of SLOT_REEL_SYMBOLS) {
     for (const pattern of SLOT_PAYOUT_PATTERNS) {
-      if (pattern.cells.every((index) => board[index] === berry)) {
+      const symbols = pattern.cells.map((index) => board[index]);
+      if (symbols.includes(berry) && symbols.every((symbol) => symbol === berry || symbol === SLOT_REEL_WILDCARD)) {
         wins.push({ owner: OWNER_BY_BERRY[berry], berry, patternId: pattern.id, points: pattern.points, cells: [...pattern.cells] });
       }
     }

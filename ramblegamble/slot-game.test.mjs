@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { SLOT_PAYOUT_PATTERNS, findSlotPayouts, getSlotEligibleIndexes, placeSlotBerry, resolveSlotPayouts, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs";
+import { SLOT_PAYOUT_PATTERNS, findSlotPayouts, getSlotEligibleIndexes, placeSlotBerry, placeSlotWildcard, resolveSlotPayouts, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs";
+import { SLOT_REEL_WILDCARD } from "./slot-reels.mjs";
 
 const blankBoard = () => Array(15).fill(null);
 
@@ -46,6 +47,25 @@ test("line availability matches placement eligibility for each row and column", 
   assert.deepEqual(getSlotEligibleIndexes(grid, "kazberry", { axis: "diagonal", index: 0 }), []);
 });
 
+test("wildcard placement targets the exact slot, replaces an occupied cell, and leaves input unchanged", () => {
+  const grid = blankBoard();
+  grid[7] = "erinberry";
+  const result = placeSlotWildcard(grid, 7);
+  assert.equal(result.placedIndex, 7);
+  assert.equal(result.grid[7], SLOT_REEL_WILDCARD);
+  assert.equal(grid[7], "erinberry");
+  assert.equal(placeSlotWildcard(result.grid, 7).placedIndex, -1);
+  assert.equal(placeSlotWildcard(grid, 15).placedIndex, -1);
+  assert.equal(placeSlotWildcard(grid, -1).placedIndex, -1);
+});
+
+test("ordinary berry placement cannot overwrite a wildcard", () => {
+  const grid = blankBoard();
+  grid[0] = "star";
+  grid[1] = "erinberry";
+  assert.deepEqual(getSlotEligibleIndexes(grid, "kazberry", { axis: "column", index: 0 }), [2]);
+});
+
 test("placement is a no-op when a selected line is already entirely the active player's berry", () => {
   const grid = blankBoard();
   for (let row = 0; row < 3; row += 1) grid[row * 5 + 4] = "erinberry";
@@ -87,6 +107,36 @@ test("every authored mask pays for its owner, regardless of who caused the board
   assert.ok(result.payouts.some((win) => win.owner === "faroe" && win.patternId === "center-hook"));
   assert.ok(result.totals.faroe >= 30000);
   assert.equal(result.totals.kaz, 0);
+});
+
+test("star substitutes for a missing berry and pays the owner of the real berries", () => {
+  const grid = blankBoard();
+  grid[0] = "kazberry";
+  grid[5] = "star";
+  grid[10] = "star";
+  const wins = findSlotPayouts(grid);
+  assert.deepEqual(wins.map(({ owner, patternId, points }) => ({ owner, patternId, points })), [
+    { owner: "kaz", patternId: "left-column", points: 4000 },
+  ]);
+  const result = resolveSlotPayouts(grid);
+  assert.deepEqual(result.clearedCells, [0, 5, 10]);
+  assert.equal(result.totals.kaz, 4000);
+});
+
+test("all-star and mixed-berry patterns are not winning combinations", () => {
+  const grid = blankBoard();
+  [0, 5, 10].forEach((index) => { grid[index] = "star"; });
+  assert.deepEqual(findSlotPayouts(grid), []);
+  grid[0] = "kazberry";
+  grid[5] = "erinberry";
+  assert.deepEqual(findSlotPayouts(grid), []);
+});
+
+test("a placed wildcard follows its column during a spin", () => {
+  const grid = blankBoard();
+  grid[0] = "star";
+  const result = rotateSlotColumns(grid, [0], { randomIndex: () => 1 });
+  assert.equal(result.grid.indexOf("star"), 5);
 });
 
 test("simultaneous overlapping patterns each pay once and remove the union of matched cells", () => {
