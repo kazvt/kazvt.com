@@ -1,5 +1,5 @@
 import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
-import { showBurst, voteFlight, purchaseFlight } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
+import { showBurst, voteFlight, purchaseFlight } from "./show-ui-fx.mjs?v=shop-motion-20261127-v1";
 import { createSmeemoImpact, smeemoImpactTransition } from "./smeemo-impact.mjs?v=room-audio-20261127-v1";
 import { applyCardShowAction } from "./card-show-actions.mjs?v=card-polish-20261127-v1";
 import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia, writeLiveTriviaDraft } from "./live-trivia.mjs?v=match-number-20261127-v1";
@@ -531,63 +531,115 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     right.append(controls); shell.append(promptSide, right); content.append(shell);
   }
 
+  const shopColors = { faroe: "#54e49b", erin: "#be9aff", kaz: "#ffde63" };
+  function selectShopBuyer(view, player) {
+    selectedBuyer = player;
+    view.shell.style.setProperty("--shop-buyer-color", shopColors[player]);
+    for (const [name, node] of view.buyers) node.setAttribute("aria-pressed", String(name === player));
+  }
+
+  function refreshShopCard(view, entry, card, animate) {
+    const { button, wrap, front, price, owner } = entry;
+    // All hidden data stays out of the document until the purchase is committed.
+    const signature = JSON.stringify([card.revealed, card.buyer, card.price, card.revealed ? card.name : null]);
+    if (entry.signature === signature) return;
+    const newlyRevealed = animate && card.revealed && !entry.revealed;
+    entry.signature = signature;
+    entry.revealed = Boolean(card.revealed);
+    button.disabled = Boolean(card.buyer);
+    button.classList.toggle("is-revealed", Boolean(card.revealed));
+    button.setAttribute("aria-label", card.revealed ? `${card.category} card: ${card.name}, purchased by ${card.buyer}` : `${card.category} card, costs ${card.price} points`);
+    front.replaceChildren();
+    price.textContent = `${card.price} POINTS`;
+    owner.textContent = card.buyer ? playerNames[card.buyer] : "";
+    owner.hidden = !card.buyer;
+    if (card.revealed) {
+      front.append(element("span", "rg-shop-card-name", card.name));
+      front.append(element("span", "rg-shop-card-owner", `TAKEN BY ${playerNames[card.buyer]}`));
+    }
+    if (card.buyer) wrap.style.setProperty("--shop-card-color", shopColors[card.buyer]);
+    else wrap.style.removeProperty("--shop-card-color");
+    if (newlyRevealed) {
+      button.classList.add("is-newly-revealed");
+      wrap.classList.add("rg-purchase-impact");
+      // Allow one browser paint to establish the revealed card geometry.
+      requestAnimationFrame(() => {
+        if (content.children[0] !== view.shell || layer.hidden || layer.classList.contains("is-off-table") || !entry.revealed) return;
+        purchaseFlight(wrap, view.buyers.get(card.buyer), card.price);
+      });
+      window.setTimeout(() => { button.classList.remove("is-newly-revealed"); wrap.classList.remove("rg-purchase-impact"); }, 1450);
+    } else if (!card.revealed) {
+      button.classList.remove("is-newly-revealed"); wrap.classList.remove("rg-purchase-impact");
+    }
+  }
+
   function renderShop(round) {
+    // Preserve DOM identity during balance notifications, buyer selection and
+    // duplicate room publications; in-flight card turns must not restart.
+    const structure = JSON.stringify(round.cards.map(card => [card.id, card.category]));
+    if (shopPresentation.id === round.id && shopPresentation.structure === structure && content.children[0] === shopPresentation.shell) {
+      selectShopBuyer(shopPresentation, selectedBuyer);
+      for (const card of round.cards) refreshShopCard(shopPresentation, shopPresentation.cards.get(card.id), card, true);
+      return;
+    }
     const shell = element("div", "rg-shop-stage");
+    const view = { id: round.id, structure, shell, buyers: new Map(), cards: new Map() };
+    shopPresentation = view;
     const buyers = element("div", "rg-shop-buyers");
     for (const player of CARD_GAME_PLAYERS) {
       const button = element("button", "rg-shop-buyer");
       button.type = "button";
-      button.setAttribute("aria-pressed", String(selectedBuyer === player));
+      button.style.setProperty("--shop-seat-color", shopColors[player]);
       const image = element("img");
       image.src = berryImages[player];
       image.alt = "";
       button.append(image, element("span", "", playerNames[player]));
       button.addEventListener("click", () => {
-        if (selectedBuyer !== player) foley.play("select");
-        selectedBuyer = player;
-        renderShop(state.round);
+        if (shopPresentation !== view || layer.hidden || selectedBuyer === player) return;
+        foley.play("select");
+        selectShopBuyer(view, player);
+        showBurst(button, { color: shopColors[player], count: 8 });
       });
-      buyers.append(button);
+      buyers.append(button); view.buyers.set(player, button);
     }
-    shell.append(buyers);
+    shell.append(buyers); selectShopBuyer(view, selectedBuyer);
     const balances = element("div", "rg-shop-balance");
     shopBalanceNodes = new Map();
     for (const player of CARD_GAME_PLAYERS) {
-      const node = element("span", "", `${playerNames[player]} ${pointScores[player] || 0}`);
-      shopBalanceNodes.set(player, node);
-      balances.append(node);
+      const node = element("span", "rg-shop-balance-value", `${playerNames[player]} ${pointScores[player] || 0}`);
+      node.style.setProperty("--shop-seat-color", shopColors[player]);
+      shopBalanceNodes.set(player, node); balances.append(node);
     }
     shell.append(balances);
     const grid = element("div", "rg-shop-card-grid");
-    const sameShop = shopPresentation.id === round.id;
-    const previouslyRevealed = shopPresentation.revealed;
-    shopPresentation = { id: round.id, revealed: new Set(round.cards.filter(card => card.revealed).map(card => card.id)) };
     for (const [index, card] of round.cards.entries()) {
       const wrap = element("div", "rg-shop-card-wrap");
-      const button = element("button", `rg-shop-card${card.revealed ? " is-revealed" : ""}`);
+      const button = element("button", "rg-shop-card");
       button.type = "button";
-      button.disabled = Boolean(card.buyer);
-      if (!sameShop) wrap.classList.add("rg-shop-deal");
-      wrap.style.setProperty("--deal-delay", `${Math.min(index, 8) * 60}ms`);
-      if (sameShop && card.revealed && !previouslyRevealed.has(card.id)) {button.classList.add("is-newly-revealed");wrap.classList.add("rg-purchase-impact");requestAnimationFrame(()=>purchaseFlight(wrap));}
+      wrap.style.setProperty("--deal-delay", `${index * 135}ms`);
+      wrap.style.setProperty("--deal-turn", `${(index - 1) * 24}deg`);
+      wrap.style.setProperty("--deal-shift", `${(index - 1) * 12}%`);
+      wrap.style.setProperty("--shop-category-color", ["#ff7881", "#c6a0ff", "#71e2ae"][index % 3]);
       bindCardTilt(button);
-      button.setAttribute("aria-label", card.revealed ? `${card.category} card: ${card.name}, purchased by ${card.buyer}` : `${card.category} card, costs ${card.price} points`);
+      const motion = element("span", "rg-shop-card-motion rg-shop-deal");
+      window.setTimeout(() => motion.classList.remove("rg-shop-deal"), 1000 + index * 135);
+      const drift = element("span", "rg-shop-card-drift");
       const inner = element("span", "rg-shop-card-inner");
       const back = element("span", "rg-shop-card-back");
       back.setAttribute("aria-hidden", "true");
       const front = element("span", "rg-shop-card-front");
-      // Never put the hidden card name on an unrevealed face.
-      if (card.revealed) {
-        front.append(element("span", "rg-shop-card-name", card.name));
-        front.append(element("span", "rg-shop-card-owner", `TAKEN BY ${playerNames[card.buyer]}`));
+      for (const z of [-3, 0, 3]) {
+        const edge = element("span", "rg-shop-card-edge");
+        edge.style.setProperty("--shop-edge-z", `${z}px`);
+        edge.setAttribute("aria-hidden", "true"); inner.append(edge);
       }
-      inner.append(back, front); button.append(inner);
+      inner.append(back, front); drift.append(inner); motion.append(drift); button.append(motion);
       button.addEventListener("click", () => {
         const buyer = selectedBuyer;
         return runRoomMutation(() => withPointScoresLock(() => {
           if (document.documentElement?.hasAttribute("data-rg-host-locked")) return;
           const latest = readCardGames();
-          if (latest.round?.id !== round.id || latest.smeemo) return;
+          if (latest.round?.id !== round.id || latest.smeemo || dismissedActive || layer.hidden || menuOpen || shopPresentation !== view || content.children[0] !== view.shell || layer.classList.contains("is-off-table")) return;
           const priorScores = readPointScores({ strict: true });
           const purchase = buyShopCard(latest.round, card.id, buyer, priorScores);
           if (purchase.error) {
@@ -611,18 +663,23 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
           foley.play("flip");
           foley.play("purchase");
           audienceReact("cheer");
-          setStatusMessage(`${playerNames[buyer]} bought ${card.name}.`);
-        }));
+          const bought = purchase.round.cards.find(entry => entry.id === card.id);
+          setStatusMessage(`${playerNames[buyer]} bought ${bought.name}.`);
+        }), error => {
+          const message = error.message || "Purchase failed; retry.";
+          if (shopPresentation === view && !layer.hidden) setStatusMessage(message);
+          else adminStatus.textContent = message;
+        });
       });
       const label = element("span", "rg-shop-card-type", `${card.category} card`);
-      const price = element("span", "rg-shop-card-price", `${card.price} POINTS`);
-      wrap.append(button, label, price);
-      if (card.buyer) wrap.append(element("span", "rg-shop-card-owner", playerNames[card.buyer]));
+      const price = element("span", "rg-shop-card-price");
+      const owner = element("span", "rg-shop-card-owner rg-shop-owner-tag");
+      wrap.append(button, label, price, owner);
+      const entry = { button, wrap, front, price, owner, revealed: false, signature: null };
+      view.cards.set(card.id, entry); refreshShopCard(view, entry, card, false);
       grid.append(wrap);
     }
     shell.append(grid, element("p", "rg-card-round-status", "Choose a berry, then a card."));
-    // Buyer selection and committed purchases replace the stage; score-only
-    // notifications update balance text in place and retain focus/hit targets.
     content.replaceChildren(shell);
     liveStatus.textContent = "Shop is open. Choose a berry, then a card.";
   }

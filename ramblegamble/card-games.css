@@ -673,3 +673,82 @@
   .rg-preview.is-smeemo-impact .rg-smeemo-board { transform: none; will-change: auto; }
   .rg-preview.is-smeemo-impact .rg-smeemo-board::after { display: none; }
 }
+
+/* Shop showpiece: an independent deal carrier, idle carrier, and physical
+   flip/tilt carrier. The outer button never moves, so hit testing is stable.
+   No opacity, filter or clipping on the preserve-3d carriers. */
+.rg-card-games-shell:has(.rg-shop-stage) { max-height:94dvh; }
+.rg-shop-stage { --shop-buyer-color:#54e49b; }
+.rg-shop-buyers { gap:clamp(5px,1.2vw,12px); margin-bottom:6px; }
+.rg-shop-buyer { position:relative; transition:box-shadow 180ms,border-color 180ms,background-color 180ms; }
+.rg-shop-buyer[aria-pressed="true"] { border-color:var(--shop-seat-color); box-shadow:3px 3px #1e0b01,0 0 0 2px var(--shop-seat-color); }
+.rg-shop-buyer img { transition:transform 200ms cubic-bezier(.18,.8,.25,1); }
+.rg-shop-buyer:is(:hover,:focus-visible) img { transform:translateY(-3px) rotate(-10deg) scale(1.12); }
+.rg-shop-buyer[aria-pressed="true"] img { animation:rg-shop-berry-hop 460ms cubic-bezier(.18,.8,.25,1); }
+@keyframes rg-shop-berry-hop { 0%{transform:none} 45%{transform:translateY(-5px) rotate(-12deg) scale(1.18)} 100%{transform:none} }
+.rg-shop-balance { gap:clamp(5px,1.5vw,18px); margin:8px 0 16px; }
+.rg-shop-balance-value { color:#fff5da; text-shadow:1px 2px #1e0b01; border-bottom:2px solid var(--shop-seat-color); padding:2px 3px; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.rg-shop-card-grid { gap:clamp(10px,2.2vw,28px); align-items:start; padding:clamp(6px,1.7dvh,14px) 0 0; }
+.rg-shop-card-wrap { --shop-accent:var(--shop-card-color,var(--shop-buyer-color)); align-content:start; grid-template-rows:auto auto auto minmax(1.1em,auto); gap:clamp(4px,.9dvh,8px); }
+.rg-shop-card { width:min(100%,220px,37dvh); --shop-lift:clamp(3px,1.3dvh,9px); --shop-depth:clamp(9px,2.8dvh,22px); --shop-turn-depth:clamp(12px,5dvh,36px); perspective:760px; perspective-origin:50% 45%; outline-offset:5px; }
+.rg-shop-card-motion,.rg-shop-card-drift { position:absolute; inset:0; display:block; transform-style:preserve-3d; pointer-events:none; }
+.rg-shop-card-motion.rg-shop-deal { animation:rg-shop-grand-deal 900ms cubic-bezier(.18,.76,.22,1) both; animation-delay:var(--deal-delay); }
+@keyframes rg-shop-grand-deal {
+  0% { transform:translate3d(var(--deal-shift),12%,-100px) rotateX(48deg) rotateY(calc(150deg + var(--deal-turn))) rotateZ(var(--deal-turn)) scale(.64); }
+  52% { transform:translate3d(0,-8%,20px) rotateX(-13deg) rotateY(-22deg) rotateZ(calc(var(--deal-turn)*-.28)) scale(1.02); }
+  76% { transform:translate3d(0,1%,0) rotateX(5deg) rotateY(7deg) rotateZ(2deg) scale(.98); }
+  100% { transform:none; }
+}
+.rg-shop-card:not(.is-revealed) .rg-shop-card-drift { animation:rg-shop-suspend 3.6s ease-in-out infinite; animation-delay:calc(900ms + var(--deal-delay)); }
+@keyframes rg-shop-suspend { 0%,100%{transform:none} 28%{transform:translate3d(0,-2px,3px) rotateZ(-1.1deg) rotateY(-2deg)} 64%{transform:translate3d(0,-4px,5px) rotateZ(1.1deg) rotateY(2deg)} }
+.rg-shop-card:is(:hover,:focus-visible,:active) .rg-shop-card-drift { animation-play-state:paused; }
+.rg-shop-card.is-newly-revealed .rg-shop-card-drift,.rg-shop-card.is-revealed .rg-shop-card-motion.rg-shop-deal { animation:none; }
+.rg-shop-card-edge { position:absolute; inset:1px; border-radius:13px 13px 21px 21px; background:#513663; border:2px solid #29162d; transform:translateZ(var(--shop-edge-z)); pointer-events:none; }
+.rg-shop-card-back { transform:translateZ(4px); }
+.rg-shop-card-front { transform:rotateY(180deg) translateZ(4px); grid-template-columns:minmax(0,1fr); grid-template-rows:minmax(0,1fr) auto; align-content:stretch; padding:9%; gap:4px; border-color:var(--shop-accent); box-shadow:0 0 0 2px #1e0b01,4px 5px #8b2626; }
+.rg-shop-card-name { max-width:100%; max-height:100%; overflow-wrap:anywhere; overflow:auto; scrollbar-width:thin; font-size:clamp(12px,2.1vw,24px); text-shadow:1px 1px #b77beb; }
+.rg-shop-card-front .rg-shop-card-owner { max-width:100%; overflow-wrap:anywhere; font-size:clamp(8px,1vw,12px); color:#60334b; }
+.rg-shop-card:not(.is-revealed) .rg-shop-card-front { background:#9a88ff url('/ramblegamble/assets/card-games/menu-card-back.png') center / 100% 100% no-repeat; border-color:#1e0b01; image-rendering:pixelated; }
+.rg-shop-card-back::after { content:""; position:absolute; inset:0; pointer-events:none; opacity:0; background:linear-gradient(116deg,transparent 22%,#fff5c044 42%,#fff8df99 50%,#fff5c044 58%,transparent 78%); transform:translateX(-105%); }
+.rg-shop-card:is(:hover,:focus-visible):not(:disabled) .rg-shop-card-back::after { animation:rg-shop-glint 850ms ease-out both; }
+@keyframes rg-shop-glint { 0%{opacity:0;transform:translateX(-105%)} 18%{opacity:.7} 78%{opacity:.5} 100%{opacity:0;transform:translateX(105%)} }
+.rg-shop-card:is(:hover,:focus-visible):not(:disabled) .rg-shop-card-inner { transform:translate3d(0,calc(-1 * var(--shop-lift)),var(--shop-depth)) rotateX(var(--tilt-x,-7deg)) rotateY(var(--tilt-y,9deg)); }
+.rg-shop-card:active:not(:disabled) .rg-shop-card-inner { transform:translate3d(0,2px,-5px) rotateX(5deg) scale(.97); }
+.rg-shop-card-wrap:has(.rg-shop-card:is(:hover,:focus-visible):not(:disabled)) .rg-shop-card-back { border-color:var(--shop-accent); box-shadow:0 0 0 2px #1e0b01,4px 5px #8b2626,0 0 15px var(--shop-accent); }
+.rg-shop-card-type { background:#8b2626; color:#fff5da; border:1px solid var(--shop-category-color); box-shadow:2px 2px #1e0b01; line-height:1.1; }
+.rg-shop-card-price { color:#ffe9ab; text-shadow:2px 2px #1e0b01; font-variant-numeric:tabular-nums; text-align:center; }
+.rg-shop-owner-tag { color:var(--shop-card-color,#fff5da); text-shadow:1px 2px #1e0b01; text-transform:uppercase; }
+.rg-shop-owner-tag[hidden] { display:none; }
+.rg-shop-card.is-newly-revealed .rg-shop-card-inner { animation:rg-shop-grand-turn 1120ms cubic-bezier(.2,.75,.24,1) both; }
+@keyframes rg-shop-grand-turn {
+  0%{transform:none}
+  15%{transform:translate3d(0,1%,0) rotateX(9deg) rotateY(-18deg) rotateZ(-4deg) scale(.97)}
+  43%{transform:translate3d(0,-6%,var(--shop-turn-depth)) rotateX(-12deg) rotateY(100deg) rotateZ(8deg) scale(1.025)}
+  70%{transform:translate3d(0,-3%,10px) rotateY(202deg) rotateZ(-4deg)}
+  86%{transform:translate3d(0,1%,0) rotateY(173deg) rotateX(4deg)}
+  100%{transform:rotateY(180deg)}
+}
+/* Local celebration ring, not persistent room lighting. It is clipped to the
+   card's own footprint by its inset and never receives pointer events. */
+.rg-purchase-impact .rg-shop-card::after { content:""; position:absolute; inset:9%; pointer-events:none; border:3px solid var(--shop-accent); outline:1px dashed #ffdf75; outline-offset:3px; z-index:2; animation:rg-shop-halo 960ms 300ms cubic-bezier(.18,.8,.25,1) both; }
+@keyframes rg-shop-halo { 0%{opacity:0;transform:scale(.55) rotate(-8deg)} 24%{opacity:.8} 100%{opacity:0;transform:scale(1.05) rotate(3deg)} }
+.rg-shop-stage .rg-flight-token { font-variant-numeric:tabular-nums; }
+@media(max-width:480px) { .rg-shop-card-grid {gap:7px} .rg-shop-card-front,.rg-shop-card-back {border-width:2px;border-radius:7px} .rg-shop-card-edge {border-width:1px;border-radius:6px} .rg-shop-card-name {font-size:clamp(9px,3vw,13px)} .rg-shop-card-type {font-size:clamp(8px,2.5vw,11px);padding:3px} .rg-shop-card-price {font-size:clamp(10px,3vw,14px)} .rg-shop-balance {font-size:10px} .rg-shop-buyer {min-height:32px;padding:3px 5px;gap:4px} .rg-shop-buyer img {width:22px;height:22px} }
+@media(max-height:600px) {
+  .rg-card-games-header[data-card-mode="shop"] {margin-bottom:5px;}
+  .rg-card-games-header[data-card-mode="shop"] h1 {font-size:clamp(15px,2.4vw,24px);padding:4px 9px;}
+  .rg-shop-buyers {margin-bottom:3px;}
+  .rg-shop-buyer {min-height:30px;padding:3px 7px;}
+  .rg-shop-buyer img {width:22px;height:22px;}
+  .rg-shop-balance {margin:3px 0 6px;font-size:11px;}
+  .rg-shop-card-grid {padding-top:5px;}
+  .rg-shop-card-wrap {gap:3px;grid-template-rows:auto auto auto minmax(12px,auto);}
+  .rg-shop-card {width:min(100%,220px,max(76px,calc((94dvh - 215px) * .68)));}
+  .rg-shop-card-type {font-size:clamp(9px,1.3vw,12px);padding:3px 5px;}
+  .rg-shop-card-price {font-size:clamp(11px,1.6vw,15px);}
+  .rg-shop-stage .rg-card-round-status {margin-top:5px;font-size:12px;}
+}
+@media(prefers-reduced-motion:reduce) {
+  .rg-shop-card-motion.rg-shop-deal,.rg-shop-card-drift,.rg-shop-card-inner,.rg-shop-buyer img,.rg-shop-card-back::after,.rg-purchase-impact .rg-shop-card::after {animation:none!important;transition:none!important;}
+  .rg-shop-card:is(:hover,:focus-visible,:active):not(:disabled) .rg-shop-card-inner,.rg-shop-buyer:is(:hover,:focus-visible) img {transform:none;}
+}

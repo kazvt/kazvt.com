@@ -12,6 +12,26 @@ export function crowdPeople(width,seed) {
   for(let row=0;row<5;row++) for(let x=-4;x<width+10;x+=11+row*1.4) {
     people.push({row,x:x+rand()*6,base:60+row*23+rand()*4,w:7+row+rand()*4,h:18+row*2+rand()*7,phase:rand()*Math.PI*2,speed:.65+rand()*1.1,hair:Math.floor(rand()*4),type:rand(),shade:Math.floor(rand()*3)});
   }
+  // Pick one adjacent pair from each group of four, without altering the
+  // original random sequence or the normal audience poses. Round the final
+  // partial group to whole pairs. The same spectators dance every cheer.
+  const pairs=[];
+  for(let row=0;row<5;row++) {
+    const line=people.filter(person=>person.row===row);
+    for(let i=0;i<line.length;i+=4) {
+      const remaining=line.length-i;
+      if(remaining<2)continue;
+      const first=i+(remaining>=4&&((seed+row+i/4)%2===1)?2:0);
+      const a=line[first],b=line[first+1];
+      const pair={center:(a.x+b.x)/2,phase:a.phase,speed:(a.speed+b.speed)/2};
+      pairs.push({a,b,pair,partial:remaining<4});
+    }
+  }
+  // Nearest possible half of the panel, in whole pairs. Drop trailing
+  // partial groups first so the middle of each row stays evenly distributed.
+  const targetPairs=Math.round(people.length/4);
+  while(pairs.length>targetPairs){let partial=pairs.length-1;while(partial>=0&&!pairs[partial].partial)partial--;pairs.splice(partial<0?pairs.length-1:partial,1);}
+  for(const {a,b,pair} of pairs){a.dance={...pair,side:-1};b.dance={...pair,side:1};}
   return people;
 }
 export function crowdPose(person,frame,emotion) {
@@ -20,12 +40,45 @@ export function crowdPose(person,frame,emotion) {
   const hop=cheer?Math.max(0,Math.sin(t*5*person.speed+p))*13:shock?Math.abs(Math.sin(t*3+p))*4:Math.sin(t*2.4*person.speed+p)*2;
   return {x:Math.round(person.x+Math.sin(t*2+p)*energy*(cheer?4:2)),y:Math.round(person.base-hop*energy),arm:cheer?10+Math.round((Math.sin(t*6*person.speed+p)+1)*7):shock?9:Math.round((Math.sin(t*2+p)+1)*3),arms:cheer?2:shock?1:suspense?0:person.type<.22?1:0};
 }
+// A silly paired celebration: side-by-side hip bumps, alternating shoulder
+// leans and linked arms. No anatomical detail; only the cheering pose changes.
+export function crowdDancePose(person,frame) {
+  const d=person.dance;
+  if(!d)return null;
+  const t=frame/CROWD_FPS, beat=t*5.2*d.speed+d.phase;
+  const pulse=Math.sin(beat), hop=Math.max(0,Math.sin(beat*.5))*5;
+  return {x:Math.round(d.center+d.side*(5.1+1.3*pulse)),
+    y:Math.round(person.base-hop),lean:d.side*(2.6*pulse),
+    hip:Math.round(-d.side*(2.8+2*pulse)),arm:10+Math.round(5*(1+Math.sin(beat+.9))),
+    partnerSide:-d.side};
+}
 export function paintCrowd(ctx,width,height,people,frame,emotion) {
   ctx.clearRect(0,0,width,height);
   const poly=(pts,color)=>{ctx.fillStyle=color;ctx.beginPath();pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fill();};
   const palettes=[['#473653','#40304e','#382940'],['#3d2d4c','#332541','#423051'],['#332541','#2c203b','#39294b'],['#291d37','#30223e','#352441'],['#21192f','#292039','#30233e']];
   for(const p of people) {
-    const {x,y,arm,arms}=crowdPose(p,frame,emotion),w=Math.round(p.w),h=Math.round(p.h),head=y-h,hw=Math.round(w*.67),color=palettes[p.row][p.shade];
+    const dance=emotion==='cheer'?crowdDancePose(p,frame):null;
+    const {x,y,arm,arms}=dance?{...dance,arms:2}:crowdPose(p,frame,emotion),w=Math.round(p.w),h=Math.round(p.h),head=y-h,hw=Math.round(w*.67),color=palettes[p.row][p.shade];
+    if(dance){
+      const hx=Math.round(x+dance.lean),hip=x+dance.hip;
+      // Broad, angular, clothed silhouette shapes read as a goofy dance at 6 FPS.
+      poly([[hx-w*.5,head+11],[hx-w*.7,head+17],[hip-w*.65,y+9],[hip+w*.65,y+9],[hx+w*.7,head+17],[hx+w*.5,head+11]],color);
+      ctx.fillStyle=color;ctx.fillRect(Math.round(hx-hw/2),head,hw,12);
+      ctx.fillRect(Math.round(hx-hw/2+1),head-2,Math.max(1,hw-2),2);
+      if(p.hair===1)ctx.fillRect(Math.round(hx-hw/2-2),head+2,hw+4,10);
+      if(p.hair===2)ctx.fillRect(hx-2,head-5,4,3);
+      if(p.hair===3)ctx.fillRect(Math.round(hx-hw/2),head-3,hw+3,4);
+      ctx.fillStyle=p.row<2?'#5b466d':'#4c385d';ctx.fillRect(Math.round(hx-hw/2),head+1,1,7);
+      for(const side of [-1,1]){
+        const linked=side===dance.partnerSide;
+        ctx.strokeStyle=color;ctx.lineWidth=4+p.row*.35;ctx.beginPath();
+        ctx.moveTo(hx+side*w*.48,head+17);
+        ctx.lineTo(hx+side*w*.9,head+9-arm*.45);
+        ctx.lineTo(linked?p.dance.center:hx+side*w*.9,linked?Math.round(p.base-30-4*Math.sin(frame/CROWD_FPS*5.2*p.dance.speed+p.dance.phase)):head+4-arm);
+        ctx.stroke();
+      }
+      continue;
+    }
     poly([[x-w/2,head+11],[x-w*.78,head+17],[x-w*.65,y+10],[x+w*.65,y+10],[x+w*.78,head+17],[x+w/2,head+11]],color);
     ctx.fillStyle=color;ctx.fillRect(Math.round(x-hw/2),head,hw,12);ctx.fillRect(Math.round(x-hw/2+1),head-2,Math.max(1,hw-2),2);
     if(p.hair===1)ctx.fillRect(Math.round(x-hw/2-2),head+2,hw+4,11);

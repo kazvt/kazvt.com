@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { AUDIENCE_KEY,AUDIENCE_MIN,AUDIENCE_MODES,createAudienceState,readAudienceMode,writeAudienceMode } from './audience-state.mjs';
-import { CROWD_FPS,CROWD_SECTIONS,crowdPeople,crowdPose } from './audience-render.mjs';
+import { CROWD_FPS,CROWD_SECTIONS,crowdPeople,crowdPose,crowdDancePose,paintCrowd } from './audience-render.mjs';
 import { parsePointsCommand } from './points-commands.mjs';
 import { commandSuggestions,applyCommandSuggestion } from './console-completion.mjs';
 
@@ -37,4 +37,34 @@ test('both audience and emote command names complete only valid emotion argument
  for(const cmd of ['audience','emote'])for(const mode of AUDIENCE_MODES){assert.deepEqual(parsePointsCommand(`${cmd} ${mode}`),{action:'audience',mode});}
  assert.equal(parsePointsCommand('audience invalid').action,'error');assert.equal(parsePointsCommand('emote cheer now').action,'error');
  const s=commandSuggestions('emote ch');assert.deepEqual(s.options,['cheer']);assert.equal(applyCommandSuggestion(s,0).value,'emote cheer');
+});
+
+
+test('about half the audience forms deterministic adjacent pairs with synchronized and bounded dance poses',()=>{
+ let total=0,dancers=0;
+ for(const panel of CROWD_SECTIONS){
+  const people=crowdPeople(Math.round(panel.width*22),panel.seed);total+=people.length;
+  const paired=people.filter(p=>p.dance);dancers+=paired.length;
+  assert.ok(Math.abs(paired.length/people.length-.5)<.04);
+  for(const row of new Set(people.map(p=>p.row))){const line=people.filter(p=>p.row===row);for(let i=0;i<line.length;i++){
+    const p=line[i];if(!p.dance){assert.equal(crowdDancePose(p,0),null);continue;}
+    if(p.dance.side!==-1)continue;
+    const q=line[i+1];assert.equal(q.dance.side,1);assert.equal(p.dance.center,q.dance.center);assert.equal(p.dance.phase,q.dance.phase);
+    for(const frame of [0,1,3,8,16,60,1000,518400]){
+      const a=crowdDancePose(p,frame),b=crowdDancePose(q,frame);
+      assert.ok(a.x<b.x);assert.ok(Math.abs(a.x-p.x)<12);assert.ok(Math.abs(b.x-q.x)<12);
+      assert.ok(Math.abs(a.y-p.base)<=6);assert.ok(Math.abs(b.y-q.base)<=6);
+      assert.ok(Object.values(a).every(Number.isFinite));assert.ok(Object.values(b).every(Number.isFinite));
+    }
+  }}
+ }
+ assert.equal(total,386);assert.equal(dancers,194);
+});
+test('only the cheer painter uses paired dance; all other emotions retain exactly their old geometry',()=>{
+ const people=crowdPeople(396,19),old=people.map(({dance,...p})=>p);
+ const capture=(list,frame,mood)=>{const calls=[];const ctx=new Proxy({}, {get:(o,k)=>(...args)=>calls.push([k,...args]),set:(o,k,v)=>{calls.push([k,v]);return true;}});paintCrowd(ctx,396,180,list,frame,mood);return calls;};
+ for(const frame of [0,1,10,60,518400])for(const mood of ['idle','suspense','shock'])assert.deepEqual(capture(people,frame,mood),capture(old,frame,mood));
+ assert.notDeepEqual(capture(people,0,'cheer'),capture(old,0,'cheer'));
+ assert.notDeepEqual(capture(people,0,'cheer'),capture(people,1,'cheer'));
+ assert.deepEqual(capture(people,0,'cheer'),capture(people,0,'cheer'));
 });

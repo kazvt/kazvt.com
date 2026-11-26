@@ -15,16 +15,27 @@ export function showBurst(target,{color='#ffe576',kind='star',count=12}={}){
   }
   setTimeout(()=>overlay.remove(),1050);
 }
-function flyToken(target,source,text,color){
+function flyToken(target,source,text,color,{delay=0,arc=18,rotation=-15}={}){
   if(!motionAllowed()||!target?.isConnected||!source?.isConnected||!target.getClientRects().length||!source.getClientRects().length)return;
   const shell=target.closest('.rg-show-round,.rg-shop-stage');if(!shell)return;
   const a=source.getBoundingClientRect(), b=target.getBoundingClientRect(), r=shell.getBoundingClientRect();
   const x=a.left+a.width/2-r.left,y=a.top+a.height/2-r.top,dx=b.left+b.width/2-r.left-x,dy=b.top+b.height/2-r.top-y;
   const token=document.createElement('span');token.className='rg-flight-token';token.setAttribute('aria-hidden','true');token.textContent=text;token.style.color=color;token.style.left=`${x}px`;token.style.top=`${y}px`;shell.append(token);
-  const anim=token.animate([{transform:'translate(-50%,-50%) scale(.5)',opacity:0},{transform:`translate(calc(-50% + ${dx*.5}px),calc(-50% + ${dy*.5-18}px)) scale(1.12) rotate(-15deg)`,opacity:1,offset:.5},{transform:`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) scale(.45)`,opacity:0}],{duration:540,easing:'ease-out',fill:'both'});
-  anim.finished.then(()=>token.remove(),()=>token.remove());setTimeout(()=>token.remove(),750);
+  const anim=token.animate([{transform:'translate(-50%,-50%) scale(.5)',opacity:0},{transform:`translate(calc(-50% + ${dx*.5}px),calc(-50% + ${dy*.5-arc}px)) scale(1.12) rotate(${rotation}deg)`,opacity:1,offset:.5},{transform:`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) scale(.45)`,opacity:0}],{duration:540,delay,easing:'ease-out',fill:'both'});
+  anim.finished.then(()=>token.remove(),()=>token.remove());setTimeout(()=>token.remove(),750+delay);
 }
-export function purchaseFlight(target){const stage=target?.closest('.rg-shop-stage');const buyer=stage?.querySelector('.rg-shop-buyer[aria-pressed="true"]');flyToken(target,buyer,'●','#ffdc58');showBurst(target,{kind:'coin',color:'#ffdc58',count:18});}
+export function purchaseFlight(target,buyer,price){
+  if(!motionAllowed()||!target?.isConnected)return;
+  // The committed buyer is authoritative even if the selection changed while
+  // the points/room locks were pending. Stagger the token paths, not the charge.
+  for(let i=0;i<5;i++)flyToken(target,buyer,'●',i%2?'#fff2ac':'#ffdc58',{delay:i*65,arc:18+i*9,rotation:i*18-36});
+  showBurst(target,{kind:'coin',color:'#ffdc58',count:24});
+  if(buyer?.isConnected){
+    showBurst(buyer,{color:'#ffdc58',count:10});
+    buyer.animate?.([{scale:'1'},{scale:'1.06'},{scale:'1'}],{duration:400});
+    if(price>0)flyToken(target,buyer,`−${price}`,'#fff2ac',{delay:110,arc:32});
+  }
+}
 export function voteFlight(target){
   if(!motionAllowed()||!target?.isConnected)return;
   const badge=target.querySelector('.rg-card-vote-count');if(!badge)return;

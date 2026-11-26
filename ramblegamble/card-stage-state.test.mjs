@@ -53,15 +53,15 @@ function mountUI(saved, initialPoints = {kaz:0,faroe:0,erin:0}) {
   get('#rg-card-games-layer').hidden=true;
   get('#rg-card-games-layer').querySelector=get;
   get('#rg-card-mode').value='shop'; get('#rg-card-player').value='kaz';
-  let data=normalizeCardGamesState(saved), subscriber, pointsSubscriber, balances={...initialPoints}, failPoints=false, failCards=false;
-  const calls=[], sounds=[], impacts=[];
+  let data=normalizeCardGamesState(saved), subscriber, pointsSubscriber, balances={...initialPoints}, failPoints=false, failCards=false, deferPoints=false, releasePoints=null;
+  const calls=[], sounds=[], impacts=[], purchases=[];
   const listeners=new Map();
   const timers=new Map();let timerId=0;
   const window={queueMicrotask:fn=>fn(),matchMedia:()=>({matches:true}), clearTimeout(id){timers.delete(id);},setTimeout(fn){timers.set(++timerId,fn);return timerId;},addEventListener:(type,fn)=>listeners.set(type,fn),dispatchEvent(event){calls.push(event.type);listeners.get(event.type)?.(event);}};
   class FakeEvent {constructor(type,opts={}){this.type=type;this.detail=opts.detail;}}
   const code=readFileSync(new URL('./card-games-ui.js',import.meta.url),'utf8').replace(/^import\s+[\s\S]*?;\n/gm,'');
-  vm.runInNewContext(code,{audienceReact(){},showBurst(){},voteFlight(){},purchaseFlight(){},requestAnimationFrame:fn=>fn(),...games,applyCardShowAction,activeCardStage,cardStageChange,smeemoImpactTransition,createSmeemoImpact:()=>({trigger:event=>impacts.push(event),stop(){}}),window,document:{querySelector:get,querySelectorAll:()=>[],createElement:()=>new FakeElement(),addEventListener(){}},CustomEvent:FakeEvent,Event:FakeEvent,readCardGames:()=>data,writeCardGames:value=>failCards?{state:data,persisted:false}:({state:data=normalizeCardGamesState(value),persisted:true}),subscribeLiveTrivia:()=>{},writeLiveTriviaDraft:()=>true,activeRoomRound:()=>data.round,subscribeCardGames:fn=>{subscriber=fn;fn(data);},readPointScores:()=>({...balances}),writePointScores:value=>{if(failPoints)return {scores:{...balances},persisted:false};balances={...value};pointsSubscriber?.({...balances});return {scores:{...balances},persisted:true};},subscribePointScores:fn=>{pointsSubscriber=fn;fn({...balances});},withPointScoresLock:async fn=>fn(),mountCardRoom:()=>({publish(){}}),foley:{start(channel,cue){sounds.push(cue);},stop(){},play(cue){sounds.push(cue);}},withRoomSubmissionLock:async fn=>fn()});
-  return {get,calls,sounds,impacts,window,get state(){return data;},get balances(){return balances;},setPoints(next){balances={...next};pointsSubscriber({...balances});},blockPoints(value){failPoints=value;},blockCards(value){failCards=value;},update(next){data=normalizeCardGamesState(next);subscriber(data);},flushTimers(){for(const [id,fn] of [...timers]){timers.delete(id);fn();}}};
+  vm.runInNewContext(code,{audienceReact(){},showBurst(){},voteFlight(){},purchaseFlight(target,buyer,price){purchases.push({target,buyer,price});},requestAnimationFrame:fn=>fn(),...games,applyCardShowAction,activeCardStage,cardStageChange,smeemoImpactTransition,createSmeemoImpact:()=>({trigger:event=>impacts.push(event),stop(){}}),window,document:{querySelector:get,querySelectorAll:()=>[],createElement:()=>new FakeElement(),addEventListener(){}},CustomEvent:FakeEvent,Event:FakeEvent,readCardGames:()=>data,writeCardGames:value=>failCards?{state:data,persisted:false}:({state:data=normalizeCardGamesState(value),persisted:true}),subscribeLiveTrivia:()=>{},writeLiveTriviaDraft:()=>true,activeRoomRound:()=>data.round,subscribeCardGames:fn=>{subscriber=fn;fn(data);},readPointScores:()=>({...balances}),writePointScores:value=>{if(failPoints)return {scores:{...balances},persisted:false};balances={...value};pointsSubscriber?.({...balances});return {scores:{...balances},persisted:true};},subscribePointScores:fn=>{pointsSubscriber=fn;fn({...balances});},withPointScoresLock:async fn=>{if(deferPoints){deferPoints=false;await new Promise(resolve=>{releasePoints=resolve;});}return fn();},mountCardRoom:()=>({publish(){}}),foley:{start(channel,cue){sounds.push(cue);},stop(){},play(cue){sounds.push(cue);}},withRoomSubmissionLock:async fn=>fn()});
+  return {get,calls,sounds,impacts,purchases,window,get state(){return data;},get balances(){return balances;},setPoints(next){balances={...next};pointsSubscriber({...balances});},blockPoints(value){failPoints=value;},deferPointLock(){deferPoints=true;},releasePointLock(){releasePoints?.();},blockCards(value){failCards=value;},update(next){data=normalizeCardGamesState(next);subscriber(data);},flushTimers(){for(const [id,fn] of [...timers]){timers.delete(id);fn();}}};
 }
 test('restored shop stays hidden, menu has only three choices, and choosing Shop starts fresh',async()=>{
   const round=createShopRound(decks);
@@ -176,7 +176,10 @@ test('shop animates only a committed new reveal and keeps the item name out of t
   assert.doesNotMatch(allText(content),/Hidden prize unique 123/);
   const purchased=buyShopCard(round,round.cards.find(c=>c.name===secret).id,'faroe',{faroe:0}).round;
   ui.update({round:purchased});assert.ok(findNew(content));assert.match(allText(content),/Hidden prize unique 123/);
-  ui.update({round:purchased});assert.equal(findNew(content),undefined);
+  const turning=findNew(content);
+  ui.update({round:purchased});assert.equal(findNew(content),turning,'duplicate state must not interrupt the turn');
+  assert.equal(ui.purchases.length,1);ui.flushTimers();assert.equal(findNew(content),undefined);
+  ui.update({round:purchased});assert.equal(findNew(content),undefined);assert.equal(ui.purchases.length,1);
 });
 
 
@@ -245,4 +248,31 @@ test('actual Smeemo click produces no impact on failed persistence or duplicate 
   await card.click();await Promise.resolve();assert.equal(ui.impacts.length,2);assert.equal(ui.state.smeemo.draws.length,1);
   const winnerIndex=game.cards.findIndex(c=>c.smeemo);const winner=content.children[0].children[0].children[0].children[winnerIndex];
   await winner.click();await Promise.resolve();assert.equal(ui.impacts.length,3);assert.deepEqual(ui.impacts.at(-1),{kind:'win',count:2});
+});
+
+
+test('shop buyer switching preserves all card DOM nodes and routes celebration from the committed buyer',async()=>{
+ const ui=mountUI({}, {faroe:200,erin:200,kaz:200});
+ const round=createShopRound({penalty:[{name:'P',price:25}],challenge:[{name:'C',price:10}],instant:[{name:'I',price:5}]});
+ ui.update({round});const shell=ui.get('#rg-card-games-content').children[0],buyers=shell.children[0].children,grid=shell.children[2];
+ const cards=grid.children.map(w=>w.children[0]);
+ buyers[1].click();assert.equal(buyers[1].attributes['aria-pressed'],'true');
+ assert.equal(ui.get('#rg-card-games-content').children[0],shell);
+ assert.deepEqual(grid.children.map(w=>w.children[0]),cards);
+ const task=cards[0].click();buyers[2].click();await task;
+ assert.equal(ui.state.round.cards[0].buyer,'erin');assert.equal(ui.balances.erin,175);assert.equal(ui.balances.kaz,200);
+ assert.equal(ui.purchases.length,1);assert.equal(ui.purchases[0].buyer,buyers[1]);assert.equal(ui.purchases[0].price,25);
+ assert.deepEqual(grid.children.map(w=>w.children[0]),cards);
+ assert.equal(cards[0].classList.contains('is-newly-revealed'),true);
+ buyers[0].click();assert.equal(cards[0].classList.contains('is-newly-revealed'),true);
+ await cards[1].click();assert.equal(ui.state.round.cards[1].buyer,'faroe');assert.equal(ui.purchases.length,2);
+ assert.equal(cards[0].classList.contains('is-newly-revealed'),true);assert.deepEqual(grid.children.map(w=>w.children[0]),cards);
+ ui.update({round:ui.state.round});assert.equal(ui.purchases.length,2);
+ ui.flushTimers();assert.ok(cards.every(c=>!c.classList.contains('is-newly-revealed')));
+});
+test('a queued shop click cannot purchase after leaving the stage',async()=>{
+ const ui=mountUI({}, {faroe:10,erin:10,kaz:10});ui.update({round:createShopRound(decks)});
+ const card=findClass(ui.get('#rg-card-games-content'),'rg-shop-card');
+ ui.deferPointLock();const pending=card.click();ui.get('#rg-card-room').click();ui.releasePointLock();await pending;
+ assert.equal(ui.state.round.cards[0].buyer,null);assert.equal(ui.purchases.length,0);
 });
