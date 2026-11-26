@@ -40,6 +40,13 @@ export function normalizeReelColumns(columns) {
   )))];
 }
 
+export function slotCellIndexAtUv(uv) {
+  if (!uv || uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1) return -1;
+  const column = Math.min(SLOT_REEL_COLUMNS - 1, Math.floor(uv.x * SLOT_REEL_COLUMNS));
+  const row = Math.min(SLOT_REEL_ROWS - 1, Math.floor((1 - uv.y) * SLOT_REEL_ROWS));
+  return row * SLOT_REEL_COLUMNS + column;
+}
+
 export function slotScreenPoint(textureX, textureY, depth = 0) {
   const { width, panelLeftX, panelRightX, panelLeftTopY, panelRightTopY,
     panelLeftBottomY, panelRightBottomY, topZ, bottomZ } = DISPLAY_TEXTURE;

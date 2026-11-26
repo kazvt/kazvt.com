@@ -18,6 +18,7 @@ import {
   createSlotReelMotion,
   normalizeSlotGrid,
   sampleSlotReelColumn,
+  slotCellIndexAtUv,
   slotScreenPoint,
 } from "./slot-reels.mjs?v=slot-machine-live-game-20261126-v1";
 import { placeSlotBerry, resolveSlotPayouts, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs?v=slot-machine-live-game-20261126-v1";
@@ -1593,13 +1594,6 @@ import {
       if (knownNames.has(name)) return name;
     }
     return "";
-  }
-
-  function slotCellIndexAtUv(uv) {
-    if (!uv || uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1) return -1;
-    const column = Math.min(4, Math.floor(uv.x * 5));
-    const row = Math.min(2, Math.floor((1 - uv.y) * 3));
-    return row * 5 + column;
   }
 
   function getProjectedSlotControlAt(clientX, clientY, canvasBounds) {
