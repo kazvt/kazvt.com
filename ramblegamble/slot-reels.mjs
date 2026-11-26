@@ -41,6 +41,13 @@ export function normalizeReelColumns(columns) {
   )))];
 }
 
+export function normalizeReelRows(rows) {
+  const source = Array.isArray(rows) ? rows : [rows];
+  return [...new Set(source.map(Number).filter((row) => (
+    Number.isInteger(row) && row >= 0 && row < SLOT_REEL_ROWS
+  )))];
+}
+
 export function slotCellIndexAtUv(uv) {
   if (!uv || uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1) return -1;
   const column = Math.min(SLOT_REEL_COLUMNS - 1, Math.floor(uv.x * SLOT_REEL_COLUMNS));
@@ -76,11 +83,11 @@ function randomSymbol(random) {
   )];
 }
 
-function chooseTravelRows(column, random, previousSpinRows, reducedMotion) {
+function chooseTravelDistance(lineIndex, random, previousTravel, reducedMotion) {
   const minimum = reducedMotion ? 2 : 12;
   const maximum = reducedMotion ? 5 : 32;
   const range = maximum - minimum + 1;
-  const previous = Number(previousSpinRows?.[column]);
+  const previous = Number(previousTravel?.[lineIndex]);
   const hasPrevious = Number.isInteger(previous) && previous >= minimum && previous <= maximum;
   const available = range - Number(hasPrevious);
   const choice = Math.max(0, Math.min(0.999999999999, Number(random()) || 0));
@@ -109,7 +116,7 @@ export function createSlotReelMotion(grid, columns, {
     startedAt: Number(startedAt) || 0,
     grid: currentGrid,
     columns: activeColumns.map((column, order) => {
-      const travelRows = chooseTravelRows(column, random, previousSpinRows, reducedMotion);
+      const travelRows = chooseTravelDistance(column, random, previousSpinRows, reducedMotion);
       const start = Array.from({ length: SLOT_REEL_ROWS }, (_, row) => currentGrid[row * SLOT_REEL_COLUMNS + column]);
       const stop = Array.from({ length: travelRows }, () => randomSymbol(random));
       const target = start.map((_, row) => settledGrid[row * SLOT_REEL_COLUMNS + column]);
@@ -123,6 +130,47 @@ export function createSlotReelMotion(grid, columns, {
         target,
         strip: [...start, ...stop, ...target],
         targetOffset: SLOT_REEL_ROWS + travelRows,
+      };
+    }),
+    targetGrid: settledGrid,
+  };
+}
+
+export function createSlotRowMotion(grid, rows, {
+  targetGrid = grid,
+  startedAt = 0,
+  duration = 1850,
+  stagger = 115,
+  random = Math.random,
+  reducedMotion = false,
+  previousSpinColumns = {},
+} = {}) {
+  const currentGrid = normalizeSlotGrid(grid);
+  const settledGrid = normalizeSlotGrid(targetGrid);
+  const activeRows = normalizeReelRows(rows);
+  if (!activeRows.length) return null;
+  const safeDuration = Math.max(0, Number(duration) || 0);
+  const safeStagger = Math.max(0, Number(stagger) || 0);
+
+  return {
+    startedAt: Number(startedAt) || 0,
+    grid: currentGrid,
+    columns: [],
+    rows: activeRows.map((row, order) => {
+      const travelColumns = chooseTravelDistance(row, random, previousSpinColumns, reducedMotion);
+      const start = Array.from({ length: SLOT_REEL_COLUMNS }, (_, column) => currentGrid[row * SLOT_REEL_COLUMNS + column]);
+      const stop = Array.from({ length: travelColumns }, () => randomSymbol(random));
+      const target = start.map((_, column) => settledGrid[row * SLOT_REEL_COLUMNS + column]);
+      return {
+        row,
+        delay: order * safeStagger,
+        duration: reducedMotion ? Math.min(safeDuration, 360) : safeDuration,
+        travelColumns,
+        start,
+        stop,
+        target,
+        strip: [...start, ...stop, ...target],
+        targetOffset: SLOT_REEL_COLUMNS + travelColumns,
       };
     }),
     targetGrid: settledGrid,
@@ -143,5 +191,20 @@ export function sampleSlotReelColumn(columnMotion, motion, time) {
     ? progress / 0.72 * 0.82
     : 0.82 + 0.18 * (1 - Math.pow(1 - (progress - 0.72) / 0.28, 3));
   return { offset: columnMotion.targetOffset * eased, symbols: null, spinning: true };
+}
+
+export function sampleSlotReelRow(rowMotion, motion, time) {
+  if (!rowMotion || !motion) return null;
+  const elapsed = Number(time) - motion.startedAt - rowMotion.delay;
+  if (elapsed <= 0) return { offset: 0, symbols: rowMotion.start, spinning: true };
+  if (rowMotion.duration <= 0 || elapsed >= rowMotion.duration) {
+    return { offset: rowMotion.targetOffset, symbols: rowMotion.target, spinning: false };
+  }
+
+  const progress = clamp01(elapsed / rowMotion.duration);
+  const eased = progress < 0.72
+    ? progress / 0.72 * 0.82
+    : 0.82 + 0.18 * (1 - Math.pow(1 - (progress - 0.72) / 0.28, 3));
+  return { offset: rowMotion.targetOffset * eased, symbols: null, spinning: true };
 }
 
