@@ -1595,6 +1595,13 @@ import {
     return "";
   }
 
+  function slotCellIndexAtUv(uv) {
+    if (!uv || uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1) return -1;
+    const column = Math.min(4, Math.floor(uv.x * 5));
+    const row = Math.min(2, Math.floor((1 - uv.y) * 3));
+    return row * 5 + column;
+  }
+
   function getProjectedSlotControlAt(clientX, clientY, canvasBounds) {
     if (!camera || !slotControlTargets.size) return null;
     camera.updateMatrixWorld(true);
@@ -1672,7 +1679,11 @@ import {
     const partNames = hit.machine === "roulette" ? ROULETTE_PART_NAMES : SLOT_PART_NAMES;
     let part = getNamedPart(hit.hit, hit.model, partNames);
     if (hit.machine === "slot" && projectedSlotControl) part = projectedSlotControl.part;
-    return { ...hit, part };
+    return {
+      ...hit,
+      part,
+      cellIndex: hit.machine === "slot" && part === "slot-reel-display" ? slotCellIndexAtUv(hit.hit?.uv) : -1,
+    };
   }
 
   function getSeatAtScreen(clientX, clientY, canvasBounds) {
