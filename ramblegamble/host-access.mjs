@@ -21,7 +21,7 @@ let access, booted=false, bootPromise=null, busy=false, locked=true, inertBefore
 const isConsole=location.pathname.replace(/\/$/,'').endsWith('/console');
 const appModules=isConsole? ['/rg/console/console.js?v=show-stage-20261126-v1'] : [
   '/ramblegamble/ramblegamble.js?v=show-stage-20261126-v1',
-  '/ramblegamble/dice-mode.js?v=show-stage-20261126-v1',
+  '/ramblegamble/dice-mode.js?v=dice-impact-20261127-v1',
   '/ramblegamble/trivia-ui.js?v=show-stage-20261126-v1',
   '/ramblegamble/card-games-ui.js?v=show-stage-20261126-v1',
 ];

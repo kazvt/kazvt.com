@@ -1,7 +1,9 @@
 export const DICE_PHYSICS_FIXED_STEP = 1 / 120;
 export const DICE_PHYSICS_MAX_SUBSTEPS = 10;
 
-const GRAVITY = 9.81;
+const GRAVITY = 12.5;
+export const DICE_TRAY_HALF_WIDTH = 4.35;
+export const DICE_TRAY_HALF_DEPTH = 3.0;
 const TAU = Math.PI * 2;
 
 function unitSample(random) {
@@ -44,22 +46,22 @@ export function createDiceThrow({ restPosition, lane, random = Math.random, redu
 
   const lowMotion = Boolean(reducedMotion);
   const inward = -lane;
-  const height = lowMotion ? 1.2 : 1.65 + unitSample(random) * 0.25;
+  const height = lowMotion ? 1.2 : 1.75 + unitSample(random) * 0.45;
   const position = [
-    restPosition[0] + lane * (lowMotion ? 0.18 : 0.42) + signedSample(random) * (lowMotion ? 0.08 : 0.16),
+    restPosition[0] + lane * 0.70,
     restPosition[1] + height,
-    restPosition[2] + signedSample(random) * (lowMotion ? 0.12 : 0.32),
+    restPosition[2] + signedSample(random) * (lowMotion ? 0.12 : 0.50),
   ];
   const velocity = [
-    inward * (lowMotion ? 0.22 + unitSample(random) * 0.25 : 0.45 + unitSample(random) * 0.75) + signedSample(random) * 0.16,
-    -(lowMotion ? 0.35 + unitSample(random) * 0.25 : 0.65 + unitSample(random) * 0.6),
-    signedSample(random) * (lowMotion ? 0.18 + unitSample(random) * 0.18 : 0.35 + unitSample(random) * 0.6),
+    inward * (lowMotion ? 0.22 + unitSample(random) * 0.25 : 2.5 + unitSample(random) * 1.8) + signedSample(random) * 0.16,
+    -(lowMotion ? 0.35 + unitSample(random) * 0.25 : 2.0 + unitSample(random) * 1.7),
+    signedSample(random) * (lowMotion ? 0.18 + unitSample(random) * 0.18 : 1.0 + unitSample(random) * 1.9),
   ];
 
   const spinAxisY = signedSample(random);
   const spinAngle = unitSample(random) * TAU;
   const spinAxisRadius = Math.sqrt(1 - spinAxisY * spinAxisY);
-  const spinSpeed = lowMotion ? 3.6 + unitSample(random) * 2.4 : 8 + unitSample(random) * 5.5;
+  const spinSpeed = lowMotion ? 3.6 + unitSample(random) * 2.4 : 12.5 + unitSample(random) * 7;
   const angularVelocity = [
     spinAxisRadius * Math.cos(spinAngle) * spinSpeed,
     spinAxisY * spinSpeed,
@@ -141,8 +143,8 @@ export function createDicePhysicsWorld(CANNON) {
   world.allowSleep = true;
   world.solver.iterations = 18;
   world.solver.tolerance = 0.001;
-  world.defaultContactMaterial.friction = 0.2;
-  world.defaultContactMaterial.restitution = 0.65;
+  world.defaultContactMaterial.friction = 0.30;
+  world.defaultContactMaterial.restitution = 0.60;
   world.defaultContactMaterial.contactEquationStiffness = 1e7;
   world.defaultContactMaterial.contactEquationRelaxation = 3;
   world.defaultContactMaterial.frictionEquationStiffness = 1e7;
@@ -160,8 +162,8 @@ export function createDicePhysicsWorld(CANNON) {
     world.addBody(rail);
   };
   const wallHalfHeight = 3.6;
-  const trayHalfWidth = 4.2;
-  const trayHalfDepth = 2.8;
+  const trayHalfWidth = DICE_TRAY_HALF_WIDTH;
+  const trayHalfDepth = DICE_TRAY_HALF_DEPTH;
   addRail([0.12, wallHalfHeight, trayHalfDepth], [-trayHalfWidth, wallHalfHeight, 0]);
   addRail([0.12, wallHalfHeight, trayHalfDepth], [trayHalfWidth, wallHalfHeight, 0]);
   addRail([trayHalfWidth, wallHalfHeight, 0.12], [0, wallHalfHeight, -trayHalfDepth]);
@@ -181,8 +183,8 @@ export function createDiceBody(CANNON, world, halfExtents, position) {
     allowSleep: true,
     sleepSpeedLimit: 0.11,
     sleepTimeLimit: 0.6,
-    linearDamping: 0.018,
-    angularDamping: 0.018,
+    linearDamping: 0.10,
+    angularDamping: 0.18,
   });
   body.addShape(new CANNON.Box(new CANNON.Vec3(...halfExtents)));
   world.addBody(body);

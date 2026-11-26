@@ -971,3 +971,30 @@ body.ramble-page *::after {
 .rg-dice-dialog:not(.is-staff) .rg-dice-layout { grid-template-columns: minmax(0,1fr) minmax(0,2fr) minmax(0,1fr); }
 .rg-dice-dialog:not(.is-staff) .rg-dice-roll { min-width:min(100%,180px); background:rgba(248,238,156,.78); color:#8b2626; border-color:#ffdf75; box-shadow:4px 4px #8b2626; }
 .rg-dice-dialog:not(.is-staff) .rg-dice-status { background:rgba(248,238,156,.78); color:#8b2626; }
+
+/* Dice result follows the same cream/gold, berry and deep-violet arcade trim
+   as the reel celebrations. The actual winning face is lit in world space. */
+.rg-dice-dialog .rg-dice-status[data-state="complete"] {
+  background: #261740;
+  color: #fff29b;
+  border: 2px solid #fff29b;
+  box-shadow: 3px 3px #b34f95, 0 0 16px #6255ee77;
+  padding: 4px 7px;
+  animation: rg-dice-result-in .36s cubic-bezier(.16,1,.3,1) both;
+}
+.rg-dice-status[data-state="complete"] .rg-dice-result {
+  --dice-result-color: #fff29b;
+  color: var(--dice-result-color);
+  padding: 2px 3px;
+  gap: 4px;
+}
+.rg-dice-status[data-state="complete"] .rg-dice-result[data-asset="erinberry"] { --dice-result-color: #cf9aff; }
+.rg-dice-status[data-state="complete"] .rg-dice-result[data-asset="faroeberry"] { --dice-result-color: #6df4a2; }
+.rg-dice-status[data-state="complete"] .rg-dice-result[data-asset="kazberry"] { --dice-result-color: #ffe567; }
+@keyframes rg-dice-result-in {
+  from { opacity: .3; transform: translateY(6px) scale(.96); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rg-dice-dialog .rg-dice-status[data-state="complete"] { animation: none; }
+}
