@@ -153,6 +153,7 @@ import {
   const slotReelImages = new Map();
   let selectedSlotBerry = "kazberry";
   let slotPlacementAxis = "column";
+  let slotHoverCellIndex = -1;
   const pickQuestion = createQuestionPicker();
   let playing = false;
   let gameStarted = false;
@@ -395,6 +396,13 @@ import {
       context.lineTo(slotReelCanvas.width, row * cellHeight);
     }
     context.stroke();
+    if (slotHoverCellIndex >= 0 && !slotReelMotion && currentView.kind === "slot") {
+      const hoverColumn = slotHoverCellIndex % 5;
+      const hoverRow = Math.floor(slotHoverCellIndex / 5);
+      context.fillStyle = "rgba(255, 242, 155, 0.3)";
+      if (slotPlacementAxis === "row") context.fillRect(0, hoverRow * cellHeight, slotReelCanvas.width, cellHeight);
+      else context.fillRect(hoverColumn * cellWidth, 0, cellWidth, slotReelCanvas.height);
+    }
     context.restore();
     slotReelTexture.needsUpdate = true;
   }
@@ -1721,6 +1729,15 @@ import {
     }
     const rect = preview.getBoundingClientRect();
     const interaction = getSceneInteractionAt(event.clientX, event.clientY);
+    const hoveredCell = currentView.kind === "slot"
+      && interaction?.machine === "slot"
+      && interaction.part === "slot-reel-display"
+      ? interaction.cellIndex
+      : -1;
+    if (hoveredCell !== slotHoverCellIndex) {
+      slotHoverCellIndex = hoveredCell;
+      drawSlotReelDisplay();
+    }
     const zone = interaction ? "" : resolvePointClickZone({
       x: event.clientX - rect.left,
       y: event.clientY - rect.top,
@@ -1997,7 +2014,11 @@ import {
 
   canvas.addEventListener("pointermove", updatePointer);
   canvas.addEventListener("click", (event) => pointClickAt(event.clientX, event.clientY));
-  canvas.addEventListener("pointerleave", hideGameCursor);
+  canvas.addEventListener("pointerleave", () => {
+    slotHoverCellIndex = -1;
+    drawSlotReelDisplay();
+    hideGameCursor();
+  });
   window.addEventListener("blur", hideGameCursor);
 
   window.addEventListener("rg:dice-mode-state", (event) => {
@@ -2083,6 +2104,7 @@ import {
     const axis = event.detail?.axis;
     if (["faroeberry", "erinberry", "kazberry"].includes(berry)) selectedSlotBerry = berry;
     if (axis === "row" || axis === "column") slotPlacementAxis = axis;
+    drawSlotReelDisplay();
   });
   window.addEventListener("storage", (event) => {
     if (event.key !== SLOT_GRID_STORAGE_KEY) return;
