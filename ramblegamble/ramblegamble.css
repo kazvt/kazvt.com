@@ -127,59 +127,62 @@ body.ramble-page *::after {
   pointer-events: none;
   filter: grayscale(.35);
 }
-
+/* Each state is the exact 16×16 supplied pixel-art tile. */
+.rg-slot-placement-marker,
+.rg-slot-sprite-blank {
+  border: 0;
+  padding: 0;
+  background-color: transparent;
+  background-image: var(--slot-normal);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+.rg-slot-sprite-column {
+  --slot-normal: url("./assets/slot-controls/column-normal.png");
+  --slot-hover: url("./assets/slot-controls/column-hover.png");
+  --slot-active: url("./assets/slot-controls/column-active.png");
+}
+.rg-slot-sprite-row {
+  --slot-normal: url("./assets/slot-controls/row-normal.png");
+  --slot-hover: url("./assets/slot-controls/row-hover.png");
+  --slot-active: url("./assets/slot-controls/row-active.png");
+}
+.rg-slot-sprite-blank {
+  --slot-normal: url("./assets/slot-controls/blank-normal.png");
+  --slot-hover: url("./assets/slot-controls/blank-hover.png");
+  --slot-active: url("./assets/slot-controls/blank-active.png");
+}
 .rg-slot-placement-marker {
   position: absolute;
-  display: flex;
   min-width: 0;
   min-height: 0;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0;
-  padding: 1px 2px;
-  border: 2px solid var(--ink);
-  color: var(--paper);
-  background: color-mix(in srgb, var(--paper) 92%, transparent);
-  box-shadow: 3px 3px 0 var(--pink), inset 0 0 0 1px var(--paper);
   transform: translate(-50%, -50%);
-  pointer-events: auto;
-  cursor: pointer;
-  touch-action: manipulation;
-  transition: background-color 100ms ease, box-shadow 100ms ease, transform 100ms ease;
 }
-
-.rg-slot-placement-marker img {
-  display: block;
-  width: 72%;
-  min-height: 0;
-  flex: 1 1 auto;
-  object-fit: contain;
-  image-rendering: pixelated;
+.rg-slot-placement-marker:hover:not(:disabled),
+.rg-slot-sprite-blank:hover:not(:disabled) { background-image: var(--slot-hover); }
+.rg-slot-placement-marker:active:not(:disabled),
+.rg-slot-sprite-blank:active:not(:disabled),
+.rg-slot-sprite-blank[aria-pressed="true"] { background-image: var(--slot-active); }
+.rg-slot-placement-marker:focus-visible,
+.rg-slot-sprite-blank:focus-visible { outline: 2px solid white; outline-offset: 2px; }
+.rg-slot-placement-marker:disabled,
+.rg-slot-sprite-blank:disabled { opacity: .48; cursor: not-allowed; }
+.rg-slot-overlay-picker {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
   pointer-events: none;
 }
-
-.rg-slot-placement-index {
-  display: block;
-  min-width: 0;
-  height: 8px;
-  padding: 0 1px;
-  color: var(--ink);
-  font-size: 7px;
-  font-weight: 900;
-  line-height: 1;
-  text-shadow: none;
-}
-
-.rg-slot-placement-marker:hover:not(:disabled) {
-  background: var(--pink);
-  box-shadow: 3px 3px 0 var(--ink), inset 0 0 0 1px var(--paper);
-  transform: translate(-50%, -50%) scale(1.1);
-}
-
-.rg-slot-placement-marker:active:not(:disabled) { transform: translate(-50%, -50%) scale(.94); }
-.rg-slot-placement-marker:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
-.rg-slot-placement-marker:disabled { opacity: .48; filter: grayscale(.75); cursor: not-allowed; }
+.rg-slot-overlay-picker button { width: clamp(40px, 5vw, 56px); aspect-ratio: 1; display: grid; place-items: center; }
+.rg-slot-overlay-picker img { width: 76%; height: 76%; object-fit: contain; pointer-events: none; image-rendering: pixelated; }
+.rg-slot-overlay-picker button[aria-pressed="true"] { outline: 2px solid white; outline-offset: 2px; }
 
 .rg-points-hud {
   position: absolute;

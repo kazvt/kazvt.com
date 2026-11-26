@@ -1,3 +1,4 @@
+import { foley } from "./game-foley.mjs?v=slot-foley-20261126-v3";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import {
@@ -39,6 +40,7 @@ import {
   let previousFrameTime = null;
   let loadPromise = null;
   let rolling = false;
+  let lastImpactAt = -Infinity;
   let activeRolls = [];
   let isOpen = false;
   let isClosing = false;
@@ -63,6 +65,7 @@ import {
       if (rolling) return;
       const next = nextDiceAsset(dieState.assignments[faceIndex]);
       dieState.assignments[faceIndex] = next.id;
+      foley.play("place", { volume: .55 });
       updateFaceButton(button, face, next.id);
       updateSticker(dieState, faceIndex, next.id);
       status.textContent = "";
@@ -318,6 +321,8 @@ import {
     if (rolling || !renderer || !CANNON || !physicsWorld
       || dieStates.some(({ body, stickers }) => !body || stickers.length !== DICE_FACE_ORDER.length)) return;
     rolling = true;
+    lastImpactAt = -Infinity;
+    foley.start("dice-grab", "diceGrab");
     rollButton.disabled = true;
     for (const picker of document.querySelectorAll(".rg-die-face-button")) picker.disabled = true;
     physicsWorld.accumulator = 0;
@@ -408,6 +413,14 @@ import {
         dieState.group.position.set(...initialPosition);
         dieState.throwOrigin = [...initialPosition];
         dieState.body = createDiceBody(CANNON, physicsWorld, halfExtents, initialPosition);
+        dieState.body.addEventListener("collide", (event) => {
+          if (!rolling || !isOpen || isClosing || document.hidden) return;
+          const speed = Math.abs(event.contact?.getImpactVelocityAlongNormal?.() || 0);
+          const time = performance.now();
+          if (speed < .8 || time - lastImpactAt < 180) return;
+          lastImpactAt = time;
+          foley.start("dice-impact", "diceImpact", { volume: Math.min(1, .25 + speed / 6) });
+        });
       }
       rollButton.disabled = false;
       status.textContent = "";
@@ -471,6 +484,8 @@ import {
     if (!isOpen || isClosing) return;
     const wasEntering = dialog.classList.contains("rg-dice-entering");
     isClosing = true;
+    foley.stop("dice-grab");
+    foley.stop("dice-impact");
     dialog.classList.remove("rg-dice-entering");
     dialog.classList.add("rg-dice-exiting");
     if (reducedMotion.matches || wasEntering || !dialog.open) {

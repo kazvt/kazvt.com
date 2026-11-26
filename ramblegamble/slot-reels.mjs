@@ -208,3 +208,11 @@ export function sampleSlotReelRow(rowMotion, motion, time) {
   return { offset: rowMotion.targetOffset * eased, symbols: null, spinning: true };
 }
 
+
+// Explicit axis routing shared by the live UI and regression tests. No implicit
+// column fallback for an invalid row request.
+export function createSlotLineMotion(grid, { axis, indexes }, options = {}) {
+  if (axis === "row") return createSlotRowMotion(grid, indexes, options);
+  if (axis === "column") return createSlotReelMotion(grid, indexes, options);
+  return null;
+}

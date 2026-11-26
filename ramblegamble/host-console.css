@@ -555,3 +555,18 @@
   .rg-console button,
   .rg-console { scroll-behavior: auto; }
 }
+
+/* Slot editor: each occupied square is a safe, individual remove action. */
+.rg-slot-cell.is-filled:not(:disabled) { cursor: pointer; }
+.rg-slot-cell.is-filled:not(:disabled):hover { background: #ffd4e9; border-color: #bc146b; }
+.rg-slot-cell:focus-visible { outline: 3px solid #bc146b; outline-offset: 2px; }
+.rg-slot-cell:disabled { cursor: default; }
+.rg-slot-cell-remove { position: absolute; right: 3px; top: 1px; color: #8b2626; font-size: 15px; line-height: 1; }
+.rg-slot-cell:disabled .rg-slot-cell-remove { visibility: hidden; }
+.rg-berry-picker .rg-berry-choice.rg-slot-sprite-blank { background-color: transparent; background-image: var(--slot-normal); background-size: 100% 100%; border: 0; box-shadow: none; }
+.rg-berry-picker .rg-berry-choice.rg-slot-sprite-blank:hover { background-image: var(--slot-hover); }
+.rg-berry-picker .rg-berry-choice.rg-slot-sprite-blank:active,
+.rg-berry-picker .rg-berry-choice.rg-slot-sprite-blank[aria-pressed="true"] { background-image: var(--slot-active); outline: 2px solid #8b2626; outline-offset: 1px; }
+
+.rg-foley-setting { display: flex; align-items: center; gap: .55rem; margin: .8rem 0; cursor: pointer; }
+.rg-foley-setting input { accent-color: #ff4cae; }

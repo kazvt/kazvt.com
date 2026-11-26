@@ -1,3 +1,4 @@
+import { foley } from "./game-foley.mjs?v=slot-foley-20261126-v3";
 import {
   CARD_GAME_CATEGORIES,
   CARD_GAME_PLAYERS,
@@ -235,6 +236,10 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       if (!latest || latest.id !== game.id || latest.phase !== game.phase) return;
       const advanced = advanceSmeemoPhase(latest, game.phase);
       if (advanced === latest) return;
+      if (!dismissedActive && !layer.hidden) {
+        if (advanced.phase === "stacking") foley.start("cards-motion", "shuffle");
+        if (advanced.phase === "dealing") foley.start("cards-motion", "deal");
+      }
       sync({ ...state, smeemo: advanced });
     }, wait);
   }
@@ -420,6 +425,8 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
           setStatusMessage(message);
           return;
         }
+        foley.play("flip");
+        foley.play("payout", { volume: .65 });
         pointScores = writePointScores(purchase.scores).scores;
         sync({ ...state, round: purchase.round });
         setStatusMessage(`${playerNames[selectedBuyer]} bought ${card.name}.`);
@@ -485,6 +492,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
         if (!current || current.id !== game.id) return;
         const result = drawSmeemoCard(current, card.id);
         if (result.error) return;
+        foley.play("flip");
         sync({ ...state, smeemo: result.game });
         window.queueMicrotask(() => content.querySelector(".rg-smeemo-card.is-available")?.focus({ preventScroll: true }));
       });
@@ -553,6 +561,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     const next = { ...state, decks, round, smeemo: null };
     menuOpen = false;
     dismissedActive = false;
+    foley.start("cards-motion", "deal");
     sync(next);
     window.dispatchEvent(new CustomEvent("rg:card-game-active", { detail: { mode: round.mode } }));
     closeHostPanel();
@@ -568,6 +577,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       return;
     }
     answerText.value = "";
+    foley.play("place");
     sync({ ...state, round: updated });
     closeHostPanel();
   }
@@ -588,9 +598,11 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   revealButton.addEventListener("click", () => {
     const round = revealAudienceResults(state.round);
     if (round === state.round) return;
+    foley.play("flip");
     sync({ ...state, round });
   });
   resetButton.addEventListener("click", () => {
+    foley.stop("cards-motion");
     sync({ ...state, round: null });
     adminStatus.textContent = "Current card game reset.";
   });
@@ -603,12 +615,14 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     selectedBuyer = "faroe";
     menuOpen = false;
     dismissedActive = false;
+    foley.start("cards-motion", "deal");
     sync({ ...state, round });
     window.dispatchEvent(new CustomEvent("rg:card-game-active", { detail: { mode: "shop" } }));
     closeHostPanel();
   });
   hostButton.addEventListener("click", openHostPanel);
   roomButton.addEventListener("click", () => {
+    foley.stop("cards-motion");
     menuOpen = false;
     dismissedActive = Boolean(state.round || state.smeemo);
     window.clearTimeout(menuTimer);

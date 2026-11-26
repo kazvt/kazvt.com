@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { SLOT_PAYOUT_PATTERNS, findSlotPayouts, getSlotEligibleIndexes, placeSlotBerry, placeSlotWildcard, resolveSlotPayouts, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs";
+import { SLOT_PAYOUT_PATTERNS, findSlotPayouts, getSlotEligibleIndexes, placeSlotBerry, placeSlotWildcard, resolveSlotPayouts, removeSlotSymbol, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs";
 import { SLOT_REEL_WILDCARD } from "./slot-reels.mjs";
 
 const blankBoard = () => Array(15).fill(null);
@@ -105,7 +105,7 @@ test("every authored mask pays for its owner, regardless of who caused the board
   for (const index of SLOT_PAYOUT_PATTERNS.find(({ id }) => id === "center-hook").cells) grid[index] = "faroeberry";
   const result = resolveSlotPayouts(grid);
   assert.ok(result.payouts.some((win) => win.owner === "faroe" && win.patternId === "center-hook"));
-  assert.ok(result.totals.faroe >= 30000);
+  assert.equal(result.totals.faroe, 30000);
   assert.equal(result.totals.kaz, 0);
 });
 
@@ -139,13 +139,63 @@ test("a placed wildcard follows its column during a spin", () => {
   assert.equal(result.grid.indexOf("star"), 5);
 });
 
-test("simultaneous overlapping patterns each pay once and remove the union of matched cells", () => {
-  const grid = Array(15).fill("kazberry");
+test("greedy payout claims the eye first; no cell can be paid twice", () => {
+  const eye = SLOT_PAYOUT_PATTERNS.find(({ id }) => id === "diamond");
+  const grid = blankBoard();
+  for (const index of eye.cells) grid[index] = "kazberry";
   const result = resolveSlotPayouts(grid);
-  assert.equal(result.payouts.length, 16);
-  assert.equal(result.totals.kaz, 401000);
-  assert.deepEqual(result.clearedCells, Array.from({ length: 15 }, (_, index) => index));
-  assert.ok(result.grid.every((berry) => berry === null));
+  assert.deepEqual(result.payouts.map(({ patternId }) => patternId), ["diamond"]);
+  assert.equal(result.totals.kaz, 75000);
+  assert.equal(result.clearedCells.length, 9);
+  const full = resolveSlotPayouts(Array(15).fill("kazberry"));
+  assert.equal(full.payouts[0].patternId, "diamond");
+  assert.equal(full.payouts.flatMap(({ cells }) => cells).length, full.clearedCells.length);
+});
+
+test("disjoint winners pay independently, even for the same berry", () => {
+  const grid = blankBoard();
+  for (const i of [0, 5, 10, 1, 6, 11]) grid[i] = "erinberry";
+  for (const i of [3, 8, 13]) grid[i] = "faroeberry";
+  const result = resolveSlotPayouts(grid);
+  assert.deepEqual(result.totals, { faroe: 5000, erin: 9000, kaz: 0 });
+  assert.equal(result.grid[3], null);
+});
+
+test("every mask works with any number of stars as long as a real berry remains", () => {
+  for (const pattern of SLOT_PAYOUT_PATTERNS) {
+    for (const berry of ["kazberry", "faroeberry", "erinberry"]) {
+      for (let count = 0; count < pattern.cells.length; count++) {
+        const grid = blankBoard();
+        pattern.cells.forEach((index, i) => { grid[index] = i < count ? "star" : berry; });
+        const result = resolveSlotPayouts(grid);
+        assert.equal(result.payouts[0]?.patternId, pattern.id, `${pattern.id}, ${berry}, ${count}`);
+        assert.equal(result.payouts[0]?.points, pattern.points);
+      }
+    }
+  }
+});
+
+test("wildcards shared across owners are consumed by the higher prize only", () => {
+  const grid = blankBoard();
+  [0, 1, 2, 3].forEach(i => { grid[i] = "kazberry"; });
+  grid[4] = "star"; // top row
+  grid[2] = "star"; grid[7] = "erinberry"; grid[12] = "erinberry";
+  const result = resolveSlotPayouts(grid);
+  assert.equal(result.totals.kaz, 8000);
+  assert.equal(result.totals.erin, 0);
+  assert.equal(result.grid[7], "erinberry");
+});
+
+test("remove one berry or star without changing other cells or the source", () => {
+  const grid = blankBoard(); grid[2] = "star"; grid[7] = "kazberry";
+  const result = removeSlotSymbol(grid, 2);
+  assert.equal(result.removed, true);
+  assert.equal(result.grid[2], null);
+  assert.equal(result.grid[7], "kazberry");
+  assert.equal(grid[2], "star");
+  assert.equal(removeSlotSymbol(result.grid, 2).removed, false);
+  assert.equal(removeSlotSymbol(grid, -1).removed, false);
+  assert.equal(removeSlotSymbol(grid, null).removed, false);
 });
 
 test("secure random integer selection stays in range and uses crypto when available", () => {

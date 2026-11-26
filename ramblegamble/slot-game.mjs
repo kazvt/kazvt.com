@@ -110,7 +110,26 @@ export function findSlotPayouts(grid) {
       }
     }
   }
-  return wins;
+  // A cell (including a wildcard) can fund only one award in a resolution.
+  // Prefer the largest prize, then the larger mask; authored order breaks ties.
+  wins.sort((a, b) => b.points - a.points || b.cells.length - a.cells.length
+    || SLOT_PAYOUT_PATTERNS.findIndex(({ id }) => id === a.patternId)
+      - SLOT_PAYOUT_PATTERNS.findIndex(({ id }) => id === b.patternId));
+  const used = new Set();
+  return wins.filter((win) => {
+    if (win.cells.some((index) => used.has(index))) return false;
+    for (const index of win.cells) used.add(index);
+    return true;
+  });
+}
+
+export function removeSlotSymbol(grid, index) {
+  const next = normalizeSlotGrid(grid);
+  if (!Number.isInteger(index) || index < 0 || index >= next.length || !next[index]) {
+    return { grid: next, removed: false };
+  }
+  next[index] = null;
+  return { grid: next, removed: true };
 }
 
 export function resolveSlotPayouts(grid) {

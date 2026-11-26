@@ -8,8 +8,8 @@
     <link rel="canonical" href="https://kazvt.com/rg/">
     <title>Ramble Gamble - kazvt</title>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
-    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=slot-line-markers-20261126-v2">
-    <link rel="stylesheet" href="/ramblegamble/host-console.css?v=player-handoff-input-hitbox-20261126-v1">
+    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=slot-foley-20261126-v3">
+    <link rel="stylesheet" href="/ramblegamble/host-console.css?v=slot-foley-20261126-v3">
     <link rel="stylesheet" href="/ramblegamble/card-games.css?v=rg-smeemo-secret-repeat-20261126-v4">
     <script type="importmap">
       {
@@ -20,10 +20,10 @@
         }
       }
     </script>
-    <script type="module" src="/ramblegamble/ramblegamble.js?v=slot-row-sideways-20261126-v1"></script>
-    <script type="module" src="/ramblegamble/dice-mode.js?v=dice-berry-hyphen-20261120-v2"></script>
-    <script type="module" src="/ramblegamble/trivia-ui.js?v=slot-line-markers-20261126-v2"></script>
-    <script type="module" src="/ramblegamble/card-games-ui.js?v=rg-shop-render-idempotent-20261126-v1"></script>
+    <script type="module" src="/ramblegamble/ramblegamble.js?v=slot-foley-20261126-v3"></script>
+    <script type="module" src="/ramblegamble/dice-mode.js?v=slot-foley-20261126-v3"></script>
+    <script type="module" src="/ramblegamble/trivia-ui.js?v=slot-foley-20261126-v3"></script>
+    <script type="module" src="/ramblegamble/card-games-ui.js?v=slot-foley-20261126-v3"></script>
   </head>
   <body class="ramble-page" data-theme="p2">
     <main class="rg-preview" id="rg-preview">
@@ -156,6 +156,7 @@
           <div class="rg-machine-actions">
             <button class="rg-action-card" id="rg-spin-wheel" type="button"><span class="rg-action-glyph" aria-hidden="true">◎</span><span><strong>SPIN THE WHEEL</strong><small>Draw from the session question bank</small></span></button>
           </div>
+          <label class="rg-foley-setting"><input type="checkbox" id="rg-foley-enabled" checked> Game foley (slots, cards, roulette, dice)</label>
           <div class="rg-arcade-status" id="rg-arcade-status" role="status" aria-live="polite">No host questions added yet.</div>
           <p class="rg-storage-note">Trivia questions and round drafts stay in this tab's browser session. They do not change the palette setting on other pages.</p>
         </section>
@@ -165,15 +166,15 @@
             <div><p class="rg-kicker">MACHINE CONTROLS</p><h2>Slot machine</h2></div>
             <span class="rg-theme-lock">5 COLUMNS / 3 ROWS</span>
           </div>
-          <p class="rg-panel-copy">Choose a berry for a row or column, or the star to place on an exact cell. Machine buttons spin.</p>
+          <p class="rg-panel-copy">Choose a berry, then an arrow for a row or column. Choose the star to place on an exact cell. Click any filled LIVE BOARD square to remove just that icon. Machine buttons spin.</p>
           <div class="rg-slot-layout">
             <div class="rg-slot-config">
               <fieldset class="rg-control-group"><legend>PLACE / PLAY AS</legend>
                 <div class="rg-berry-picker" role="group" aria-label="Choose a berry or star wildcard">
-                  <button class="rg-berry-choice" type="button" data-berry="kazberry" aria-label="Kazberry" aria-pressed="true"><img class="rg-berry-choice-image" src="/ramblegamble/assets/berries/kazberry.png" alt="" aria-hidden="true" draggable="false"></button>
-                  <button class="rg-berry-choice" type="button" data-berry="faroeberry" aria-label="Faroeberry" aria-pressed="false"><img class="rg-berry-choice-image" src="/ramblegamble/assets/berries/faroeberry.png" alt="" aria-hidden="true" draggable="false"></button>
-                  <button class="rg-berry-choice" type="button" data-berry="erinberry" aria-label="Erinberry" aria-pressed="false"><img class="rg-berry-choice-image" src="/ramblegamble/assets/berries/erinberry.png" alt="" aria-hidden="true" draggable="false"></button>
-                  <button class="rg-berry-choice rg-berry-choice--wildcard" type="button" data-berry="star" aria-label="Star wildcard" aria-pressed="false"><img class="rg-berry-choice-image" src="/ramblegamble/assets/berries/star.png" alt="" aria-hidden="true" draggable="false"></button>
+                  <button class="rg-berry-choice rg-slot-sprite-blank" type="button" data-berry="kazberry" aria-label="Kazberry" aria-pressed="true"><img class="rg-berry-choice-image" src="/ramblegamble/assets/berries/kazberry.png" alt="" aria-hidden="true" draggable="false"></button>
+                  <button class="rg-berry-choice rg-slot-sprite-blank" type="button" data-berry="faroeberry" aria-label="Faroeberry" aria-pressed="false"><img class="rg-berry-choice-image" src="/ramblegamble/assets/berries/faroeberry.png" alt="" aria-hidden="true" draggable="false"></button>
+                  <button class="rg-berry-choice rg-slot-sprite-blank" type="button" data-berry="erinberry" aria-label="Erinberry" aria-pressed="false"><img class="rg-berry-choice-image" src="/ramblegamble/assets/berries/erinberry.png" alt="" aria-hidden="true" draggable="false"></button>
+                  <button class="rg-berry-choice rg-slot-sprite-blank rg-berry-choice--wildcard" type="button" data-berry="star" aria-label="Star wildcard" aria-pressed="false"><img class="rg-berry-choice-image" src="/ramblegamble/assets/berries/star.png" alt="" aria-hidden="true" draggable="false"></button>
                 </div>
               </fieldset>
               <button class="rg-secondary-button" id="rg-slot-clear" type="button">RESET BOARD</button>

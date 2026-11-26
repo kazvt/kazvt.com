@@ -1,3 +1,5 @@
+import { removeSlotSymbol } from "./slot-game.mjs?v=slot-foley-20261126-v3";
+import { foley } from "./game-foley.mjs?v=slot-foley-20261126-v3";
 import {
   MODE_NAMES,
   ROUND_IDS,
@@ -97,6 +99,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
   let pendingImport = null;
   let slotGrid = loadGrid();
   let selectedBerry = "kazberry";
+  let slotBoardBusy = false;
   let issuedClientActivities = readSessionArray(CLIENT_ISSUED_KEY).filter((entry) => entry && typeof entry.activityId === "string");
   let clientSubmissions = readSessionArray(CLIENT_ANSWERS_KEY).filter((entry) => validateClientSubmission(entry).ok);
   let pendingClientSubmissions = [];
@@ -836,13 +839,34 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     const board = $("#rg-slot-board");
     board.replaceChildren();
     slotGrid.forEach((berry, index) => {
-      const cell = document.createElement("div");
+      const cell = document.createElement("button");
+      cell.type = "button";
+      cell.disabled = slotBoardBusy || !berry;
       const row = Math.floor(index / 5);
       const column = index % 5;
       cell.className = "rg-slot-cell" + (berry ? " is-filled" : "");
       cell.dataset.index = String(index);
       cell.setAttribute("aria-label", "Row " + (row + 1) + ", column " + (column + 1) + ": " + (berry ? berryNames[berry] : "blank"));
-      cell.setAttribute("role", "img");
+      if (berry) {
+        cell.setAttribute("aria-label", "Remove " + berryNames[berry] + " from row " + (row + 1) + ", column " + (column + 1));
+        cell.title = "Remove " + berryNames[berry];
+        const remove = document.createElement("span");
+        remove.className = "rg-slot-cell-remove";
+        remove.setAttribute("aria-hidden", "true");
+        remove.textContent = "×";
+        cell.append(remove);
+      }
+      cell.addEventListener("click", () => {
+        if (slotBoardBusy) return;
+        const result = removeSlotSymbol(slotGrid, index);
+        if (!result.removed) return;
+        slotGrid = result.grid;
+        foley.play("remove");
+        persistGrid();
+        $("#rg-arcade-status").textContent = "Removed icon from cell " + (index + 1) + ".";
+        const next = board.querySelector("button:not(:disabled)");
+        (next || $("#rg-slot-clear")).focus({ preventScroll: true });
+      });
       const cellIndex = document.createElement("span");
       cellIndex.className = "rg-slot-cell-index";
       cellIndex.textContent = String(index + 1).padStart(2, "0");
@@ -863,11 +887,15 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
 
   $$("[data-berry]").forEach((button) => button.addEventListener("click", () => {
     selectedBerry = button.dataset.berry;
-    $$("[data-berry]").forEach((choice) => choice.setAttribute("aria-pressed", String(choice === button)));
-    updateGridStatus();
     publishSlotSettings();
   }));
+  window.addEventListener("rg:slot-settings-updated", (event) => {
+    if (!Object.hasOwn(berryNames, event.detail?.berry)) return;
+    selectedBerry = event.detail.berry;
+    $$("[data-berry]").forEach((choice) => choice.setAttribute("aria-pressed", String(choice.dataset.berry === selectedBerry)));
+  });
   $("#rg-slot-clear").addEventListener("click", () => {
+    if (slotBoardBusy) return;
     slotGrid = Array(gridSize).fill(null);
     persistGrid();
     renderGrid();
@@ -895,13 +923,17 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     $("#rg-arcade-status").textContent = event.detail?.prompt || "No questions in the bank. Add some in the Trivia tab.";
   });
   window.addEventListener("rg:slot-action-start", (event) => {
+    slotBoardBusy = true;
     $("#rg-slot-clear").disabled = true;
+    renderGrid();
     $("#rg-arcade-status").textContent = event.detail?.kind === "wildcard-place"
       ? "Star popping into place..."
-      : "Reels spinning...";
+      : event.detail?.kind === "place-row" ? "Row spinning sideways..." : "Reels spinning...";
   });
   window.addEventListener("rg:slot-action-finish", (event) => {
+    slotBoardBusy = false;
     $("#rg-slot-clear").disabled = false;
+    renderGrid();
     const totals = event.detail?.totals || {};
     const scored = Object.entries(totals).filter(([, amount]) => amount > 0)
       .map(([name, amount]) => name.toUpperCase() + " +" + Number(amount).toLocaleString());

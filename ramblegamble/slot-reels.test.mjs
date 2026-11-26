@@ -4,6 +4,7 @@ import {
   SLOT_REEL_CELL_COUNT,
   SLOT_REEL_WILDCARD,
   createSlotRowMotion,
+  createSlotLineMotion,
   createSlotReelMotion,
   normalizeReelColumns,
   normalizeReelRows,
@@ -134,4 +135,26 @@ test("a column's texture-space quad maps to the machine's front panel and stays 
   assert.ok(upperLeft.y > lowerRight.y, "the top of the display is above its bottom");
   assert.ok(upperLeft.z > lowerRight.z, "front-panel depth follows its sloped baked mesh");
   assert.ok(upperLeft.z < -3, "the overlay is nudged toward the viewer from the cabinet face");
+});
+
+for (const row of [0, 1, 2]) {
+  test(`explicit row ${row} dispatch never animates columns and retains two stars`, () => {
+    const grid = Array(15).fill("faroeberry");
+    const target = grid.slice();
+    target[row * 5] = "star";
+    target[row * 5 + 2] = "star";
+    const motion = createSlotLineMotion(grid, { axis: "row", indexes: [row] }, {targetGrid: target, startedAt: 100, duration: 1000, random: () => .5});
+    assert.deepEqual(motion.columns, []);
+    assert.deepEqual(motion.rows.map(line => line.row), [row]);
+    assert.deepEqual(sampleSlotReelRow(motion.rows[0], motion, 1100).symbols, target.slice(row * 5, row * 5 + 5));
+    assert.ok(sampleSlotReelRow(motion.rows[0], motion, 600).spinning);
+    assert.deepEqual(motion.targetGrid, target);
+  });
+}
+test("explicit column motion remains vertical and invalid axis never falls back to column", () => {
+  const grid = Array(15).fill(null);
+  const motion = createSlotLineMotion(grid, { axis: "column", indexes: [3] });
+  assert.deepEqual(motion.columns.map(line => line.column), [3]);
+  assert.equal((motion.rows || []).length, 0);
+  assert.equal(createSlotLineMotion(grid, { axis: "typo", indexes: [3] }), null);
 });
