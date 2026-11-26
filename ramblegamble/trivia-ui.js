@@ -97,7 +97,6 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
   let pendingImport = null;
   let slotGrid = loadGrid();
   let selectedBerry = "kazberry";
-  let placementMode = "column";
   let issuedClientActivities = readSessionArray(CLIENT_ISSUED_KEY).filter((entry) => entry && typeof entry.activityId === "string");
   let clientSubmissions = readSessionArray(CLIENT_ANSWERS_KEY).filter((entry) => validateClientSubmission(entry).ok);
   let pendingClientSubmissions = [];
@@ -824,16 +823,13 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
 
   function publishSlotSettings() {
     window.dispatchEvent(new CustomEvent("rg:slot-settings-updated", {
-      detail: { berry: selectedBerry, axis: placementMode },
+      detail: { berry: selectedBerry },
     }));
   }
 
   function updateGridStatus() {
     const filled = slotGrid.filter(Boolean).length;
     $("#rg-slot-count").textContent = filled + " / 15";
-    $("#rg-slot-help").textContent = placementMode === "row"
-      ? "Click a row on the machine screen."
-      : "Click a column on the machine screen.";
   }
 
   function renderGrid() {
