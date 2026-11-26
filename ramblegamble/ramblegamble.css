@@ -1009,3 +1009,8 @@ body.ramble-page *::after {
 .rg-preview.is-freecam :is(#rg-card-games-layer, #rg-live-trivia, #rg-slot-control-layer, #rg-result) { visibility: hidden !important; pointer-events: none !important; }
 .rg-preview.is-freecam :is(#rg-card-games-layer, #rg-live-trivia, #rg-slot-control-layer) * { visibility: hidden !important; pointer-events: none !important; }
 .rg-preview.is-freecam #rg-canvas { cursor: move; }
+
+/* Screen-space mask on the wrapper; the child retains the exact projective transform. */
+.rg-character-visibility {position:absolute;inset:0;pointer-events:none;mask-repeat:no-repeat;-webkit-mask-repeat:no-repeat;mask-mode:alpha;}
+.rg-preview.is-freecam-detached :is(#rg-card-games-layer,#rg-live-trivia,#rg-slot-control-layer,#rg-result),
+.rg-preview.is-freecam-detached :is(#rg-card-games-layer,#rg-live-trivia,#rg-slot-control-layer) * {visibility:hidden!important;pointer-events:none!important;}

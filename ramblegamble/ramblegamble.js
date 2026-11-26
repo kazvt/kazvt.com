@@ -1,9 +1,10 @@
 import { createStageShow } from "./stage-show.mjs?v=theatre-20261127-v1";
 import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state.mjs?v=theatre-20261127-v1";
+import { createCharacterOcclusion } from "./character-occlusion.mjs?v=freecam-depth-20261127-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
-import { createAudienceRenderer } from "./audience-render.mjs?v=half-opacity-20261127-v1";
-import { createShowFX } from "./show-fx.mjs?v=standing-characters-20261127-v1";
+import { createAudienceRenderer } from "./audience-render.mjs?v=freecam-depth-20261127-v1";
+import { createShowFX } from "./show-fx.mjs?v=freecam-depth-20261127-v1";
 import { CHARACTER_SOURCE_SIZE, CHARACTER_YAW_LIMIT, characterYaw, standingCharacterPose, projectCharacterQuad, pointInCharacterQuad } from "./character-billboards.mjs?v=standing-characters-20261127-v1";
 import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
@@ -207,6 +208,9 @@ import {
   let focusBase = null;
   let focusDrag = null;
   let freecam = null;
+  let cameraDetached = false;
+  let characterOcclusion = null;
+  let warnedOcclusion = false;
   let lastScenePointer = null;
   let overviewCameraBounds = null;
   let pendingCardGameMode = "";
@@ -1231,7 +1235,7 @@ import {
     camera.updateProjectionMatrix();
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
     renderer.setSize(width, height, false);
-    if (!sceneReady || freecam?.active) return;
+    if (!sceneReady || freecam?.active || cameraDetached) return;
 
     const pose = getCameraPoseForView(currentView, aspect);
     if (!pose) return;
@@ -1441,6 +1445,8 @@ import {
     if (nextView.kind !== "roulette") {stopRouletteSettlement(); showFX?.clearRoulette();}
     const viewChanged=currentView.kind!==nextView.kind||currentView.contestantId!==nextView.contestantId;
     if(stageShow?.busy&&!viewChanged&&nextView.kind==="slot"&&!immediate)return;
+    cameraDetached = false;
+    preview.classList.remove("is-freecam-detached");
     const openingSlot=currentView.kind!=="slot"&&nextView.kind==="slot";
     const closingSlot=currentView.kind==="slot"&&nextView.kind!=="slot";
     if(stageShow&&viewChanged){
@@ -1475,17 +1481,18 @@ import {
   }
 
   function setLookDirection(look) {
+    if (cameraDetached) { transitionToView({kind:"overview",look}); return; }
     if (currentView.kind !== "overview") { focusDrag?.stopFollowing(); focusOrbit.nudge(-look * .012, 0); return; }
     if (currentView.look === look) return;
     transitionToView({ ...currentView, look });
   }
 
   function canGoBack() {
-    return Boolean(resolvePointClickBack(currentView));
+    return cameraDetached || Boolean(resolvePointClickBack(currentView));
   }
 
   function goBack() {
-    const destination = resolvePointClickBack(currentView);
+    const destination = cameraDetached ? {kind:"overview",look:0} : resolvePointClickBack(currentView);
     if (destination) transitionToView(destination);
   }
 
@@ -1777,7 +1784,10 @@ import {
       panel.append(placeholder);
     }
 
-    billboardLayer.append(panel);
+    const mask = document.createElement("div");
+    mask.className = "rg-character-visibility";
+    mask.append(panel);
+    billboardLayer.append(mask);
     return panel;
   }
 
@@ -1899,7 +1909,7 @@ import {
   }
 
   function getProjectedSlotControlAt(clientX, clientY, canvasBounds) {
-    if (!camera || !slotControlTargets.size) return null;
+    if (!camera || cameraDetached || !slotsModel?.visible || !slotControlTargets.size) return null;
     camera.updateMatrixWorld(true);
     const candidates = [];
     for (const [part, object] of slotControlTargets) {
@@ -1987,21 +1997,22 @@ import {
   }
 
   function getBillboardAtScreen(clientX, clientY) {
-    if (diceModeOpen || pauseMenuOpen || !["overview","host","contestant","contestants"].includes(currentView.kind)
+    if (diceModeOpen || pauseMenuOpen || (!cameraDetached && !["overview","host","contestant","contestants"].includes(currentView.kind))
       || billboardLayer.classList.contains("rg-billboards-fading")) return null;
     const rect = billboardLayer.getBoundingClientRect();
     if (!rect.width || !rect.height) return null;
     const x = (clientX-rect.left)*preview.clientWidth/rect.width;
     const y = (clientY-rect.top)*preview.clientHeight/rect.height;
     // Use the actual projected quadrilateral, not an oversized rectangle.
-    // Where transparent browser-source panels overlap, prefer the closest
-    // projected centre; break ties with the actual paint order.
+    // Where panels overlap, prefer the visible frontmost DOM layer,
+    // then use distance to the projected centre as a tie breaker.
     const hits = billboards.filter(entry=>entry.panel.style.visibility==="visible"
-      && pointInCharacterQuad(entry.projectedQuad?.corners,x,y)).map(entry=>{
+      && pointInCharacterQuad(entry.projectedQuad?.corners,x,y)
+      && characterOcclusion?.contains(entry,x,y)).map(entry=>{
       const corners=entry.projectedQuad.corners;
       const cx=corners.reduce((sum,p)=>sum+p.x,0)/4, cy=corners.reduce((sum,p)=>sum+p.y,0)/4;
       return {entry,distance:Math.hypot(x-cx,y-cy)};
-    }).sort((a,b)=>a.distance-b.distance || Number(b.entry.panel.style.zIndex)-Number(a.entry.panel.style.zIndex));
+    }).sort((a,b)=>Number(b.entry.panel.parentElement.style.zIndex)-Number(a.entry.panel.parentElement.style.zIndex) || a.distance-b.distance);
     const entry = hits[0]?.entry;
     if (!entry) return null;
     return entry === hostBillboard ? {machine:"host",hostId:entry.id} : {machine:"contestant",contestantId:entry.id};
@@ -2047,13 +2058,13 @@ import {
       return;
     }
     const rect = preview.getBoundingClientRect();
-    if (currentView.kind === "trivia") {
+    if (!cameraDetached && currentView.kind === "trivia") {
       const backBand = Math.min(84, Math.max(48, rect.height * 0.11));
       setGameCursor(event.clientY >= rect.bottom - backBand ? "back" : "default");
       return;
     }
     const interaction = getSceneInteractionAt(event.clientX, event.clientY);
-    const hoveredCell = currentView.kind === "slot"
+    const hoveredCell = !cameraDetached && currentView.kind === "slot"
       && interaction?.machine === "slot"
       && interaction.part === "slot-reel-display"
       ? interaction.cellIndex
@@ -2076,12 +2087,12 @@ import {
       height: rect.height,
       canGoBack: canGoBack(),
     });
-    const sameFocusedTarget = interaction?.machine === "host"
+    const sameFocusedTarget = !cameraDetached && (interaction?.machine === "host"
       ? currentView.kind === "host"
       : interaction?.machine === "contestant"
         && currentView.kind === "contestant"
-        && currentView.contestantId === interaction.contestantId;
-    const decorativeSlot = currentView.kind === "slot" && interaction?.machine === "slot"
+        && currentView.contestantId === interaction.contestantId);
+    const decorativeSlot = !cameraDetached && currentView.kind === "slot" && interaction?.machine === "slot"
       && (!interaction.part || interaction.part === "machine");
     const actionable = Boolean(interaction && !sameFocusedTarget && !decorativeSlot);
     setGameCursor(resolvePointClickCursor({ zone, actionable }));
@@ -2226,7 +2237,7 @@ import {
     }
     result.hidden = true;
     window.dispatchEvent(new Event("rg:close-host-panel"));
-    if (currentView.kind !== "card-table") { crowdState.react(mode === "menu" || mode === "shop" ? "idle" : "suspense",crowdClock); transitionToView({ kind: "card-table" }); }
+    if (cameraDetached || currentView.kind !== "card-table") { crowdState.react(mode === "menu" || mode === "shop" ? "idle" : "suspense",crowdClock); transitionToView({ kind: "card-table" }); }
   }
 
   window.addEventListener("rg:card-game-active", (event) => activateCardGameMode(event.detail?.mode));
@@ -2258,7 +2269,7 @@ import {
   function pointClickAt(clientX, clientY) {
     if (freecam?.active || !gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen || cameraTransition || stageShow?.busy) return;
     const rect = preview.getBoundingClientRect();
-    if(currentView.kind==="trivia") { if(clientY>=rect.bottom-Math.min(84,Math.max(48,rect.height*.11)))goBack(); return; }
+    if(!cameraDetached && currentView.kind==="trivia") { if(clientY>=rect.bottom-Math.min(84,Math.max(48,rect.height*.11)))goBack(); return; }
     const interaction = getSceneInteractionAt(clientX, clientY);
     const zone = resolveSceneNavigationZone({
       interaction, view: currentView.kind,
@@ -2272,6 +2283,14 @@ import {
     if (zone === "right") return setLookDirection(1);
     if (zone === "back") return goBack();
     if (!interaction) return;
+    // A free camera has no focused controls. A scene click deliberately docks
+    // at the selected object; it never spends a berry or spins a machine.
+    if (cameraDetached) {
+      const kind=interaction.machine;
+      if (["host","contestant","card-table","slot","roulette","dice-door"].includes(kind))
+        transitionToView({kind,...(kind==="contestant"?{contestantId:interaction.contestantId}:{})});
+      return;
+    }
 
     if (interaction.machine === "dice-door") {
       const action = resolvePointClickAction({
@@ -2344,21 +2363,20 @@ import {
       cameraTransition = null;
       focusDrag?.reset(); focusOrbit.reset(currentView.kind); lastScenePointer = null;
       slotHoverCell = -1; slotHoverLine = null; drawSlotReelDisplay(); hideGameCursor();
-      preview.classList.add("is-freecam");
+      cameraDetached = true;
+      preview.classList.add("is-freecam", "is-freecam-detached");
     },
     onStop: () => {
       preview.classList.remove("is-freecam");
       focusDrag?.reset(); focusOrbit.reset(currentView.kind); lastScenePointer = null; hideGameCursor();
-      // Restore the current authored activity at the latest viewport aspect.
-      if (camera && sceneReady) {
-        const pose = getCameraPoseForView(currentView, camera.aspect);
-        if (pose) applyCameraPose(pose);
-        updateCardTableProjection(); updateSlotPlacementControlProjection(); updateBillboardProjection();
-      }
+      // Release only the input capture. Retain the world pose until an explicit
+      // navigation action; resize, pointer hover and game state cannot reframe it.
+      cameraDetached = true;
+      preview.classList.add("is-freecam-detached");
     },
   });
   window.addEventListener("rg:open-host-panel", () => freecam.stop());
-  const canOrbit = () => !freecam.active && !stageShow?.busy && gameStarted && sceneReady && !pauseMenuOpen && !diceModeOpen && !cameraTransition
+  const canOrbit = () => !freecam.active && !cameraDetached && !stageShow?.busy && gameStarted && sceneReady && !pauseMenuOpen && !diceModeOpen && !cameraTransition
     && currentView.kind !== "overview" && !document.hidden && !document.querySelector("dialog[open]") && !document.documentElement.hasAttribute("data-rg-host-locked");
   focusDrag = bindFocusDrag(canvas, {
     enabled: canOrbit, hoverSurface: preview,
@@ -2405,7 +2423,7 @@ import {
     if(event.button!==2)return;
     const interaction=getSceneInteractionAt(event.clientX,event.clientY);
     const index = resolveSlotContextCell({
-      button: event.button, view: currentView.kind, selected: selectedSlotBerry,
+      button: event.button, view: cameraDetached ? "overview" : currentView.kind, selected: selectedSlotBerry,
       interaction,
     });
     if (index < 0) {
@@ -2493,7 +2511,7 @@ import {
     const shortcut = resolveArcadeShortcut(key);
     if (shortcut === "participants") transitionToView({ kind: "contestants" });
     else if (shortcut === "dice-door") {
-      if (currentView.kind !== "dice-door" || currentView.look !== 0) {
+      if (cameraDetached || currentView.kind !== "dice-door" || currentView.look !== 0) {
         transitionToView({ kind: "dice-door" });
       }
     }
@@ -2507,15 +2525,15 @@ import {
     else if (key === "3") transitionToView({ kind: "roulette" });
     else if (key === "arrowleft") setLookDirection(-1);
     else if (key === "arrowright") setLookDirection(1);
-    else if (key === "arrowup" && currentView.kind !== "overview") { focusDrag.stopFollowing(); focusOrbit.nudge(0,.012); }
-    else if (key === "arrowdown" && event.shiftKey && currentView.kind !== "overview") { focusDrag.stopFollowing(); focusOrbit.nudge(0,-.012); }
+    else if (key === "arrowup" && !cameraDetached && currentView.kind !== "overview") { focusDrag.stopFollowing(); focusOrbit.nudge(0,.012); }
+    else if (key === "arrowdown" && event.shiftKey && !cameraDetached && currentView.kind !== "overview") { focusDrag.stopFollowing(); focusOrbit.nudge(0,-.012); }
     else if (key === "arrowdown" || key === "backspace") goBack();
     else if (key === "enter" || key === " ") {
       const bounds = canvas.getBoundingClientRect();
       pointClickAt(bounds.left + bounds.width / 2, bounds.top + bounds.height / 2);
     }
-    else if (key === "r") startWheelSpin();
-    else if (key === "s") startLeverPull();
+    else if (key === "r") { if(cameraDetached)transitionToView({kind:"roulette"});else startWheelSpin(); }
+    else if (key === "s") { if(cameraDetached)transitionToView({kind:"slot"});else startLeverPull(); }
     else if (key === "g") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "slots" } }));
     else if (key === "t") { if(event.shiftKey)window.dispatchEvent(new CustomEvent("rg:open-host-panel",{detail:{tab:"trivia"}}));else window.dispatchEvent(new Event("rg:show-latest-trivia")); }
     else if (shortcut !== "cheer") return;
@@ -2583,17 +2601,26 @@ import {
       billboard.panel.style.transform = transform;
       const brightness=stageShow?.brightnessAt(billboard.anchor)??1;
       billboard.panel.style.filter=brightness===1?"":`brightness(${brightness.toFixed(3)})`;
-      billboard.panel.style.visibility = "visible";
       visible.push(billboard);
     }
-    // DOM overlays have no shared WebGL depth buffer. Paint farther character
-    // planes first, so overlapping live sources remain correctly ordered.
+    // Actual scene geometry masks the DOM planes at pixel granularity. The
+    // iframe itself is never read or replaced; transparent pixels remain live.
     visible.sort((a,b)=>b.projectedQuad.depth-a.projectedQuad.depth);
-    visible.forEach((entry,index)=>{entry.panel.style.zIndex=String(index+1);});
+    visible.forEach((entry,index)=>{entry.panel.parentElement.style.zIndex=String(index+1);});
+    try {
+      if (!characterOcclusion) throw new Error("Character depth pass unavailable");
+      scene.updateMatrixWorld(true);
+      characterOcclusion.update(visible,viewport,camera);
+    } catch(error) {
+      // Fail closed instead of letting a character show through walls.
+      for(const entry of visible)entry.panel.style.visibility="hidden";
+      characterOcclusion?.invalidate();
+      if(!warnedOcclusion){warnedOcclusion=true;console.warn("Character occlusion unavailable",error);}
+    }
   }
 
   function updateSlotPlacementControlProjection() {
-    if (freecam?.active || !slotControlLayer || !camera || !sceneReady || preview.clientWidth < 1 || preview.clientHeight < 1) return;
+    if (freecam?.active || cameraDetached || !slotControlLayer || !camera || !sceneReady || preview.clientWidth < 1 || preview.clientHeight < 1) return;
     const visible = gameStarted && !pauseMenuOpen && !diceModeOpen && !cameraTransition && !stageShow?.busy && currentView.kind === "slot";
     slotControlLayer.hidden = !visible;
     if (!visible || !slotPlacementControls.length) return;
@@ -2650,7 +2677,7 @@ import {
   const cardLayer = document.getElementById("rg-card-games-layer");
   let cardTableBounds = null;
   function updateCardTableProjection() {
-    if (!cardLayer || freecam?.active) return;
+    if (!cardLayer || freecam?.active || cameraDetached) return;
     const active = gameStarted && !pauseMenuOpen && !diceModeOpen && !cameraTransition && currentView.kind === "card-table" && cardTableModel;
     cardLayer.classList.toggle("is-off-table", !active);
     if (!active || cardLayer.hidden) return;
@@ -2692,8 +2719,8 @@ import {
       // Re-pick under a stationary cursor as the damped camera moves, including its final frame.
       if ((changed || moving) && lastScenePointer && !lastScenePointer.buttons) updatePointer(lastScenePointer);
     }
-    preview.classList.toggle("is-trivia",currentView.kind === "trivia");
-    if (triviaLayer) triviaLayer.hidden = !(gameStarted && !pauseMenuOpen && !diceModeOpen && sceneReady && !cameraTransition && currentView.kind === "trivia" && triviaLayer.dataset.ready === "true");
+    preview.classList.toggle("is-trivia",!cameraDetached && currentView.kind === "trivia");
+    if (triviaLayer) triviaLayer.hidden = !(gameStarted && !pauseMenuOpen && !diceModeOpen && sceneReady && !cameraTransition && !cameraDetached && currentView.kind === "trivia" && triviaLayer.dataset.ready === "true");
     updateCardTableProjection();
     exteriorMist?.update(time, reducedMotion.matches);
     if (slotWinCelebration) {
@@ -2707,10 +2734,7 @@ import {
       renderer.render(scene, camera);
       return;
     }
-    if (sceneReady) {
-      updateBillboardProjection();
-      updateSlotPlacementControlProjection();
-    }
+    if (sceneReady) updateSlotPlacementControlProjection();
 
     if (wheelMotion && wheelPivot && ballPivot && ballOrbitObject && Number.isFinite(wheelMotion.ballAngle)) {
       const progress = Math.min(1, (time - wheelMotion.started) / wheelMotion.duration);
@@ -2804,6 +2828,7 @@ import {
     }
 
     showFX?.update(time,{active:roomVisible,spinning:Boolean(wheelMotion),view:currentView,reduced:reducedMotion.matches});
+    if (sceneReady && roomVisible) updateBillboardProjection();
     renderer.render(scene, camera);
   }
 
@@ -2872,6 +2897,8 @@ import {
       overviewCameraBounds = getArcadeBounds();
       try { stageShow=createStageShow(THREE,scene,{slotRig,slotsModel,roots:[stageModel,rouletteModel,slotsModel,audience?.group],foley,onEmotion:emotion=>crowdState.react(emotion,crowdClock),reduced:()=>reducedMotion.matches});stageShow.group.visible=!pauseMenuOpen; }
       catch(error){scene.getObjectByName("rg-stage-theatre")?.removeFromParent();slotsModel.visible=true;console.warn("Stage theatre unavailable",error);}
+      try {characterOcclusion=createCharacterOcclusion(THREE,renderer,[stageModel,rouletteModel,slotsModel,stageShow?.group],billboards);}
+      catch(error){console.warn("Character depth pass unavailable",error);}
       fitCamera();
       if (pendingCardGameMode) {
         const mode = pendingCardGameMode;
@@ -2914,7 +2941,7 @@ import {
     resizeObserver?.disconnect();
     liquidPortal?.dispose();
     exteriorMist?.dispose();
-    audience?.dispose(); showFX?.dispose(); stageShow?.dispose();
+    characterOcclusion?.dispose(); audience?.dispose(); showFX?.dispose(); stageShow?.dispose();
     renderer?.dispose();
   }, { once: true });
 })();

@@ -45,5 +45,5 @@ test('cursor clears on entry to a camera transition and on pointer cancellation 
 test('forced colors use native cursors and trivia canvas advertises only its back action',()=>{
   const forced=css.slice(css.indexOf('@media (forced-colors: active)'));
   for(const [mode,,,,fallback] of modes)assert.ok(forced.includes(`#rg-canvas[data-rg-cursor="${mode}"] { cursor: ${fallback}; }`));
-  assert.match(js,/if \(currentView\.kind === "trivia"\) \{\s+const backBand[^;]+;\s+setGameCursor\(event\.clientY >= rect\.bottom - backBand \? "back" : "default"\);\s+return;/);
+  assert.match(js,/if \(!cameraDetached && currentView\.kind === "trivia"\) \{\s+const backBand[^;]+;\s+setGameCursor\(event\.clientY >= rect\.bottom - backBand \? "back" : "default"\);\s+return;/);
 });

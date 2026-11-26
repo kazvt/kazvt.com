@@ -132,20 +132,20 @@ const roomSource=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8
 const roomSection=(a,b)=>roomSource.slice(roomSource.indexOf(a),roomSource.indexOf(b,roomSource.indexOf(a)));
 test('visible character artwork is directly clickable, respects overlap order, and never hijacks dedicated machine views',()=>{
  const rect={left:100,right:300,top:100,bottom:300,width:200,height:200};
- const panel=(visibility='visible',zIndex=1)=>({style:{visibility,zIndex}});
+ const panel=(visibility='visible',zIndex=1)=>({style:{visibility},parentElement:{style:{zIndex}}});
  const projectedQuad={corners:[{x:100,y:100},{x:300,y:100},{x:300,y:300},{x:100,y:300}]};
  const host={id:'lillie-host',panel:panel('visible',3),projectedQuad},faroe={id:'faroe',panel:panel(),projectedQuad},erin={id:'erin',panel:panel('hidden'),projectedQuad};
- const ctx={billboards:[faroe,erin,host],hostBillboard:host,diceModeOpen:false,pauseMenuOpen:false,currentView:{kind:'overview'},preview:{clientWidth:400,clientHeight:400},pointInCharacterQuad,billboardLayer:{getBoundingClientRect:()=>({left:0,top:0,width:400,height:400}),classList:{contains:()=>false}}};
+ const ctx={cameraDetached:false,characterOcclusion:{contains:()=>true},billboards:[faroe,erin,host],hostBillboard:host,diceModeOpen:false,pauseMenuOpen:false,currentView:{kind:'overview'},preview:{clientWidth:400,clientHeight:400},pointInCharacterQuad,billboardLayer:{getBoundingClientRect:()=>({left:0,top:0,width:400,height:400}),classList:{contains:()=>false}}};
  runInNewContext(roomSection('  function getBillboardAtScreen(', '  function getSeatAtScreen(')+'\nthis.pick=getBillboardAtScreen;',ctx);
  assert.equal(ctx.pick(180,180).machine,'host');assert.equal(ctx.pick(90,180),null);
- host.panel.style.visibility='hidden';assert.equal(ctx.pick(180,180).contestantId,'faroe');
+ ctx.characterOcclusion.contains=entry=>entry!==host;assert.equal(ctx.pick(180,180).contestantId,'faroe');host.panel.style.visibility='hidden';assert.equal(ctx.pick(180,180).contestantId,'faroe');
  for(const kind of ['host','contestant','contestants']){ctx.currentView.kind=kind;assert.equal(ctx.pick(180,180).contestantId,'faroe');}
  for(const kind of ['slot','roulette','card-table','dice-door','trivia']){ctx.currentView.kind=kind;assert.equal(ctx.pick(180,180),null);}
- ctx.currentView.kind='overview';ctx.diceModeOpen=true;assert.equal(ctx.pick(180,180),null);ctx.diceModeOpen=false;ctx.pauseMenuOpen=true;assert.equal(ctx.pick(180,180),null);
+ ctx.cameraDetached=true;ctx.currentView.kind='slot';assert.equal(ctx.pick(180,180).contestantId,'faroe');ctx.characterOcclusion.contains=()=>false;assert.equal(ctx.pick(180,180),null);ctx.cameraDetached=false;ctx.currentView.kind='overview';ctx.diceModeOpen=true;assert.equal(ctx.pick(180,180),null);ctx.diceModeOpen=false;ctx.pauseMenuOpen=true;assert.equal(ctx.pick(180,180),null);
 });
 test('real point-click handler selects the clicked contestant on the first click, retains group back and host focus',()=>{
  const transitions=[];let interaction;
- const ctx={stageShow:{busy:false},freecam:{active:false},gameStarted:true,pauseMenuOpen:false,sceneReady:true,diceModeOpen:false,cameraTransition:null,camera:{},currentView:{kind:'overview'},preview:{getBoundingClientRect:()=>({left:0,top:0,width:1366,height:668})},getSceneInteractionAt:()=>interaction,resolveSceneNavigationZone,resolvePointClickAction,canGoBack:()=>true,transitionToView:view=>{transitions.push(view);ctx.currentView=view;},goBack:()=>{ctx.currentView=resolvePointClickBack(ctx.currentView);}};
+ const ctx={cameraDetached:false,stageShow:{busy:false},freecam:{active:false},gameStarted:true,pauseMenuOpen:false,sceneReady:true,diceModeOpen:false,cameraTransition:null,camera:{},currentView:{kind:'overview'},preview:{getBoundingClientRect:()=>({left:0,top:0,width:1366,height:668})},getSceneInteractionAt:()=>interaction,resolveSceneNavigationZone,resolvePointClickAction,canGoBack:()=>true,transitionToView:view=>{transitions.push(view);ctx.currentView=view;},goBack:()=>{ctx.currentView=resolvePointClickBack(ctx.currentView);}};
  runInNewContext(roomSection('  function pointClickAt(', '  const canFreecam =')+'\nthis.click=pointClickAt;',ctx);
  for(const id of ['faroe','erin','kaz']){interaction={machine:'contestant',contestantId:id};ctx.click(600,300);assert.equal(ctx.currentView.kind,'contestant');assert.equal(ctx.currentView.contestantId,id);const count=transitions.length;ctx.click(600,300);assert.equal(transitions.length,count);}
  interaction=null;ctx.click(600,660);assert.equal(ctx.currentView.kind,'contestants');interaction={machine:'contestant',contestantId:'erin'};ctx.click(600,300);assert.equal(ctx.currentView.contestantId,'erin');
@@ -154,8 +154,9 @@ test('real point-click handler selects the clicked contestant on the first click
 
 test('real focused slot click sends exact cell, never invokes random column placement',()=>{
   const placed=[];let interaction;
-  const ctx={stageShow:{busy:false},freecam:{active:false},gameStarted:true,pauseMenuOpen:false,sceneReady:true,diceModeOpen:false,cameraTransition:null,camera:{},currentView:{kind:'slot'},preview:{getBoundingClientRect:()=>({left:0,top:0,width:1366,height:668})},getSceneInteractionAt:()=>interaction,resolveSceneNavigationZone,resolvePointClickAction,canGoBack:()=>true,placeSelectedSlotSymbolAtCell:i=>placed.push(i)};
+  const ctx={cameraDetached:false,stageShow:{busy:false},freecam:{active:false},gameStarted:true,pauseMenuOpen:false,sceneReady:true,diceModeOpen:false,cameraTransition:null,camera:{},currentView:{kind:'slot'},preview:{getBoundingClientRect:()=>({left:0,top:0,width:1366,height:668})},getSceneInteractionAt:()=>interaction,resolveSceneNavigationZone,resolvePointClickAction,canGoBack:()=>true,placeSelectedSlotSymbolAtCell:i=>placed.push(i)};
   runInNewContext(roomSection('  function pointClickAt(', '  const canFreecam =')+'\nthis.click=pointClickAt;',ctx);
   for(let index=0;index<15;index++){interaction={machine:'slot',part:'slot-reel-display',cellIndex:index};ctx.click(600,300);}
   ctx.stageShow.busy=true;ctx.click(600,300);assert.deepEqual(placed,Array.from({length:15},(_,i)=>i));
+  ctx.stageShow.busy=false;ctx.cameraDetached=true;let dock;ctx.transitionToView=v=>dock=v;ctx.click(600,300);assert.equal(dock.kind,"slot");assert.equal(placed.length,15);
 });
