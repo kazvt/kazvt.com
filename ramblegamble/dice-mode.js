@@ -18,7 +18,7 @@ import {
   stepDicePhysics,
 } from "./dice-roll-physics.mjs?v=dice-impact-20261127-v1";
 
-import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCameraDistance } from "./dice-effects.mjs?v=dice-impact-20261127-v1";
+import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCameraDistance } from "./dice-effects.mjs?v=vip-focus-20261127-v1";
 
 (() => {
   "use strict";

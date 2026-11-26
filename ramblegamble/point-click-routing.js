@@ -48,7 +48,7 @@ export function resolvePointClickAction({ zone = "", machine = "", part = "", fo
   if (zone === "right") return "look-right";
   if (zone === "back") return canGoBack ? "back" : "";
   if (machine === "host") return focused ? "" : "focus-host";
-  if (machine === "contestant") return focused ? "" : "focus-contestants";
+  if (machine === "contestant") return focused ? "" : "focus-contestant";
   if (machine === "card-table") return focused ? "open-card-games" : "focus-card-table";
   if (machine === "roulette" && ROULETTE_MENU_PARTS.has(part)) return "show-trivia";
   if ((machine === "roulette" || machine === "slot") && !focused) return `focus-${machine}`;

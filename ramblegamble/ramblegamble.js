@@ -1,6 +1,6 @@
-import { createFocusOrbit, orbitPosition, bindFocusDrag } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
+import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { createExteriorMist } from "./exterior-mist.mjs?v=exterior-mist-20261126-v1";
-import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS } from "./arcade-framing.mjs?v=bottom-column-arrows-20261126-v1";
+import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=vip-focus-20261127-v1";
 import { foley } from "./game-foley.mjs?v=settlement-hover-20261127-v1";
 import {
   resolvePointClickAction,
@@ -10,7 +10,7 @@ import {
   resolveArcadeShortcut,
   resolveSlotContextCell,
   resolveHostContextAction,
-} from "./point-click-routing.js?v=show-stage-20261126-v1";
+} from "./point-click-routing.js?v=vip-focus-20261127-v1";
 import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
 import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-door-wall-target-20261120-v1";
 import { readPointScores, subscribePointScores, writePointScores, withPointScoresLock } from "./points-store.mjs?v=card-score-sync-20261127-v1";
@@ -1210,6 +1210,17 @@ import {
       const distance = Math.max(1.45 / tan, 1.9 / (tan * Math.max(.5, aspect)));
       return {target,position:target.clone().add(new THREE.Vector3(0,0,distance))};
     }
+    const character = view.kind === "host" ? hostBillboard : view.kind === "contestant"
+      ? contestants.find(entry => entry.id === view.contestantId) : null;
+    if (character) {
+      const target = character.anchor.clone();
+      const elevation = .12, yaw = REFERENCE_START_VIEW.yaw;
+      const horizontal = Math.sqrt(1-elevation*elevation);
+      const direction = new THREE.Vector3(Math.sin(yaw)*horizontal, elevation, Math.cos(yaw)*horizontal);
+      const distance = fitCharacterCloseup({worldWidth: character.worldWidth, worldHeight: character.worldHeight,
+        aspect, fov: camera.fov, near: camera.near, elevation, pitchCap: focusLimits(view.kind)[1]});
+      return {target, position: target.clone().addScaledVector(direction, distance)};
+    }
     const bounds = view.kind === "slot" && slotFocusPoints.length
       ? new THREE.Box3().setFromPoints(slotFocusPoints)
       : getViewBounds(view);
@@ -1935,6 +1946,10 @@ import {
   }
 
   function getSceneInteractionAt(clientX, clientY) {
+    // Browser-source characters are composited above WebGL. Their actual
+    // visible panel is the natural click target, not objects behind it.
+    const visibleCharacter = getBillboardAtScreen(clientX, clientY);
+    if (visibleCharacter) return visibleCharacter;
     const bounds = canvas.getBoundingClientRect();
     pointer.x = ((clientX - bounds.left) / bounds.width) * 2 - 1;
     pointer.y = -((clientY - bounds.top) / bounds.height) * 2 + 1;
@@ -1979,6 +1994,21 @@ import {
       part,
       cellIndex: hit.machine === "slot" && part === "slot-reel-display" ? slotCellIndexAtUv(hit.hit?.uv) : -1,
     };
+  }
+
+  function getBillboardAtScreen(clientX, clientY) {
+    // The rect matches the most recently displayed frame (including CSS
+    // translation and responsive width cap); iframe content is cross-origin.
+    if (diceModeOpen || pauseMenuOpen || !["overview","host","contestant","contestants"].includes(currentView.kind)
+      || billboardLayer.classList.contains("rg-billboards-fading")) return null;
+    // Later DOM panels are painted on top if two rectangles overlap.
+    for (const entry of [...billboards].reverse()) {
+      if (entry.panel.style.visibility !== "visible") continue;
+      const r = entry.panel.getBoundingClientRect();
+      if (r.width <= 0 || r.height <= 0 || clientX < r.left || clientX > r.right || clientY < r.top || clientY > r.bottom) continue;
+      return entry === hostBillboard ? {machine:"host",hostId:entry.id} : {machine:"contestant",contestantId:entry.id};
+    }
+    return null;
   }
 
   function getSeatAtScreen(clientX, clientY, canvasBounds) {
@@ -2276,13 +2306,9 @@ import {
     }
 
     if (interaction.machine === "contestant") {
-      const focused = currentView.kind === "contestants" || currentView.kind === "contestant";
+      const focused = currentView.kind === "contestant" && currentView.contestantId === interaction.contestantId;
       const action = resolvePointClickAction({ machine: "contestant", focused });
-      if (action === "focus-contestants") {
-        transitionToView({ kind: "contestants" });
-      } else if (currentView.kind === "contestants" || currentView.contestantId !== interaction.contestantId) {
-        transitionToView({ kind: "contestant", contestantId: interaction.contestantId });
-      }
+      if (action === "focus-contestant") transitionToView({kind:"contestant", contestantId:interaction.contestantId});
       return;
     }
 
@@ -2400,6 +2426,9 @@ import {
       preview.classList.add("is-dice-mode");
       hideGameCursor();
       result.hidden = true;
+      // The transparent dialog composites over this existing canvas. Replace
+      // its last room frame synchronously so no room geometry leaks through.
+      if (renderer && scene && camera) renderer.render(scene, camera);
     } else {
       for (const [object, visible] of diceModeVisibility || []) object.visible = visible;
       diceModeVisibility = null;

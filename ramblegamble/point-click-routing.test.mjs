@@ -65,12 +65,12 @@ test("screen-edge navigation resolves to fixed left, right, and back zones", () 
   assert.equal(resolvePointClickZone({ x: 180, y: 530, width: 360, height: 540, canGoBack: true }), "back");
 });
 
-test("first machine or contestant click focuses the area; focused machines keep their actions", () => {
+test("first machine or contestant click focuses its target; focused machines keep their actions", () => {
   assert.equal(resolvePointClickAction({ machine: "roulette", part: "wheel" }), "focus-roulette");
   assert.equal(resolvePointClickAction({ machine: "roulette", part: "wheel", focused: true }), "spin-wheel");
   assert.equal(resolvePointClickAction({ machine: "slot", part: "arm" }), "focus-slot");
   assert.equal(resolvePointClickAction({ machine: "slot", part: "arm", focused: true }), "pull-lever");
-  assert.equal(resolvePointClickAction({ machine: "contestant" }), "focus-contestants");
+  assert.equal(resolvePointClickAction({ machine: "contestant" }), "focus-contestant");
   assert.equal(resolvePointClickAction({ machine: "contestant", focused: true }), "");
   assert.equal(resolvePointClickAction({ machine: "host" }), "focus-host");
   assert.equal(resolvePointClickAction({ machine: "host", focused: true }), "");
@@ -123,4 +123,29 @@ test("focused slot decorative body allows navigation bands without stealing inte
   for(const part of ["slot-reel-display","arm","button1"])assert.equal(resolveSceneNavigationZone({...geometry,interaction:{machine:"slot",part}}),"");
   assert.equal(resolveSceneNavigationZone({...geometry,view:"overview",interaction:{machine:"slot",part:"machine"}}),"");
   assert.equal(resolveSceneNavigationZone({...geometry,x:10,y:150,interaction:{machine:"slot",part:"machine"}}),"left");
+});
+
+import { readFileSync } from 'node:fs';
+import { runInNewContext } from 'node:vm';
+const roomSource=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
+const roomSection=(a,b)=>roomSource.slice(roomSource.indexOf(a),roomSource.indexOf(b,roomSource.indexOf(a)));
+test('visible character artwork is directly clickable, respects overlap order, and never hijacks dedicated machine views',()=>{
+ const rect={left:100,right:300,top:100,bottom:300,width:200,height:200};
+ const panel=(visibility='visible')=>({style:{visibility},getBoundingClientRect:()=>rect});
+ const host={id:'lillie-host',panel:panel()},faroe={id:'faroe',panel:panel()},erin={id:'erin',panel:panel('hidden')};
+ const ctx={billboards:[faroe,erin,host],hostBillboard:host,diceModeOpen:false,pauseMenuOpen:false,currentView:{kind:'overview'},billboardLayer:{classList:{contains:()=>false}}};
+ runInNewContext(roomSection('  function getBillboardAtScreen(', '  function getSeatAtScreen(')+'\nthis.pick=getBillboardAtScreen;',ctx);
+ assert.equal(ctx.pick(180,180).machine,'host');assert.equal(ctx.pick(90,180),null);
+ host.panel.style.visibility='hidden';assert.equal(ctx.pick(180,180).contestantId,'faroe');
+ for(const kind of ['host','contestant','contestants']){ctx.currentView.kind=kind;assert.equal(ctx.pick(180,180).contestantId,'faroe');}
+ for(const kind of ['slot','roulette','card-table','dice-door','trivia']){ctx.currentView.kind=kind;assert.equal(ctx.pick(180,180),null);}
+ ctx.currentView.kind='overview';ctx.diceModeOpen=true;assert.equal(ctx.pick(180,180),null);ctx.diceModeOpen=false;ctx.pauseMenuOpen=true;assert.equal(ctx.pick(180,180),null);
+});
+test('real point-click handler selects the clicked contestant on the first click, retains group back and host focus',()=>{
+ const transitions=[];let interaction;
+ const ctx={gameStarted:true,pauseMenuOpen:false,sceneReady:true,diceModeOpen:false,cameraTransition:null,camera:{},currentView:{kind:'overview'},preview:{getBoundingClientRect:()=>({left:0,top:0,width:1366,height:668})},getSceneInteractionAt:()=>interaction,resolveSceneNavigationZone,resolvePointClickAction,canGoBack:()=>true,transitionToView:view=>{transitions.push(view);ctx.currentView=view;},goBack:()=>{ctx.currentView=resolvePointClickBack(ctx.currentView);}};
+ runInNewContext(roomSection('  function pointClickAt(', '  const canOrbit =')+'\nthis.click=pointClickAt;',ctx);
+ for(const id of ['faroe','erin','kaz']){interaction={machine:'contestant',contestantId:id};ctx.click(600,300);assert.equal(ctx.currentView.kind,'contestant');assert.equal(ctx.currentView.contestantId,id);const count=transitions.length;ctx.click(600,300);assert.equal(transitions.length,count);}
+ interaction=null;ctx.click(600,660);assert.equal(ctx.currentView.kind,'contestants');interaction={machine:'contestant',contestantId:'erin'};ctx.click(600,300);assert.equal(ctx.currentView.contestantId,'erin');
+ interaction={machine:'host'};ctx.click(600,300);assert.equal(ctx.currentView.kind,'host');
 });

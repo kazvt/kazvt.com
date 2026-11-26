@@ -148,3 +148,44 @@ test('capped presentation orbit keeps slot interaction geometry inside the viewp
   }
  }
 });
+
+// Character framing uses the actual authored seat/character bounds and the
+// screen-facing iframe projection, not the chair hit volume used for picking.
+import { fitCharacterCloseup } from './arcade-framing.mjs';
+test('host and all three contestant close-ups are tighter and retain full billboard at every orbit extreme',()=>{
+ const m=model('rg_stage'),root=m.d.nodes.find(n=>n.name==='chair'&&n.children);
+ const entries=root.children.map(i=>m.d.nodes[i]).filter(n=>/^(chair|tall_chair)$/.test(n.name));
+ const world=p=>add(p,root.translation);
+ const host=entries.filter(n=>n.name==='chair').sort((a,b)=>box(nodePoints(m,b).map(world)).max[1]-box(nodePoints(m,a).map(world)).max[1])[0];
+ const chairs=[host,...entries.filter(n=>n.name==='tall_chair')];assert.equal(chairs.length,4);
+ const [maxYaw,maxPitch]=focusLimits('contestant'),tan=Math.tan(42*Math.PI/360);
+ for(const n of chairs){
+  const isHost=n===host,local=isHost?[-.0306,.055,-.0004]:[0,.099,.0263];
+  // These are the same measured seat-plane fallback centroids as production.
+  const anchor=add(world(add(rotateQuaternion(local,n.rotation),n.translation||[0,0,0])),[0,.52,0]);
+  const chair=box(nodePoints(m,n).map(world)),size=sub(chair.max,chair.min);
+  const hitSize=size.map((s,i)=>Math.max(s+(isHost?[.5,.4,.5]:[.42,.36,.42])[i],(isHost?[.96,1.42,.86]:[.92,1.35,.82])[i]));
+  const oldBox=box([add(chair.center,mul(hitSize,-.5)),add(chair.center,mul(hitSize,.5)),add(anchor,[-.52,-.52,0]),add(anchor,[.52,.52,0])]);
+  const oldBounds=box([add(oldBox.min,[-.22,-.22,-.22]),add(oldBox.max,[.22,.22,.22])]);
+  const oldBasis=basis(-.38,.24);
+  for(const [w,h] of [[320,640],[390,844],[768,1024],[1366,668],[1920,1080],[2560,1080],[844,390]]){
+   const a=w/h,dist=fitCharacterCloseup({worldWidth:1.04,worldHeight:1.04,aspect:a,pitchCap:maxPitch});
+   const oldP=relative(oldBounds.corners,oldBounds.center,oldBasis),oldDist=Math.max(1,...oldP.map(p=>Math.max(Math.abs(p.x)/(tan*a),Math.abs(p.y)/tan)+p.z))*1.18;
+   const oldDepth=oldDist-relative([anchor],oldBounds.center,oldBasis)[0].z;
+   assert.ok(dist<oldDepth*.88,`${n.name} ${w}x${h}: new distance ${dist}, previous anchor depth ${oldDepth}`);
+   const oldEndpoints=project(relative([add(anchor,[0,.52,0]),add(anchor,[0,-.52,0])],oldBounds.center,oldBasis),{distance:oldDist,shiftX:0,shiftY:0},w,h);
+   for(const yaw of [-maxYaw,0,maxYaw])for(let i=0;i<=20;i++){
+    const pitch=-maxPitch+2*maxPitch*i/20,b=basis(-.38+yaw,Math.sin(Math.asin(.12)+pitch));
+    const endpoints=project(relative([add(anchor,[0,.52,0]),add(anchor,[0,-.52,0])],anchor,b),{distance:dist,shiftX:0,shiftY:0},w,h);
+    assert.ok(endpoints.every(p=>p[2]>.1&&Math.abs(p[1])<=.70+1e-9));
+    assert.ok(1.04/(2*dist*tan*a)<=.76+1e-9);
+    assert.ok(span(endpoints,1)>span(oldEndpoints,1)*1.15,`${n.name} ${w}x${h} enlarged`);
+    // At desktop aspect the whole character panel occupies ~two thirds height.
+    if(a>=1.5)assert.ok(span(endpoints,1)/2>.60&&span(endpoints,1)/2<=.70);
+   }
+  }
+ }
+ const js=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
+ assert.match(js,/const target = character\.anchor\.clone\(\);/);
+ assert.match(js,/distance = fitCharacterCloseup\(/);
+});

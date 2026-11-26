@@ -2,7 +2,7 @@ import { focusLimits, orbitPosition } from "./focus-orbit.mjs";
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {collectDiceContact, collectDiceReimpacts, snapshotDiceContact, impactStyle, diceCameraDistance, FX_LIMITS, createDiceEffects, DICE_FX_PALETTE} from './dice-effects.mjs';
+import {collectDiceContact, collectDiceReimpacts, snapshotDiceContact, impactStyle, diceCameraDistance, FX_LIMITS, createDiceEffects, DICE_FX_PALETTE, TOP_FACE_MAX_OPACITY} from './dice-effects.mjs';
 import {createDiceThrow, DICE_TRAY_HALF_WIDTH, DICE_TRAY_HALF_DEPTH, DICE_PHYSICS_FIXED_STEP} from './dice-roll-physics.mjs';
 import {DICE_FACE_ORDER} from './dice-game-state.mjs';
 const v=(x,y,z)=>({x,y,z});
@@ -101,7 +101,7 @@ class Obj {
 class Color {set(v){this.value=v;return this;}}
 class Mat {constructor(o){Object.assign(this,o);this.color=new Color();}}
 class Mesh extends Obj{constructor(g,m){super();this.geometry=g;this.material=m;}}
-class Batch extends Mesh{constructor(g,m,n){super(g,m);this.capacity=n;this.instanceMatrix={};this.instanceColor={};}setMatrixAt(i,m){assert.ok(i<this.capacity);assert.ok(m.every(Number.isFinite));}setColorAt(i,c){assert.ok(i<this.capacity);assert.ok(c.value);}}
+class Batch extends Mesh{constructor(g,m,n){super(g,m);this.capacity=n;this.instanceMatrix={};this.instanceColor={};this.colors=[];}setMatrixAt(i,m){assert.ok(i<this.capacity);assert.ok(m.every(Number.isFinite));}setColorAt(i,c){assert.ok(i<this.capacity);assert.ok(c.value);this.colors[i]=c.value;}}
 const T={Vector3:Vec,Object3D:Obj,Color,MeshBasicMaterial:Mat,Mesh,InstancedMesh:Batch,PlaneGeometry:class{},BoxGeometry:class{},CanvasTexture:class{}};
 function mockCanvas(){const canvas={width:256,height:256};const noop=()=>{};const ctx=new Proxy({canvas,createRadialGradient:()=>({addColorStop:noop})},{get:(o,k)=>o[k]??noop});canvas.getContext=()=>ctx;return canvas;}
 test('effect lifecycle: bounded burst pool, all six exact local face transforms, persistent seal, clear and reduced motion',()=>{
@@ -112,12 +112,18 @@ test('effect lifecycle: bounded burst pool, all six exact local face transforms,
     const fx=createDiceEffects(T,scene,dies),batch=scene.children.find(x=>x instanceof Batch);
     const objectCount=scene.children.length;
     for(let i=0;i<200;i++)fx.impact({point:[0,0,0],normal:[0,1,0],speed:13,bothDice:i%2===0},false);
-    assert.equal(fx.update(.016,true,false),true);assert.equal(batch.count,FX_LIMITS.particles);assert.equal(scene.children.length,objectCount);
+    assert.equal(fx.update(.016,true,false),true);assert.equal(batch.count,FX_LIMITS.particles);assert.equal(scene.children.length,objectCount);assert.deepEqual(new Set(batch.colors.slice(0,batch.count)),new Set(["#ffffff","#000000"]));
     for(const face of DICE_FACE_ORDER){
       fx.clear();fx.land(0,face,'faroeberry',false);fx.update(.016,false,false);
-      const [edge,glow]=dies[0].group.children;
-      assert.ok(edge.visible&&glow.visible);assert.deepEqual(edge.position.toArray(),face.normal.map(x=>x*1.222));
-      assert.deepEqual(edge.rotation.toArray(),[...face.rotation]);assert.equal(glow.material.color.value,DICE_FX_PALETTE.faroeberry);
+      const [edge]=dies[0].group.children;
+      assert.equal(dies[0].group.children.length,1,'no overlapping top-face layers');
+      assert.ok(edge.visible);assert.deepEqual(edge.position.toArray(),face.normal.map(x=>x*1.222));
+      assert.deepEqual(edge.rotation.toArray(),[...face.rotation]);assert.equal(edge.material.color.value,'#ffffff');
+      assert.ok(edge.material.opacity<=TOP_FACE_MAX_OPACITY);assert.equal(edge.children.length,0);assert.equal(edge.material.forceSinglePass,true);
+      const ground=scene.children.filter(x=>x.visible&&x.material?.color.value===DICE_FX_PALETTE.faroeberry);
+      assert.equal(ground.length,3,'the colored aura, seal and wave remain intact');
+      for(let frame=0;frame<120;frame++){fx.update(1/60,false,false);assert.ok(edge.material.opacity<=.1);}
+      assert.equal(edge.material.opacity,.1);
     }
     for(let i=0;i<120;i++)fx.update(1/60,false,false);
     assert.equal(fx.update(1/60,false,false),false);assert.equal(batch.count,0);assert.ok(dies[0].group.children[0].visible);

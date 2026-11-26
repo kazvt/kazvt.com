@@ -2,7 +2,9 @@
 export const DICE_FX_PALETTE = Object.freeze({
   blank: '#fff29b', erinberry: '#cf9aff', faroeberry: '#6df4a2', kazberry: '#ffe567',
 });
-const GOLD = '#fff29b', PINK = '#ff62c9', VIOLET = '#6255ee';
+const GOLD = '#fff29b';
+const WHITE = '#ffffff', BLACK = '#000000';
+export const TOP_FACE_MAX_OPACITY = .10;
 export const clamp01 = n => Math.max(0, Math.min(1, n));
 export const easeOut = n => 1 - (1 - clamp01(n)) ** 3;
 export function diceCameraDistance(aspect, fov=43, targetY=1.65, elevation=Math.atan(.53)) {
@@ -68,11 +70,11 @@ export function collectDiceReimpacts(pending, contacts, previous, step, dt) {
 export function impactStyle(speed, bothDice = false) {
   const power = clamp01(speed / 13);
   return { power, size: .48 + 1.45 * power, life: .26 + .35 * power,
-    count: Math.round(3 + 13 * power + (bothDice ? 5 : 0)), color: bothDice ? PINK : GOLD };
+    count: Math.round(3 + 13 * power + (bothDice ? 5 : 0)), color: WHITE };
 }
 
 // Small authored, transparent arcade textures; the same pixel geometry and
-// gold/pink/violet palette as the reel win animation. No full-screen flash.
+// monochrome contact palette; the existing colored landing seal is unchanged.
 export function paintDiceEffect(ctx, kind) {
   const n = ctx.canvas.width;
   ctx.clearRect(0, 0, n, n);
@@ -96,10 +98,10 @@ export function paintDiceEffect(ctx, kind) {
     ctx.fillStyle = '#ffffff';
     for (const [x,y] of [[14,14],[224,14],[14,224],[224,224]]) ctx.fillRect(x,y,18,18);
   } else if (kind === 'impact') {
-    ring(68, 16, '#6255ee70'); ring(75, 5, '#ffffffdf'); ring(88, 3, '#ff62c9a0');
+    ring(68, 16, '#000000c0'); ring(75, 5, '#ffffffdf'); ring(88, 3, '#000000e0');
     for (let i=0;i<12;i++) {
       ctx.save(); ctx.translate(c,c); ctx.rotate(i*Math.PI/6);
-      ctx.fillStyle = i%2 ? PINK : GOLD; ctx.fillRect(-3,91,6,i%2?12:25); ctx.restore();
+      ctx.fillStyle = i%2 ? BLACK : WHITE; ctx.fillRect(-3,91,6,i%2?12:25); ctx.restore();
     }
   } else if (kind === 'seal') {
     ring(111, 9, '#6255ee85'); ring(104, 3, '#ffffff'); ring(81, 2, '#ffffffa0');
@@ -127,7 +129,7 @@ export function createDiceEffects(THREE, scene, dieStates) {
   const plane = new THREE.PlaneGeometry(1,1);
   const makePlane = (kind, parent = scene, order = 1) => {
     const mesh = new THREE.Mesh(plane, new THREE.MeshBasicMaterial({ map:maps[kind], transparent:true,
-      depthWrite:false, depthTest:true, toneMapped:false, side:THREE.DoubleSide }));
+      depthWrite:false, depthTest:true, toneMapped:false, blending:THREE.NormalBlending, side:THREE.DoubleSide }));
     mesh.visible = false; mesh.renderOrder = order; parent.add(mesh); return mesh;
   };
   const up = new THREE.Vector3(0,1,0), planeNormal = new THREE.Vector3(0,0,1);
@@ -135,12 +137,11 @@ export function createDiceEffects(THREE, scene, dieStates) {
   const dice = dieStates.map(({group}) => {
     const shadow = makePlane('shadow',scene,0), aura = makePlane('aura',scene,1), seal = makePlane('seal',scene,1), wave = makePlane('seal',scene,1);
     for (const mesh of [shadow,aura,seal,wave]) mesh.rotation.x = -Math.PI/2;
-    const edge = makePlane('edge',group,3), edgeGlow = makePlane('edge',group,3);
-    const chasers = Array.from({length:4},()=>{
-      const mesh = new THREE.Mesh(plane,new THREE.MeshBasicMaterial({color:0xfff8de,transparent:true,depthWrite:false,toneMapped:false,side:THREE.DoubleSide}));
-      mesh.visible=false; mesh.renderOrder=4; edge.add(mesh); return mesh;
-    });
-    return {group,shadow,aura,seal,wave,edge,edgeGlow,chasers,age:Infinity,color:GOLD,landed:false,trailClock:0};
+    // One alpha-blended white plane, not overlapping glow/chaser layers.
+    const edge = makePlane('edge',group,3);
+    edge.material.color.set(WHITE); edge.material.opacity=TOP_FACE_MAX_OPACITY;
+    edge.material.forceSinglePass=true;
+    return {group,shadow,aura,seal,wave,edge,age:Infinity,color:GOLD,landed:false,trailClock:0};
   });
   const shards = new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1), new THREE.MeshBasicMaterial({toneMapped:false}),FX_LIMITS.particles);
   shards.count = 0; shards.frustumCulled = false; scene.add(shards);
@@ -156,14 +157,14 @@ export function createDiceEffects(THREE, scene, dieStates) {
     }
     particles.push({point:[...point],velocity:[...velocity],size,life,age:0,tint,spin:(rng()-.5)*10,phase:rng()*6.28,priority});
   }
-  function burst(point, normal, count, power, tint, priority = 1) {
+  function burst(point, normal, count, power, priority = 1) {
     const axis = new THREE.Vector3(...normal).normalize();
     const tangent = new THREE.Vector3().crossVectors(axis, Math.abs(axis.y)>.9 ? planeNormal : up).normalize();
     const bitangent = new THREE.Vector3().crossVectors(axis,tangent);
     for(let i=0;i<count;i++) {
       const angle = (i+rng()*.6)/count*Math.PI*2, speed = (.8+rng()*2.3)*( .55+power);
       const v = tangent.clone().multiplyScalar(Math.cos(angle)*speed).addScaledVector(bitangent,Math.sin(angle)*speed).addScaledVector(axis,.5+rng()*2.0);
-      addParticle(point,v.toArray(),.055+rng()*.10,.28+rng()*.55,[tint,GOLD,PINK,VIOLET,'#fff8de'][i%5],priority);
+      addParticle(point,v.toArray(),.055+rng()*.10,.28+rng()*.55,i%2 ? BLACK : WHITE,priority);
     }
   }
   function impact(hit, reduced) {
@@ -176,23 +177,21 @@ export function createDiceEffects(THREE, scene, dieStates) {
     slot.mesh.material.color.set(style.color);
     slot.age=0; slot.life=style.life; slot.size=style.size; slot.power=style.power;
     slot.mesh.visible=true;
-    burst(hit.point,hit.normal,style.count,style.power,style.color);
+    burst(hit.point,hit.normal,style.count,style.power);
     // A second outward hemisphere for dice-on-dice contact.
-    if(hit.bothDice) burst(hit.point,hit.normal.map(n=>-n),Math.ceil(style.count/2),style.power,PINK);
+    if(hit.bothDice) burst(hit.point,hit.normal.map(n=>-n),Math.ceil(style.count/2),style.power);
   }
   function land(index, face, asset, reduced, settled = false) {
     const d=dice[index]; d.landed=true; d.age=settled?FX_LIMITS.landingDuration:0; d.color=DICE_FX_PALETTE[asset] || GOLD;
-    for(const edge of [d.edge,d.edgeGlow]) {
-      edge.position.set(...face.normal).multiplyScalar(1.222);
-      edge.rotation.set(...face.rotation); edge.visible=true;
-    }
-    d.edge.material.color.set(GOLD); d.edgeGlow.material.color.set(d.color);
+    d.edge.position.set(...face.normal).multiplyScalar(1.222);
+    d.edge.rotation.set(...face.rotation); d.edge.visible=true;
+    d.edge.material.color.set(WHITE);
     for(const mesh of [d.aura,d.seal,d.wave]) mesh.material.color.set(d.color);
-    if(!reduced) burst([d.group.position.x,.10,d.group.position.z],[0,1,0],36,1.15,d.color,2);
+    if(!reduced) burst([d.group.position.x,.10,d.group.position.z],[0,1,0],36,1.15,2);
   }
   function clearLanding(d) {
     d.landed=false; d.age=Infinity;
-    for(const mesh of [d.aura,d.seal,d.wave,d.edge,d.edgeGlow]) mesh.visible=false;
+    for(const mesh of [d.aura,d.seal,d.wave,d.edge]) mesh.visible=false;
   }
   function clear() {
     particles.length=0; shards.count=0;
@@ -224,7 +223,7 @@ export function createDiceEffects(THREE, scene, dieStates) {
           d.trailClock=0;
           const v=new THREE.Vector3(body.velocity.x,body.velocity.y,body.velocity.z).normalize();
           const p=g.position.clone().addScaledVector(v,-1.45*scale);
-          addParticle(p.toArray(),[-v.x*.8,.25-v.y*.4,-v.z*.8],.12,.25,index?PINK:GOLD,0);
+          addParticle(p.toArray(),[-v.x*.8,.25-v.y*.4,-v.z*.8],.12,.25,index?BLACK:WHITE,0);
         }
       }
       if(!d.landed) continue;
@@ -237,18 +236,10 @@ export function createDiceEffects(THREE, scene, dieStates) {
       d.seal.scale.setScalar((4.10+.40*(1-p))*scale); d.seal.material.opacity=.78;
       d.seal.rotation.z=reduced?0:(1-p)*-.7;
       d.wave.scale.setScalar((3.0+3.5*p)*scale);d.wave.material.opacity=.82*(1-t)**1.7;
-      // Actual top-face frame follows the die's local transform and stays lit.
-      d.edge.scale.setScalar(2.78);d.edge.material.opacity=.92;
-      d.edgeGlow.scale.setScalar(2.88+.12*(1-p));d.edgeGlow.material.opacity=.42+.40*(1-p);
-      for (const [j,chaser] of d.chasers.entries()) {
-        chaser.visible=!reduced&&t<1;
-        const u=(t*2.4+j)%4, side=Math.floor(u), along=(u-side)*.84-.42;
-        const xy=[[along,-.42],[.42,along],[-along,.42],[-.42,-along]][side];
-        chaser.position.set(...xy,.004);
-        chaser.rotation.z=side*Math.PI/2;
-        chaser.scale.set(.10,.025,1);chaser.material.opacity=(1-t)*.9;
-      }
-      d.edgeGlow.position.set(...d.edge.position.toArray()).multiplyScalar(1.002);
+      // Actual top-face frame: a single white layer, never above 10% alpha.
+      // A subtle opacity settle preserves the animation without stacking.
+      d.edge.scale.setScalar(2.78);
+      d.edge.material.opacity=TOP_FACE_MAX_OPACITY*(.75+.25*p);
     }
     for(let i=particles.length-1;i>=0;i--) {
       const p=particles[i];p.age+=dt;

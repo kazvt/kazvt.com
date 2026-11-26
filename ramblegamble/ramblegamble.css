@@ -125,6 +125,11 @@ body.ramble-page *::after {
   opacity: 0;
 }
 
+/* The translucent modal must reveal only the actual sky canvas, never a
+   fading character, portal iframe, card UI or stale result behind it. The
+   live points HUD is moved into the dialog before this class is applied. */
+.rg-preview.is-dice-mode > :not(#rg-canvas) { display: none !important; }
+
 .rg-slot-control-layer {
   position: absolute;
   z-index: 3;
@@ -384,7 +389,8 @@ body.ramble-page *::after {
   overflow: hidden;
   border: 0;
   color: var(--ink);
-  background: #030303;
+  /* The main scene already renders only its animated sky while Dice is open. */
+  background: transparent;
   font-family: Arial, Helvetica, sans-serif !important;
   opacity: 0;
   transition: opacity 320ms ease;

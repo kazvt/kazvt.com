@@ -290,8 +290,8 @@ test("scene wiring preloads one plane, updates it before every room render, and 
   assert.match(js, /liquidPortal\?\.dispose\(\)/);
   assert.match(css, /#rg-canvas \{[^}]*z-index: 1;/);
   assert.match(css, /\.rg-liquid-portal-layer \{[^}]*z-index: 0;[^}]*pointer-events: none;/);
-  assert.match(readFileSync(new URL("./host-access.mjs", import.meta.url), "utf8"), /ramblegamble\.js\?v=settlement-hover-20261127-v1/);
-  assert.match(html, /ramblegamble\.css\?v=dice-impact-20261127-v1/);
+  assert.match(readFileSync(new URL("./host-access.mjs", import.meta.url), "utf8"), /ramblegamble\.js\?v=vip-focus-20261127-v1/);
+  assert.match(html, /ramblegamble\.css\?v=vip-focus-20261127-v1/);
 });
 
 
@@ -338,10 +338,12 @@ test("both VIP surfaces share one neutral black preset with all supplied motion 
   assert.doesNotMatch(dice, /liquid\.src\s*=\s*["']\/liquid/);
 });
 
-test("VIP doorway has 80% opacity and Dice liquid has 50% opacity over a neutral background", () => {
+test("VIP doorway has 80% opacity and Dice liquid has 50% opacity over the existing animated sky", () => {
   const css = readFileSync(new URL("./ramblegamble.css", import.meta.url), "utf8");
   assert.match(css, /\.rg-liquid-portal-frame \{[^}]*background: #030303;/);
-  assert.match(css, /\.rg-dice-dialog \{[^}]*background: #030303;/);
+  assert.match(css, /\.rg-dice-dialog \{[^}]*background: transparent;/);
+  assert.match(css, /\.rg-dice-dialog::backdrop \{[^}]*background: transparent;/);
+  assert.match(css, /\.rg-preview\.is-dice-mode > :not\(#rg-canvas\) \{ display: none !important; \}/);
   assert.match(css, /\.rg-dice-liquid \{[^}]*background: #030303;[^}]*opacity: 0\.5;/);
   const f = fixture();
   assert.equal(f.surface.material.color, 0x030303);
@@ -351,6 +353,24 @@ test("VIP doorway has 80% opacity and Dice liquid has 50% opacity over a neutral
   f.dispose();
   const gate = readFileSync(new URL("./host-access.mjs", import.meta.url), "utf8");
   const html = readFileSync(new URL("../rg/index.html", import.meta.url), "utf8");
-  assert.match(gate, /dice-mode\.js\?v=settlement-hover-20261127-v1/);
-  assert.match(html, /host-access\.mjs\?v=settlement-hover-20261127-v1/);
+  assert.match(gate, /dice-mode\.js\?v=vip-focus-20261127-v1/);
+  assert.match(html, /host-access\.mjs\?v=vip-focus-20261127-v1/);
+});
+
+import { runInNewContext } from 'node:vm';
+test('Dice mode swaps the existing room canvas to sky-only immediately and restores exact visibility on exit',()=>{
+ const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
+ const start=src.indexOf('  window.addEventListener("rg:dice-mode-state",');
+ const end=src.indexOf('  window.addEventListener("keydown",',start);
+ const objects=[{visible:true},{visible:true},{visible:false},{visible:true}],skyRoot={visible:true};
+ const events=[],listeners={},classes=new Set(),billboardClasses=new Set(),portalStates=[];
+ const classList=set=>({add:v=>set.add(v),remove:v=>set.delete(v)});
+ const pointsHud={};
+ const context={diceModeOpen:false,pointsHud,diceHeader:{prepend:h=>events.push(['hud-in',h])},preview:{classList:classList(classes),insertBefore:h=>events.push(['hud-out',h])},result:{hidden:false},updateLiquidPortal:()=>portalStates.push(context.diceModeOpen),focusDrag:{clearHover(){}},lastScenePointer:null,stopRouletteSettlement(){},diceModeVisibility:null,stageModel:objects[0],rouletteRig:objects[1],slotRig:objects[2],exteriorMist:{group:objects[3]},billboardLayer:{classList:classList(billboardClasses)},hideGameCursor(){},renderer:{render(){events.push(['render',...objects.map(o=>o.visible),skyRoot.visible]);}},scene:{},camera:{updateMatrixWorld(){}},suppressElapsedWheelCue(){},pendingTrivia:false,pendingCardGameMode:'',window:{addEventListener:(key,fn)=>listeners[key]=fn}};
+ runInNewContext(src.slice(start,end),context);
+ const change=open=>listeners['rg:dice-mode-state']({detail:{open}});
+ change(true);assert.deepEqual(objects.map(o=>o.visible),[false,false,false,false]);assert.equal(skyRoot.visible,true);assert.ok(classes.has('is-dice-mode'));assert.ok(context.result.hidden);
+ assert.deepEqual(events,[['hud-in',pointsHud],['render',false,false,false,false,true]]);assert.deepEqual(portalStates,[true]);
+ change(true);assert.equal(events.length,2,'duplicate open is idempotent');
+ change(false);assert.deepEqual(objects.map(o=>o.visible),[true,true,false,true]);assert.equal(skyRoot.visible,true);assert.ok(!classes.has('is-dice-mode'));assert.ok(!billboardClasses.size);assert.deepEqual(events.at(-1),['hud-out',pointsHud]);assert.deepEqual(portalStates,[true,false]);
 });
