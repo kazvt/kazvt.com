@@ -60,7 +60,7 @@ import {
   menuMarquee.volume = Math.max(0, Math.min(1, menuMarquee.volume * 0.2));
   const FORCED_THEME = "p2";
   const ROULETTE_PART_NAMES = new Set(["center", "wheel", "rim", "ball"]);
-  const SLOT_PART_NAMES = new Set(["machine", "arm", "button1", "button2", "button3", "button4", "button5"]);
+  const SLOT_PART_NAMES = new Set(["machine", "slot-reel-display", "arm", "button1", "button2", "button3", "button4", "button5"]);
   const SLOT_GRID_STORAGE_KEY = "ramblegamble.slot-grid.v1";
   const SLOT_DISPLAY_PIXELS = Object.freeze({ left: 5, right: 75, top: 16, bottom: 58 });
   const SLOT_SYMBOL_IMAGE_PATH = "/ramblegamble/assets/berries/";
@@ -150,6 +150,8 @@ import {
   let slotReelDisplay = null;
   let slotControlTargets = new Map();
   const slotReelImages = new Map();
+  let selectedSlotBerry = "kazberry";
+  let slotPlacementAxis = "column";
   const pickQuestion = createQuestionPicker();
   let playing = false;
   let gameStarted = false;
