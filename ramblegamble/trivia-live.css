@@ -49,3 +49,17 @@
 @media(prefers-reduced-motion:no-preference){.rg-live-wrong {animation:rg-live-answer-shake 300ms ease-in-out;}@keyframes rg-live-answer-shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}}
 
 @media(max-width:600px){.rg-live-stage-content:is([data-kind="choice-image"],[data-kind="choice-image-wide"],[data-kind="image-grid"]) .rg-live-grid[data-count="10"] .rg-live-image{max-height:11vh;}}
+
+/* A visible object palette in both the audience question and player view. */
+.rg-live-compose-palette{width:min(100%,880px);min-width:0;flex:none;}
+.rg-live-compose-heading{font-size:clamp(12px,1.4vw,17px);margin:0 0 5px;color:inherit;text-align:center;text-shadow:0 1px 2px #3f2178;}
+.rg-live-compose-types{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,88px),1fr));gap:5px;min-width:0;}
+.rg-live-compose-type{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;min-height:44px;padding:5px;border:2px solid #6457ef;background:#a6a1fa;color:#211844;font-size:clamp(12px,1.3vw,16px);font-weight:800;text-align:center;overflow-wrap:anywhere;}
+.rg-live-compose-type img{width:clamp(28px,5vh,54px);height:clamp(28px,5vh,54px);object-fit:contain;image-rendering:pixelated;}
+.rg-live-compose-type span{max-width:100%;}
+.rg-live-compose-empty{grid-column:1/-1;text-align:center;}
+.rg-live-stage-content[data-kind="compose-image"] .rg-live-artboard{width:min(100%,880px);}
+.rg-live-body:has(.rg-live-compose-palette){overflow:auto;justify-content:flex-start;}
+
+/* The generic image thumbnail height must not crop the picture under the placement canvas. */
+.rg-live-artboard > img{max-height:none;max-width:none;}

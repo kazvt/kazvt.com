@@ -576,3 +576,8 @@
 
 /* A visible result even with reduced motion or muted audio. */
 #rg-trivia-interface.is-error .rg-answer-feedback { color:#8b2626; }
+
+.rg-compose-type > span:only-child { grid-column: 1 / -1; }
+.rg-compose-type > span { overflow-wrap: anywhere; }
+
+.rg-compose-type > img { order: -1; }

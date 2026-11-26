@@ -1,6 +1,6 @@
 import { gradeSimpleAnswer, isSimpleGradeMode } from "./trivia-simple-grade.mjs?v=room-recovery-20261127-v1";
 import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, newTriviaId, updateTrivia, activeRoomRound, publicMedia } from "./live-trivia.mjs?v=show-stage-20261126-v1";
-import { renderLiveQuestion, renderTriviaResponses } from "./trivia-live-view.mjs?v=smeemo-quake-20261127-v1";
+import { renderLiveQuestion, renderTriviaResponses } from "./trivia-live-view.mjs?v=compose-object-types-20261127-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
 import { readCardGames, subscribeCardGames } from "./card-games-store.mjs?v=show-stage-20261126-v1";
 import { removeSlotSymbol } from "./slot-game.mjs?v=host-cell-cards-20261127-v1";
@@ -14,7 +14,8 @@ import {
   resolveRoundFormat,
   resolveRoundMode,
   resolveTimelineReorder,
-} from "./trivia-data.js?v=compose-repeat-grid-20261124-v1";
+  resolveComposeTypeCount,
+} from "./trivia-data.js?v=compose-object-types-20261127-v1";
 import {
   QUESTION_BANK_SESSION_KEY,
   readSessionQuestionBank,
@@ -24,8 +25,8 @@ import {
   decodeTriviaBytes,
   exportTriviaText,
   parseTriviaText,
-} from "./trivia-text.mjs?v=number-grid-guess-limit-20261121-v1";
-import { compareNumberGuess, hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, normalizeGuessLimit, scoreFourDigitGuess } from "./trivia-game.mjs?v=changeable-number-feedback-20261124-v1";
+} from "./trivia-text.mjs?v=compose-object-types-20261127-v1";
+import { compareNumberGuess, hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, normalizeGuessLimit, scoreFourDigitGuess } from "./trivia-game.mjs?v=compose-object-types-20261127-v1";
 import { migrateLegacyComposePlacements, normalizeComposePlacements, snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-place-20261124-v1";
 import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, validateClientSubmission } from "./trivia-client.mjs?v=player-handoff-20261125-v1";
 
@@ -734,9 +735,11 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     content.guessLimit = normalizeGuessLimit(content.guessLimit);
     if (content.optionCount == null) content.optionCount = content.mode === "number-grid" ? 16 : content.mode === "image-grid" && format.mode !== "image-grid" ? 12 : format.optionCount;
     content.optionCount = Math.max(0, Math.min(24, Number(content.optionCount) || 0));
+    if (content.mode === "compose-image") content.optionCount = resolveComposeTypeCount(content.optionCount, content.items);
     if (isChoiceMode(content.mode) && content.optionCount === 0) content.optionCount = content.mode === "number-grid" ? 16 : content.mode === "image-grid" ? 12 : 6;
     format = {
       ...format,
+      ...(content.mode === "compose-image" && format.mode !== "compose-image" ? { imageAspect: "11 / 3", gridSize: 16 } : {}),
       optionCount: content.optionCount,
       reorder: resolveTimelineReorder(round, difficulty, drafts.rounds[round] || {}),
     };
@@ -1176,8 +1179,8 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
         html += '<span data-item-number aria-hidden="true">' + number + '</span>';
         html += '</div>';
       }
-      html += '<input type="text" data-item-label placeholder="' + (isTimeline ? "Event " : "Item ") + number + '" value="' + esc(item.label || "") + '" aria-label="' + (isTimeline ? "Timeline event " : "Item ") + (index + 1) + ' name">';
-      html += '<input type="url" data-item-image placeholder="Image URL" value="' + esc(item.image || "") + '" aria-label="' + (isTimeline ? "Timeline event " : "Item ") + (index + 1) + ' image URL">';
+      html += '<input type="text" data-item-label placeholder="' + (isTimeline ? "Event " : isCompose ? "Object " : "Item ") + number + '" value="' + esc(item.label || "") + '" aria-label="' + (isTimeline ? "Timeline event " : isCompose ? "Object type " : "Item ") + (index + 1) + ' name">';
+      html += '<input type="url" data-item-image placeholder="Image URL" value="' + esc(item.image || "") + '" aria-label="' + (isTimeline ? "Timeline event " : isCompose ? "Object type " : "Item ") + (index + 1) + ' image URL">';
       if (isCompose) html += '<label class="rg-option-upload rg-item-upload">FILE<input type="file" data-item-file accept="image/*" aria-label="Upload image for object type ' + (index + 1) + '"></label>';
       if (!isTimeline) html += '<span aria-hidden="true">' + number + '</span>';
       html += '</div>';
@@ -1241,7 +1244,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     if (isChoiceMode(format.mode) && format.mode !== "number-grid") {
       const counts = [5, 6, 8, 9, 10, 12, 13, 16, 18, 24];
       const chosen = counts.includes(format.optionCount) ? format.optionCount : 6;
-      html += '<label class="rg-field-label" for="rg-edit-option-count">Number of options<select id="rg-edit-option-count" data-option-count>';
+      html += '<label class="rg-field-label" for="rg-edit-option-count">Number of options<select id="rg-edit-option-count" data-option-count="choice">';
       counts.forEach((count) => { html += '<option value="' + count + '" ' + (count === chosen ? "selected" : "") + '>' + count + '</option>'; });
       html += '</select></label>';
       html += '<label class="rg-field-label" for="rg-edit-selection-rule">How answers are judged<select id="rg-edit-selection-rule" data-selection-rule>';
@@ -1272,6 +1275,9 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
       html += '<label class="rg-field-label" for="rg-edit-video">Video URL<input id="rg-edit-video" type="url" data-video-url value="' + esc(content.videoUrl || "") + '" placeholder="https://…"></label>';
     }
     if (format.mode === "compose-image") {
+      html += '<label class="rg-field-label" for="rg-edit-option-count">Number of object types<select id="rg-edit-option-count" data-option-count="compose">';
+      for (let count = 1; count <= 24; count += 1) html += '<option value="' + count + '" ' + (count === format.optionCount ? "selected" : "") + '>' + count + '</option>';
+      html += '</select></label>';
       html += '<label class="rg-field-label">Background image<input type="url" data-background-image value="' + esc(content.backgroundImage || "") + '" placeholder="Use prompt image URL or a separate one"></label>';
     }
     return html;
@@ -1342,7 +1348,10 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     delete content.optionCount;
     levelDraft()["question"] = content.question;
     Object.assign(levelDraft(), content);
-    if (countInput && selectedOptionCount !== resolveRoundFormat(currentRound, currentDifficulty).optionCount) levelDraft().optionCount = selectedOptionCount;
+    if (content.mode === "compose-image") {
+      // The visible selector belongs to the old mode during a mode change.
+      levelDraft().optionCount = resolveComposeTypeCount(countInput?.dataset.optionCount === "compose" ? selectedOptionCount : 0, content.items);
+    } else if (isChoiceMode(content.mode) && countInput?.dataset.optionCount === "choice" && selectedOptionCount !== resolveRoundFormat(currentRound, currentDifficulty).optionCount) levelDraft().optionCount = selectedOptionCount;
     else delete levelDraft().optionCount;
   }
 
@@ -2016,6 +2025,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
   }
 
   function renderCompose(content, format) {
+    if (!content.items[selectedComposePiece]) selectedComposePiece = -1;
     const layout = document.createElement("div");
     layout.className = "rg-compose-layout";
     const tray = document.createElement("div");
@@ -2283,7 +2293,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
   roundSelect.addEventListener("change", () => { currentRound = roundSelect.value; render(); });
   difficultySelect.addEventListener("change", () => { currentDifficulty = Number(difficultySelect.value); render(); });
   editor.addEventListener("input", (event) => {
-    if (event.target.id === "rg-edit-mode") return;
+    if (["rg-edit-mode", "rg-edit-option-count"].includes(event.target.id)) return;
     saveAndRenderStage();
   });
   editor.addEventListener("change", (event) => {

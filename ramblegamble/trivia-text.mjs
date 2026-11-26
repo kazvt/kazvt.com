@@ -1,4 +1,4 @@
-import { MODE_NAMES, isChoiceMode, resolveRoundFormat } from "./trivia-data.js?v=trivia-answer-modes-20261119-v3";
+import { MODE_NAMES, isChoiceMode, resolveRoundFormat, resolveComposeTypeCount } from "./trivia-data.js?v=compose-object-types-20261127-v1";
 import { normalizeGuessLimit } from "./trivia-game.mjs?v=number-grid-guess-limit-20261121-v1";
 import { normalizeComposePlacements } from "./compose-placement.mjs";
 
@@ -30,7 +30,7 @@ const MODE_ALIASES = new Map([
   ["match pairs", "match-pairs"], ["pair matching", "match-pairs"], ["image sequence", "image-sequence"],
   ["text sequence", "text-sequence"], ["categorize images", "categorize-images"], ["categorise images", "categorize-images"],
   ["sort images", "categorize-images"], ["draw over image", "draw-over-image"], ["drawing", "draw-over-image"],
-  ["compose image", "compose-image"], ["number stepper", "number-stepper"], ["memory number", "memory-number"],
+  ["compose image", "compose-image"], ["place images on the picture", "compose-image"], ["place images on picture", "compose-image"], ["replace images on picture", "compose-image"], ["number stepper", "number-stepper"], ["memory number", "memory-number"],
   ["video", "video"], ["video prompt", "video"],
 ]);
 
@@ -236,7 +236,8 @@ function parseQuestionObjects(questions) {
     const explicitAccepted = item.acceptedAnswers ?? item.accepted_answers ?? item.expectedAnswer ?? item.expected_answer;
     const answerValue = item.answer ?? item.back ?? item.definition;
     const acceptedAnswers = normalizeAnswerObjects(explicitAccepted ?? (options.length ? null : answerValue));
-    const mode = normalizeMode(item.mode ?? item.type ?? item.format) || (options.length > 1 ? "choice-text" : "short-answer");
+    const hasObjectTypes = Array.isArray(item.objectTypes ?? item.object_types) || (resolveRoundFormat(round, 1).mode === "compose-image" && Array.isArray(item.items));
+    const mode = normalizeMode(item.mode ?? item.type ?? item.format) || (hasObjectTypes ? "compose-image" : options.length > 1 ? "choice-text" : "short-answer");
     const rawCorrect = item.correctAnswers ?? item.correct_answers ?? item.correctAnswer ?? item.correct_answer ?? item.answerKey ?? item.answer_key ?? item.correctOption ?? item.correct_option ?? item.correct ?? (options.length ? answerValue : null);
     const correct = typeof rawCorrect === "boolean" ? null : rawCorrect;
     const hasDifficulty = item.difficulty != null || item.level != null || item.tier != null;
@@ -260,7 +261,7 @@ function parseQuestionObjects(questions) {
       question,
       subtitle: safeString(item.subtitle ?? item.description ?? item.hint),
       mode,
-      explicitMode: Boolean(item.mode ?? item.type ?? item.format),
+      explicitMode: Boolean(item.mode ?? item.type ?? item.format) || hasObjectTypes,
       options: choiceOptions,
       optionsPresent: rawOptions != null,
       acceptedAnswers,
@@ -277,7 +278,7 @@ function parseQuestionObjects(questions) {
       imageVisible: item.imageVisible ?? item.image_visible,
       drawing: item.drawing,
       categories: item.categories,
-      items: item.items,
+      items: Array.isArray(item.items ?? item.objectTypes ?? item.object_types) ? (item.items ?? item.objectTypes ?? item.object_types).map(entry => typeof entry === "string" ? {label:entry, image:"", asset:""} : entry) : undefined,
       placements: item.placements ?? item.objectPlacements ?? item.object_placements,
       pairs: item.pairs,
       assignments: item.assignments,
@@ -349,7 +350,7 @@ function parseQuestionObjects(questions) {
           }
         }
       }
-      if (!isChoiceMode(state.mode)) { state.options = []; state.optionCount = 0; }
+      if (!isChoiceMode(state.mode)) { state.options = []; state.optionCount = state.mode === "compose-image" ? Math.max(resolveComposeTypeCount(state.optionCount, state.items), Math.min(24, state.items.length)) : 0; }
       else if (state.options.length) state.optionCount = state.options.length;
       rounds[round][level] = clone(state);
     }
@@ -482,7 +483,7 @@ function parseDelimited(text) {
         }
       }
       if (isChoiceMode(state.mode)) state.optionCount = state.options.length || state.optionCount;
-      else { state.options = []; state.optionCount = 0; }
+      else { state.options = []; state.optionCount = state.mode === "compose-image" ? resolveComposeTypeCount(state.optionCount, state.items) : 0; }
       rounds[roundId][level] = clone(state);
     }
   }
@@ -673,7 +674,7 @@ function parseHumanText(input) {
         else if (!Number.isFinite(Number(state.optionCount))) state.optionCount = resolveRoundFormat(id, level).optionCount;
       } else {
         state.options = [];
-        state.optionCount = 0;
+        state.optionCount = state.mode === "compose-image" ? resolveComposeTypeCount(state.optionCount, state.items) : 0;
       }
       levels[level] = {
         question: state.question, subtitle: state.subtitle, promptImage: state.promptImage, promptAsset: state.promptAsset,

@@ -9,6 +9,7 @@ test("blank round templates stay blank until the host adds visible content", () 
     items: [], pairs: [], categories: ["Group 1", "Group 2", "Group 3"],
     assignments: [], numberValue: 0, numberVisible: false, numberCode: "", acceptedAnswers: [],
   }), false);
+  assert.equal(hasAuthoredTriviaContent({ items: [{ label: "", image: "", asset: "stored-image" }] }), true);
   assert.equal(hasAuthoredTriviaContent({ question: "  What is this?  " }), true);
   assert.equal(hasAuthoredTriviaContent({ options: [{ label: "", image: "/berry.png" }] }), true);
   assert.equal(hasAuthoredTriviaContent({ categories: ["Fruit", "Group 2", "Group 3"] }), true);

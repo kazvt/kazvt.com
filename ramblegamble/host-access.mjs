@@ -19,10 +19,10 @@ const unlock=gate.querySelector('[data-host-unlock]');
 let promptOpen=false;
 let access, booted=false, bootPromise=null, busy=false, locked=true, inertBefore=new Map();
 const isConsole=location.pathname.replace(/\/$/,'').endsWith('/console');
-const appModules=isConsole? ['/rg/console/console.js?v=smeemo-quake-20261127-v1'] : [
+const appModules=isConsole? ['/rg/console/console.js?v=compose-object-types-20261127-v1'] : [
   '/ramblegamble/ramblegamble.js?v=smeemo-quake-20261127-v1',
   '/ramblegamble/dice-mode.js?v=smeemo-quake-20261127-v1',
-  '/ramblegamble/trivia-ui.js?v=smeemo-quake-20261127-v1',
+  '/ramblegamble/trivia-ui.js?v=compose-object-types-20261127-v1',
   '/ramblegamble/card-games-ui.js?v=smeemo-quake-20261127-v1',
 ];
 function renderLockedGate({focus=false}={}) {

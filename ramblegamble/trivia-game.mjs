@@ -18,7 +18,7 @@ export function hasAuthoredTriviaContent(content = {}) {
     || (Array.isArray(content.options) && content.options.some((option) =>
       hasText(option?.label) || hasMedia(option?.image) || hasMedia(option?.asset)))
     || (Array.isArray(content.items) && content.items.some((item) =>
-      hasText(item?.label) || hasMedia(item?.image)))
+      hasText(item?.label) || hasMedia(item?.image) || hasMedia(item?.asset)))
     || (Array.isArray(content.pairs) && content.pairs.some((pair) =>
       hasText(pair?.left) || hasMedia(pair?.leftImage) || hasText(pair?.right)))
     || (Array.isArray(content.categories) && content.categories.some((category, index) =>

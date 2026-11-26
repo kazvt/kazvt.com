@@ -128,3 +128,11 @@ export const MODE_NAMES = Object.freeze({
 export function isChoiceMode(mode) {
   return ["choice-text", "choice-image", "choice-image-wide", "number-grid", "image-grid"].includes(mode);
 }
+
+// Placement questions always need a non-empty palette. A legacy zero count
+// (including imported non-choice drafts) is not an intentional empty palette.
+export function resolveComposeTypeCount(count, items = []) {
+  const value = Math.trunc(Number(count));
+  if (Number.isFinite(value) && value > 0) return Math.min(24, value);
+  return Math.min(24, Math.max(6, Array.isArray(items) ? items.length : 0));
+}
