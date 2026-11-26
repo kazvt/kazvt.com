@@ -19,6 +19,11 @@ import zipfile
 DEST = Path(__file__).resolve().parent / "foley"
 KENNEY = "https://kenney.nl/media/pages/assets/casino-audio/2472606a04-1721639069/kenney_casino-audio.zip"
 INTERFACE = "https://kenney.nl/media/pages/assets/interface-sounds/fa43c1dd4d-1677589452/kenney_interface-sounds.zip"
+# Kenney's old direct-media URLs redirect to its asset pages now. These are the
+# original Kenney CC0 ZIPs mirrored on OpenGameArt, whose source pages confirm
+# Kenney as creator and CC0 as the license.
+KENNEY = "https://lpc.opengameart.org/sites/default/files/kenney_casino-audio.zip"
+INTERFACE = "https://opengameart.org/sites/default/files/kenney_interfaceSounds.zip"
 # destination : exact normalized basename from the CC0 pack
 PACK = {
     **{f"card-place-{n}.ogg": f"cardplace{n}.ogg" for n in (1, 2)},
@@ -28,7 +33,7 @@ PACK = {
     **{f"card-shove-{n}.ogg": f"cardshove{n}.ogg" for n in (1, 2)},
     **{f"chips-stack-{n}.ogg": f"chipsstack{n}.ogg" for n in (1, 2)},
     **{f"chips-collide-{n}.ogg": f"chipscollide{n}.ogg" for n in (1, 2, 3, 4)},
-    **{f"die-grab-{n}.ogg": f"diegrab{n}.ogg" for n in (1, 2)},
+    **{f"die-grab-{n}.ogg": f"dicegrab{n}.ogg" for n in (1, 2)},
     "chip-lay-3.ogg": "chiplay3.ogg",
     **{f"chips-handle-{n}.ogg": f"chipshandle{n}.ogg" for n in (1, 2)},
     **{f"chip-lay-{n}.ogg": f"chiplay{n}.ogg" for n in (1, 2)},
