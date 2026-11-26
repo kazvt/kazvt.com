@@ -27,9 +27,9 @@ import {
   slotCellIndexAtUv,
   slotScreenPoint,
   slotMotionFrame,
-} from "./slot-reels.mjs?v=directional-reels-20261126-v1";
+} from "./slot-reels.mjs?v=parked-reels-20261127-v1";
 import { createSlotWinAnimation, isSlotWinFinished, paintSlotWin } from "./slot-win-animation.mjs?v=show-stage-20261126-v1";
-import { createSlotLinePainter } from "./slot-reel-render.mjs?v=directional-reels-20261126-v1";
+import { createSlotLinePainter } from "./slot-reel-render.mjs?v=parked-reels-20261127-v1";
 import { getSlotEligibleIndexes, placeSlotBerry, placeSlotWildcard, removeSlotSymbol, resolveSlotPayouts, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs?v=wildcard-shared-20261126-v1";
 import {
   ROULETTE_BALL_COLOR,
@@ -397,7 +397,8 @@ import {
       const row = Math.floor(index / 5);
       const pop = slotWildcardPop?.index === index ? slotWildcardPop : null;
       if (!pop) {
-        drawSlotSymbol(column, row, symbol);
+        const shake = motionFrame?.parked.get(index);
+        drawSlotSymbol(column, row, symbol, (shake?.x || 0) * cellWidth, (shake?.y || 0) * cellHeight);
         return;
       }
       const progress = Math.max(0, Math.min(1, (time - pop.startedAt) / pop.duration));

@@ -247,11 +247,29 @@ export function slotLineBlur(frame, line, reducedMotion = false) {
     frame.offset * 2, (line.targetOffset - frame.offset) * 2));
 }
 
+// Only parked symbols on a moving placement track vibrate. Use the same
+// continuous speed envelope as the directional exposure; no random-per-frame
+// noise, accumulated displacement, or post-stop movement.
+function parkedReelStrength(blur) {
+  const t = clamp01(blur / 0.45);
+  return t * t * (3 - 2 * t);
+}
+
+function parkedReelOffset(axis, cell, elapsed, strength) {
+  const t = elapsed / 1000;
+  const phase = cell * 1.73;
+  const along = 0.032 * strength * (0.72 * Math.sin(t * Math.PI * 16) + 0.28 * Math.sin(t * Math.PI * 22 + phase));
+  const across = 0.018 * strength * (0.72 * Math.sin(t * Math.PI * 12 + 0.8) + 0.28 * Math.sin(t * Math.PI * 18 - phase));
+  return axis === "row" ? { x: along, y: across } : { x: across, y: along };
+}
+
 // Keep the board snapshot immutable throughout a roll. A placement arrow
-// changes one cell; occupied unchanged positions within the track are fixed.
+// changes one cell; occupied unchanged positions within the track stay parked
+// (only a small presentation offset is applied while neighbors scroll).
 export function slotMotionFrame(motion, time, reducedMotion = false) {
   const grid = motion.grid.slice();
   const lines = [];
+  const parked = new Map();
   for (const [axis, tracks] of [["column", motion.columns], ["row", motion.rows || []]]) {
     for (const line of tracks) {
       const index = line[axis];
@@ -261,11 +279,21 @@ export function slotMotionFrame(motion, time, reducedMotion = false) {
         grid[axis === "column" ? position * SLOT_REEL_COLUMNS + index : index * SLOT_REEL_COLUMNS + position] = null;
       }
       const frame = sampleLine(line, motion, time);
-      lines.push({ axis, index, positions, line, frame,
-        blur: slotLineBlur(frame, line, motion.reducedMotion || reducedMotion) });
+      const blur = slotLineBlur(frame, line, motion.reducedMotion || reducedMotion);
+      const count = axis === "column" ? SLOT_REEL_ROWS : SLOT_REEL_COLUMNS;
+      const strength = positions.length < count ? parkedReelStrength(blur) : 0;
+      if (strength > 0) {
+        for (let position = 0; position < count; position++) {
+          if (positions.includes(position)) continue;
+          const cell = axis === "column" ? position * SLOT_REEL_COLUMNS + index : index * SLOT_REEL_COLUMNS + position;
+          if (grid[cell]) parked.set(cell, parkedReelOffset(axis, cell, time - motion.startedAt - line.delay, strength));
+        }
+      }
+      // Feather only moving/parked cutouts, never a fully spinning hardware reel.
+      lines.push({ axis, index, positions, line, frame, blur, feather: 0.18 * strength });
     }
   }
-  return { grid, lines };
+  return { grid, lines, parked };
 }
 
 // Explicit axis routing shared by the live UI and regression tests. No implicit
