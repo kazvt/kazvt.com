@@ -1996,6 +1996,7 @@ import {
     else if (action === "spin-wheel") startWheelSpin();
     else if (action === "pull-lever") startLeverPull();
     else if (action.startsWith("spin-column-")) spinSlotColumn(Number(action.slice("spin-column-".length)));
+    else if (action === "place-slot-berry") placeSlotBerryFromDisplay(interaction.cellIndex);
     else if (action === "open-slots") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "slots" } }));
     else if (action === "open-trivia") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "trivia" } }));
   }
@@ -2082,6 +2083,12 @@ import {
   window.addEventListener("rg:slot-grid-updated", (event) => {
     slotReelGrid = normalizeSlotGrid(event.detail?.grid);
     if (!slotReelMotion) drawSlotReelDisplay();
+  });
+  window.addEventListener("rg:slot-settings-updated", (event) => {
+    const berry = event.detail?.berry;
+    const axis = event.detail?.axis;
+    if (["faroeberry", "erinberry", "kazberry"].includes(berry)) selectedSlotBerry = berry;
+    if (axis === "row" || axis === "column") slotPlacementAxis = axis;
   });
   window.addEventListener("storage", (event) => {
     if (event.key !== SLOT_GRID_STORAGE_KEY) return;
@@ -2216,9 +2223,9 @@ import {
         !sampleSlotReelColumn(column, slotReelMotion, time)?.spinning
       ));
       if (settled) {
+        const completedMotion = slotReelMotion;
         slotReelMotion = null;
-        drawSlotReelDisplay(time);
-        finishTurn();
+        finishSlotAction(completedMotion);
       }
     }
 
