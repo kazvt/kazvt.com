@@ -299,7 +299,7 @@ import {
     slotResultToken += 1;
     window.clearTimeout(slotResultTimeout);
     slotResultTimeout = 0;
-    hideResult();
+    result.hidden = true;
   }
 
   function showSlotPayout(totals) {
@@ -516,7 +516,7 @@ import {
     slotReelMotion.action = kind;
     playing = true;
     preview.classList.add("is-playing");
-    result.hidden = true;
+    hideResult();
     if (pullCrank && lever) {
       leverMotion = {
         started: startedAt,
@@ -1890,7 +1890,7 @@ import {
     readyScreen.hidden = true;
     pauseMenu.hidden = false;
     loading.classList.add("is-hidden");
-    result.hidden = true;
+    hideResult();
     hideGameCursor();
     if (!document.hidden && renderer && !animationFrame) animationFrame = requestAnimationFrame(animate);
 
