@@ -11,11 +11,9 @@ import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.m
 import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-door-wall-target-20261120-v1";
 import { readPointScores, subscribePointScores, writePointScores } from "./points-store.mjs?v=points-console-20261120-v1";
 import {
-  createCssProjectiveQuad,
-  LIQUID_PORTAL_HEIGHT,
-  LIQUID_PORTAL_SOURCE,
-  LIQUID_PORTAL_WIDTH,
-} from "./liquid-portal.mjs?v=liquid-door-portal-20261120-v1";
+  createLiquidPortal,
+  isLiquidPortalActive,
+} from "./liquid-portal.mjs?v=vip-world-plane-20261126-v1";
 import {
   createSlotLineMotion,
   normalizeSlotGrid,
@@ -176,7 +174,7 @@ import {
   let pauseMenuOpen = false;
   let marqueeVideoUnavailable = false;
   let sceneReady = false;
-  let liquidPortalLoaded = false;
+  let liquidPortal = null;
   let diceModeOpen = false;
   let diceModeVisibility = null;
   let stageModel;
@@ -196,60 +194,13 @@ import {
   let pendingCardGameMode = "";
   let skyRandomState = 0x4b415a56;
 
-  function setLiquidPortalLoaded(shouldLoad) {
-    if (!liquidPortalFrame || shouldLoad === liquidPortalLoaded) return;
-    liquidPortalLoaded = shouldLoad;
-    if (shouldLoad) liquidPortalFrame.src = LIQUID_PORTAL_SOURCE;
-    else {
-      liquidPortalFrame.removeAttribute("src");
-      liquidPortalFrame.style.transform = "";
-    }
-  }
-
-  function updateLiquidPortalProjection() {
-    if (!liquidPortalLayer || !liquidPortalFrame) return;
-    const active = gameStarted
-      && !pauseMenuOpen
-      && !diceModeOpen
-      && currentView.kind === "dice-door";
-    setLiquidPortalLoaded(active);
-    if (!active || !camera || !sceneReady || preview.clientWidth < 1 || preview.clientHeight < 1) {
-      liquidPortalLayer.hidden = true;
-      return;
-    }
-
-    camera.updateMatrixWorld(true);
-    const opening = ARCADE_REFERENCE_LAYOUT.diceDoor;
-    const planeX = opening.wallX + 0.008;
-    const worldCorners = [
-      new THREE.Vector3(planeX, opening.maxY, opening.minZ),
-      new THREE.Vector3(planeX, opening.maxY, opening.maxZ),
-      new THREE.Vector3(planeX, opening.minY, opening.maxZ),
-      new THREE.Vector3(planeX, opening.minY, opening.minZ),
-    ];
-    const previewBounds = preview.getBoundingClientRect();
-    const corners = [];
-    for (const worldCorner of worldCorners) {
-      const cameraSpace = camera.worldToLocal(worldCorner.clone());
-      const depth = -cameraSpace.z;
-      if (depth <= camera.near || depth >= camera.far) {
-        liquidPortalLayer.hidden = true;
-        return;
-      }
-      const projected = worldCorner.project(camera);
-      corners.push({
-        x: (projected.x + 1) * 0.5 * previewBounds.width,
-        y: (1 - projected.y) * 0.5 * previewBounds.height,
-      });
-    }
-
-    const transform = createCssProjectiveQuad(LIQUID_PORTAL_WIDTH, LIQUID_PORTAL_HEIGHT, corners);
-    if (!transform) {
-      liquidPortalLayer.hidden = true;
-      return;
-    }
-    liquidPortalFrame.style.transform = transform;
-    liquidPortalLayer.hidden = false;
+  function updateLiquidPortal(time = performance.now()) {
+    if (!liquidPortal) return;
+    liquidPortal.setActive(isLiquidPortalActive({
+      gameStarted, pauseMenuOpen, diceModeOpen, sceneReady,
+      documentHidden: document.hidden,
+    }));
+    liquidPortal.update(camera, time);
   }
 
   function nextSkyRandom() {
@@ -860,7 +811,7 @@ import {
     renderer = new THREE.WebGLRenderer({
       canvas,
       antialias: true,
-      alpha: false,
+      alpha: true, // Only the depth-tested compatibility plane writes transparent pixels.
       powerPreference: "high-performance",
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
@@ -2358,7 +2309,7 @@ import {
     const open = Boolean(event.detail?.open);
     if (open === diceModeOpen) return;
     diceModeOpen = open;
-    updateLiquidPortalProjection();
+    updateLiquidPortal();
     if (open) {
       diceModeVisibility = [stageModel, rouletteRig, slotRig]
         .filter(Boolean)
@@ -2579,6 +2530,7 @@ import {
     updateCameraTransition(time);
     updateCardTableProjection();
     updateSkyAnimations(time);
+    updateLiquidPortal(time);
     if (diceModeOpen) {
       renderer.render(scene, camera);
       return;
@@ -2586,7 +2538,6 @@ import {
     if (sceneReady) {
       updateBillboardProjection();
       updateSlotPlacementControlProjection();
-      updateLiquidPortalProjection();
     }
 
     if (wheelMotion && wheelPivot && ballPivot) {
@@ -2694,6 +2645,14 @@ import {
       stageModel.visible = !pauseMenuOpen;
       scene.add(stageModel);
       carveDiceDoorway(stageModel);
+      if (liquidPortalFrame && liquidPortalLayer) {
+        liquidPortal = createLiquidPortal({
+          THREE, scene, frame: liquidPortalFrame, layer: liquidPortalLayer,
+          opening: ARCADE_REFERENCE_LAYOUT.diceDoor, preview,
+        });
+        // Load once during room boot, not on entry to the door close-up.
+        liquidPortal.preload();
+      }
 
       rouletteModel = rouletteGltf.scene;
       prepareModel(rouletteModel);
@@ -2738,6 +2697,7 @@ import {
 
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
+      liquidPortal?.setActive(false);
       cancelAnimationFrame(animationFrame);
       animationFrame = 0;
     } else if ((gameStarted || pauseMenuOpen) && renderer && !animationFrame) {
@@ -2748,6 +2708,7 @@ import {
   window.addEventListener("pagehide", () => {
     cancelAnimationFrame(animationFrame);
     resizeObserver?.disconnect();
+    liquidPortal?.dispose();
     renderer?.dispose();
   }, { once: true });
 })();
