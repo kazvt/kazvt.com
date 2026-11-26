@@ -12,8 +12,8 @@ import {
   revealAudienceResults,
   submitRoundAnswer,
   buyShopCard,
-} from "./card-games.mjs?v=rg-smeemo-secret-repeat-20261126-v2";
-import { readCardGames, writeCardGames, subscribeCardGames } from "./card-games-store.mjs?v=rg-smeemo-secret-repeat-20261126-v2";
+} from "./card-games.mjs?v=rg-smeemo-secret-repeat-20261126-v3";
+import { readCardGames, writeCardGames, subscribeCardGames } from "./card-games-store.mjs?v=rg-smeemo-secret-repeat-20261126-v3";
 import { readPointScores, subscribePointScores, writePointScores } from "./points-store.mjs?v=points-console-20261120-v1";
 
 (() => {
@@ -467,7 +467,9 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       const inner = element("span", "rg-smeemo-card-inner");
       const front = element("span", `rg-smeemo-card-front${smeemoRevealed ? " is-berry" : ""}`);
       if (smeemoRevealed) {
-        const berryMark = element("span", "rg-smeemo-berry-mark");
+        const berryMark = element("img", "rg-smeemo-berry-mark");
+        berryMark.src = "/ramblegamble/assets/berries/smeemo.png";
+        berryMark.alt = "";
         berryMark.setAttribute("aria-hidden", "true");
         front.append(berryMark);
       }

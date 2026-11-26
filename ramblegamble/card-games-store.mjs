@@ -2,7 +2,7 @@ import {
   CARD_GAME_STORAGE_KEY,
   emptyCardGamesState,
   normalizeCardGamesState,
-} from "./card-games.mjs?v=rg-smeemo-secret-repeat-20261126-v2";
+} from "./card-games.mjs?v=rg-smeemo-secret-repeat-20261126-v3";
 
 const CHANNEL_NAME = "ramblegamble.card-games.v1";
 let channel = null;

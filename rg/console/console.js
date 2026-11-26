@@ -4,8 +4,8 @@ import {
   writePointScores,
 } from "/ramblegamble/points-store.mjs?v=points-console-20261120-v1";
 import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=rg-smeemo-manual-20261125-v1";
-import { createSmeemoGame } from "/ramblegamble/card-games.mjs?v=rg-smeemo-secret-repeat-20261126-v2";
-import { readCardGames, writeCardGames } from "/ramblegamble/card-games-store.mjs?v=rg-smeemo-secret-repeat-20261126-v2";
+import { createSmeemoGame } from "/ramblegamble/card-games.mjs?v=rg-smeemo-secret-repeat-20261126-v3";
+import { readCardGames, writeCardGames } from "/ramblegamble/card-games-store.mjs?v=rg-smeemo-secret-repeat-20261126-v3";
 
 const output = document.getElementById("terminal-output");
 const form = document.getElementById("terminal-form");
