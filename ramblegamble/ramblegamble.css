@@ -122,6 +122,11 @@ body.ramble-page *::after {
 .rg-slot-control-layer[hidden],
 .rg-preview.is-menu .rg-slot-control-layer,
 .rg-preview.is-dice-mode .rg-slot-control-layer { display: none; }
+.rg-slot-control-layer.is-wildcard-mode .rg-slot-placement-marker {
+  opacity: .14;
+  pointer-events: none;
+  filter: grayscale(.35);
+}
 
 .rg-slot-placement-marker {
   position: absolute;

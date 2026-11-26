@@ -30,7 +30,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
   const DRAFT_KEY = "ramblegamble.trivia.drafts.v1";
   const GRID_KEY = "ramblegamble.slot-game-board.v1";
   const gridSize = 15;
-  const berryNames = { kazberry: "Kazberry", faroeberry: "Faroeberry", erinberry: "Erinberry" };
+  const berryNames = { kazberry: "Kazberry", faroeberry: "Faroeberry", erinberry: "Erinberry", star: "Star wildcard" };
   const modeValues = Object.keys(MODE_NAMES);
   const modeNames = MODE_NAMES;
   const interfaceRoot = $("#rg-trivia-interface");
@@ -894,9 +894,11 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
   window.addEventListener("rg:turn-finish", (event) => {
     $("#rg-arcade-status").textContent = event.detail?.prompt || "No questions in the bank. Add some in the Trivia tab.";
   });
-  window.addEventListener("rg:slot-action-start", () => {
+  window.addEventListener("rg:slot-action-start", (event) => {
     $("#rg-slot-clear").disabled = true;
-    $("#rg-arcade-status").textContent = "Reels spinning...";
+    $("#rg-arcade-status").textContent = event.detail?.kind === "wildcard-place"
+      ? "Star popping into place..."
+      : "Reels spinning...";
   });
   window.addEventListener("rg:slot-action-finish", (event) => {
     $("#rg-slot-clear").disabled = false;

@@ -8,8 +8,8 @@
     <link rel="canonical" href="https://kazvt.com/rg/">
     <title>Ramble Gamble - kazvt</title>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
-    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=slot-line-markers-20261126-v1">
-    <link rel="stylesheet" href="/ramblegamble/host-console.css?v=slot-line-markers-20261126-v1">
+    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=slot-line-markers-20261126-v2">
+    <link rel="stylesheet" href="/ramblegamble/host-console.css?v=slot-line-markers-20261126-v2">
     <link rel="stylesheet" href="/ramblegamble/card-games.css?v=rg-smeemo-secret-repeat-20261126-v4">
     <script type="importmap">
       {
@@ -20,9 +20,9 @@
         }
       }
     </script>
-    <script type="module" src="/ramblegamble/ramblegamble.js?v=slot-line-markers-20261126-v1"></script>
+    <script type="module" src="/ramblegamble/ramblegamble.js?v=slot-line-markers-20261126-v2"></script>
     <script type="module" src="/ramblegamble/dice-mode.js?v=dice-berry-hyphen-20261120-v2"></script>
-    <script type="module" src="/ramblegamble/trivia-ui.js?v=slot-line-markers-20261126-v1"></script>
+    <script type="module" src="/ramblegamble/trivia-ui.js?v=slot-line-markers-20261126-v2"></script>
     <script type="module" src="/ramblegamble/card-games-ui.js?v=rg-smeemo-secret-repeat-20261126-v4"></script>
   </head>
   <body class="ramble-page" data-theme="p2">
@@ -165,14 +165,15 @@
             <div><p class="rg-kicker">MACHINE CONTROLS</p><h2>Slot machine</h2></div>
             <span class="rg-theme-lock">5 COLUMNS / 3 ROWS</span>
           </div>
-          <p class="rg-panel-copy">Pick a berry, then use the machine markers to place it. Its buttons spin the reels.</p>
+          <p class="rg-panel-copy">Choose a berry for a row or column, or the star to place on an exact cell. Machine buttons spin.</p>
           <div class="rg-slot-layout">
             <div class="rg-slot-config">
-              <fieldset class="rg-control-group"><legend>PLAY AS</legend>
-                <div class="rg-berry-picker" role="group" aria-label="Choose the berry for the next slot play">
+              <fieldset class="rg-control-group"><legend>PLACE / PLAY AS</legend>
+                <div class="rg-berry-picker" role="group" aria-label="Choose a berry or star wildcard">
                   <button class="rg-berry-choice" type="button" data-berry="kazberry" aria-label="Kazberry" aria-pressed="true"><img class="rg-berry-choice-image" src="/ramblegamble/assets/berries/kazberry.png" alt="" aria-hidden="true" draggable="false"></button>
                   <button class="rg-berry-choice" type="button" data-berry="faroeberry" aria-label="Faroeberry" aria-pressed="false"><img class="rg-berry-choice-image" src="/ramblegamble/assets/berries/faroeberry.png" alt="" aria-hidden="true" draggable="false"></button>
                   <button class="rg-berry-choice" type="button" data-berry="erinberry" aria-label="Erinberry" aria-pressed="false"><img class="rg-berry-choice-image" src="/ramblegamble/assets/berries/erinberry.png" alt="" aria-hidden="true" draggable="false"></button>
+                  <button class="rg-berry-choice rg-berry-choice--wildcard" type="button" data-berry="star" aria-label="Star wildcard" aria-pressed="false"><img class="rg-berry-choice-image" src="/ramblegamble/assets/berries/star.png" alt="" aria-hidden="true" draggable="false"></button>
                 </div>
               </fieldset>
               <button class="rg-secondary-button" id="rg-slot-clear" type="button">RESET BOARD</button>

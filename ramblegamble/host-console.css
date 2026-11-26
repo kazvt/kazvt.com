@@ -187,10 +187,11 @@
 
 .rg-control-group { min-width: 0; margin: 0 0 17px; padding: 0; border: 0; }
 .rg-control-group legend { margin-bottom: 8px; color: #486c2f; font-size: 13px; font-weight: 900; }
-.rg-berry-picker { display: grid; grid-template-columns: repeat(3, 60px); gap: 7px; }
-.rg-berry-choice { display: grid; width: 60px; min-width: 60px; min-height: 60px; place-items: center; padding: 5px; }
+.rg-berry-picker { display: grid; grid-template-columns: repeat(4, 52px); gap: 5px; }
+.rg-berry-choice { display: grid; width: 52px; min-width: 52px; min-height: 52px; place-items: center; padding: 4px; }
 .rg-berry-choice[aria-pressed="true"] { color: #fff; background: #8b2626; }
-.rg-berry-choice-image { display: block; width: 44px; height: 44px; object-fit: cover; image-rendering: pixelated; pointer-events: none; }
+.rg-berry-choice-image { display: block; width: 42px; height: 42px; object-fit: contain; image-rendering: pixelated; pointer-events: none; }
+.rg-berry-choice--wildcard[aria-pressed="true"] { border-color: #48dce8; background: #492478; box-shadow: 0 0 0 2px #fff3a0, 0 0 18px #48dce8; }
 .rg-secondary-button { padding: 7px 12px; font-size: 11px; letter-spacing: .04em; }
 .rg-slot-board-wrap { min-width: 0; padding: 12px; border: 3px ridge #8b2626; background: #e9d98b; }
 .rg-slot-board-label { margin-bottom: 10px; }
