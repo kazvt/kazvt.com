@@ -21,11 +21,12 @@ import {
   normalizeSlotGrid,
   sampleSlotReelColumn,
   sampleSlotReelRow,
-  SLOT_REEL_COLUMNS,
   SLOT_REEL_WILDCARD,
   slotCellIndexAtUv,
   slotScreenPoint,
-} from "./slot-reels.mjs?v=slot-foley-20261126-v3";
+  slotMotionFrame,
+} from "./slot-reels.mjs?v=directional-reels-20261126-v1";
+import { createSlotLinePainter } from "./slot-reel-render.mjs?v=directional-reels-20261126-v1";
 import { getSlotEligibleIndexes, placeSlotBerry, placeSlotWildcard, removeSlotSymbol, resolveSlotPayouts, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs?v=wildcard-shared-20261126-v1";
 import {
   ROULETTE_BALL_COLOR,
@@ -334,13 +335,15 @@ import {
     catch { return normalizeSlotGrid(null); }
   }
 
+  const paintSlotLines = createSlotLinePainter();
+
   function drawSlotSymbol(column, row, symbol, xOffset = 0, yOffset = 0, {
     scale = 1,
     alpha = 1,
     rotation = 0,
     glow = 0,
-  } = {}) {
-    if (!symbol || !slotReelContext) return;
+  } = {}, context = slotReelContext) {
+    if (!symbol || !context) return;
     const image = slotReelImages.get(symbol);
     if (!image?.complete || !image.naturalWidth) return;
     const cellWidth = slotReelCanvas.width / 5;
@@ -348,16 +351,16 @@ import {
     const size = Math.min(cellWidth, cellHeight) * 0.82 * scale;
     const centerX = column * cellWidth + cellWidth / 2 + xOffset;
     const centerY = row * cellHeight + cellHeight / 2 + yOffset;
-    slotReelContext.save();
-    slotReelContext.globalAlpha = alpha;
+    context.save();
+    context.globalAlpha = alpha;
     if (glow > 0) {
-      slotReelContext.shadowColor = "#48f5ff";
-      slotReelContext.shadowBlur = glow;
+      context.shadowColor = "#48f5ff";
+      context.shadowBlur = glow;
     }
-    slotReelContext.translate(centerX, centerY);
-    slotReelContext.rotate(rotation);
-    slotReelContext.drawImage(image, -size / 2, -size / 2, size, size);
-    slotReelContext.restore();
+    context.translate(centerX, centerY);
+    context.rotate(rotation);
+    context.drawImage(image, -size / 2, -size / 2, size, size);
+    context.restore();
   }
 
   function drawSlotReelDisplay(time = performance.now()) {
@@ -367,77 +370,42 @@ import {
     const cellHeight = slotReelCanvas.height / 3;
     context.clearRect(0, 0, slotReelCanvas.width, slotReelCanvas.height);
 
-    for (let column = 0; column < 5; column += 1) {
-      const motionColumn = slotReelMotion?.columns.find((entry) => entry.column === column);
-      const frame = motionColumn ? sampleSlotReelColumn(motionColumn, slotReelMotion, time) : null;
-      if (!motionColumn || !frame || frame.symbols) {
-        const symbols = frame?.symbols || Array.from({ length: 3 }, (_, row) => slotReelGrid[row * 5 + column]);
-        symbols.forEach((symbol, row) => {
-          if (slotReelMotion?.rows?.some((entry) => entry.row === row)) return;
-          const index = row * 5 + column;
-          const pop = slotWildcardPop?.index === index ? slotWildcardPop : null;
-          if (!pop) {
-            drawSlotSymbol(column, row, symbol);
-            return;
-          }
-          const progress = Math.max(0, Math.min(1, (time - pop.startedAt) / pop.duration));
-          const eased = 1 - Math.pow(1 - progress, 3);
-          const bounce = progress < 0.72
-            ? 0.62 + 0.56 * (1 - Math.pow(1 - progress / 0.72, 3))
-            : 1.18 - 0.18 * Math.pow((progress - 0.72) / 0.28, 2);
-          const pulse = Math.sin(progress * Math.PI * 8) * (1 - progress);
-          const cellX = column * cellWidth + cellWidth / 2;
-          const cellY = row * cellHeight + cellHeight / 2;
-          context.save();
-          context.globalAlpha = (1 - eased) * 0.78;
-          context.strokeStyle = "#fff5a6";
-          context.lineWidth = Math.max(3, cellWidth * 0.045);
-          context.beginPath();
-          context.arc(cellX, cellY, Math.min(cellWidth, cellHeight) * (0.18 + eased * 0.34), 0, Math.PI * 2);
-          context.stroke();
-          context.restore();
-          drawSlotSymbol(column, row, symbol, 0, 0, {
-            scale: bounce,
-            rotation: pulse * 0.12,
-            glow: 30 * (1 - eased) + 8,
-          });
-        });
-        continue;
+    const motionFrame = slotReelMotion ? slotMotionFrame(slotReelMotion, time, reducedMotion.matches) : null;
+    const fixedGrid = motionFrame?.grid || slotReelGrid;
+    fixedGrid.forEach((symbol, index) => {
+      const column = index % 5;
+      const row = Math.floor(index / 5);
+      const pop = slotWildcardPop?.index === index ? slotWildcardPop : null;
+      if (!pop) {
+        drawSlotSymbol(column, row, symbol);
+        return;
       }
-
+      const progress = Math.max(0, Math.min(1, (time - pop.startedAt) / pop.duration));
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const bounce = progress < 0.72
+        ? 0.62 + 0.56 * (1 - Math.pow(1 - progress / 0.72, 3))
+        : 1.18 - 0.18 * Math.pow((progress - 0.72) / 0.28, 2);
+      const pulse = Math.sin(progress * Math.PI * 8) * (1 - progress);
+      const cellX = column * cellWidth + cellWidth / 2;
+      const cellY = row * cellHeight + cellHeight / 2;
       context.save();
+      context.globalAlpha = (1 - eased) * 0.78;
+      context.strokeStyle = "#fff5a6";
+      context.lineWidth = Math.max(3, cellWidth * 0.045);
       context.beginPath();
-      context.rect(column * cellWidth, 0, cellWidth, slotReelCanvas.height);
-      context.clip();
-      const wholeRows = Math.floor(frame.offset);
-      const fractionalRow = frame.offset - wholeRows;
-      for (let row = 0; row <= 3; row += 1) {
-        const symbol = motionColumn.strip[wholeRows + row] || null;
-        drawSlotSymbol(column, row, symbol, 0, -fractionalRow * cellHeight);
-      }
+      context.arc(cellX, cellY, Math.min(cellWidth, cellHeight) * (0.18 + eased * 0.34), 0, Math.PI * 2);
+      context.stroke();
       context.restore();
-    }
-
-    for (const motionRow of slotReelMotion?.rows || []) {
-      const frame = sampleSlotReelRow(motionRow, slotReelMotion, time);
-      if (!frame) continue;
-      const rowTop = motionRow.row * cellHeight;
-      context.save();
-      context.beginPath();
-      context.rect(0, rowTop, slotReelCanvas.width, cellHeight);
-      context.clip();
-      context.clearRect(0, rowTop, slotReelCanvas.width, cellHeight);
-      if (frame.symbols) {
-        frame.symbols.forEach((symbol, column) => drawSlotSymbol(column, motionRow.row, symbol));
-      } else {
-        const wholeColumns = Math.floor(frame.offset);
-        const fractionalColumn = frame.offset - wholeColumns;
-        for (let column = 0; column <= SLOT_REEL_COLUMNS; column += 1) {
-          const symbol = motionRow.strip[wholeColumns + column] || null;
-          drawSlotSymbol(column, motionRow.row, symbol, -fractionalColumn * cellWidth);
-        }
-      }
-      context.restore();
+      drawSlotSymbol(column, row, symbol, 0, 0, {
+        scale: bounce,
+        rotation: pulse * 0.12,
+        glow: 30 * (1 - eased) + 8,
+      });
+    });
+    if (motionFrame) {
+      paintSlotLines(context, motionFrame.lines, (target, column, row, symbol, x, y) => {
+        drawSlotSymbol(column, row, symbol, x, y, {}, target);
+      });
     }
 
     context.save();
@@ -662,6 +630,7 @@ import {
       reducedMotion: reducedMotion.matches,
       previousSpinRows: lastSlotTravelRows,
       previousSpinColumns: lastSlotTravelColumns,
+      preserveUnchanged: kind === "place-row" || kind === "place-column",
     };
     slotReelMotion = createSlotLineMotion(startingGrid, { axis, indexes }, motionOptions);
     if (!slotReelMotion) return false;

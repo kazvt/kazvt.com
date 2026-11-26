@@ -96,6 +96,20 @@ function chooseTravelDistance(lineIndex, random, previousTravel, reducedMotion) 
   return minimum + offset;
 }
 
+// Placement keeps existing, unchanged icons physically parked. Empty cells
+// can still scroll, so the animation does not telegraph the chosen landing
+// cell. Never copy a parked icon (especially a wildcard) into the strip.
+function reelStrip(start, stop, target, preserveUnchanged) {
+  const movingPositions = start.flatMap((symbol, index) =>
+    !preserveUnchanged || symbol === null || symbol !== target[index] ? [index] : []);
+  const moving = new Set(movingPositions);
+  return {
+    movingPositions,
+    strip: [...start.map((symbol, i) => moving.has(i) ? symbol : null), ...stop,
+      ...target.map((symbol, i) => moving.has(i) ? symbol : null)],
+  };
+}
+
 export function createSlotReelMotion(grid, columns, {
   targetGrid = grid,
   startedAt = 0,
@@ -104,6 +118,7 @@ export function createSlotReelMotion(grid, columns, {
   random = Math.random,
   reducedMotion = false,
   previousSpinRows = {},
+  preserveUnchanged = false,
 } = {}) {
   const currentGrid = normalizeSlotGrid(grid);
   const settledGrid = normalizeSlotGrid(targetGrid);
@@ -115,6 +130,7 @@ export function createSlotReelMotion(grid, columns, {
   return {
     startedAt: Number(startedAt) || 0,
     grid: currentGrid,
+    reducedMotion,
     columns: activeColumns.map((column, order) => {
       const travelRows = chooseTravelDistance(column, random, previousSpinRows, reducedMotion);
       const start = Array.from({ length: SLOT_REEL_ROWS }, (_, row) => currentGrid[row * SLOT_REEL_COLUMNS + column]);
@@ -128,7 +144,7 @@ export function createSlotReelMotion(grid, columns, {
         start,
         stop,
         target,
-        strip: [...start, ...stop, ...target],
+        ...reelStrip(start, stop, target, preserveUnchanged),
         targetOffset: SLOT_REEL_ROWS + travelRows,
       };
     }),
@@ -144,6 +160,7 @@ export function createSlotRowMotion(grid, rows, {
   random = Math.random,
   reducedMotion = false,
   previousSpinColumns = {},
+  preserveUnchanged = false,
 } = {}) {
   const currentGrid = normalizeSlotGrid(grid);
   const settledGrid = normalizeSlotGrid(targetGrid);
@@ -155,6 +172,7 @@ export function createSlotRowMotion(grid, rows, {
   return {
     startedAt: Number(startedAt) || 0,
     grid: currentGrid,
+    reducedMotion,
     columns: [],
     rows: activeRows.map((row, order) => {
       const travelColumns = chooseTravelDistance(row, random, previousSpinColumns, reducedMotion);
@@ -169,7 +187,7 @@ export function createSlotRowMotion(grid, rows, {
         start,
         stop,
         target,
-        strip: [...start, ...stop, ...target],
+        ...reelStrip(start, stop, target, preserveUnchanged),
         targetOffset: SLOT_REEL_COLUMNS + travelColumns,
       };
     }),
@@ -177,37 +195,78 @@ export function createSlotRowMotion(grid, rows, {
   };
 }
 
-export function sampleSlotReelColumn(columnMotion, motion, time) {
-  if (!columnMotion || !motion) return null;
-  const elapsed = Number(time) - motion.startedAt - columnMotion.delay;
-  if (elapsed <= 0) return { offset: 0, symbols: columnMotion.start, spinning: true };
-  if (columnMotion.duration <= 0 || elapsed >= columnMotion.duration) {
-    return { offset: columnMotion.targetOffset, symbols: columnMotion.target, spinning: false };
+// A brief smooth acceleration, steady travel, and smooth braking. The
+// integrated smoothstep velocity has no jump at either phase boundary.
+function reelTravel(progress) {
+  const acceleration = 0.08;
+  const braking = 0.28;
+  const brakeStart = 1 - braking;
+  const area = 1 - (acceleration + braking) / 2;
+  const smooth = (x) => x * x * (3 - 2 * x);
+  const integral = (x) => x * x * x * (1 - x / 2);
+  if (progress < acceleration) {
+    const t = progress / acceleration;
+    return { distance: acceleration * integral(t) / area, speed: smooth(t) / area };
   }
+  if (progress < brakeStart) {
+    return { distance: (progress - acceleration / 2) / area, speed: 1 / area };
+  }
+  const t = (progress - brakeStart) / braking;
+  return {
+    distance: (brakeStart - acceleration / 2 + braking * (t - integral(t))) / area,
+    speed: (1 - smooth(t)) / area,
+  };
+}
 
-  const progress = clamp01(elapsed / columnMotion.duration);
-  // Symbols move at a steady initial pace, then ease down into the exact stop.
-  const eased = progress < 0.72
-    ? progress / 0.72 * 0.82
-    : 0.82 + 0.18 * (1 - Math.pow(1 - (progress - 0.72) / 0.28, 3));
-  return { offset: columnMotion.targetOffset * eased, symbols: null, spinning: true };
+function sampleLine(line, motion, time) {
+  if (!line || !motion) return null;
+  const elapsed = Number(time) - motion.startedAt - line.delay;
+  if (elapsed < 0) return { offset: 0, symbols: line.start, spinning: true, velocity: 0 };
+  if (line.duration <= 0 || elapsed >= line.duration) {
+    return { offset: line.targetOffset, symbols: line.target, spinning: false, velocity: 0 };
+  }
+  if (elapsed === 0) return { offset: 0, symbols: line.start, spinning: true, velocity: 0 };
+  const { distance, speed } = reelTravel(clamp01(elapsed / line.duration));
+  return { offset: line.targetOffset * distance, symbols: null, spinning: true,
+    velocity: line.targetOffset * speed / line.duration };
+}
+
+export function sampleSlotReelColumn(columnMotion, motion, time) {
+  return sampleLine(columnMotion, motion, time);
 }
 
 export function sampleSlotReelRow(rowMotion, motion, time) {
-  if (!rowMotion || !motion) return null;
-  const elapsed = Number(time) - motion.startedAt - rowMotion.delay;
-  if (elapsed <= 0) return { offset: 0, symbols: rowMotion.start, spinning: true };
-  if (rowMotion.duration <= 0 || elapsed >= rowMotion.duration) {
-    return { offset: rowMotion.targetOffset, symbols: rowMotion.target, spinning: false };
-  }
-
-  const progress = clamp01(elapsed / rowMotion.duration);
-  const eased = progress < 0.72
-    ? progress / 0.72 * 0.82
-    : 0.82 + 0.18 * (1 - Math.pow(1 - (progress - 0.72) / 0.28, 3));
-  return { offset: rowMotion.targetOffset * eased, symbols: null, spinning: true };
+  return sampleLine(rowMotion, motion, time);
 }
 
+// Velocity is measured in cells/ms, not per rendered frame. A centered
+// exposure is limited to 0.85 cells and never samples past the real stops.
+export function slotLineBlur(frame, line, reducedMotion = false) {
+  if (reducedMotion || !frame?.spinning || frame.symbols || !(frame.velocity > 0)) return 0;
+  return Math.max(0, Math.min(0.85, frame.velocity * 45,
+    frame.offset * 2, (line.targetOffset - frame.offset) * 2));
+}
+
+// Keep the board snapshot immutable throughout a roll. A placement arrow
+// changes one cell; occupied unchanged positions within the track are fixed.
+export function slotMotionFrame(motion, time, reducedMotion = false) {
+  const grid = motion.grid.slice();
+  const lines = [];
+  for (const [axis, tracks] of [["column", motion.columns], ["row", motion.rows || []]]) {
+    for (const line of tracks) {
+      const index = line[axis];
+      const positions = line.movingPositions;
+      if (!positions.length) continue;
+      for (const position of positions) {
+        grid[axis === "column" ? position * SLOT_REEL_COLUMNS + index : index * SLOT_REEL_COLUMNS + position] = null;
+      }
+      const frame = sampleLine(line, motion, time);
+      lines.push({ axis, index, positions, line, frame,
+        blur: slotLineBlur(frame, line, motion.reducedMotion || reducedMotion) });
+    }
+  }
+  return { grid, lines };
+}
 
 // Explicit axis routing shared by the live UI and regression tests. No implicit
 // column fallback for an invalid row request.
