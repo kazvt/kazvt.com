@@ -125,11 +125,14 @@ body.ramble-page *::after {
 
 .rg-slot-placement-marker {
   position: absolute;
-  display: grid;
-  min-width: 28px;
-  min-height: 28px;
-  place-items: center;
-  padding: 3px;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0;
+  padding: 1px 2px;
   border: 2px solid var(--ink);
   color: var(--paper);
   background: color-mix(in srgb, var(--paper) 92%, transparent);
@@ -144,28 +147,23 @@ body.ramble-page *::after {
 .rg-slot-placement-marker img {
   display: block;
   width: 72%;
-  height: 72%;
+  min-height: 0;
+  flex: 1 1 auto;
   object-fit: contain;
   image-rendering: pixelated;
   pointer-events: none;
 }
 
 .rg-slot-placement-index {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  display: grid;
-  min-width: 15px;
-  height: 15px;
-  place-items: center;
-  padding: 0 2px;
-  border: 1px solid var(--ink);
-  color: var(--paper);
-  background: var(--blue);
-  font-size: 9px;
+  display: block;
+  min-width: 0;
+  height: 8px;
+  padding: 0 1px;
+  color: var(--ink);
+  font-size: 7px;
   font-weight: 900;
   line-height: 1;
-  text-shadow: 1px 1px 0 var(--ink);
+  text-shadow: none;
 }
 
 .rg-slot-placement-marker:hover:not(:disabled) {
@@ -175,7 +173,7 @@ body.ramble-page *::after {
 }
 
 .rg-slot-placement-marker:active:not(:disabled) { transform: translate(-50%, -50%) scale(.94); }
-.rg-slot-placement-marker:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
+.rg-slot-placement-marker:focus-visible { outline: 2px solid var(--pink); outline-offset: 2px; }
 .rg-slot-placement-marker:disabled { opacity: .48; filter: grayscale(.75); cursor: not-allowed; }
 
 .rg-points-hud {

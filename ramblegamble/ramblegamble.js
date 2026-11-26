@@ -512,13 +512,13 @@ import {
         index,
         label: String(index + 1),
         x: left + (index + 0.5) * cellWidth,
-        y: top - cellHeight * 0.36,
+        y: top - cellHeight * 0.5,
       })),
       ...Array.from({ length: 3 }, (_, index) => ({
         axis: "row",
         index,
         label: String.fromCharCode(65 + index),
-        x: left - cellWidth * 0.36,
+        x: left - cellWidth * 0.5,
         y: top + (index + 0.5) * cellHeight,
       })),
     ];
@@ -561,7 +561,22 @@ import {
         .distanceTo(slotWorldPoint(definition.x + cellWidth * 0.32, definition.y));
       const worldHeight = slotWorldPoint(definition.x, definition.y - cellHeight * 0.27)
         .distanceTo(slotWorldPoint(definition.x, definition.y + cellHeight * 0.27));
-      slotPlacementControls.push({ ...definition, anchor, button, image, worldWidth, worldHeight });
+      const adjacentX = definition.index === (definition.axis === "column" ? 4 : 0)
+        ? definition.x - cellWidth
+        : definition.x + cellWidth;
+      const adjacentY = definition.index === (definition.axis === "row" ? 2 : 0)
+        ? definition.y - cellHeight
+        : definition.y + cellHeight;
+      slotPlacementControls.push({
+        ...definition,
+        anchor,
+        xSpacingAnchor: slotWorldPoint(adjacentX, definition.y),
+        ySpacingAnchor: slotWorldPoint(definition.x, adjacentY),
+        button,
+        image,
+        worldWidth,
+        worldHeight,
+      });
     }
     syncSlotPlacementControls();
   }
@@ -2313,10 +2328,20 @@ import {
         control.button.style.visibility = "hidden";
         continue;
       }
+      const xSpacingPoint = control.xSpacingAnchor.clone().project(camera);
+      const ySpacingPoint = control.ySpacingAnchor.clone().project(camera);
+      const horizontalGap = Math.hypot(
+        (xSpacingPoint.x - projected.x) * width * 0.5,
+        (xSpacingPoint.y - projected.y) * height * 0.5,
+      );
+      const verticalGap = Math.hypot(
+        (ySpacingPoint.x - projected.x) * width * 0.5,
+        (ySpacingPoint.y - projected.y) * height * 0.5,
+      );
       control.button.style.left = ((projected.x + 1) * 0.5 * width) + "px";
       control.button.style.top = ((1 - projected.y) * 0.5 * height) + "px";
-      control.button.style.width = Math.max(28, Math.min(54, control.worldWidth * pixelsPerWorldUnitAtOne / depth)) + "px";
-      control.button.style.height = Math.max(28, Math.min(48, control.worldHeight * pixelsPerWorldUnitAtOne / depth)) + "px";
+      control.button.style.width = Math.min(Math.max(22, control.worldWidth * pixelsPerWorldUnitAtOne / depth), horizontalGap * 0.9) + "px";
+      control.button.style.height = Math.min(Math.max(22, control.worldHeight * pixelsPerWorldUnitAtOne / depth), verticalGap * 0.9) + "px";
       control.button.style.visibility = "visible";
     }
   }
