@@ -4,10 +4,10 @@ import {
   resolvePointClickCursor,
   resolvePointClickZone,
   resolveArcadeShortcut,
-} from "./point-click-routing.js?v=rg-slot-hardware-controls-20261125-v1";
+} from "./point-click-routing.js?v=slot-machine-live-game-20261126-v1";
 import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
 import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-door-wall-target-20261120-v1";
-import { subscribePointScores } from "./points-store.mjs?v=points-console-20261120-v1";
+import { readPointScores, subscribePointScores, writePointScores } from "./points-store.mjs?v=points-console-20261120-v1";
 import {
   createCssProjectiveQuad,
   LIQUID_PORTAL_HEIGHT,
@@ -19,7 +19,8 @@ import {
   normalizeSlotGrid,
   sampleSlotReelColumn,
   slotScreenPoint,
-} from "./slot-reels.mjs?v=slot-reels-canvas-20261125-v1";
+} from "./slot-reels.mjs?v=slot-machine-live-game-20261126-v1";
+import { findSlotPayouts, placeSlotBerry, resolveSlotPayouts, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs?v=slot-machine-live-game-20261126-v1";
 import {
   ROULETTE_BALL_COLOR,
   ROULETTE_BALL_LANDING_RADIUS,
