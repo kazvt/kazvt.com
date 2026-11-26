@@ -40,6 +40,7 @@ import {
   const liquidPortalLayer = document.getElementById("rg-liquid-portal-layer");
   const liquidPortalFrame = document.getElementById("rg-liquid-portal-frame");
   const billboardLayer = document.getElementById("rg-billboard-layer");
+  const slotControlLayer = document.getElementById("rg-slot-control-layer");
   const gameCursor = document.getElementById("rg-game-cursor");
   const gameCursorImage = document.getElementById("rg-game-cursor-image");
   const pointsHud = document.getElementById("rg-points-hud");
@@ -152,8 +153,8 @@ import {
   let slotControlTargets = new Map();
   const slotReelImages = new Map();
   let selectedSlotBerry = "kazberry";
-  let slotPlacementAxis = "column";
-  let slotHoverCellIndex = -1;
+  let slotPlacementControls = [];
+  let slotHoverLine = null;
   let slotResultTimeout = 0;
   let slotResultToken = 0;
   const pickQuestion = createQuestionPicker();
@@ -422,12 +423,10 @@ import {
       context.moveTo(0, row * cellHeight);
       context.lineTo(slotReelCanvas.width, row * cellHeight);
     }
-    if (slotHoverCellIndex >= 0 && !slotReelMotion && currentView.kind === "slot") {
-      const hoverColumn = slotHoverCellIndex % 5;
-      const hoverRow = Math.floor(slotHoverCellIndex / 5);
+    if (slotHoverLine && !slotReelMotion && currentView.kind === "slot") {
       context.fillStyle = "rgba(255, 242, 155, 0.3)";
-      if (slotPlacementAxis === "row") context.fillRect(0, hoverRow * cellHeight, slotReelCanvas.width, cellHeight);
-      else context.fillRect(hoverColumn * cellWidth, 0, cellWidth, slotReelCanvas.height);
+      if (slotHoverLine.axis === "row") context.fillRect(0, slotHoverLine.index * cellHeight, slotReelCanvas.width, cellHeight);
+      else context.fillRect(slotHoverLine.index * cellWidth, 0, cellWidth, slotReelCanvas.height);
     }
     context.stroke();
     context.restore();
@@ -493,6 +492,80 @@ import {
     drawSlotReelDisplay();
   }
 
+  function slotWorldPoint(textureX, textureY, depth = 0.16) {
+    const point = slotScreenPoint(textureX, textureY, depth);
+    return slotsModel.localToWorld(new THREE.Vector3(point.x, point.y, point.z));
+  }
+
+  function createSlotPlacementControls() {
+    if (!slotControlLayer || !slotsModel) return;
+    slotRig.updateMatrixWorld(true);
+    slotsModel.updateMatrixWorld(true);
+    slotControlLayer.replaceChildren();
+    slotPlacementControls = [];
+    const { left, right, top, bottom } = SLOT_DISPLAY_PIXELS;
+    const cellWidth = (right - left) / 5;
+    const cellHeight = (bottom - top) / 3;
+    const definitions = [
+      ...Array.from({ length: 5 }, (_, index) => ({
+        axis: "column",
+        index,
+        label: String(index + 1),
+        x: left + (index + 0.5) * cellWidth,
+        y: top - cellHeight * 0.54,
+      })),
+      ...Array.from({ length: 3 }, (_, index) => ({
+        axis: "row",
+        index,
+        label: String.fromCharCode(65 + index),
+        x: left - cellWidth * 0.54,
+        y: top + (index + 0.5) * cellHeight,
+      })),
+    ];
+
+    for (const definition of definitions) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "rg-slot-placement-marker";
+      button.dataset.axis = definition.axis;
+      button.dataset.index = String(definition.index);
+      button.innerHTML = '<img alt="" aria-hidden="true" draggable="false"><span class="rg-slot-placement-index" aria-hidden="true">' + definition.label + "</span>";
+      const image = button.querySelector("img");
+      image.src = SLOT_SYMBOL_IMAGE_PATH + selectedSlotBerry + ".png";
+      button.addEventListener("pointerenter", () => {
+        slotHoverLine = { axis: definition.axis, index: definition.index };
+        drawSlotReelDisplay();
+        hideGameCursor();
+      });
+      button.addEventListener("pointerleave", () => {
+        if (slotHoverLine?.axis === definition.axis && slotHoverLine.index === definition.index) {
+          slotHoverLine = null;
+          drawSlotReelDisplay();
+        }
+      });
+      button.addEventListener("focus", () => {
+        slotHoverLine = { axis: definition.axis, index: definition.index };
+        drawSlotReelDisplay();
+      });
+      button.addEventListener("blur", () => {
+        if (slotHoverLine?.axis === definition.axis && slotHoverLine.index === definition.index) {
+          slotHoverLine = null;
+          drawSlotReelDisplay();
+        }
+      });
+      button.addEventListener("click", () => placeSlotBerryOnLine(definition.axis, definition.index));
+      slotControlLayer.append(button);
+
+      const anchor = slotWorldPoint(definition.x, definition.y);
+      const worldWidth = slotWorldPoint(definition.x - cellWidth * 0.32, definition.y)
+        .distanceTo(slotWorldPoint(definition.x + cellWidth * 0.32, definition.y));
+      const worldHeight = slotWorldPoint(definition.x, definition.y - cellHeight * 0.27)
+        .distanceTo(slotWorldPoint(definition.x, definition.y + cellHeight * 0.27));
+      slotPlacementControls.push({ ...definition, anchor, button, image, worldWidth, worldHeight });
+    }
+    syncSlotPlacementControls();
+  }
+
   function saveSlotGrid(grid) {
     slotReelGrid = normalizeSlotGrid(grid);
     try { localStorage.setItem(SLOT_GRID_STORAGE_KEY, JSON.stringify(slotReelGrid)); }
@@ -516,6 +589,7 @@ import {
     slotReelMotion.action = kind;
     playing = true;
     preview.classList.add("is-playing");
+    syncSlotPlacementControls();
     hideResult();
     if (pullCrank && lever) {
       leverMotion = {
@@ -529,12 +603,11 @@ import {
     return true;
   }
 
-  function placeSlotBerryFromDisplay(cellIndex) {
-    if (playing || slotReelMotion || !Number.isInteger(cellIndex) || cellIndex < 0 || cellIndex >= 15) return false;
-    const line = slotPlacementAxis === "row" ? Math.floor(cellIndex / 5) : cellIndex % 5;
+  function placeSlotBerryOnLine(axis, lineIndex) {
+    if (playing || slotReelMotion || !["row", "column"].includes(axis)) return false;
     const placement = placeSlotBerry(readSavedSlotGrid(), selectedSlotBerry, {
-      axis: slotPlacementAxis,
-      index: line,
+      axis,
+      index: lineIndex,
       randomIndex: secureRandomIndex,
     });
     if (placement.placedIndex < 0) {
@@ -542,6 +615,24 @@ import {
       return false;
     }
     return startSlotAction(placement.grid, [placement.placedIndex % 5], { kind: "place" });
+  }
+
+  function syncSlotPlacementControls() {
+    if (!slotPlacementControls.length) return;
+    const grid = readSavedSlotGrid();
+    const berryNames = { faroeberry: "Faroeberry", erinberry: "Erinberry", kazberry: "Kazberry" };
+    for (const control of slotPlacementControls) {
+      control.image.src = SLOT_SYMBOL_IMAGE_PATH + selectedSlotBerry + ".png";
+      const cells = control.axis === "column"
+        ? Array.from({ length: 3 }, (_, row) => row * 5 + control.index)
+        : Array.from({ length: 5 }, (_, column) => control.index * 5 + column);
+      const available = cells.filter((cellIndex) => grid[cellIndex] !== selectedSlotBerry).length;
+      const lineName = control.axis === "column" ? "column " + (control.index + 1) : "row " + control.label;
+      control.button.disabled = Boolean(playing || slotReelMotion || available === 0);
+      control.button.setAttribute("aria-label", "Place " + berryNames[selectedSlotBerry] + " in a random available cell in " + lineName + "; " + available + " available");
+      control.button.title = "Place " + berryNames[selectedSlotBerry] + " in " + lineName + " (" + available + " available)";
+      control.button.classList.toggle("is-unavailable", available === 0);
+    }
   }
 
   function startSlotReelSpin(columns, pullCrank = false) {
@@ -568,6 +659,7 @@ import {
     playing = false;
     preview.classList.remove("is-playing");
     drawSlotReelDisplay();
+    syncSlotPlacementControls();
     showSlotPayout(outcome.totals);
     window.dispatchEvent(new CustomEvent("rg:slot-action-finish", {
       detail: {
