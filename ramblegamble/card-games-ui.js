@@ -2,7 +2,7 @@ import { applyCardShowAction } from "./card-show-actions.mjs?v=show-stage-202611
 import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia } from "./live-trivia.mjs?v=show-stage-20261126-v1";
 import { activeCardStage, cardStageChange } from "./card-stage-state.mjs?v=wildcard-shared-20261126-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
-import { mountCardRoom } from "./card-room-host.mjs?v=show-stage-20261126-v1";
+import { mountCardRoom } from "./card-room-host.mjs?v=room-recovery-20261127-v1";
 import { foley } from "./game-foley.mjs?v=settlement-hover-20261127-v1";
 import {
   CARD_GAME_CATEGORIES,

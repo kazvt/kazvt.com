@@ -1,5 +1,6 @@
+import { gradeSimpleAnswer, isSimpleGradeMode } from "./trivia-simple-grade.mjs?v=room-recovery-20261127-v1";
 import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, newTriviaId, updateTrivia, activeRoomRound, publicMedia } from "./live-trivia.mjs?v=show-stage-20261126-v1";
-import { renderLiveQuestion, renderTriviaResponses } from "./trivia-live-view.mjs?v=settlement-hover-20261127-v1";
+import { renderLiveQuestion, renderTriviaResponses } from "./trivia-live-view.mjs?v=room-recovery-20261127-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
 import { readCardGames, subscribeCardGames } from "./card-games-store.mjs?v=show-stage-20261126-v1";
 import { removeSlotSymbol } from "./slot-game.mjs?v=wildcard-shared-20261126-v1";
@@ -96,7 +97,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
   let drawingData = new Map();
   let numberGuessState = { key: "", guesses: [], solved: false };
   let changeableNumberState = { key: "", solved: false };
-  let lastWrongAt = 0;
+  let lastWrongAt = -Infinity, shakeTimer = 0;
   let drafts = loadDrafts();
   let questionBank = readSessionQuestionBank();
   let pendingImport = null;
@@ -1426,12 +1427,13 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
 
   function setAnswerStatus(message, state) {
     feedback.textContent = message;
+    clearTimeout(shakeTimer);
     interfaceRoot.classList.remove("is-error", "is-correct");
     if (state === "wrong") {
       void interfaceRoot.offsetWidth;
       interfaceRoot.classList.add("is-error");
       playErrorSound();
-      window.setTimeout(() => interfaceRoot.classList.remove("is-error"), 360);
+      shakeTimer = window.setTimeout(() => interfaceRoot.classList.remove("is-error"), 360);
     } else if (state === "correct") { interfaceRoot.classList.add("is-correct"); foley.play("confirm"); }
   }
 
@@ -1442,34 +1444,16 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     foley.play("error");
   }
 
-  function normalizeAnswer(value) {
-    return String(value || "").normalize("NFKC").trim().toLocaleLowerCase().replace(/\s+/g, " ");
-  }
-
   function checkFreeAnswer() {
-    const effective = effectiveNow();
-    if (!effective.content.acceptedAnswers.length) {
-      setAnswerStatus("Add accepted answers in the host editor first.", "neutral");
-      return;
-    }
-    const answer = normalizeAnswer($("#rg-short-answer").value);
-    if (!answer) {
-      setAnswerStatus("Enter the answer given first.", "neutral");
-      return;
-    }
-    const accepted = effective.content.acceptedAnswers.map(normalizeAnswer);
-    if (answer && accepted.includes(answer)) setAnswerStatus("CORRECT!", "correct");
-    else setAnswerStatus("Not quite - try another answer.", "wrong");
+    const {content}=effectiveNow();
+    const result=gradeSimpleAnswer({kind:'short-answer'},{accepted:content.acceptedAnswers},{text:$("#rg-short-answer").value});
+    setAnswerStatus(result.text,result.state);
   }
 
   function checkOption(index) {
-    const { content } = effectiveNow();
-    if (!content.options.some((option) => option.correct)) {
-      setAnswerStatus("Mark the correct option in the host editor first.", "neutral");
-      return;
-    }
-    if (content.options[index]?.correct) setAnswerStatus("CORRECT!", "correct");
-    else setAnswerStatus("Not quite - try another choice.", "wrong");
+    const {content,format}=effectiveNow();
+    const result=gradeSimpleAnswer({kind:format.mode,options:content.options,multiple:false},{correct:content.options.flatMap((o,i)=>o.correct?[i]:[])},{selected:[index]});
+    setAnswerStatus(result.text,result.state);
   }
 
   function setQuestionContent(effective) {
@@ -1679,7 +1663,8 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     check.className = "rg-stage-button";
     check.textContent = "CHECK ANSWER";
     check.addEventListener("click", checkFreeAnswer);
-    input.addEventListener("keydown", (event) => { if (event.key === "Enter") checkFreeAnswer(); });
+    input.addEventListener("input", () => setAnswerStatus("", "neutral"));
+    input.addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.isComposing && !event.repeat) { event.preventDefault(); checkFreeAnswer(); } });
     answerArea.append(input, check);
   }
 
@@ -2215,6 +2200,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     stageItems.replaceChildren();
     answerArea.replaceChildren();
     feedback.textContent = "";
+    clearTimeout(shakeTimer);
     interfaceRoot.classList.remove("is-error", "is-correct");
 
     if (currentRound === "00") {
@@ -2422,8 +2408,11 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
   }
   function renderLive(round, open=false) {
     if(!round)return;
-    const q=publicQuestion(round);const key=JSON.stringify(q);
-    if(key!==lastRenderedQuestion){renderLiveQuestion(liveContent,q);lastRenderedQuestion=key;}
+    const q=publicQuestion(round);const key=JSON.stringify([round.id,q]);
+    if(key!==lastRenderedQuestion){
+      const hostCheck=isSimpleGradeMode(q.kind)?answer=>gradeSimpleAnswer(q,round.secret,answer):null;
+      renderLiveQuestion(liveContent,q,{interactive:!!hostCheck,hostCheck});lastRenderedQuestion=key;
+    }
     liveLayer.dataset.ready="true";
     if(open){ foley.play("question"); closeConsole(); window.dispatchEvent(new Event("rg:show-trivia-stage")); }
   }

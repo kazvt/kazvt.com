@@ -9,9 +9,9 @@
     <title>Ramble Gamble - kazvt</title>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
     <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=vip-focus-20261127-v1">
-    <link rel="stylesheet" href="/ramblegamble/host-console.css?v=submission-audit-20261126-v1">
-    <link rel="stylesheet" href="/ramblegamble/trivia-live.css?v=submission-audit-20261126-v1">
-    <link rel="stylesheet" href="/ramblegamble/card-games.css?v=card-score-sync-20261127-v1">
+    <link rel="stylesheet" href="/ramblegamble/host-console.css?v=room-recovery-20261127-v1">
+    <link rel="stylesheet" href="/ramblegamble/trivia-live.css?v=room-recovery-20261127-v1">
+    <link rel="stylesheet" href="/ramblegamble/card-games.css?v=room-recovery-20261127-v1">
     <script type="importmap">
       {
         "imports": {
@@ -22,11 +22,11 @@
       }
     </script>
     <link rel="stylesheet" href="/ramblegamble/host-access.css?v=host-toggle-20261126-v1">
-    <script type="module" src="/ramblegamble/host-access.mjs?v=vip-focus-20261127-v1"></script>
+    <script type="module" src="/ramblegamble/host-access.mjs?v=room-recovery-20261127-v1"></script>
   </head>
   <body class="ramble-page" data-theme="p2">
     <main class="rg-preview" id="rg-preview">
-      <canvas id="rg-canvas" tabindex="0" aria-label="Point-and-click arcade. Drag a focused scene slightly to look around. Right-click a machine for staff controls. Click the contestant or host seats, card table, slot machine, roulette wheel, or dice-framed door to interact. Click the dice door once to approach it, then click it again to enter Dice. Use the left and right screen edges to look around, and the bottom edge, Down, or Backspace to return to the parent view. Escape opens the pause menu. Keyboard: 1 or P participants, 2 slots, 3 roulette, D approaches the dice door, 4 or H host, 5 focuses the card table, C cheer, Left and Right look, Enter or Space activate, R spin, S pull lever."></canvas>
+      <canvas id="rg-canvas" tabindex="0" aria-label="Point-and-click arcade. Move the cursor over a focused scene to look around; dragging also works. Right-click a machine for staff controls. Click the contestant or host seats, card table, slot machine, roulette wheel, or dice-framed door to interact. Click the dice door once to approach it, then click it again to enter Dice. Use the left and right screen edges to look around, and the bottom edge, Down, or Backspace to return to the parent view. Escape opens the pause menu. Keyboard: 1 or P participants, 2 slots, 3 roulette, D approaches the dice door, 4 or H host, 5 focuses the card table, C cheer, Left and Right look, Enter or Space activate, R spin, S pull lever."></canvas>
       <div class="rg-liquid-portal-layer" id="rg-liquid-portal-layer" aria-hidden="true" hidden>
         <iframe
           class="rg-liquid-portal-frame"
@@ -249,8 +249,8 @@
           <div class="rg-trivia-layout" id="rg-trivia-interface">
             <section class="rg-trivia-screen" aria-label="Question preview">
               <div class="rg-trivia-screen-top"><span id="rg-round-badge">ROUND 01</span><span id="rg-format-badge">SHORT ANSWER</span><button class="rg-stage-edit" id="rg-stage-edit" type="button" hidden>BACK TO EDIT</button></div>
-              <p class="rg-question-subtitle" id="rg-question-subtitle" hidden></p>
               <h3 class="rg-question-text" id="rg-question-text" hidden></h3>
+              <p class="rg-question-subtitle" id="rg-question-subtitle" hidden></p>
               <img class="rg-prompt-image" id="rg-prompt-image" alt="" hidden>
               <div class="rg-video-box" id="rg-video-box" hidden></div>
               <div class="rg-stage-items" id="rg-stage-items"></div>
@@ -303,13 +303,13 @@
           </div>
           <p class="rg-card-admin-note">One entry per line. Shop entries use <code>Name [price]</code>. Lists save in this browser.</p>
           <div id="rg-card-network" class="rg-card-network">
-              <p>Share one private link per player before starting. Keep either this page or the console open. One reader is elected automatically. New rounds arrive automatically while connected. Never show private invitations on stream.</p>
+              <p>Send private links off-stream. Keep this page or the console open.</p>
               <button type="button" class="rg-secondary-button" data-room-start>START ONLINE ROOM</button>
               <button type="button" class="rg-secondary-button" data-room-stop>STOP ONLINE ROOM</button>
               <p data-room-status role="status">Offline invitations ready; start online room for live answers.</p>
               <div data-room-links></div>
         <button type="button" data-room-rotate>REPLACE ALL ROOM INVITATIONS</button>
-              <details><summary>Offline fallback — import a private answer packet</summary><p>Use OFFLINE ROUND to send a fresh private round link to each player if live connection fails. Paste the player's returned packet below.</p><textarea data-room-packet aria-label="Private player packet" rows="3"></textarea><button type="button" class="rg-secondary-button" data-room-import>IMPORT ANSWER</button></details>
+              <details><summary>Offline answer packet</summary><p>Send an offline round link, then paste the returned packet.</p><textarea data-room-packet aria-label="Private player packet" rows="3"></textarea><button type="button" class="rg-secondary-button" data-room-import>IMPORT ANSWER</button></details>
             </div>
           <section class="rg-card-private-entry" id="rg-card-private-entry" hidden>
             <h3>MANUAL HOST ENTRY</h3>

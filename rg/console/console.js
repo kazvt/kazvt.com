@@ -1,8 +1,8 @@
 import { applyCardShowAction } from "/ramblegamble/card-show-actions.mjs?v=show-stage-20261126-v1";
-import { renderTriviaResponses } from "/ramblegamble/trivia-live-view.mjs?v=settlement-hover-20261127-v1";
+import { renderTriviaResponses } from "/ramblegamble/trivia-live-view.mjs?v=room-recovery-20261127-v1";
 import { activeRoomRound, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, newTriviaId, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, updateTrivia, answerSummary } from "/ramblegamble/live-trivia.mjs?v=show-stage-20261126-v1";
 import { withRoomSubmissionLock } from "/ramblegamble/card-room-election.mjs";
-import { mountCardRoom } from "/ramblegamble/card-room-host.mjs?v=show-stage-20261126-v1";
+import { mountCardRoom } from "/ramblegamble/card-room-host.mjs?v=room-recovery-20261127-v1";
 import {
   RG_CONTESTANTS,
   readPointScores,

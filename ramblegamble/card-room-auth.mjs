@@ -35,6 +35,9 @@ function fingerprint(desc) {
   return lines[0];
 }
 export function channelBinding(conn, host) {
+  // A local SharedWorker transfers a unique private MessagePort to each end.
+  // Domain-separated from every WebRTC fingerprint-bound transcript.
+  if (typeof conn?.localChannelId === 'string' && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(conn.localChannelId)) return ['rg-local-message-port-v1',conn.localChannelId];
   const pc = conn.peerConnection;
   const local = fingerprint(pc?.localDescription), remote = fingerprint(pc?.remoteDescription);
   return host ? [local,remote] : [remote,local];

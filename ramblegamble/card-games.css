@@ -523,3 +523,12 @@
 .rg-mode-choice[data-mode="shop"] { --mode-trim:#48e68b; --mode-label-bg:#19643e; }
 .rg-mode-choice:is(:hover,:focus-visible) .rg-mode-label { box-shadow:3px 3px 0 #1e0b01,0 0 12px var(--mode-trim); }
 @media(prefers-reduced-motion:reduce) { .rg-mode-label { transition:none; } }
+
+/* Stable, readable private-room rows. */
+.rg-card-network [data-room-links] .rg-room-seat {display:grid;grid-template-columns:minmax(100px,1fr) auto auto;gap:5px;align-items:center;padding:5px 0;border-top:1px solid #c9bd91;}
+.rg-card-network .rg-room-seat a {color:#594747;font-size:13px;overflow-wrap:anywhere;}
+.rg-card-network .rg-room-seat.is-connected a {color:#23623a;}
+.rg-card-network .rg-room-seat button,.rg-card-network [data-room-rotate] {font:inherit;font-size:12px;padding:5px 7px;min-height:30px;background:#fff8d4;color:#412018;border:1px solid #8b2626;cursor:pointer;}
+.rg-card-network .rg-room-seat textarea {grid-column:1/-1;}
+.rg-card-network .rg-room-seat button:hover,.rg-card-network [data-room-rotate]:hover {background:#ead695;}
+@media(max-width:440px){.rg-card-network [data-room-links] .rg-room-seat {grid-template-columns:1fr 1fr;}.rg-card-network .rg-room-seat a {grid-column:1/-1;}}

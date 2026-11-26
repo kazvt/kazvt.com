@@ -1,16 +1,17 @@
 import { ACK_TIMEOUT_MS, matchesAck, pendingReceipt, validRequestId } from "./card-room-delivery.mjs?v=submission-audit-20261126-v1";
 import { foley } from "./game-foley.mjs?v=settlement-hover-20261127-v1";
-import { renderLiveQuestion } from "./trivia-live-view.mjs?v=settlement-hover-20261127-v1";
-import { nonce, validNonce, validPublicKey, channelBinding, transcript, verifyHost, proveSeat } from "./card-room-auth.mjs?v=host-security-20261126-v1";
+import { renderLiveQuestion } from "./trivia-live-view.mjs?v=room-recovery-20261127-v1";
+import { nonce, validNonce, validPublicKey, channelBinding, transcript, verifyHost, proveSeat } from "./card-room-auth.mjs?v=room-recovery-20261127-v1";
 import { ROOM_VERSION, isPlayer, decodePacket, encodePacket } from "./card-room-protocol.mjs?v=show-stage-20261126-v1";
-import { loadPeer } from "./card-room-peer.mjs";
+import { loadPeer } from "./card-room-peer.mjs?v=room-recovery-20261127-v1";
+import { connectLocal } from "./card-room-local.mjs?v=room-recovery-20261127-v1";
 const $ = id => document.getElementById(id);
 const invite = decodePacket(location.hash.slice(1));
 window.addEventListener("hashchange", () => location.reload());
 if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/.test(invite.room) && validNonce(invite.token) && validPublicKey(invite.hostKey)) {
   const envelope = { v: ROOM_VERSION, room: invite.room, player: invite.player, token: invite.token };
   let triviaRenderKey = "";
-  let round = null, peer = null, conn = null, attempt = 0, online = false, pending = null, retryTimer = null, retryDelay = 1000, ackTimer = null;
+  let round = null, peer = null, conn = null, attempt = 0, online = false, pending = null, retryTimer = null, retryDelay = 1000, ackTimer = null, connectionTimer = null, controller = null, terminal = false, skipLocalOnce = false;
   const pendingKey = `rg-card-pending:${invite.room}:${invite.player}`;
   function remember(value) { try { if (value) sessionStorage.setItem(pendingKey, JSON.stringify(value)); else sessionStorage.removeItem(pendingKey); } catch {} }
   function recover(roundId) { try { const saved = JSON.parse(sessionStorage.getItem(pendingKey)); if(saved?.roundId !== roundId || saved?.room !== invite.room || saved?.token !== invite.token || typeof saved.answer !== 'string')return null; if(!validRequestId(saved.requestId))saved.requestId=crypto.randomUUID(); return saved; } catch { return null; } }
@@ -19,7 +20,7 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
   function loadDraft(id) { try {const d=JSON.parse(sessionStorage.getItem(draftKey));return d?.roundId===id&&d.token===invite.token?d.value:null;}catch{return null;} }
   function clearDraft(){try{sessionStorage.removeItem(draftKey);}catch{}}
   function clearPending() { clearTimeout(ackTimer); ackTimer=null; pending=null; remember(null); }
-  function showPending() { if(!pending)return; $('packet').value=encodePacket(pending); $('fallback').hidden=online; $('form').hidden=true; $('trivia-player-content').hidden=true; $('submission').textContent=online?'Sending…':'Reconnecting…'; }
+  function showPending() { if(!pending)return; $('packet').value=encodePacket(pending); $('fallback').hidden=online; $('form').hidden=true; $('trivia-player-content').hidden=true; $('submission').textContent=online?'Sending…':invite.round?'Copy the packet and send it to the host.':'Waiting for connection…'; }
   function resolvePending(next) { const receipt=pendingReceipt(pending,next); if(!receipt)return null; clearPending(); if(receipt==='accepted')foley.play('confirm'); return receipt; }
   function showPacket() { if(!pending)return; showPending(); $('fallback').hidden=false; $('submission').textContent='Waiting for host confirmation.'; }
 
@@ -59,7 +60,7 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
     else { $('fallback').hidden=true; $('submission').textContent=''; }
   }
   function queueAnswer(answer) {
-    if (!round || round.phase !== 'submissions' || round.submitted || pending) return;
+    if ((!invite.round && terminal) || !round || round.phase !== 'submissions' || round.submitted || pending) return;
     foley.play("submit");
     pending={...envelope,type:'submit',roundId:round.id,requestId:crypto.randomUUID(),answer}; remember(pending);
     showPending();sendPending();
@@ -84,49 +85,54 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
     else if(next.phase!=='submissions')$('submission').textContent='Round closed.';
     else $('submission').textContent='';
   }
+  function closeTransport() {
+    clearTimeout(connectionTimer); connectionTimer=null;
+    controller?.abort(); controller=null;
+    const old=peer, channel=conn; peer=null;conn=null;
+    try{channel?.close?.();}catch{} try{old?.destroy();}catch{}
+  }
   function disconnect(message, retry = true) {
-    ++attempt; online = false; clearTimeout(ackTimer); ackTimer=null; if(pending)showPacket(); $('connect').disabled = false;
-    const old = peer; peer = null; conn = null; try { old?.destroy(); } catch {}
-    clearTimeout(retryTimer);
-    if (invite.round || !retry) { status(message); return; }
-    status(`${message} Reconnecting…`);
-    retryTimer = setTimeout(connect, retryDelay); retryTimer?.unref?.(); retryDelay = Math.min(retryDelay * 2, 15000);
+    ++attempt; online=false; terminal=!retry; clearTimeout(ackTimer);ackTimer=null;
+    closeTransport(); clearTimeout(retryTimer);retryTimer=null;
+    if(pending)showPacket(); $('connect').disabled=false; $('connect').textContent='RETRY NOW';
+    if(invite.round || !retry){if(!invite.round){$('form').hidden=true;$('trivia-player-content').hidden=true;}status(message);return;}
+    status(`${message} Retrying…`);
+    retryTimer=setTimeout(connect,retryDelay);retryTimer?.unref?.();retryDelay=Math.min(retryDelay*2,15000);
   }
   async function connect() {
-    clearTimeout(retryTimer); clearTimeout(ackTimer); ackTimer=null; const generation = ++attempt; online = false; $('connect').disabled = true; status('Connecting…');
-    if (peer && !peer.destroyed) peer.destroy();
-    const timer = setTimeout(() => { if (generation === attempt && !online) { disconnect('Host unreachable. Retry or ask the host for an OFFLINE ROUND link and copy a packet.'); } }, 18000); timer?.unref?.();
-    try {
-      const Peer = await loadPeer(); if (generation !== attempt) return;
-      peer = new Peer({debug:0});
-      const fail = (message,retry=true) => { if (generation !== attempt) return; clearTimeout(timer); disconnect(message,retry); };
-      peer.on('disconnected', () => { if (!conn?.open) fail('Signaling disconnected. Retry or ask for an offline round link.'); });
-      peer.on('error', () => fail('Connection error. Retry or copy a packet.'));
-      peer.on('open', () => {
-        if (generation !== attempt) return;
-        const channel = conn = peer.connect(invite.room,{reliable:true,serialization:'binary'});
-        const clientNonce = nonce(); let phase = 'challenge';
-        const current = () => generation === attempt && conn === channel && channel.open;
-        channel.on('open', () => { if (current()) channel.send({v:ROOM_VERSION,type:'hello',room:invite.room,player:invite.player,clientNonce}); });
+    clearTimeout(retryTimer);retryTimer=null; clearTimeout(ackTimer);ackTimer=null;
+    const generation=++attempt; online=false;terminal=false;closeTransport();
+    const abort=controller=new AbortController();
+    $('connect').disabled=false;$('connect').textContent='RETRY NOW';status('Looking for host…');
+    const currentAttempt=()=>generation===attempt&&!abort.signal.aborted;
+    const fail=(message,retry=true)=>{if(currentAttempt()){if(retry&&!online&&conn?.localChannelId)skipLocalOnce=true;disconnect(message,retry);}};
+    const deadline=(ms,message)=>{clearTimeout(connectionTimer);connectionTimer=setTimeout(()=>fail(message),ms);connectionTimer?.unref?.();};
+    function attach(channel) {
+      if(!currentAttempt()||!channel){channel?.close?.();return;}
+      conn=channel;const clientNonce=nonce();let phase='challenge',helloSent=false;
+      const current=()=>currentAttempt()&&conn===channel&&channel.open;
+      const hello=()=>{if(!current()||helloSent)return;helloSent=true;status('Verifying host…');deadline(channel.localChannelId?5000:12000,'Host did not confirm the invitation.');try{channel.send({v:ROOM_VERSION,type:'hello',room:invite.room,player:invite.player,clientNonce});}catch{fail('Connection interrupted.');}};
+      channel.on('open',hello);
         channel.on('data', async message => {
           if (!current()) return;
-          if (message?.v !== ROOM_VERSION) { fail('Incompatible host. Ask for a new invitation.'); return; }
+          if (message?.v !== ROOM_VERSION) { fail('Incompatible host. Refresh both pages.',false); return; }
           if (phase === 'challenge') {
-            phase='verifying';
+            phase='verifying'; status('Verifying host…');
             try {
               if (message.type !== 'challenge' || message.room !== invite.room || message.player !== invite.player || message.clientNonce !== clientNonce || !validNonce(message.hostNonce)) throw Error('Invalid host challenge');
               const text=transcript(message,channelBinding(channel,false));
               if (!await verifyHost(invite.hostKey,text,message.signature)) throw Error('Host identity mismatch');
               const proof=await proveSeat(invite.token,text);
               if (!current() || phase !== 'verifying') return;
-              phase='verified'; channel.send({v:ROOM_VERSION,type:'proof',proof});
+              phase='verified'; status('Confirming invitation…'); channel.send({v:ROOM_VERSION,type:'proof',proof});
             } catch { if(current()) fail('Host identity could not be verified. Do not share your link; ask the host to confirm it.',false); }
             return;
           }
           if (phase !== 'verified') { fail('Unexpected authentication message.'); return; }
-          if (message.type === 'denied' && !online) { clearTimeout(timer); disconnect('Invitation invalid or revoked. Ask the host for a replacement link.',false); return; }
+          if (message.type === 'superseded' && online) { disconnect('This seat is open in another window. Reconnect here to take over.',false); return; }
+          if (message.type === 'denied' && !online) { clearTimeout(connectionTimer); disconnect('Invitation invalid or revoked. Ask the host for a replacement link.',false); return; }
           if (message.type !== 'round' && !online) { fail('Host did not confirm your seat.'); return; }
-          if (message.type === 'round') { online = true; retryDelay = 1000; clearTimeout(timer); $('connect').disabled = false; status(message.round ? 'Connected' : 'Connected — waiting for round'); render(message.round); }
+          if (message.type === 'round') { online = true; terminal=false; retryDelay = 1000; clearTimeout(connectionTimer); $('connect').textContent='RECONNECT'; status(message.round ? 'Connected' : 'Connected — waiting for round'); render(message.round); }
           if (message.type === 'ack' && matchesAck(pending,message)) {
             if (message.status === 'accepted' || message.status === 'already-submitted') {
               // Keep the outbox until the authoritative snapshot confirms the exact
@@ -141,12 +147,25 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
             }
           }
         });
-        conn.on('close', () => fail('Disconnected. Retry or copy your pending packet.')); conn.on('error', () => fail('Connection error. Retry or copy your packet.'));
-      });
-    } catch { clearTimeout(timer); if (generation === attempt) disconnect('Live service unavailable. Use copy/paste packets.'); }
+      channel.on('close',()=>fail('Connection lost.'));channel.on('error',()=>fail('Connection interrupted.'));
+      if(channel.open)hello();
+    }
+    try {
+      const skip=skipLocalOnce;skipLocalOnce=false;const local=skip?null:await connectLocal(invite.room,{signal:abort.signal,onStage:status});
+      if(!currentAttempt()){local?.close();return;}
+      if(local){attach(local);return;}
+      status('Connecting to online service…');deadline(16000,'Online service unavailable.');
+      const Peer=await loadPeer();if(!currentAttempt())return;
+      peer=new Peer({debug:0});deadline(15000,'Online service did not respond.');
+      peer.on('disconnected',()=>{if(!conn?.open)fail('Signaling disconnected.');});
+      peer.on('error',error=>{if(error?.type==='disconnected'&&conn?.open)return;fail(error?.type==='peer-unavailable'?'Host not reachable. Ask host to check the room.':error?.type==='browser-incompatible'?'This browser does not support live connections. Use an offline round.':'Online connection failed.',error?.type!=='browser-incompatible');});
+      peer.on('open',()=>{if(!currentAttempt())return;status('Contacting host…');deadline(18000,'Host not reachable. Ask host to check the room.');try{attach(peer.connect(invite.room,{reliable:true,serialization:'binary'}));}catch{fail('Could not contact host.');}});
+    }catch{fail('Live service unavailable.');}
   }
-  $('connect').addEventListener('click', connect);
-  window.addEventListener('online',()=>{if(!online&&!invite.round&&!$('connect').disabled)connect();});
+  $('connect').addEventListener('click',connect);
+  window.addEventListener('online',()=>{if(!online&&!invite.round&&!terminal)connect();});
+  window.addEventListener('pagehide',()=>{++attempt;online=false;clearTimeout(retryTimer);clearTimeout(ackTimer);ackTimer=null;closeTransport();});
+  window.addEventListener('pageshow',event=>{if(event.persisted&&!invite.round&&!terminal)connect();});
   $('answer').addEventListener('input',()=>saveDraft({text:$('answer').value}));
   $('form').addEventListener('submit', event => {
     event.preventDefault(); if (!round || round.mode === 'trivia' || round.phase !== 'submissions' || round.submitted || pending) return;
@@ -156,7 +175,8 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
     queueAnswer(answer);
   });
   $('copy').addEventListener('click', async () => { try { await navigator.clipboard.writeText($('packet').value); $('submission').textContent = 'Packet copied. Send it privately to the host.'; } catch { $('packet').select(); } });
-  render(invite.round || null); status('Connecting…'); if (invite.round) status('Offline round'); connect();
+  render(invite.round || null); if(invite.round){status('Offline round — send your answer packet to the host.');$('connect').textContent='CONNECT LIVE';}else connect();
 }
 
 if (invite && invite.v !== ROOM_VERSION) $('connection').textContent = 'Ask the host for a new invitation.';
+else if (location.hash && $('connect').hidden) $('connection').textContent = 'Invalid or incomplete invitation. Ask the host to copy your link again.';

@@ -1,7 +1,8 @@
 import { validRequestId } from "./card-room-delivery.mjs?v=submission-audit-20261126-v1";
-import { loadHostIdentity, nonce, validNonce, transcript, channelBinding, signHost, verifySeat } from "./card-room-auth.mjs?v=host-security-20261126-v1";
+import { loadHostIdentity, nonce, validNonce, transcript, channelBinding, signHost, verifySeat } from "./card-room-auth.mjs?v=room-recovery-20261127-v1";
 import { ROOM_VERSION, createRoom, validRoom, playerRound, encodePacket, decodePacket, acceptSubmission, isPlayer, randomToken } from "./card-room-protocol.mjs?v=show-stage-20261126-v1";
-import { loadPeer } from "./card-room-peer.mjs";
+import { loadPeer } from "./card-room-peer.mjs?v=room-recovery-20261127-v1";
+import { openLocalHost } from "./card-room-local.mjs?v=room-recovery-20261127-v1";
 import { CARD_GAME_PLAYERS } from "./card-games.mjs?v=show-stage-20261126-v1";
 import { electReader, withRoomSubmissionLock, ROOM_KEY, ENABLED_KEY, STATUS_KEY } from "./card-room-election.mjs";
 
@@ -11,8 +12,9 @@ export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/
   const doc = env.document;
   const read = key => { try { return JSON.parse(storage.getItem(key)); } catch { return null; } };
   const write = (key, value) => { try { storage.setItem(key, JSON.stringify(value)); return true; } catch { return false; } };
+  let linksKey = null;
   let initFailed = false, hostIdentity = null, room = null, leader = false, awake = true, disposed = false, shared = false;
-  let peer = null, retry = null, connectionTimer = null, retryDelay = 1000, generation = 0;
+  let peer = null, retry = null, connectionTimer = null, retryDelay = 1000, generation = 0, localHost = null, cloudText = "Connecting…";
   const clients = new Map(), incomingConnections = new Map(), sentStates = new WeakMap();
   const status = root.querySelector('[data-room-status]');
   const links = root.querySelector('[data-room-links]');
@@ -23,18 +25,23 @@ export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/
   const rotate = root.querySelector('[data-room-rotate]');
   const enabled = () => read(ENABLED_KEY) === true;
   function refreshLinks() {
-    links.replaceChildren();
-    if (!room) return;
+    if (!room) {linksKey=null;links.replaceChildren();return;}
     const current = leader ? { connected: [...clients.keys()] } : read(STATUS_KEY);
+    const activeRound = getRound(), active=enabled();
+    const projections = CARD_GAME_PLAYERS.map(player=>playerRound(activeRound,player));
+    const key=JSON.stringify([room.id,room.tokens,active,current?.connected||[],projections]);
+    if(key===linksKey)return;linksKey=key;
+    links.replaceChildren();
     for (const player of CARD_GAME_PLAYERS) {
       const url = new URL('/rg/player/', env.location.href);
       const envelope = { v: ROOM_VERSION, room: room.id, player, token: room.tokens[player], hostKey: room.hostKey };
       url.hash = encodePacket(envelope);
-      const round = playerRound(getRound(), player);
+      const round = projections[CARD_GAME_PLAYERS.indexOf(player)];
       const offline = new URL(url); const offlineFits = JSON.stringify(round).length < 40000; if (offlineFits) offline.hash = encodePacket({ ...envelope, round });
       const row = doc.createElement('div');
+      row.className = active && current?.connected?.includes(player) ? 'rg-room-seat is-connected' : 'rg-room-seat';
       const link = doc.createElement('a'); link.href = url.href; link.target = '_blank'; link.rel = 'noopener noreferrer';
-      link.textContent = `${player.toUpperCase()} — ${enabled() && current?.connected?.includes(player) ? 'connected' : 'offline'}${round?.submitted ? ' · saved' : round?.phase === 'submissions' ? ' · waiting' : ''}`;
+      link.textContent = `${player.toUpperCase()} — ${active && current?.connected?.includes(player) ? 'connected' : active ? 'not connected' : 'offline'}${round?.submitted ? ' · saved' : round?.phase === 'submissions' ? ' · waiting' : ''}`;
       function copyButton(label, value, message) {
         const copy = doc.createElement('button'); copy.type = 'button'; copy.textContent = label;
         copy.addEventListener('click', async () => {
@@ -62,7 +69,9 @@ export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/
   }
   function report(text) {
     if (!leader) return;
-    write(STATUS_KEY, { role, text, connected: [...clients.keys()] });
+    if(text) cloudText=text;
+    const summary = `${clients.size}/3 connected · ${cloudText}${localHost?.ready ? " · local ready" : ""}`;
+    write(STATUS_KEY, { role, text:summary, connected: [...clients.keys()] });
     refreshStatus();
   }
   function sendState(conn, player, force=false) {
@@ -85,12 +94,13 @@ export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/
     // Serialize packet imports on both pages with incoming network submissions.
     return withRoomSubmissionLock(apply, locks || null);
   }
-  function incoming(conn, epoch) {
-    if (!leader || epoch !== generation || incomingConnections.size >= 24) { conn.close(); return; }
+  function incoming(conn, epoch, local = false) {
+    const active = () => leader && (local ? localHost === epoch : epoch === generation);
+    if (!active() || incomingConnections.size >= 24) { conn.close(); return; }
     
     let identity = null, seatToken = null, phase = 'hello', challenge = null, closed = false;
     const timeout = setTimeout(() => { if (!identity) { cleanup(); conn.close(); } }, 12000);
-    const alive = () => !closed && leader && epoch === generation && conn.open && enabled() && !!room && read(ROOM_KEY)?.id === room.id;
+    const alive = () => !closed && active() && conn.open && enabled() && !!room && read(ROOM_KEY)?.id === room.id;
     const current = () => alive() && clients.get(identity) === conn && read(ROOM_KEY)?.tokens?.[identity] === seatToken;
     conn.on('data', async message => {
       try {
@@ -113,10 +123,16 @@ export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/
           if (!alive() || phase !== 'verifying') { conn.close(); return; }
           if (!verified || read(ROOM_KEY)?.tokens?.[challenge.player] !== challenge.token) { conn.send({v:ROOM_VERSION,type:'denied'}); phase='denied'; return; }
           identity=challenge.player; seatToken=challenge.token; phase='joined'; clearTimeout(timeout); challenge=null;
-          const previous=clients.get(identity); clients.set(identity,conn); if(previous && previous!==conn) previous.close();
-          report('Online. Share private invites.'); publish(); return;
+          const previous=clients.get(identity); clients.set(identity,conn);
+          if(previous && previous!==conn) {
+            // A second copy of a seat must not endlessly evict the new tab.
+            try{previous.send({v:ROOM_VERSION,type:'superseded'});}catch{}
+            const delay=setTimeout(()=>previous.close(),250);delay?.unref?.();
+          }
+          report(); publish(); return;
         }
-        if (phase !== 'joined' || !current() || message.type !== 'submit' || typeof message.roundId!=='string' || message.roundId.length>160 || (message.requestId!==undefined&&!validRequestId(message.requestId))) { conn.close(); return; }
+        if (phase === 'joined' && !current()) return;
+        if (phase !== 'joined' || message.type !== 'submit' || typeof message.roundId!=='string' || message.roundId.length>160 || (message.requestId!==undefined&&!validRequestId(message.requestId))) { conn.close(); return; }
         const submission={v:ROOM_VERSION,type:'submit',room:room.id,player:identity,token:seatToken,roundId:message.roundId,answer:message.answer,requestId:message.requestId};
         let result;
         try { result=await accept(submission,current); } catch { result='storage-error'; }
@@ -125,26 +141,27 @@ export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/
     });
     function cleanup() {
       closed=true; clearTimeout(timeout); incomingConnections.delete(conn);
-      if(identity && clients.get(identity)===conn) { clients.delete(identity); if(leader && epoch===generation) report('Online. Share private invites.'); }
+      if(identity && clients.get(identity)===conn) { clients.delete(identity); if(active()) report(); }
     }
-    incomingConnections.set(conn,cleanup); conn.on('close',cleanup); conn.on('error',cleanup);
+    cleanup.local=local; incomingConnections.set(conn,cleanup); conn.on('close',cleanup); conn.on('error',cleanup);
   }
-  function destroyTransport() {
+  function destroyTransport(all = true) {
     ++generation;
     clearTimeout(connectionTimer); clearTimeout(retry); connectionTimer = retry = null;
     const old = peer; peer = null;
-    for (const [conn,cleanup] of [...incomingConnections]) { cleanup(); try { conn.close(); } catch {} }
-    incomingConnections.clear(); clients.clear();
+    for (const [conn,cleanup] of [...incomingConnections]) { if(!all && cleanup.local)continue; cleanup(); try { conn.close(); } catch {} }
+    if(all){const local=localHost;localHost=null;try{local?.close();}catch{}incomingConnections.clear();clients.clear();}
     try { old?.destroy(); } catch {}
   }
   function scheduleRetry(text) {
     if (!leader) return;
-    destroyTransport(); report(`${text} Retrying automatically…`);
+    destroyTransport(false); report(`${text} Retrying…`);
     retry = setTimeout(connect, retryDelay); retryDelay = Math.min(retryDelay * 2, 15000);
   }
   async function connect() {
     if (!leader || !room || !enabled() || !awake) return;
-    destroyTransport(); const epoch = generation;
+    destroyTransport(false); const epoch = generation;
+    if(!localHost || localHost.closed){try{localHost=openLocalHost(room.id,conn=>incoming(conn,localHost,true),env,()=>report());}catch{}}
     report('Connecting to PeerJS Cloud…');
     try {
       const Peer = await peerLoader();
@@ -153,9 +170,9 @@ export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/
       const current = () => leader && epoch === generation && peer === active;
       const failed = text => { if (current()) scheduleRetry(text); };
       connectionTimer = setTimeout(() => failed('Connection timed out.'), 15000);
-      active.on('open', () => { if (!current()) return; clearTimeout(connectionTimer); retryDelay = 1000; report('Online. Share private invites.'); publish(); });
+      active.on('open', () => { if (!current()) return; clearTimeout(connectionTimer); retryDelay = 1000; report('Remote ready'); publish(); });
       active.on('connection', conn => incoming(conn, epoch));
-      active.on('error', () => failed('Room connection error.'));
+      active.on('error', error => { if(error?.type==='peer-unavailable' && active.open)return; failed(error?.type==='unavailable-id'?'Waiting for previous reader.':'Remote connection error.'); });
       active.on('disconnected', () => failed('Signaling disconnected.'));
       active.on('close', () => failed('Room closed.'));
     } catch { if (leader && epoch === generation) scheduleRetry('PeerJS unavailable.'); }
@@ -187,8 +204,8 @@ export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/
   env.addEventListener?.('pagehide', pageHide);
   env.addEventListener?.('pageshow', pageShow);
   rotate?.addEventListener('click', () => { if(env.confirm?.('Replace room ID and all invitations? Players need new links. Saved rounds stay.')) return changeCredentials(); });
-  start.addEventListener('click', () => { if (shared && locks?.request && room && write(ENABLED_KEY, true)) reconcile(); });
-  stop?.addEventListener('click', () => { write(ENABLED_KEY, false); reconcile(); });
+  start.addEventListener('click', () => { if (!shared||!locks?.request||!room)return; if(write(ENABLED_KEY,true))reconcile();else onStatus?.('Could not start room: storage unavailable.'); });
+  stop?.addEventListener('click', () => { if(write(ENABLED_KEY,false))reconcile();else onStatus?.('Could not stop room: storage unavailable.'); });
   importButton.addEventListener('click', async () => {
     let result; try { result = await accept(decodePacket(packet.value.trim())); } catch { result = 'storage-error'; }
     onStatus?.(`Packet: ${result}.`); if (result === 'accepted') packet.value = ''; publish();
