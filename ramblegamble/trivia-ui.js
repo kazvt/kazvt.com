@@ -840,13 +840,13 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     const board = $("#rg-slot-board");
     board.replaceChildren();
     slotGrid.forEach((berry, index) => {
-      const cell = document.createElement("button");
+      const cell = document.createElement("div");
       const row = Math.floor(index / 5);
       const column = index % 5;
-      cell.type = "button";
       cell.className = "rg-slot-cell" + (berry ? " is-filled" : "");
       cell.dataset.index = String(index);
       cell.setAttribute("aria-label", "Row " + (row + 1) + ", column " + (column + 1) + ": " + (berry ? berryNames[berry] : "blank"));
+      cell.setAttribute("role", "img");
       const cellIndex = document.createElement("span");
       cellIndex.className = "rg-slot-cell-index";
       cellIndex.textContent = String(index + 1).padStart(2, "0");
@@ -860,53 +860,62 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
         image.draggable = false;
         cell.append(image);
       }
-      cell.addEventListener("click", () => applyGridAction(index));
       board.append(cell);
     });
     updateGridStatus();
-  }
-
-  function applyGridAction(index) {
-    if (placementMode === "blank") slotGrid[index] = null;
-    else if (placementMode === "row") {
-      const start = Math.floor(index / 5) * 5;
-      for (let offset = 0; offset < 5; offset += 1) slotGrid[start + offset] = selectedBerry;
-    } else {
-      const column = index % 5;
-      for (let row = 0; row < 3; row += 1) slotGrid[row * 5 + column] = selectedBerry;
-    }
-    persistGrid();
-    renderGrid();
-    $("[data-index='" + index + "']", $("#rg-slot-board"))?.focus();
-    const changed = placementMode === "blank" ? "Square cleared." : "Selected berry placed in the " + placementMode + ".";
-    $("#rg-arcade-status").textContent = changed;
   }
 
   $$("[data-berry]").forEach((button) => button.addEventListener("click", () => {
     selectedBerry = button.dataset.berry;
     $$("[data-berry]").forEach((choice) => choice.setAttribute("aria-pressed", String(choice === button)));
     updateGridStatus();
+    publishSlotSettings();
   }));
   $$("[data-placement]").forEach((button) => button.addEventListener("click", () => {
     placementMode = button.dataset.placement;
     $$("[data-placement]").forEach((choice) => choice.setAttribute("aria-pressed", String(choice === button)));
     updateGridStatus();
+    publishSlotSettings();
   }));
   $("#rg-slot-clear").addEventListener("click", () => {
     slotGrid = Array(gridSize).fill(null);
     persistGrid();
     renderGrid();
-    $("#rg-arcade-status").textContent = "The slot menu grid is clear.";
+    $("#rg-arcade-status").textContent = "Slot board reset.";
+  });
+  window.addEventListener("rg:slot-grid-updated", (event) => {
+    const next = event.detail?.grid;
+    if (!Array.isArray(next)) return;
+    slotGrid = next.slice(0, gridSize).map((value) => Object.hasOwn(berryNames, value) ? value : null);
+    renderGrid();
+  });
+  window.addEventListener("storage", (event) => {
+    if (event.key !== GRID_KEY) return;
+    slotGrid = loadGrid();
+    renderGrid();
   });
   renderGrid();
+  publishSlotSettings();
 
   $("#rg-spin-wheel").addEventListener("click", () => window.dispatchEvent(new CustomEvent("rg:spin-wheel")));
-  $("#rg-pull-slots").addEventListener("click", () => window.dispatchEvent(new CustomEvent("rg:pull-slots")));
   window.addEventListener("rg:turn-start", (event) => {
     $("#rg-arcade-status").textContent = event.detail?.machine === "wheel" ? "The wheel is spinning..." : "The slot lever is moving...";
   });
   window.addEventListener("rg:turn-finish", (event) => {
     $("#rg-arcade-status").textContent = event.detail?.prompt || "No questions in the bank. Add some in the Trivia tab.";
+  });
+  window.addEventListener("rg:slot-action-start", () => {
+    $("#rg-slot-clear").disabled = true;
+    $("#rg-arcade-status").textContent = "Reels spinning...";
+  });
+  window.addEventListener("rg:slot-action-finish", (event) => {
+    $("#rg-slot-clear").disabled = false;
+    const totals = event.detail?.totals || {};
+    const scored = Object.entries(totals).filter(([, amount]) => amount > 0)
+      .map(([name, amount]) => name.toUpperCase() + " +" + Number(amount).toLocaleString());
+    $("#rg-arcade-status").textContent = scored.length
+      ? scored.join(" - ")
+      : event.detail?.reason === "no-eligible-cell" ? "No open spot in that line." : "No pattern.";
   });
 
   exportButton.addEventListener("click", async () => {
