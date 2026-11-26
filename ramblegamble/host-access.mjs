@@ -20,7 +20,7 @@ let promptOpen=false;
 let access, booted=false, bootPromise=null, busy=false, locked=true, inertBefore=new Map();
 const isConsole=location.pathname.replace(/\/$/,'').endsWith('/console');
 const appModules=isConsole? ['/rg/console/console.js?v=match-number-20261127-v1'] : [
-  '/ramblegamble/ramblegamble.js?v=fugi-stable-20261127-v1',
+  '/ramblegamble/ramblegamble.js?v=crowd-mist-20261127-v1',
   '/ramblegamble/dice-mode.js?v=theatre-20261127-v1',
   '/ramblegamble/trivia-ui.js?v=all-curtain-20261127-v1',
   '/ramblegamble/card-games-ui.js?v=shop-motion-20261127-v1',

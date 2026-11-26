@@ -3,12 +3,12 @@ import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state
 import { createCharacterOcclusion } from "./character-occlusion.mjs?v=fugi-stable-20261127-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
-import { createAudienceRenderer } from "./audience-render.mjs?v=shop-motion-20261127-v1";
+import { createAudienceRenderer } from "./audience-render.mjs?v=crowd-mist-20261127-v1";
 import { createShowFX } from "./show-fx.mjs?v=freecam-depth-20261127-v1";
 import { CHARACTER_SOURCE_SIZE, CHARACTER_YAW_LIMIT, characterYaw, standingCharacterPose, projectCharacterQuad, pointInCharacterQuad } from "./character-billboards.mjs?v=fugi-stable-20261127-v1";
 import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
-import { createExteriorMist } from "./exterior-mist.mjs?v=exterior-mist-20261126-v1";
+import { createExteriorMist } from "./exterior-mist.mjs?v=crowd-mist-20261127-v1";
 import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=standing-characters-20261127-v1";
 import { foley } from "./game-foley.mjs?v=theatre-20261127-v1";
 import {
@@ -2727,7 +2727,7 @@ import {
     preview.classList.toggle("is-trivia",!cameraDetached && currentView.kind === "trivia");
     if (triviaLayer) triviaLayer.hidden = !(gameStarted && !pauseMenuOpen && !diceModeOpen && sceneReady && !cameraTransition && !cameraDetached && currentView.kind === "trivia" && triviaLayer.dataset.ready === "true");
     updateCardTableProjection();
-    exteriorMist?.update(time, reducedMotion.matches);
+    exteriorMist?.update(time, reducedMotion.matches, camera);
     if (slotWinCelebration) {
       if (!canShowSlotCelebration() || (reducedMotion.matches && !slotWinCelebration.animation.reduced)) endSlotCelebration(false);
       else if (isSlotWinFinished(slotWinCelebration.animation, time)) endSlotCelebration();

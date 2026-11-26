@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { AUDIENCE_KEY,AUDIENCE_MIN,AUDIENCE_MODES,createAudienceState,readAudienceMode,writeAudienceMode } from './audience-state.mjs';
-import { CROWD_FPS,CROWD_SECTIONS,crowdPeople,crowdPose,crowdDancePose,paintCrowd } from './audience-render.mjs';
+import { CROWD_FPS,CROWD_SECTIONS,CROWD_BOUNDARY,CROWD_FADE_WIDTH,crowdEdgeAlpha,makeCrowdEdgeMask,applyCrowdEdgeMask,crowdPeople,crowdPose,crowdDancePose,paintCrowd } from './audience-render.mjs';
 import { parsePointsCommand } from './points-commands.mjs';
 import { commandSuggestions,applyCommandSuggestion } from './console-completion.mjs';
 
@@ -58,7 +58,7 @@ test('about half the audience forms deterministic adjacent pairs with synchroniz
     }
   }}
  }
- assert.equal(total,386);assert.equal(dancers,194);
+ assert.equal(total,399);assert.equal(dancers,200);
 });
 test('only the cheer painter uses paired dance; all other emotions retain exactly their old geometry',()=>{
  const people=crowdPeople(396,19),old=people.map(({dance,...p})=>p);
@@ -67,4 +67,36 @@ test('only the cheer painter uses paired dance; all other emotions retain exactl
  assert.notDeepEqual(capture(people,0,'cheer'),capture(old,0,'cheer'));
  assert.notDeepEqual(capture(people,0,'cheer'),capture(people,1,'cheer'));
  assert.deepEqual(capture(people,0,'cheer'),capture(people,0,'cheer'));
+});
+
+
+test('rear and side panels meet exactly with no overlap; feather only exposed front ends',()=>{
+ const [rear,left,right]=CROWD_SECTIONS;
+ const point=(p,u)=>[p.x+(u-.5)*p.width*Math.cos(p.yaw),p.z-(u-.5)*p.width*Math.sin(p.yaw)];
+ const near=(a,b)=>assert.ok(Math.hypot(a[0]-b[0],a[1]-b[1])<1e-12);
+ near(point(rear,1),point(left,0));near(point(rear,0),point(right,1));
+ near(point(left,1),[CROWD_BOUNDARY.left,CROWD_BOUNDARY.front]);near(point(right,0),[CROWD_BOUNDARY.right,CROWD_BOUNDARY.front]);
+ for(let i=0;i<=100;i++)assert.equal(crowdEdgeAlpha(rear,i/100),1);
+ for(const p of [left,right]){
+  const u=d=>p.fade==='left'?d/p.width:1-d/p.width;
+  assert.equal(crowdEdgeAlpha(p,u(0)),0);
+  assert.ok(Math.abs(crowdEdgeAlpha(p,u(CROWD_FADE_WIDTH/2))-.5)<1e-12);
+  assert.equal(crowdEdgeAlpha(p,u(CROWD_FADE_WIDTH)),1);
+  let old=0;for(let i=0;i<=1000;i++){const v=crowdEdgeAlpha(p,u(p.width*i/1000));assert.ok(v>=old-1e-12&&v<=1);old=v;}
+ }
+});
+
+test('edge mask is cached, monotonic and isolated from normal crowd painting',()=>{
+ const calls=[],stops=[];const ctx={createLinearGradient(...args){calls.push(args);return {addColorStop(u,color){stops.push([u,color]);}};},save(){calls.push('save');},restore(){calls.push('restore');},fillRect(...args){calls.push([this.globalCompositeOperation,...args]);}};
+ assert.equal(makeCrowdEdgeMask(ctx,411,CROWD_SECTIONS[0]),null);assert.equal(calls.length,0);
+ for(const section of CROWD_SECTIONS.slice(1)){
+  stops.length=0;calls.length=0;const mask=makeCrowdEdgeMask(ctx,305,section);
+  assert.equal(stops.length,17);assert.ok(stops.every(([u])=>u>=0&&u<=1));assert.ok(stops.every(([u],i)=>i===0||u>stops[i-1][0]));
+  const alpha=stops.map(([,c])=>Number(c.slice(c.lastIndexOf(',')+1,-1)));
+  assert.ok(alpha.every((a,i)=>i===0||(section.fade==='left'?a>=alpha[i-1]:a<=alpha[i-1])));
+  assert.ok(Math.abs(alpha[section.fade==='left'?0:16])<1e-12);
+  assert.ok(Math.abs(alpha[section.fade==='left'?16:0]-1)<1e-12);
+  applyCrowdEdgeMask(ctx,305,180,mask);applyCrowdEdgeMask(ctx,305,180,mask);
+  assert.deepEqual(calls,[[0,0,305,0],'save',['destination-in',0,0,305,180],'restore','save',['destination-in',0,0,305,180],'restore']);
+ }
 });

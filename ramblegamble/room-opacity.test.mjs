@@ -46,7 +46,7 @@ const THREE={Group,Mesh,InstancedMesh,Object3D,Box3,Color,Vector3:Vector,CanvasT
 
 test('all three crowd panels blend at 70 percent opacity without writing transparent depth',()=>{
   const old=globalThis.document;
-  const ctx=new Proxy({}, {get:()=>()=>{}});
+  const ctx=new Proxy({}, {get:(o,k)=>k==='createLinearGradient'?()=>({addColorStop(){}}):()=>{}});
   globalThis.document={createElement:()=>({getContext:()=>ctx})};
   try{
     const audience=createAudienceRenderer(THREE,new Group());

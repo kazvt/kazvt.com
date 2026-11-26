@@ -5,6 +5,13 @@ export const MIST_CLEAR = Object.freeze({ minX: -2.8, maxX: 18.2, minZ: -7.6, ma
 export const MIST_DISTANCE = 6;
 export const MIST_EXTENT = 400;
 export const MIST_FADE = Object.freeze({ start: 65, end: 125 });
+// The stage has an eave at y=3.9624 and an upper wall at y=7.0104.
+// Keep the eave bank outside the playable envelope; the higher bank can
+// drift over the roof as it is above all authored stage geometry.
+export const UPPER_MIST_LAYERS=Object.freeze([
+  Object.freeze({y:4.12,exteriorOnly:1,opacity:.29,seed:17.2}),
+  Object.freeze({y:7.16,exteriorOnly:0,opacity:.36,seed:41.7}),
+]);
 const smooth = (a,b,x) => { const t=Math.max(0,Math.min(1,(x-a)/(b-a))); return t*t*(3-2*t); };
 export function mistDistance(x,z) {
   return Math.hypot(Math.max(MIST_CLEAR.minX-x,0,x-MIST_CLEAR.maxX), Math.max(MIST_CLEAR.minZ-z,0,z-MIST_CLEAR.maxZ));
@@ -108,6 +115,29 @@ export const CLOUD_FRAGMENT = `${MIST_COMMON}
     #include <colorspace_fragment>
   }
 `;
+export const UPPER_CLOUD_FRAGMENT = `${MIST_COMMON}
+  uniform float uExteriorOnly;
+  uniform float uOpacity;
+  uniform float uSeed;
+  void main() {
+    float fade=horizonMist();
+    float edge=mix(1.0,boundaryMist(vMistWorld.xz),uExteriorOnly);
+    if(edge<=0.0||fade<=0.0)discard;
+    vec2 p=vMistWorld.xz*vec2(.23,.31)+vec2(uSeed,-uSeed*.71);
+    p+=vec2(uTime*.046,-uTime*.032);
+    float cloud=cloudMist(p);
+    float density=smoothstep(.24,.76,cloud);
+    float farFade=1.0-smoothstep(22.0,${gl(MIST_FADE.start)},length(vMistWorld-cameraPosition));
+    // Fade near grazing angles to avoid a bright hard line when freecam
+    // passes through one of the thin sheets.
+    vec3 ray=vMistWorld-cameraPosition;
+    float angleFade=smoothstep(.012,.075,abs(ray.y)/max(length(ray),.001));
+    float alpha=edge*fade*farFade*angleFade*uOpacity*density;
+    if(alpha<=.001)discard;
+    gl_FragColor=vec4(mix(uDark,uLight,density),alpha);
+    #include <colorspace_fragment>
+  }
+`;
 function makeQuad(THREE,y,uvAt) {
   const corners=[[-MIST_EXTENT,-MIST_EXTENT],[-MIST_EXTENT,MIST_EXTENT],[MIST_EXTENT,MIST_EXTENT],[MIST_EXTENT,-MIST_EXTENT]];
   const geometry=new THREE.BufferGeometry();
@@ -141,8 +171,23 @@ export function createExteriorMist({THREE,scene,stage,horizonColor}) {
   const cloudMaterial=new THREE.ShaderMaterial({uniforms:common,vertexShader:MIST_VERTEX,fragmentShader:CLOUD_FRAGMENT,transparent:true,depthTest:true,depthWrite:false,toneMapped:false,side:THREE.DoubleSide,forceSinglePass:true});
   const clouds=new THREE.Mesh(makeQuad(THREE,.12,()=>[0,0]),cloudMaterial);
   clouds.name='rg-low-exterior-clouds'; clouds.renderOrder=-9995;
+  const upper=UPPER_MIST_LAYERS.map((layer,i)=>{
+    const material=new THREE.ShaderMaterial({uniforms:{...common,uExteriorOnly:{value:layer.exteriorOnly},uOpacity:{value:layer.opacity},uSeed:{value:layer.seed}},vertexShader:MIST_VERTEX,fragmentShader:UPPER_CLOUD_FRAGMENT,transparent:true,depthTest:true,depthWrite:false,toneMapped:false,side:THREE.DoubleSide,forceSinglePass:true});
+    const sheet=new THREE.Mesh(makeQuad(THREE,layer.y,()=>[0,0]),material);
+    sheet.name=i===0?'rg-eave-exterior-clouds':'rg-rooftop-clouds';
+    // From the normal room camera the high banks are behind the audience.
+    sheet.renderOrder=-9993-i;
+    return sheet;
+  });
   // Explicit picking lists are used by the arcade; these surfaces are decorative.
-  ground.raycast=clouds.raycast=()=>{};
-  group.add(ground,clouds); scene.add(group); mesh.visible=false;
-  return {group,update(time,reducedMotion){if(group.visible)clock.value=reducedMotion?0:time*.001;},dispose(){scene.remove(group);ground.geometry.dispose();clouds.geometry.dispose();groundMaterial.dispose();cloudMaterial.dispose();mesh.visible=true;}};
+  const surfaces=[ground,clouds,...upper];
+  for(const surface of surfaces)surface.raycast=()=>{};
+  group.add(...surfaces);scene.add(group);mesh.visible=false;
+  return {group,update(time,reducedMotion,camera){
+    if(!group.visible)return;
+    clock.value=reducedMotion?0:time*.001;
+    // When freecam looks down from above, blend the near upper bank after
+    // the lower transparent layers rather than overpainting it with crowd.
+    for(let i=0;i<upper.length;i++)upper[i].renderOrder=camera?.position.y>UPPER_MIST_LAYERS[i].y?10+i:-9993-i;
+  },dispose(){scene.remove(group);for(const surface of surfaces){surface.geometry.dispose();surface.material.dispose();}mesh.visible=true;}};
 }

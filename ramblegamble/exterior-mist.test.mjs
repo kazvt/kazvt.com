@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { rouletteRecessCenter } from "./arcade-framing.mjs";
 import {readFileSync} from 'node:fs';
-import { EXTERIOR_FLOOR, MIST_CLEAR, MIST_DISTANCE, MIST_EXTENT, MIST_FADE, mistDistance, mistCoverage, isExteriorFloor, floorUvTransform, createExteriorMist, FLOOR_FRAGMENT, CLOUD_FRAGMENT } from './exterior-mist.mjs';
+import { EXTERIOR_FLOOR, MIST_CLEAR, MIST_DISTANCE, MIST_EXTENT, MIST_FADE, mistDistance, mistCoverage, isExteriorFloor, floorUvTransform, createExteriorMist, FLOOR_FRAGMENT, CLOUD_FRAGMENT, UPPER_MIST_LAYERS, UPPER_CLOUD_FRAGMENT } from './exterior-mist.mjs';
 const model=JSON.parse(readFileSync(new URL('./assets/provided/rg_stage.gltf',import.meta.url),'utf8'));
 const buffers=model.buffers.map(b=>Buffer.from(b.uri.split(',')[1],'base64'));
 function accessor(i) {
@@ -47,10 +47,26 @@ test('mist lifecycle preserves texture and original geometry, supports reduced m
  const {points,uvs}=findQuad()[0];const geometry=new Geo();geometry.index={count:6,getX:i=>i};geometry.attributes={position:{values:points.map(p=>[p.x,p.y,p.z])},uv:{values:uvs.map(p=>[p.x,p.y,0])}};
  const original=new Mesh(geometry,{map:{name:'checker'},color:new Color('#fff')});const scene=new Group();const stage={visible:true,updateWorldMatrix(){},traverse(cb){cb(original);}};
  const mist=createExteriorMist({THREE,scene,stage,horizonColor:'#865fd0'});assert.ok(mist);assert.equal(original.visible,false);assert.equal(original.geometry,geometry);
- const [ground,clouds]=mist.group.children;assert.equal(ground.material.uniforms.uChecker.value,original.material.map);assert.equal(ground.material.depthWrite,true);assert.equal(clouds.material.depthWrite,false);assert.ok(ground.renderOrder<clouds.renderOrder);assert.equal(ground.material.depthTest,true);assert.equal(clouds.material.depthTest,true);assert.equal(ground.raycast(),undefined);
+ const [ground,clouds,...upper]=mist.group.children;assert.equal(upper.length,2);assert.equal(ground.material.uniforms.uChecker.value,original.material.map);assert.equal(ground.material.depthWrite,true);assert.equal(clouds.material.depthWrite,false);assert.ok(ground.renderOrder<clouds.renderOrder);assert.equal(ground.material.depthTest,true);assert.equal(clouds.material.depthTest,true);assert.equal(ground.raycast(),undefined);
+ for(let i=0;i<upper.length;i++){
+ const sheet=upper[i],layer=UPPER_MIST_LAYERS[i];assert.equal(sheet.material.uniforms.uOpacity.value,layer.opacity);assert.equal(sheet.material.uniforms.uExteriorOnly.value,layer.exteriorOnly);assert.equal(sheet.material.depthTest,true);assert.equal(sheet.material.depthWrite,false);assert.equal(sheet.material.side,THREE.DoubleSide);assert.equal(sheet.raycast(),undefined);assert.ok(sheet.geometry.attributes.position.values.filter((_,j)=>j%3===1).every(y=>y===layer.y));assert.equal(sheet.material.uniforms.uTime,ground.material.uniforms.uTime);
+ }
+ mist.update(1000,false,{position:{y:2}});assert.ok(upper.every(s=>s.renderOrder<0));assert.ok(upper[1].renderOrder<upper[0].renderOrder);mist.update(1000,false,{position:{y:5}});assert.ok(upper[0].renderOrder>0&&upper[1].renderOrder<0);mist.update(1000,false,{position:{y:10}});assert.ok(upper.every(s=>s.renderOrder>0));assert.ok(upper[0].renderOrder<upper[1].renderOrder);
  mist.update(1234,false);assert.equal(ground.material.uniforms.uTime.value,1.234);mist.update(5678,true);assert.equal(clouds.material.uniforms.uTime.value,0);mist.group.visible=false;mist.update(9999,false);assert.equal(ground.material.uniforms.uTime.value,0);
- mist.dispose();assert.equal(original.visible,true);assert.equal(scene.children.length,0);assert.ok(ground.geometry.disposed&&clouds.geometry.disposed&&ground.material.disposed&&clouds.material.disposed);assert.equal(original.geometry.disposed,undefined);
+ mist.dispose();assert.equal(original.visible,true);assert.equal(scene.children.length,0);assert.ok([ground,clouds,...upper].every(s=>s.geometry.disposed&&s.material.disposed));assert.equal(original.geometry.disposed,undefined);
 });
 test('scene wires mist into boot, pause, Dice visibility, animation and cleanup without scene-wide fog',()=>{
- const js=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');assert.match(js,/liquidPortal\.preload\(\);\s*\}\s*exteriorMist = createExteriorMist/);assert.match(js,/exteriorMist\?\.update\(time, reducedMotion.matches\)/);assert.equal((js.match(/\[stageModel, rouletteRig, slotRig, exteriorMist\?\.group, audience\?\.group, showFX\?\.group, stageShow\?\.group\]/g)||[]).length,2);assert.match(js,/exteriorMist\?\.dispose\(\)/);assert.doesNotMatch(js,/scene\.fog\s*=/);assert.match(FLOOR_FRAGMENT,/mix\(tile,haze,mask\)/);assert.match(CLOUD_FRAGMENT,/if\(edge<=0.0\|\|fade<=0.0\)discard/);
+ const js=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');assert.match(js,/liquidPortal\.preload\(\);\s*\}\s*exteriorMist = createExteriorMist/);assert.match(js,/exteriorMist\?\.update\(time, reducedMotion.matches, camera\)/);assert.equal((js.match(/\[stageModel, rouletteRig, slotRig, exteriorMist\?\.group, audience\?\.group, showFX\?\.group, stageShow\?\.group\]/g)||[]).length,2);assert.match(js,/exteriorMist\?\.dispose\(\)/);assert.doesNotMatch(js,/scene\.fog\s*=/);assert.match(FLOOR_FRAGMENT,/mix\(tile,haze,mask\)/);assert.match(CLOUD_FRAGMENT,/if\(edge<=0.0\|\|fade<=0.0\)discard/);
+});
+
+test('upper fog banks respect the actual model eave and top and preserve depth and horizon fades',()=>{
+ const node=model.nodes[0];const vertices=model.meshes[node.mesh].primitives.flatMap(p=>{const points=accessor(p.attributes.POSITION);return accessor(p.indices).flat().map(i=>transform(points[i],node));});
+ const roof=Math.max(...vertices.map(v=>v.y));
+ assert.ok(Math.abs(roof-7.0104)<.001);
+ assert.ok(vertices.some(v=>Math.abs(v.y-3.9624)<.001));
+ assert.ok(UPPER_MIST_LAYERS[0].y>3.9624&&UPPER_MIST_LAYERS[0].y<roof);
+ assert.ok(UPPER_MIST_LAYERS[1].y>roof);
+ assert.equal(UPPER_MIST_LAYERS[0].exteriorOnly,1);assert.equal(UPPER_MIST_LAYERS[1].exteriorOnly,0);
+ assert.match(UPPER_CLOUD_FRAGMENT,/mix\(1.0,boundaryMist\(vMistWorld.xz\),uExteriorOnly\)/);
+ assert.match(UPPER_CLOUD_FRAGMENT,/horizonMist\(\)/);assert.match(UPPER_CLOUD_FRAGMENT,/angleFade/);
 });

@@ -1,11 +1,42 @@
 // Original low-resolution silhouette art, three world-space cutout texture panels.
 // Only these canvases update at 6 fps; the rest of the scene renders normally.
 export const CROWD_FPS=6;
+// Three inward-facing panels share exact world-space corner coordinates.
+// Local +X points toward -Z on the left panel and +Z on the right panel.
+export const CROWD_BOUNDARY=Object.freeze({left:-1.85,right:16.85,front:-.45,back:13.4});
+export const CROWD_FADE_WIDTH=2.5;
+const {left,right,front,back}=CROWD_BOUNDARY;
 export const CROWD_SECTIONS=Object.freeze([
-  {x:7.5,z:13.4,width:18,yaw:Math.PI,seed:19},
-  {x:-1.85,z:6.2,width:13.3,yaw:Math.PI/2,seed:31},
-  {x:16.85,z:6.2,width:13.3,yaw:-Math.PI/2,seed:47},
+  Object.freeze({x:(left+right)/2,z:back,width:right-left,yaw:Math.PI,seed:19,fade:null}),
+  Object.freeze({x:left,z:(front+back)/2,width:back-front,yaw:Math.PI/2,seed:31,fade:'right'}),
+  Object.freeze({x:right,z:(front+back)/2,width:back-front,yaw:-Math.PI/2,seed:47,fade:'left'}),
 ]);
+export function crowdEdgeAlpha(section,u) {
+  if(!section.fade)return 1;
+  const distance=(section.fade==='left'?u:1-u)*section.width;
+  const t=Math.max(0,Math.min(1,distance/CROWD_FADE_WIDTH));
+  return t*t*(3-2*t);
+}
+// Cache the mask gradient once, then apply it to the completed silhouette
+// texture (including the base shadow) without changing its RGB or animation.
+export function makeCrowdEdgeMask(ctx,width,section) {
+  if(!section.fade)return null;
+  const gradient=ctx.createLinearGradient(0,0,width,0);
+  const fraction=Math.min(1,CROWD_FADE_WIDTH/section.width);
+  const count=16;
+  for(let i=0;i<=count;i++){
+    const u=section.fade==='left'?fraction*i/count:1-fraction+fraction*i/count;
+    gradient.addColorStop(u,`rgba(255,255,255,${crowdEdgeAlpha(section,u)})`);
+  }
+  // Canvas extends the first/last stop across the untouched portion.
+  return gradient;
+}
+export function applyCrowdEdgeMask(ctx,width,height,mask) {
+  if(!mask)return;
+  ctx.save();
+  ctx.globalCompositeOperation='destination-in';ctx.fillStyle=mask;
+  ctx.fillRect(0,0,width,height);ctx.restore();
+}
 export function crowdPeople(width,seed) {
   let s=seed;const rand=()=>((s=(Math.imul(s,1664525)+1013904223)>>>0)/4294967296);
   const people=[];
@@ -95,11 +126,12 @@ export function createAudienceRenderer(THREE,scene) {
   const panels=CROWD_SECTIONS.map(section=>{
     const canvas=document.createElement('canvas');canvas.width=Math.round(section.width*22);canvas.height=180;
     const ctx=canvas.getContext('2d'); const people=crowdPeople(canvas.width,section.seed);
+    const mask=makeCrowdEdgeMask(ctx,canvas.width,section);
     const tex=new THREE.CanvasTexture(canvas);tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestFilter;tex.generateMipmaps=false;tex.colorSpace=THREE.SRGBColorSpace;
     const mesh=new THREE.Mesh(new THREE.PlaneGeometry(section.width,4.3),new THREE.MeshBasicMaterial({map:tex,transparent:true,opacity:.7,alphaTest:.001,depthWrite:false,side:THREE.FrontSide,toneMapped:false,fog:false}));
     mesh.position.set(section.x,1.525,section.z);mesh.rotation.y=section.yaw;group.add(mesh);
-    return {ctx,canvas,people,tex,mesh};
+    return {ctx,canvas,people,tex,mesh,mask};
   });
   let oldFrame=-1, oldEmotion='';
-  return {group,dispose(){scene.remove(group);for(const p of panels){p.tex.dispose();p.mesh.geometry.dispose();p.mesh.material.dispose();}},update(time,emotion,reduced=false){if(!group.visible)return;const frame=reduced?0:Math.floor(time*CROWD_FPS/1000);if(frame===oldFrame&&emotion===oldEmotion)return;oldFrame=frame;oldEmotion=emotion;for(const p of panels){paintCrowd(p.ctx,p.canvas.width,p.canvas.height,p.people,frame,emotion);p.tex.needsUpdate=true;}}};
+  return {group,dispose(){scene.remove(group);for(const p of panels){p.tex.dispose();p.mesh.geometry.dispose();p.mesh.material.dispose();}},update(time,emotion,reduced=false){if(!group.visible)return;const frame=reduced?0:Math.floor(time*CROWD_FPS/1000);if(frame===oldFrame&&emotion===oldEmotion)return;oldFrame=frame;oldEmotion=emotion;for(const p of panels){paintCrowd(p.ctx,p.canvas.width,p.canvas.height,p.people,frame,emotion);applyCrowdEdgeMask(p.ctx,p.canvas.width,p.canvas.height,p.mask);p.tex.needsUpdate=true;}}};
 }
