@@ -15,9 +15,11 @@ import {
   LIQUID_PORTAL_WIDTH,
 } from "./liquid-portal.mjs?v=liquid-door-portal-20261120-v1";
 import {
+  createSlotRowMotion,
   createSlotReelMotion,
   normalizeSlotGrid,
   sampleSlotReelColumn,
+  sampleSlotReelRow,
   SLOT_REEL_WILDCARD,
   slotCellIndexAtUv,
   slotScreenPoint,
@@ -148,6 +150,7 @@ import {
   let slotReelMotion = null;
   let slotWildcardPop = null;
   let lastSlotTravelRows = Object.create(null);
+  let lastSlotTravelColumns = Object.create(null);
   let slotReelGrid = normalizeSlotGrid(null);
   let slotReelCanvas = null;
   let slotReelContext = null;
@@ -457,6 +460,29 @@ import {
       }
       context.restore();
     }
+
+    for (const motionRow of slotReelMotion?.rows || []) {
+      const frame = sampleSlotReelRow(motionRow, slotReelMotion, time);
+      if (!frame) continue;
+      const rowTop = motionRow.row * cellHeight;
+      context.save();
+      context.beginPath();
+      context.rect(0, rowTop, slotReelCanvas.width, cellHeight);
+      context.clip();
+      context.clearRect(0, rowTop, slotReelCanvas.width, cellHeight);
+      if (frame.symbols) {
+        frame.symbols.forEach((symbol, column) => drawSlotSymbol(column, motionRow.row, symbol));
+      } else {
+        const wholeColumns = Math.floor(frame.offset);
+        const fractionalColumn = frame.offset - wholeColumns;
+        for (let column = 0; column <= SLOT_REEL_COLUMNS; column += 1) {
+          const symbol = motionRow.strip[wholeColumns + column] || null;
+          drawSlotSymbol(column, motionRow.row, symbol, -fractionalColumn * cellWidth);
+        }
+      }
+      context.restore();
+    }
+
     context.save();
     context.strokeStyle = "rgba(255, 242, 155, 0.62)";
     context.lineWidth = 3;
@@ -641,21 +667,26 @@ import {
     window.dispatchEvent(new CustomEvent("rg:slot-grid-updated", { detail: { grid: slotReelGrid.slice() } }));
   }
 
-  function startSlotAction(targetGrid, columns, { pullCrank = false, kind = "spin" } = {}) {
+  function startSlotAction(targetGrid, columns, { rows = [], pullCrank = false, kind = "spin" } = {}) {
     if (playing || slotReelMotion) return false;
     const startedAt = performance.now();
     const startingGrid = readSavedSlotGrid();
     const settledGrid = normalizeSlotGrid(targetGrid);
-    slotReelMotion = createSlotReelMotion(startingGrid, columns, {
+    const motionOptions = {
       targetGrid: settledGrid,
       startedAt,
       duration: reducedMotion.matches ? 520 : 1950,
       stagger: reducedMotion.matches ? 55 : 120,
       reducedMotion: reducedMotion.matches,
       previousSpinRows: lastSlotTravelRows,
-    });
+      previousSpinColumns: lastSlotTravelColumns,
+    };
+    slotReelMotion = rows.length
+      ? createSlotRowMotion(startingGrid, rows, motionOptions)
+      : createSlotReelMotion(startingGrid, columns, motionOptions);
     if (!slotReelMotion) return false;
     for (const column of slotReelMotion.columns) lastSlotTravelRows[column.column] = column.travelRows;
+    for (const row of slotReelMotion.rows || []) lastSlotTravelColumns[row.row] = row.travelColumns;
     slotReelMotion.action = kind;
     playing = true;
     preview.classList.add("is-playing");
@@ -684,7 +715,10 @@ import {
       window.dispatchEvent(new CustomEvent("rg:slot-action-finish", { detail: { reason: "no-eligible-cell", totals: {} } }));
       return false;
     }
-    return startSlotAction(placement.grid, [placement.placedIndex % 5], { kind: "place" });
+    return startSlotAction(placement.grid, axis === "column" ? [placement.placedIndex % 5] : [], {
+      rows: axis === "row" ? [Math.floor(placement.placedIndex / 5)] : [],
+      kind: "place",
+    });
   }
 
   function placeSlotWildcardAtCell(index) {
@@ -2505,10 +2539,13 @@ import {
 
     if (slotReelMotion) {
       drawSlotReelDisplay(time);
-      const settled = slotReelMotion.columns.every((column) => (
+      const columnsSettled = slotReelMotion.columns.every((column) => (
         !sampleSlotReelColumn(column, slotReelMotion, time)?.spinning
       ));
-      if (settled) {
+      const rowsSettled = (slotReelMotion.rows || []).every((row) => (
+        !sampleSlotReelRow(row, slotReelMotion, time)?.spinning
+      ));
+      if (columnsSettled && rowsSettled) {
         const completedMotion = slotReelMotion;
         slotReelMotion = null;
         finishSlotAction(completedMotion);
