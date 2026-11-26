@@ -8,9 +8,9 @@
     <link rel="canonical" href="https://kazvt.com/rg/">
     <title>Ramble Gamble - kazvt</title>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
-    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=slot-foley-20261126-v3">
-    <link rel="stylesheet" href="/ramblegamble/host-console.css?v=slot-foley-20261126-v3">
-    <link rel="stylesheet" href="/ramblegamble/card-games.css?v=rg-smeemo-secret-repeat-20261126-v4">
+    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=scene-table-20261126-v1">
+    <link rel="stylesheet" href="/ramblegamble/host-console.css?v=scene-table-20261126-v1">
+    <link rel="stylesheet" href="/ramblegamble/card-games.css?v=scene-table-20261126-v1">
     <script type="importmap">
       {
         "imports": {
@@ -20,10 +20,10 @@
         }
       }
     </script>
-    <script type="module" src="/ramblegamble/ramblegamble.js?v=slot-foley-20261126-v3"></script>
-    <script type="module" src="/ramblegamble/dice-mode.js?v=slot-foley-20261126-v3"></script>
-    <script type="module" src="/ramblegamble/trivia-ui.js?v=slot-foley-20261126-v3"></script>
-    <script type="module" src="/ramblegamble/card-games-ui.js?v=slot-foley-20261126-v3"></script>
+    <script type="module" src="/ramblegamble/ramblegamble.js?v=scene-table-20261126-v1"></script>
+    <script type="module" src="/ramblegamble/dice-mode.js?v=scene-table-20261126-v1"></script>
+    <script type="module" src="/ramblegamble/trivia-ui.js?v=scene-table-20261126-v1"></script>
+    <script type="module" src="/ramblegamble/card-games-ui.js?v=scene-table-20261126-v1"></script>
   </head>
   <body class="ramble-page" data-theme="p2">
     <main class="rg-preview" id="rg-preview">
@@ -301,9 +301,16 @@
             <label class="rg-card-deck" data-deck-for="shop">INSTANT CARDS<textarea id="rg-shop-instant" rows="6" placeholder="Lucky Berry [100]"></textarea></label>
           </div>
           <p class="rg-card-admin-note">One entry per line. Shop entries use <code>Name [price]</code>. Lists save in this browser.</p>
+          <div id="rg-card-network" class="rg-card-network">
+              <p>Share one private link per player before starting. Keep this host tab open. New rounds arrive automatically while connected. Never show private invitations on stream.</p>
+              <button type="button" class="rg-secondary-button" data-room-start>START ONLINE ROOM</button>
+              <p data-room-status role="status">Offline invitations ready; start online room for live answers.</p>
+              <div data-room-links></div>
+              <details><summary>Offline fallback — import a private answer packet</summary><p>Use OFFLINE ROUND to send a fresh private round link to each player if live connection fails. Paste the player's returned packet below.</p><textarea data-room-packet aria-label="Private player packet" rows="3"></textarea><button type="button" class="rg-secondary-button" data-room-import>IMPORT ANSWER</button></details>
+            </div>
           <section class="rg-card-private-entry" id="rg-card-private-entry" hidden>
-            <h3>PRIVATE SUBMISSION</h3>
-            <p>Enter each player's answer here; names stay off the audience cards.</p>
+            <h3>MANUAL HOST ENTRY</h3>
+            <p>Fallback: enter a player’s answer manually. Names stay off the audience answers.</p>
             <div class="rg-card-entry-controls">
               <label for="rg-card-player">PLAYER<select id="rg-card-player"><option value="faroe">FAROE</option><option value="erin">ERIN</option><option value="kaz">KAZ</option></select></label>
               <label class="rg-card-answer-choice" id="rg-card-answer-choice" for="rg-card-answer">A-CARD<select id="rg-card-answer"></select></label>

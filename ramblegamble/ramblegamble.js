@@ -29,10 +29,13 @@ import { getSlotEligibleIndexes, placeSlotBerry, placeSlotWildcard, resolveSlotP
 import {
   ROULETTE_BALL_COLOR,
   ROULETTE_BALL_LANDING_RADIUS,
+  ROULETTE_BALL_LANDING_HEIGHT,
+  sampleRouletteBallHeight,
+  alignBallToPocket,
   ROULETTE_BALL_TRACK_RADIUS,
   rouletteBallPositionAtRadius,
   sampleRouletteBallRadius,
-} from "./roulette-ball-motion.mjs?v=roulette-ball-inner-ring-20261125-v2";
+} from "./roulette-ball-motion.mjs?v=scene-table-20261126-v1";
 
 (() => {
   "use strict";
@@ -353,6 +356,7 @@ import {
       ballAngle: ballPositionAtStart ? Math.atan2(ballPositionAtStart.z, ballPositionAtStart.x) : Math.atan2(1, -13),
       ballHeight: ballPositionAtStart?.y ?? -7,
     };
+    wheelMotion.ballTo = alignBallToPocket(wheelMotion.ballTo, wheelMotion.wheelTo, wheelMotion.ballAngle);
   }
 
   function prepareRouletteBall() {
@@ -374,7 +378,10 @@ import {
       return;
     }
     const startingPosition = rouletteBallPositionAtRadius(ballOrbitObject.position, ROULETTE_BALL_LANDING_RADIUS);
-    if (startingPosition) ballOrbitObject.position.set(startingPosition.x, startingPosition.y, startingPosition.z);
+    if (startingPosition) {
+      ballOrbitObject.position.set(startingPosition.x, ROULETTE_BALL_LANDING_HEIGHT, startingPosition.z);
+      if (wheelPivot) ballPivot.rotation.y = alignBallToPocket(ballPivot.rotation.y, wheelPivot.rotation.y, Math.atan2(startingPosition.z, startingPosition.x));
+    }
   }
 
   function startLeverPull() {
@@ -1212,7 +1219,7 @@ import {
     // The roulette interaction is best inspected from above, like looking down
     // at a real table. Keep the room and every other close-up at the authored angle.
     // Preserve the reference's elevated oblique view instead of a near-vertical map view.
-    const elevation = view.kind === "roulette" ? 0.86 : REFERENCE_START_VIEW.elevation;
+    const elevation = view.kind === "roulette" ? 0.86 : view.kind === "card-table" ? 0.72 : REFERENCE_START_VIEW.elevation;
     const horizontal = Math.sqrt(1 - elevation * elevation);
     const direction = new THREE.Vector3(
       Math.sin(yaw) * horizontal,
@@ -1256,7 +1263,7 @@ import {
       )
       : 1;
     distance = Math.max(distance, 1)
-      * (view.kind === "overview" ? 1.14 : 1.18)
+      * (view.kind === "overview" ? 1.14 : view.kind === "card-table" ? 1.12 : 1.18)
       * overviewDistanceScale;
     return { target, position: target.clone().addScaledVector(direction, distance) };
   }
@@ -1298,7 +1305,8 @@ import {
     }
     if (view.kind === "card-table" && cardTableModel) {
       bounds.setFromObject(cardTableModel);
-      return bounds.expandByScalar(0.48);
+      bounds.min.y = Math.max(bounds.min.y, bounds.max.y - 0.14);
+      return bounds.expandByScalar(0.04);
     }
 
     return getArcadeBounds();
@@ -2347,7 +2355,7 @@ import {
 
   window.addEventListener("keydown", (event) => {
     if (event.altKey || event.ctrlKey || event.metaKey) return;
-    if (document.querySelector("dialog[open]")) return;
+    if (document.querySelector("dialog:modal") || (event.target instanceof Element && event.target.closest("dialog[open]"))) return;
     if (event.target instanceof Element && event.target.closest("input, textarea, select, [contenteditable='true']")) return;
     if (!gameStarted || pauseMenuOpen) return;
     const key = event.key.toLowerCase();
@@ -2516,11 +2524,36 @@ import {
     }
   }
 
+  // Screen-facing DOM anchored to the tabletop; the room remains interactive around it.
+  const cardLayer = document.getElementById("rg-card-games-layer");
+  let cardTableBounds = null;
+  function updateCardTableProjection() {
+    if (!cardLayer) return;
+    const active = gameStarted && !pauseMenuOpen && !diceModeOpen && currentView.kind === "card-table" && cardTableModel;
+    cardLayer.classList.toggle("is-off-table", !active);
+    if (!active || cardLayer.hidden) return;
+    cardTableBounds ||= new THREE.Box3().setFromObject(cardTableModel);
+    const center = cardTableBounds.getCenter(new THREE.Vector3());
+    center.y = cardTableBounds.max.y;
+    center.project(camera);
+    const width = preview.clientWidth, height = preview.clientHeight;
+    if (!width || !height) return;
+    // Clamp for narrow screens and large/long responses; use a screen-facing overlay,
+    // not a perspective-warped texture, so text and pointer targets remain readable.
+    const shell = cardLayer.firstElementChild;
+    shell?.classList.toggle("is-scrollable", shell.scrollHeight > shell.clientHeight + 1);
+    const halfWidth = Math.min(width / 2, (shell?.offsetWidth || width) / 2 + 4);
+    const halfHeight = Math.min(height / 2, (shell?.offsetHeight || height) / 2 + 4);
+    cardLayer.style.setProperty("--table-x", `${Math.max(halfWidth, Math.min(width - halfWidth, (center.x + 1) * width / 2))}px`);
+    cardLayer.style.setProperty("--table-y", `${Math.max(halfHeight, Math.min(height - halfHeight, (1 - center.y) * height / 2))}px`);
+  }
+
   function animate(time) {
     animationFrame = requestAnimationFrame(animate);
     if (!renderer || !scene || !camera) return;
 
     updateCameraTransition(time);
+    updateCardTableProjection();
     updateSkyAnimations(time);
     if (diceModeOpen) {
       renderer.render(scene, camera);
@@ -2545,7 +2578,7 @@ import {
         const radius = sampleRouletteBallRadius(progress, wheelMotion.ballRadiusFrom);
         const position = rouletteBallPositionAtRadius({
           x: Math.cos(wheelMotion.ballAngle),
-          y: wheelMotion.ballHeight,
+          y: sampleRouletteBallHeight(progress, wheelMotion.ballHeight),
           z: Math.sin(wheelMotion.ballAngle),
         }, radius);
         if (position) ballOrbitObject.position.set(position.x, position.y, position.z);
@@ -2555,7 +2588,7 @@ import {
         ballPivot.rotation.y = wheelMotion.ballTo;
         if (ballOrbitObject) {
           const landingPosition = rouletteBallPositionAtRadius(ballOrbitObject.position, ROULETTE_BALL_LANDING_RADIUS);
-          if (landingPosition) ballOrbitObject.position.set(landingPosition.x, landingPosition.y, landingPosition.z);
+          if (landingPosition) ballOrbitObject.position.set(landingPosition.x, ROULETTE_BALL_LANDING_HEIGHT, landingPosition.z);
         }
         wheelMotion = null;
         finishTurn();
@@ -2568,7 +2601,8 @@ import {
     if (leverMotion && lever) {
       const progress = Math.min(1, (time - leverMotion.started) / leverMotion.duration);
       lever.quaternion.copy(leverMotion.baseQuaternion);
-      lever.rotateX(-Math.sin(progress * Math.PI) * 0.92);
+      // The cabinet and authored arm each turn ~180° about Y; +local X pulls the upper handle toward +world Z (the player).
+      lever.rotateX(Math.sin(progress * Math.PI) * 0.92);
       if (progress >= 1) {
         lever.quaternion.copy(leverMotion.baseQuaternion);
         leverMotion = null;

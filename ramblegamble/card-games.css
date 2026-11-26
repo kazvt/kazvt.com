@@ -479,3 +479,42 @@
 @media (max-width: 680px) {
   .rg-console.is-card-host { inset: 6px; width: auto; max-height: calc(100dvh - 12px); }
 }
+
+/* Table HUD: no scrim or enclosing modal frame. The projected tabletop is the
+   anchor; empty overlay regions let the room keep receiving pointer input. */
+.rg-card-games-layer { display:block; padding:0; background:none; overflow:visible; pointer-events:none; perspective:none; }
+.rg-card-games-layer.is-off-table, .rg-preview.is-menu .rg-card-games-layer, .rg-preview.is-dice-mode .rg-card-games-layer { display:none; }
+.rg-card-games-shell { position:absolute; left:var(--table-x,50%); top:var(--table-y,50%); transform:translate(-50%,-50%); width:min(900px,92vw); max-height:88dvh; margin:0; padding:8px; border:0; background:none; box-shadow:none; overflow:auto; pointer-events:none; scrollbar-width:thin; }
+.rg-card-games-header { border:0; margin:0 0 12px; padding:0; gap:8px; justify-content:flex-end; }
+.rg-card-games-header h1 { margin-right:auto; color:#f2f2da; background:#8b2626; padding:5px 12px; text-shadow:2px 2px #1e0b01; box-shadow:3px 3px #1e0b01; font-size:clamp(15px,2.7vw,29px); }
+.rg-card-games-header::before,.rg-card-games-header::after { display:none!important; }
+.rg-card-games-layer button, .rg-card-games-layer a, .rg-card-games-layer input, .rg-card-games-layer textarea { pointer-events:auto; }
+.rg-card-games-content { min-height:0; }
+.rg-card-prompt.is-suspect { max-height:39dvh; }
+.rg-card-waiting, .rg-card-progress, .rg-card-results-title, .rg-card-round-status { color:#f2f2da; text-shadow:1px 2px #1e0b01; }
+.rg-card-player-progress { color:#f2f2da; text-shadow:1px 2px #1e0b01; }
+.rg-card-progress-empty { border-color:#f2f2da; }
+.rg-card-round.is-berryblast { grid-template-columns:minmax(0,1fr); gap:12px; max-width:680px; margin:auto; }
+.is-berryblast .rg-card-prompt.is-quiplash { min-height:0; padding:18px 20px; border:3px solid #49db91; box-shadow:4px 4px #1e0b01; }
+.is-berryblast .rg-card-prompt-copy { max-width:none; font-size:clamp(16px,2.5vw,25px); }
+.is-berryblast .rg-card-answer-grid { width:100%; grid-template-columns:minmax(0,1fr); gap:8px; }
+.is-berryblast .rg-card-answer { width:100%; min-height:48px; aspect-ratio:auto; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; justify-items:start; padding:12px 15px; border:2px solid #b77beb; background:#f2f2da; filter:none; box-shadow:3px 3px #1e0b01; text-align:left; }
+.is-berryblast .rg-card-answer-copy { max-width:none; white-space:pre-wrap; font-size:clamp(14px,2vw,20px); }
+.is-berryblast button.rg-card-answer:hover { transform:translateY(-2px); border-color:#49db91; }
+.is-berryblast .rg-card-answer.is-winner { outline:3px solid #ffdf00; outline-offset:0; transform:none; }
+.rg-card-network { padding:10px; margin:10px 0; border:1px solid #8b2626; background:#f2f2da; color:#1e0b01; }
+.rg-card-network [data-room-links] > div { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:6px 0; }
+.rg-card-network a { color:#8b2626; font-weight:900; }
+.rg-card-network textarea { width:100%; }
+.rg-card-network input { max-width:100%; }
+@media(max-width:680px) { .rg-card-games-shell { width:96vw; max-height:86dvh; } .rg-card-round:not(.is-berryblast) .rg-card-answer-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } .rg-card-round:not(.is-berryblast) .rg-card-answer { width:100%; padding:20px 6px; } .rg-card-round:not(.is-berryblast) .rg-card-answer-copy { font-size:12px; } }
+
+.rg-console.is-card-host { z-index:30; }
+.rg-console.is-card-host::backdrop { background:transparent; }
+/* Give overflowing long responses their own accessible scroll surface without
+   letting the empty overlay intercept room clicks. */
+.rg-card-answer-copy, .rg-card-prompt-copy { max-height:35dvh; overflow:auto; scrollbar-width:thin; }
+.is-berryblast .rg-card-answer-copy { max-height:24dvh; }
+.rg-card-prompt-copy { pointer-events:auto; }
+.rg-card-games-shell.is-scrollable { pointer-events:auto; }
+@media(max-height:500px) { .rg-card-games-shell { max-height:94dvh; } .rg-mode-card { max-height:40dvh; } }

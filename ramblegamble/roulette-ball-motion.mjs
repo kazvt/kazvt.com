@@ -1,9 +1,14 @@
 // Geometry values are in the supplied rg_roulette.gltf model's local units.
 export const ROULETTE_BALL_COLOR = 0x212068; // sampled from stage.png's dark floor checker
 export const ROULETTE_BALL_TRACK_RADIUS = Math.hypot(13, 1); // authored ball offset (-13, 1)
-export const ROULETTE_BALL_LANDING_RADIUS = 9.1;
+export const ROULETTE_BALL_LANDING_RADIUS = 11.25;
 export const ROULETTE_BALL_GEOMETRY_RADIUS = 0.84; // maximum vertex radius in the supplied ball mesh
-export const ROULETTE_INNER_YELLOW_RING = Object.freeze({ innerRadius: 6.37, outerRadius: 10.03 });
+export const ROULETTE_INNER_YELLOW_RING = Object.freeze({ innerRadius: 10.034, outerRadius: 12.50 });
+
+// Wheel group y=-3.3; yellow pocket floor local y=1.1; ball group y=7.3.
+// Add the actual mesh radius so the ball rests on the floor, not above or inside it.
+export const ROULETTE_BALL_LANDING_HEIGHT = -3.3 + 1.1 + ROULETTE_BALL_GEOMETRY_RADIUS - 7.3;
+export const ROULETTE_BALL_TRACK_HEIGHT = -3.3 + 2.6 + ROULETTE_BALL_GEOMETRY_RADIUS - 7.3;
 
 const OUTWARD_RAMP_END = 0.12;
 const INWARD_SETTLE_START = 0.76;
@@ -44,4 +49,21 @@ export function sampleRouletteBallRadius(progress, startingRadius = ROULETTE_BAL
   const settle = smoothstep((t - INWARD_SETTLE_START) / (1 - INWARD_SETTLE_START));
   return ROULETTE_BALL_TRACK_RADIUS
     + (ROULETTE_BALL_LANDING_RADIUS - ROULETTE_BALL_TRACK_RADIUS) * settle;
+}
+
+export function sampleRouletteBallHeight(progress, startingHeight = ROULETTE_BALL_LANDING_HEIGHT) {
+  const t = clamp01(progress);
+  if (t < OUTWARD_RAMP_END) return startingHeight + (ROULETTE_BALL_TRACK_HEIGHT - startingHeight) * smoothstep(t / OUTWARD_RAMP_END);
+  if (t < INWARD_SETTLE_START) return ROULETTE_BALL_TRACK_HEIGHT;
+  return ROULETTE_BALL_TRACK_HEIGHT + (ROULETTE_BALL_LANDING_HEIGHT - ROULETTE_BALL_TRACK_HEIGHT) * smoothstep((t - INWARD_SETTLE_START) / (1 - INWARD_SETTLE_START));
+}
+
+export const ROULETTE_POCKET_COUNT = 38;
+// Mesh boundary at +0.1° in local X/Z is cancelled by the wheel mesh's
+// +0.1° Y rotation. Relative to the wheel pivot, boundary zero is +X.
+export function alignBallToPocket(ballRotation, wheelRotation, ballLocalAngle) {
+  const sector = Math.PI * 2 / ROULETTE_POCKET_COUNT;
+  const relativeAngle = ballLocalAngle - ballRotation + wheelRotation;
+  const nearestCenter = (Math.floor(relativeAngle / sector) + 0.5) * sector;
+  return ballRotation + relativeAngle - nearestCenter;
 }

@@ -1,8 +1,10 @@
+import { mountCardRoom } from "./card-room-host.mjs";
 import { foley } from "./game-foley.mjs?v=slot-foley-20261126-v3";
 import {
   CARD_GAME_CATEGORIES,
   CARD_GAME_PLAYERS,
   createQuiplashRound,
+  newRoundId,
   createRedHandedRound,
   createShopRound,
   advanceSmeemoPhase,
@@ -13,8 +15,8 @@ import {
   revealAudienceResults,
   submitRoundAnswer,
   buyShopCard,
-} from "./card-games.mjs?v=rg-smeemo-secret-repeat-20261126-v4";
-import { readCardGames, writeCardGames, subscribeCardGames } from "./card-games-store.mjs?v=rg-smeemo-secret-repeat-20261126-v4";
+} from "./card-games.mjs?v=scene-table-20261126-v1";
+import { readCardGames, writeCardGames, subscribeCardGames } from "./card-games-store.mjs?v=scene-table-20261126-v1";
 import { readPointScores, subscribePointScores, writePointScores } from "./points-store.mjs?v=points-console-20261120-v1";
 
 (() => {
@@ -69,6 +71,8 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   const modeNames = { "red-handed": "RED HANDED", quiplash: "BERRYBLAST", shop: "THE SHOP" };
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let state = readCardGames();
+  if (state.round && ["red-handed", "quiplash"].includes(state.round.mode) && !state.round.id) state = writeCardGames({ ...state, round: { ...state.round, id: newRoundId() } }).state;
+  let network = null;
   let pointScores = readPointScores();
   let menuOpen = false;
   let dismissedActive = false;
@@ -128,6 +132,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   function setDeckVisibility() {
     const mode = modeSelect.value;
     for (const editor of deckEditors) editor.hidden = editor.dataset.deckFor !== mode;
+    $("#rg-card-network").hidden = mode === "shop" && !["red-handed", "quiplash"].includes(state.round?.mode);
   }
 
   function setAnswerChoices(round, player) {
@@ -171,6 +176,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     loadDeckInputs(state.decks);
     setDeckVisibility();
     setAdminState(state);
+    network?.publish();
 
     const activeSmeemo = state.smeemo && ["playing", "complete"].includes(state.smeemo.status);
     const newSmeemoGame = Boolean(activeSmeemo && state.smeemo.id && state.smeemo.id !== lastSmeemoId);
@@ -248,8 +254,8 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     window.dispatchEvent(new Event("rg:close-host-panel"));
   }
 
-  function openHostPanel() {
-    modeSelect.value = state.round?.mode && state.round.mode !== "smeemo" ? state.round.mode : modeSelect.value;
+  function openHostPanel(mode = state.round?.mode) {
+    if (typeof mode === "string" && modeNames[mode]) modeSelect.value = mode;
     setDeckVisibility();
     window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "card-games" } }));
   }
@@ -294,7 +300,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     modeSelect.value = mode;
     setDeckVisibility();
     menuTimer = window.setTimeout(() => {
-      openHostPanel();
+      openHostPanel(mode);
       modeSelect.focus({ preventScroll: true });
     }, reducedMotion.matches ? 20 : 760);
   }
@@ -323,6 +329,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   function promptCard(text, type = "suspect") {
     const card = element("div", `rg-card-prompt is-${type}`);
     const copy = element("div", "rg-card-prompt-copy", text);
+    copy.tabIndex = 0;
     card.append(copy);
     return card;
   }
@@ -337,7 +344,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       return;
     }
     const prompt = promptCard(round.prompt, round.mode === "red-handed" ? "suspect" : "quiplash");
-    const shell = element("div", "rg-card-round");
+    const shell = element("div", `rg-card-round${round.mode === "quiplash" ? " is-berryblast" : ""}`);
     const promptSide = element("div", "rg-card-prompt-side");
     promptSide.append(prompt);
     if (round.phase === "submissions") {
@@ -595,6 +602,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   modeSelect.addEventListener("change", setDeckVisibility);
   playerSelect.addEventListener("change", () => setAdminState(state));
   submitButton.addEventListener("click", submitPrivateAnswer);
+  answerText.addEventListener("keydown", event => { if (event.key === "Enter" && !event.shiftKey && !event.isComposing) { event.preventDefault(); submitPrivateAnswer(); } });
   revealButton.addEventListener("click", () => {
     const round = revealAudienceResults(state.round);
     if (round === state.round) return;
@@ -620,7 +628,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     window.dispatchEvent(new CustomEvent("rg:card-game-active", { detail: { mode: "shop" } }));
     closeHostPanel();
   });
-  hostButton.addEventListener("click", openHostPanel);
+  hostButton.addEventListener("click", () => openHostPanel());
   roomButton.addEventListener("click", () => {
     foley.stop("cards-motion");
     menuOpen = false;
@@ -641,6 +649,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     }
   });
 
+  network = mountCardRoom($("#rg-card-network"), { getRound: () => state.smeemo ? null : state.round, commitRound: round => { foley.play("place"); sync({ ...state, round }); }, onStatus: message => { adminStatus.textContent = message; } });
   loadDeckInputs(state.decks);
   setDeckVisibility();
   subscribeCardGames(updateFromState);

@@ -65,6 +65,7 @@ function normalizeRound(value) {
   if (!value || typeof value !== "object" || !["red-handed", "quiplash", "shop"].includes(value.mode)) return null;
   const phase = ROUND_PHASES.has(value.phase) ? value.phase : "submissions";
   const round = {
+    ...(value.id ? { id: cleanText(value.id) } : {}),
     mode: value.mode,
     phase,
     prompt: cleanText(value.prompt),
@@ -200,6 +201,10 @@ function pick(values, random) {
   return values[Math.floor(randomUnit(random) * values.length)];
 }
 
+export function newRoundId() {
+  return globalThis.crypto?.randomUUID?.() || `round-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 export function createRedHandedRound(evidence, suspects, random = secureRandomUnit) {
   const aCards = normalizeTextList(evidence);
   const bCards = normalizeTextList(suspects);
@@ -211,6 +216,7 @@ export function createRedHandedRound(evidence, suspects, random = secureRandomUn
     hands[CARD_GAME_PLAYERS[cardIndex % CARD_GAME_PLAYERS.length]].push(deck[cardIndex]);
   }
   return {
+    id: newRoundId(),
     mode: "red-handed",
     phase: "submissions",
     prompt: pick(bCards, random),
@@ -226,6 +232,7 @@ export function createQuiplashRound(prompts, random = secureRandomUnit) {
   const choices = normalizeTextList(prompts);
   if (!choices.length) return null;
   return {
+    id: newRoundId(),
     mode: "quiplash",
     phase: "submissions",
     prompt: pick(choices, random),

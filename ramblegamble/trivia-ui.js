@@ -766,16 +766,29 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
       panels[tabIndex].hidden = !active;
       if (active && focus) tab.focus();
     });
+    // Card controls are a nonmodal side panel; other host tools retain their
+    // existing modal presentation. Change mode when switching tabs as well.
+    if (dialog.open && typeof dialog.show === "function" && typeof dialog.showModal === "function") {
+      const shouldModal = activeTab !== 3;
+      if (dialog.matches(":modal") !== shouldModal) {
+        dialog.close();
+        if (shouldModal) dialog.showModal(); else dialog.show();
+        if (focus) tabs[activeTab]?.focus();
+      }
+    }
   }
 
   function openConsole(requestedTab = activeTab) {
     priorFocus = document.activeElement;
-    if (typeof dialog.showModal === "function") dialog.showModal();
-    else dialog.setAttribute("open", "");
     const tabIndex = Number.isInteger(requestedTab)
       ? requestedTab
       : tabs.findIndex((tab) => tab.id === "rg-tab-" + requestedTab);
     setTab(tabIndex >= 0 ? tabIndex : activeTab);
+    if (!dialog.open) {
+      if (activeTab === 3 && typeof dialog.show === "function") dialog.show();
+      else if (typeof dialog.showModal === "function") dialog.showModal();
+      else dialog.setAttribute("open", "");
+    }
     tabs[activeTab]?.focus();
   }
 
@@ -801,7 +814,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
   dialog.addEventListener("click", (event) => {
     if (event.target === dialog) closeConsole();
   });
-  dialog.addEventListener("close", () => { setPresentation(false); priorFocus?.focus?.(); });
+  dialog.addEventListener("close", () => { if (!dialog.open) { setPresentation(false); priorFocus?.focus?.(); } });
   presentButton.addEventListener("click", () => setPresentation(!dialog.classList.contains("is-presenting"), true));
   returnToEditButton.addEventListener("click", () => setPresentation(false, true));
   tabs.forEach((tab, index) => {
