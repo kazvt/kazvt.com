@@ -1,7 +1,11 @@
+import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
+import { createAudienceRenderer } from "./audience-render.mjs?v=show-energy-20261127-v1";
+import { createShowFX } from "./show-fx.mjs?v=show-energy-20261127-v1";
+import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { createExteriorMist } from "./exterior-mist.mjs?v=exterior-mist-20261126-v1";
 import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=vip-focus-20261127-v1";
-import { foley } from "./game-foley.mjs?v=room-audio-20261127-v1";
+import { foley } from "./game-foley.mjs?v=show-energy-20261127-v1";
 import {
   resolvePointClickAction,
   resolvePointClickBack,
@@ -112,6 +116,19 @@ import {
     label: "Lillie - Host",
     source: "https://reactive.fugi.tech/basic/185073584211755008",
   };
+  let audience, showFX;
+  let crowdClock=0,crowdLastFrame=null;
+  const crowdState=createAudienceState(crowdClock,readAudienceMode());
+  const audienceControls=document.getElementById("rg-audience-controls");
+  function syncAudienceControls(){for(const b of audienceControls?.querySelectorAll("[data-audience]")||[])b.setAttribute("aria-pressed",String(b.dataset.audience===crowdState.mode));}
+  function selectAudienceMode(mode){if(document.documentElement.hasAttribute("data-rg-host-locked"))return;if(writeAudienceMode(mode)){crowdState.setMode(mode,crowdClock);syncAudienceControls();}}
+  for(const mode of AUDIENCE_MODES){if(!audienceControls)break;const b=document.createElement("button");b.type="button";b.dataset.audience=mode;b.textContent=mode.toUpperCase();b.className="rg-secondary-button";b.addEventListener("click",()=>selectAudienceMode(mode));audienceControls.append(b);}
+  const crowdStatus=document.createElement("small"); crowdStatus.setAttribute("role","status"); audienceControls?.append(crowdStatus);
+  let shownCrowdStatus="";
+  function updateCrowdStatus(){const label=crowdState.active.toUpperCase()+(crowdState.pending!==crowdState.active?` → ${crowdState.pending.toUpperCase()}`:"");if(label!==shownCrowdStatus){crowdStatus.textContent=label;shownCrowdStatus=label;}}
+  syncAudienceControls();
+  window.addEventListener("storage",event=>{if(event.key===AUDIENCE_KEY||event.key===null){crowdState.setMode(readAudienceMode(),crowdClock);syncAudienceControls();}});
+  window.addEventListener("rg:audience-reaction",event=>{if(gameStarted&&!pauseMenuOpen&&!document.hidden&&!document.documentElement.hasAttribute("data-rg-host-locked"))crowdState.react(event.detail?.emotion,crowdClock);});
   let renderer;
   let scene;
   let camera;
@@ -244,6 +261,7 @@ import {
     if (settled && audible && visible) {
       foley.start("roulette-landing", "ball", { volume: .65 });
       foley.start("roulette-settlement", "settlement");
+      showFX?.impact(performance.now(),true); crowdState.react("cheer",crowdClock);
     }
     const prompt = nextHostQuestion();
     if (prompt && !settled && visible) foley.play("question", { volume: .55 });
@@ -297,6 +315,7 @@ import {
   function startWheelSpin() {
     if (!beginTurn("wheel")) return;
     stopRouletteSettlement();
+    showFX?.clearRoulette(); if(gameStarted&&!pauseMenuOpen&&!document.hidden&&currentView.kind==="roulette")crowdState.react("suspense",crowdClock);
     foley.play("switch");
     foley.start("roulette", "wheel", { loop: true });
     if (!wheelPivot || !ballPivot || !ballOrbitObject) {
@@ -1407,7 +1426,9 @@ import {
 
   function transitionToView(nextView, { immediate = false } = {}) {
     hideGameCursor(); lastScenePointer = null;
-    if (nextView.kind !== "roulette") stopRouletteSettlement();
+    if (nextView.kind !== "roulette") {stopRouletteSettlement(); showFX?.clearRoulette();}
+    const viewChanged=currentView.kind!==nextView.kind||currentView.contestantId!==nextView.contestantId;
+    if(viewChanged&&!immediate&&sceneReady){preview.dataset.showArrival=nextView.kind;preview.classList.remove("rg-show-arrival");void preview.offsetWidth;preview.classList.add("rg-show-arrival");if(nextView.kind==="overview")crowdState.react("idle",crowdClock);}
     if (!immediate && sceneReady && (currentView.kind !== nextView.kind || currentView.look !== (nextView.look ?? 0) || currentView.contestantId !== nextView.contestantId)) foley.play(nextView.kind === "overview" ? "back" : "navigate");
     currentView = { ...nextView, look: nextView.kind === "overview" ? nextView.look ?? 0 : 0 };
     focusOrbit.reset(currentView.kind);
@@ -2170,7 +2191,7 @@ import {
   updateMarqueeMotionPreference();
 
   function setMenuSceneVisibility(visible) {
-    for (const object of [stageModel, rouletteRig, slotRig, exteriorMist?.group]) {
+    for (const object of [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group]) {
       if (object) object.visible = visible;
     }
     billboardLayer.classList.toggle("rg-billboards-fading", !visible);
@@ -2245,7 +2266,7 @@ import {
     }
     result.hidden = true;
     window.dispatchEvent(new Event("rg:close-host-panel"));
-    if (currentView.kind !== "card-table") transitionToView({ kind: "card-table" });
+    if (currentView.kind !== "card-table") { crowdState.react(mode === "menu" || mode === "shop" ? "idle" : "suspense",crowdClock); transitionToView({ kind: "card-table" }); }
   }
 
   window.addEventListener("rg:card-game-active", (event) => activateCardGameMode(event.detail?.mode));
@@ -2267,29 +2288,12 @@ import {
   goButton.focus({ preventScroll: true });
 
   function playCheer() {
-    foley.start("cheer", "cheer");
+    const mode=crowdState.mode==="cheer"?"idle":"cheer";
+    selectAudienceMode(mode);
   }
 
-  subscribePointScores((scores) => {
-    if (!pointsHud) return;
-    pointsHud.replaceChildren();
-    for (const name of ["faroe", "erin", "kaz"]) {
-      const score = document.createElement("span");
-      score.className = "rg-points-entry";
-      const berry = document.createElement("img");
-      berry.src = `${SLOT_SYMBOL_IMAGE_PATH}${name}berry.png`;
-      berry.alt = name[0].toUpperCase() + name.slice(1);
-      berry.title = berry.alt;
-      berry.width = 24;
-      berry.height = 24;
-      const value = document.createElement("span");
-      value.className = "rg-points-value";
-      value.textContent = String(scores[name]);
-      score.append(berry, value);
-      pointsHud.append(score);
-    }
-    pointsHud.hidden = !Object.values(scores).some((score) => score > 0);
-  });
+  if(pointsHud)subscribePointScores(createScoreHud(pointsHud,{names:["faroe","erin","kaz"],assetPath:SLOT_SYMBOL_IMAGE_PATH,visible:()=>gameStarted&&!pauseMenuOpen}));
+  window.addEventListener("rg:slot-action-finish",event=>{if(gameStarted&&!pauseMenuOpen&&!diceModeOpen&&!document.hidden&&currentView.kind==="slot"&&Object.values(event.detail?.totals||{}).some(v=>v>0))crowdState.react("cheer",crowdClock);});
 
   function pointClickAt(clientX, clientY) {
     if (!gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen || cameraTransition) return;
@@ -2435,7 +2439,7 @@ import {
     updateLiquidPortal();
     if (open) {
       focusDrag.clearHover(); lastScenePointer = null; stopRouletteSettlement();
-      diceModeVisibility = [stageModel, rouletteRig, slotRig, exteriorMist?.group]
+      diceModeVisibility = [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group]
         .filter(Boolean)
         .map((object) => [object, object.visible]);
       for (const [object] of diceModeVisibility) object.visible = false;
@@ -2583,6 +2587,7 @@ import {
       billboard.panel.style.width = `${panelWidth}px`;
       billboard.panel.style.height = `${panelHeight}px`;
       billboard.panel.style.visibility = "visible";
+      billboard.panel.classList.toggle("rg-character-focused", currentView.kind==="host"&&billboard===hostBillboard||currentView.kind==="contestant"&&billboard.id===currentView.contestantId);
     }
   }
 
@@ -2668,7 +2673,12 @@ import {
     animationFrame = requestAnimationFrame(animate);
     if (!renderer || !scene || !camera) return;
 
-    foley.setRoomAmbience(gameStarted && sceneReady && !pauseMenuOpen, diceModeOpen ? .28 : 1);
+    const roomVisible=gameStarted&&sceneReady&&!pauseMenuOpen&&!document.hidden&&!document.documentElement.hasAttribute("data-rg-host-locked");
+    if(roomVisible){if(crowdLastFrame!==null)crowdClock+=Math.max(0,Math.min(250,time-crowdLastFrame));crowdLastFrame=time;}else crowdLastFrame=null;
+    const emotion=crowdState.step(crowdClock); updateCrowdStatus();
+    foley.setRoomAmbience(roomVisible,diceModeOpen ? .28 : 1,emotion);
+    if(audience){audience.group.visible=roomVisible&&!diceModeOpen;audience.update(crowdClock,emotion,reducedMotion.matches);}
+    if(diceModeOpen)showFX?.update(time,{active:false});
     updateCameraTransition(time);
     if (focusBase && canOrbit()) {
       const {yaw,pitch,moving} = focusOrbit.step(time, reducedMotion.matches);
@@ -2708,12 +2718,14 @@ import {
         wheelMotion.ballTo,
         1 - Math.pow(1 - progress, 2.2),
       );
+      let pocketImpact=false;
       // Audible pocket contacts follow the ball entering the inner ring, not render frames.
       if (progress >= .76 && progress < .99 && !pauseMenuOpen) {
         const sector = Math.floor((wheelMotion.ballAngle - ballPivot.rotation.y + wheelPivot.rotation.y) / (Math.PI * 2 / 38));
         if (sector !== wheelMotion.pocketSector && time - wheelMotion.lastPocketSound >= 95) {
           wheelMotion.lastPocketSound = time;
           foley.play("pocket", { volume: 1 - .55 * progress });
+          pocketImpact=true;
         }
         wheelMotion.pocketSector = sector;
       }
@@ -2726,6 +2738,7 @@ import {
         }, radius);
         if (position) ballOrbitObject.position.set(position.x, position.y, position.z);
       }
+      if(pocketImpact&&currentView.kind==="roulette"&&roomVisible)showFX?.impact(time);
       if (progress >= 1) {
         wheelPivot.rotation.y = wheelMotion.wheelTo;
         ballPivot.rotation.y = wheelMotion.ballTo;
@@ -2787,6 +2800,7 @@ import {
       }
     }
 
+    showFX?.update(time,{active:roomVisible,spinning:Boolean(wheelMotion),view:currentView,reduced:reducedMotion.matches});
     renderer.render(scene, camera);
   }
 
@@ -2845,6 +2859,10 @@ import {
       createSlotPlacementControls();
       setupPicking();
       captureSlotFocusPoints();
+      try { audience=createAudienceRenderer(THREE,scene); audience.group.visible=!pauseMenuOpen; }
+      catch(error){scene.getObjectByName("rg-audience")?.removeFromParent(); console.warn("Audience presentation unavailable",error);}
+      try { showFX=createShowFX(THREE,scene,{wheel:rouletteModel,wheelPivot,ball:ballOrbitObject,slot:slotsModel,host:hostBillboard,contestants,door:DICE_DOOR_OPENING}); showFX.group.visible=!pauseMenuOpen; }
+      catch(error){scene.getObjectByName("rg-show-fx")?.removeFromParent(); console.warn("Show effects unavailable",error);}
       applyTheme();
       sceneReady = true;
       // Fit the overview only after all machines have their final world placement.
@@ -2872,6 +2890,8 @@ import {
   }
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
+      crowdLastFrame=null;
+      showFX?.clearRoulette();
       focusDrag?.clearHover(); lastScenePointer = null;
       endSlotCelebration(false);
       liquidPortal?.setActive(false);
@@ -2888,6 +2908,7 @@ import {
     resizeObserver?.disconnect();
     liquidPortal?.dispose();
     exteriorMist?.dispose();
+    audience?.dispose(); showFX?.dispose();
     renderer?.dispose();
   }, { once: true });
 })();

@@ -2,6 +2,7 @@
 const tracks = [
   { file: 'room-bed.mp3', gain: .13 },
   { file: 'room-detail.mp3', gain: .042 },
+  { file: 'audience-cheer.mp3', gain: .14, cheer: true },
 ];
 const base = new URL('./assets/sfx/foley/', import.meta.url);
 export function createRoomAmbience({ createMedia = () => new Audio(), random = Math.random } = {}) {
@@ -29,7 +30,7 @@ export function createRoomAmbience({ createMedia = () => new Audio(), random = M
         const entry = { media, gain, source, track, context, requested: false, blocked: false, failed: false, generation: 0, level: null };
         media.addEventListener('error', () => { entry.failed = true; pause(entry); });
         media.addEventListener('loadedmetadata', () => {
-          if (Number.isFinite(media.duration) && media.duration > 10) {
+          if (Number.isFinite(media.duration) && media.duration > 4) {
             try { media.currentTime = Math.max(0, media.duration - 4) * random(); } catch {}
           }
         }, { once: true });
@@ -38,12 +39,13 @@ export function createRoomAmbience({ createMedia = () => new Audio(), random = M
       } catch { /* unavailable media API: no ambience, no gameplay impact */ }
     }
   }
-  function sync({ active, context, master, level = 1, retry = false }) {
+  function sync({ active, context, master, level = 1, emotion = "idle", retry = false }) {
     if (!active || !context || !master || context.state !== 'running') { stop(); return; }
     setup(context, master);
     for (const entry of entries) {
       if (entry.failed) continue;
-      const target = entry.track.gain * Math.max(0, Math.min(1, Number.isFinite(level) ? level : 1));
+      const mood = entry.track.cheer ? (emotion === "cheer" ? 1 : 0) : emotion === "suspense" ? .38 : emotion === "shock" ? .24 : emotion === "cheer" ? .75 : 1;
+      const target = entry.track.gain * mood * Math.max(0, Math.min(1, Number.isFinite(level) ? level : 1));
       if (entry.level !== target) {
         const p = entry.gain.gain, t = context.currentTime;
         p.cancelScheduledValues(t);
@@ -51,7 +53,7 @@ export function createRoomAmbience({ createMedia = () => new Audio(), random = M
         entry.level = target;
       }
       if (retry) entry.blocked = false;
-      if (entry.requested || entry.blocked) continue;
+      if (entry.requested || entry.blocked || target === 0) continue;
       entry.requested = true;
       const generation = ++entry.generation;
       try {

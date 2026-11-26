@@ -1,10 +1,11 @@
+import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { gradeSimpleAnswer, isSimpleGradeMode } from "./trivia-simple-grade.mjs?v=room-recovery-20261127-v1";
 import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, newTriviaId, updateTrivia, activeRoomRound, publicMedia } from "./live-trivia.mjs?v=show-stage-20261126-v1";
-import { renderLiveQuestion, renderTriviaResponses } from "./trivia-live-view.mjs?v=room-audio-20261127-v1";
+import { renderLiveQuestion, renderTriviaResponses } from "./trivia-live-view.mjs?v=show-energy-20261127-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
 import { readCardGames, subscribeCardGames } from "./card-games-store.mjs?v=show-stage-20261126-v1";
 import { removeSlotSymbol } from "./slot-game.mjs?v=host-cell-cards-20261127-v1";
-import { foley } from "./game-foley.mjs?v=room-audio-20261127-v1";
+import { foley } from "./game-foley.mjs?v=show-energy-20261127-v1";
 import {
   MODE_NAMES,
   ROUND_IDS,
@@ -2425,7 +2426,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
       renderLiveQuestion(liveContent,q,{interactive:!!hostCheck,hostCheck});lastRenderedQuestion=key;
     }
     liveLayer.dataset.ready="true";
-    if(open){ foley.play("question"); closeConsole(); window.dispatchEvent(new Event("rg:show-trivia-stage")); }
+    if(open){ audienceReact("suspense"); foley.play("question"); closeConsole(); window.dispatchEvent(new Event("rg:show-trivia-stage")); }
   }
   let previousAudioRound = readLiveTrivia();
   function refreshLive(round) {

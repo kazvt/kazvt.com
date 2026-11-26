@@ -3,7 +3,7 @@
 const names = ['faroe', 'erin', 'kaz'];
 const cards = ['close', 'reveal', 'all', 'vote', 'results'];
 const trivia = ['answers', 'close', 'next', 'previous', 'hide', 'show'];
-const roots = ['help', 'clear', 'answers', 'points', 'berryblast', 'redhanded', 'red-handed', 'cards', 'smeemo', 'trivia'];
+const roots = ['help', 'clear', 'answers', 'points', 'berryblast', 'redhanded', 'red-handed', 'cards', 'smeemo', 'trivia', 'audience', 'emote'];
 const numbers = n => Array.from({length:n}, (_,i) => String(i+1));
 
 export function commandSuggestions(value, caret = value.length) {
@@ -24,7 +24,8 @@ export function commandSuggestions(value, caret = value.length) {
     if (prior.length === 1) choices = root === 'cards' ? cards : ['start', ...cards];
     else if (prior.length === 2 && sub === 'reveal') choices = ['next','all'];
     else if (prior.length === 2 && sub === 'vote') choices = numbers(3);
-  } else if (root === 'smeemo' && prior.length === 1) choices = ['start','reset'];
+  } else if (['audience','emote'].includes(root) && prior.length === 1) choices = ['auto','idle','cheer','suspense','shock'];
+  else if (root === 'smeemo' && prior.length === 1) choices = ['start','reset'];
   else if (root === 'trivia') {
     if (prior.length === 1) choices = prefix.startsWith('0') ? numbers(9).map(n=>'0'+n) : [...trivia, ...numbers(36)];
     else if (prior.length === 2 && /^\d+$/.test(sub) && +sub>=1 && +sub<=36) choices = numbers(5);

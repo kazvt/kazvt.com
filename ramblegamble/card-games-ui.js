@@ -1,10 +1,12 @@
+import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
+import { showBurst, voteFlight, purchaseFlight } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createSmeemoImpact, smeemoImpactTransition } from "./smeemo-impact.mjs?v=room-audio-20261127-v1";
 import { applyCardShowAction } from "./card-show-actions.mjs?v=card-polish-20261127-v1";
 import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia } from "./live-trivia.mjs?v=show-stage-20261126-v1";
 import { activeCardStage, cardStageChange } from "./card-stage-state.mjs?v=wildcard-shared-20261126-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
 import { mountCardRoom } from "./card-room-host.mjs?v=room-recovery-20261127-v1";
-import { foley } from "./game-foley.mjs?v=room-audio-20261127-v1";
+import { foley } from "./game-foley.mjs?v=show-energy-20261127-v1";
 import {
   CARD_GAME_CATEGORIES,
   CARD_GAME_PLAYERS,
@@ -259,7 +261,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
         && JSON.stringify(previousSmeemo.draws) === JSON.stringify(state.smeemo.draws);
       if (!unchanged) renderSmeemo(state.smeemo);
       const event = smeemoImpactTransition(previousSmeemo, state.smeemo, opened);
-      if (event) impact.trigger(event);
+      if (event) {impact.trigger(event);audienceReact(event.kind==="win"?"shock":"suspense");}
     }
     else renderRound(state.round);
   }
@@ -469,7 +471,9 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     const sameRound = lastPresentation.id === round.id;
     const fresh = new Set(visible.filter(r => !sameRound || !lastPresentation.visible.includes(r.id)).map(r => r.id));
     const resultsNow = round.phase === "results" && (!sameRound || lastPresentation.phase !== "results");
-    lastPresentation = { id: round.id, visible: visible.map(r => r.id), phase: round.phase };
+    const previousVotes=lastPresentation.votes||{};
+    lastPresentation = { id: round.id, visible: visible.map(r => r.id), phase: round.phase, votes:{...round.votes} };
+    if(sameRound&&!layer.classList.contains("is-off-table")){if(resultsNow)audienceReact("cheer");else if(fresh.size)audienceReact("suspense");}
     content.replaceChildren();
     const shell = element("div", `rg-card-round rg-show-round${round.mode === "quiplash" ? " is-berryblast" : " is-red-handed"}`);
     const promptSide = element("div", "rg-card-prompt-side");
@@ -494,6 +498,8 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
         answer.append(copy);
         if (round.phase !== "reveal") answer.append(element("span", "rg-card-vote-count", `${round.votes[response.id] || 0} VOTES`));
         answers.append(answer);
+        if(sameRound&&!resultsNow&&round.phase==="voting"&&(round.votes[response.id]||0)>(previousVotes[response.id]||0))requestAnimationFrame(()=>voteFlight(answer));
+        if(winner&&resultsNow&&sameRound)requestAnimationFrame(()=>showBurst(answer,{count:20,color:"#ffe476"}));
       }
       if (round.phase === "reveal") {
         for (let i = visible.length; i < round.responses.length; i++) {
@@ -563,7 +569,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       button.disabled = Boolean(card.buyer);
       if (!sameShop) wrap.classList.add("rg-shop-deal");
       wrap.style.setProperty("--deal-delay", `${Math.min(index, 8) * 60}ms`);
-      if (sameShop && card.revealed && !previouslyRevealed.has(card.id)) button.classList.add("is-newly-revealed");
+      if (sameShop && card.revealed && !previouslyRevealed.has(card.id)) {button.classList.add("is-newly-revealed");wrap.classList.add("rg-purchase-impact");requestAnimationFrame(()=>purchaseFlight(wrap));}
       bindCardTilt(button);
       button.setAttribute("aria-label", card.revealed ? `${card.category} card: ${card.name}, purchased by ${card.buyer}` : `${card.category} card, costs ${card.price} points`);
       const inner = element("span", "rg-shop-card-inner");
@@ -604,6 +610,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
           updateFromState(savedRound.state);
           foley.play("flip");
           foley.play("purchase");
+          audienceReact("cheer");
           setStatusMessage(`${playerNames[buyer]} bought ${card.name}.`);
         }));
       });

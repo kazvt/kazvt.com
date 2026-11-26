@@ -1,6 +1,7 @@
+import { validAudienceMode } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { RG_CONTESTANTS } from "./points-store.mjs?v=card-score-sync-20261127-v1";
 
-export const POINTS_HELP = "help - clear - answers - points [faroe|erin|kaz] - points add <name> [amount] - points remove <name> [amount] - points set <name> <total> - points reset [name] - berryblast|redhanded start [prompt] - cards close|reveal|all|vote <1-3>|results - smeemo start|reset - trivia <round 1-36> <difficulty 1-5> - trivia answers|close|next|previous|hide|show";
+export const POINTS_HELP = "help - clear - answers - points [faroe|erin|kaz] - points add <name> [amount] - points remove <name> [amount] - points set <name> <total> - points reset [name] - berryblast|redhanded start [prompt] - cards close|reveal|all|vote <1-3>|results - audience auto|idle|cheer|suspense|shock - smeemo start|reset - trivia <round 1-36> <difficulty 1-5> - trivia answers|close|next|previous|hide|show";
 
 function parseName(value) {
   const name = String(value || "").trim().replace(/^@/, "").toLowerCase();
@@ -19,6 +20,10 @@ export function parsePointsCommand(rawCommand) {
   if (!command) return { action: "noop" };
   const [verb, ...args] = command.split(/\s+/);
   const action = verb.toLowerCase();
+  if (action === "audience" || action === "emote") {
+    const mode=args[0]?.toLowerCase();
+    return args.length===1&&validAudienceMode(mode)?{action:"audience",mode}:{action:"error",message:"Use: audience auto|idle|cheer|suspense|shock."};
+  }
   if (action === "help") return args.length ? { action: "error" } : { action: "help" };
   if (action === "clear") return args.length ? { action: "error" } : { action: "clear" };
   if (action === "answers") return args.length ? { action: "error" } : { action: "answers" };

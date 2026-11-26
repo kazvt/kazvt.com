@@ -1,6 +1,7 @@
-import { mountCommandCompletion } from "/ramblegamble/console-completion.mjs?v=card-polish-20261127-v1";
+import { AUDIENCE_KEY, AUDIENCE_MODES, readAudienceMode, writeAudienceMode } from "/ramblegamble/audience-state.mjs?v=show-energy-20261127-v1";
+import { mountCommandCompletion } from "/ramblegamble/console-completion.mjs?v=show-energy-20261127-v1";
 import { applyCardShowAction } from "/ramblegamble/card-show-actions.mjs?v=card-polish-20261127-v1";
-import { renderTriviaResponses } from "/ramblegamble/trivia-live-view.mjs?v=compose-object-types-20261127-v1";
+import { renderTriviaResponses } from "/ramblegamble/trivia-live-view.mjs?v=show-energy-20261127-v1";
 import { activeRoomRound, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, newTriviaId, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, updateTrivia, answerSummary } from "/ramblegamble/live-trivia.mjs?v=show-stage-20261126-v1";
 import { withRoomSubmissionLock } from "/ramblegamble/card-room-election.mjs";
 import { mountCardRoom } from "/ramblegamble/card-room-host.mjs?v=room-recovery-20261127-v1";
@@ -10,7 +11,7 @@ import {
   writePointScores,
   withPointScoresLock,
 } from "/ramblegamble/points-store.mjs?v=card-score-sync-20261127-v1";
-import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=card-polish-20261127-v1";
+import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=show-energy-20261127-v1";
 import { createSmeemoGame } from "/ramblegamble/card-games.mjs?v=show-stage-20261126-v1";
 import { readCardGames, writeCardGames, subscribeCardGames } from "/ramblegamble/card-games-store.mjs?v=show-stage-20261126-v1";
 
@@ -47,12 +48,18 @@ function refreshAnswers(){
   for(const name of RG_CONTESTANTS){const row=document.createElement('p');row.textContent=`${name.toUpperCase()}: ${round.submissions?.[name]||'Waiting'}`;body.append(row);}
 }
 answersPanel.addEventListener('toggle',refreshAnswers);
+const crowdControls=document.getElementById("terminal-audience");
+function refreshCrowdMode(){const mode=readAudienceMode();for(const button of crowdControls.querySelectorAll("[data-audience]"))button.setAttribute("aria-pressed",String(button.dataset.audience===mode));}
+function requestCrowdMode(mode){if(document.documentElement.hasAttribute("data-rg-host-locked"))return;if(!writeAudienceMode(mode)){addLine("Could not save audience mode.","terminal-error");return;}refreshCrowdMode();addLine(`Audience: ${mode.toUpperCase()}`);}
+for(const mode of AUDIENCE_MODES){const b=document.createElement("button");b.type="button";b.dataset.audience=mode;b.textContent=mode.toUpperCase();b.addEventListener("click",()=>requestCrowdMode(mode));crowdControls.append(b);}
+refreshCrowdMode();window.addEventListener("storage",e=>{if(e.key===AUDIENCE_KEY||e.key===null)refreshCrowdMode();});
 async function execute(rawCommand) {
   const command = rawCommand.trim();
   if (!command) return;
   addLine(`> ${command}`, "terminal-command");
   const parsed = parsePointsCommand(command);
   if (parsed.action === "noop") return;
+  if (parsed.action === "audience") {requestCrowdMode(parsed.mode);return;}
   if (parsed.action === "help") {
     addLine(POINTS_HELP);
     return;

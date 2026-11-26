@@ -1,6 +1,8 @@
+import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
+import { showBurst } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 // Console uses the private read-only renderer without installing audio listeners.
 const foley = globalThis.location?.pathname?.replace(/\/$/, '') === '/rg/console'
- ? {play(){}} : (await import('./game-foley.mjs?v=room-audio-20261127-v1')).foley;
+ ? {play(){}} : (await import('./game-foley.mjs?v=show-energy-20261127-v1')).foley;
 import { snapComposePlacement } from './compose-placement.mjs';
 import { CHOICE_MODES, publicMedia, validTriviaAnswer, MAX_TRIVIA_ANSWER, answerSummary } from './live-trivia.mjs?v=show-stage-20261126-v1';
 const node=(tag,cls='',text='')=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text)e.textContent=text;return e;};
@@ -36,7 +38,7 @@ function artboard(parent,q,answer=null,interactive=false,showTypes=false) {
 // Shared renderer: public audience gets only public data; an optional host-only
 // grading callback enables the local controls without transmitting answer keys.
 export function renderLiveQuestion(root,q,{interactive=false,attempts=[],onSubmit=null,disabled=false,initialAnswer=null,onDraft=null,hostCheck=null}={}) {
- root.replaceChildren();root.classList.remove?.('rg-live-wrong','rg-live-correct');root.onkeydown=root.oninput=root.onchange=root.onclick=root.onpointerup=null;root.dataset.kind=q.kind;
+ root.replaceChildren();root.classList.remove?.('rg-live-wrong','rg-live-correct');root.onkeydown=root.oninput=root.onchange=root.onclick=root.onpointerup=null;root.dataset.kind=q.kind;root.classList.remove?.('rg-question-dealt');void root.offsetWidth;root.classList.add('rg-question-dealt');
  const title=node('h1','rg-live-question',q.prompt);if(q.prompt)root.append(title);
  if(q.subtitle)root.append(node('p','rg-live-subtitle',q.subtitle));
  const art=['draw-over-image','compose-image'].includes(q.kind);const prompt=!art&&q.imageVisible!==false?image(q.promptImage,'Question image'):null;if(prompt){prompt.classList.add('rg-live-prompt-image');root.append(prompt);}
@@ -57,7 +59,7 @@ export function renderLiveQuestion(root,q,{interactive=false,attempts=[],onSubmi
   const feedback=node('p','rg-live-feedback');feedback.setAttribute('role','status');let shakeTimer=0;
   const clearFeedback=()=>{clearTimeout(shakeTimer);root.classList.remove?.('rg-live-wrong','rg-live-correct');feedback.textContent='';delete feedback.dataset.state;};
   clearHostFeedback=clearFeedback;
-  const showGrade=result=>{clearFeedback();feedback.textContent=result.text;feedback.dataset.state=result.state;if(result.state==='wrong'){void root.offsetWidth;root.classList.add('rg-live-wrong');foley.play('error');shakeTimer=setTimeout(()=>{if(feedback.parentNode===root)root.classList.remove?.('rg-live-wrong');},360);}else if(result.state==='correct'){root.classList.add('rg-live-correct');foley.play('confirm');}};
+  const showGrade=result=>{clearFeedback();feedback.textContent=result.text;feedback.dataset.state=result.state;if(result.state==='wrong'){void root.offsetWidth;root.classList.add('rg-live-wrong');foley.play('error');audienceReact('shock');shakeTimer=setTimeout(()=>{if(feedback.parentNode===root)root.classList.remove?.('rg-live-wrong');},360);}else if(result.state==='correct'){root.classList.add('rg-live-correct');foley.play('confirm');showBurst(root,{color:'#78f5ad',count:20});audienceReact('cheer');}};
   const submit=button(hostCheck?'CHECK ANSWER':q.kind==='number-grid'||q.kind==='number-stepper'||q.kind==='memory-number'?'Guess':'Submit',()=>{
    const answer=read();if(hostCheck){showGrade(hostCheck(answer));return;}
    if(['number-grid','number-stepper','memory-number'].includes(q.kind))answer.id=crypto.randomUUID();const raw=JSON.stringify(answer);if(!validTriviaAnswer(q,answer)||raw.length>MAX_TRIVIA_ANSWER){feedback.textContent='Complete your answer first.';foley.play('error');return;}onSubmit?.(raw);

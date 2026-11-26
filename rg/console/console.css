@@ -84,3 +84,5 @@ body {
 
 .terminal-form {flex-shrink:0;}
 .terminal:has(#console-card-room[open]):has(#console-answers[open]) .terminal-room {max-height:28dvh;}
+
+.terminal-audience{display:flex;align-items:center;flex-wrap:wrap;gap:5px}.terminal-audience span{margin-right:5px}.terminal-audience button[aria-pressed="true"]{background:#a8f8a0;color:#090b0a;border-color:#a8f8a0;}
