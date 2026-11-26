@@ -415,6 +415,8 @@
 .rg-client-import-row { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
 .rg-client-task-row > span { min-width: min(100%, 220px); flex: 1; color: #3b3019; font-size: 11px; font-weight: 800; }
 .rg-client-transfer .rg-client-open-link { display: inline-flex; align-items: center; text-decoration: none; }
+/* Keep the transparent file input hit target inside its visible upload label. */
+.rg-upload-button.rg-client-file-label { position: relative; }
 .rg-upload-button.rg-client-file-label input { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; clip-path: none; opacity: 0; cursor: pointer; }
 .rg-client-transfer-status { margin: 0; color: #486c2f; font-size: 10px; font-weight: 800; }
 .rg-client-import-preview { max-height: 150px; margin: 0; padding: 7px; overflow: auto; border: 1px solid #8b2626; color: #171329; background: #fffdf0; font: 10px/1.4 ui-monospace, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
