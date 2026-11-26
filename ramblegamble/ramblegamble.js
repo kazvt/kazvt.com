@@ -50,6 +50,7 @@ import {
   const billboardLayer = document.getElementById("rg-billboard-layer");
   const slotControlLayer = document.getElementById("rg-slot-control-layer");
   const pointsHud = document.getElementById("rg-points-hud");
+  const diceHeader = document.querySelector(".rg-dice-header");
   const loading = document.getElementById("rg-loading");
   const result = document.getElementById("rg-result");
   const readyScreen = document.getElementById("rg-ready-screen");
@@ -2162,7 +2163,17 @@ import {
     pointsHud.replaceChildren();
     for (const name of ["faroe", "erin", "kaz"]) {
       const score = document.createElement("span");
-      score.textContent = `${name.toUpperCase()} ${scores[name]}`;
+      score.className = "rg-points-entry";
+      const berry = document.createElement("img");
+      berry.src = `${SLOT_SYMBOL_IMAGE_PATH}${name}berry.png`;
+      berry.alt = name[0].toUpperCase() + name.slice(1);
+      berry.title = berry.alt;
+      berry.width = 24;
+      berry.height = 24;
+      const value = document.createElement("span");
+      value.className = "rg-points-value";
+      value.textContent = String(scores[name]);
+      score.append(berry, value);
       pointsHud.append(score);
     }
     pointsHud.hidden = !Object.values(scores).some((score) => score > 0);
@@ -2290,6 +2301,12 @@ import {
     const open = Boolean(event.detail?.open);
     if (open === diceModeOpen) return;
     diceModeOpen = open;
+    // The modal is in the browser top layer: keep the one live score strip
+    // inside it while playing Dice, then restore it to the room on exit.
+    if (pointsHud && diceHeader) {
+      if (open) diceHeader.prepend(pointsHud);
+      else preview.insertBefore(pointsHud, result);
+    }
     updateLiquidPortal();
     if (open) {
       diceModeVisibility = [stageModel, rouletteRig, slotRig]

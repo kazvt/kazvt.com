@@ -288,8 +288,8 @@ test("scene wiring preloads one plane, updates it before every room render, and 
   assert.match(js, /liquidPortal\?\.dispose\(\)/);
   assert.match(css, /#rg-canvas \{[^}]*z-index: 1;/);
   assert.match(css, /\.rg-liquid-portal-layer \{[^}]*z-index: 0;[^}]*pointer-events: none;/);
-  assert.match(readFileSync(new URL("./host-access.mjs", import.meta.url), "utf8"), /ramblegamble\.js\?v=pixel-cursor-20261126-v1/);
-  assert.match(html, /ramblegamble\.css\?v=pixel-cursor-20261126-v1/);
+  assert.match(readFileSync(new URL("./host-access.mjs", import.meta.url), "utf8"), /ramblegamble\.js\?v=berry-score-hud-20261126-v1/);
+  assert.match(html, /ramblegamble\.css\?v=berry-score-hud-20261126-v1/);
 });
 
 

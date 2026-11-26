@@ -205,6 +205,8 @@ body.ramble-page *::after {
   left: max(12px, env(safe-area-inset-left));
   display: flex;
   gap: 4px;
+  flex-wrap: wrap;
+  max-width: calc(100% - 24px);
   padding: 4px;
   border: 1px solid color-mix(in srgb, var(--ink) 72%, transparent);
   color: var(--ink);
@@ -217,7 +219,31 @@ body.ramble-page *::after {
 }
 .rg-points-hud[hidden],
 .rg-preview.is-menu .rg-points-hud { display: none; }
-.rg-points-hud span { padding: 3px 5px; white-space: nowrap; }
+.rg-points-hud .rg-points-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.rg-points-entry img {
+  display: block;
+  width: clamp(18px, 2.5vw, 24px);
+  height: clamp(18px, 2.5vw, 24px);
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.rg-dice-header .rg-points-hud {
+  position: static;
+  max-width: 100%;
+  min-width: 0;
+  text-shadow: none;
+}
+.rg-dice-header .rg-dice-return {
+  margin-left: auto;
+  flex-shrink: 0;
+}
 
 .rg-billboard {
   position: absolute;
@@ -426,16 +452,8 @@ body.ramble-page *::after {
   text-shadow: 0 1px 4px color-mix(in srgb, var(--bg) 70%, transparent);
 }
 
-.rg-dice-header h1,
 .rg-die-picker h2 {
   margin: 0;
-}
-
-.rg-dice-header h1 {
-  font-size: clamp(16px, 1.6vw, 22px);
-  font-weight: 900;
-  letter-spacing: .08em;
-  line-height: 1.05;
 }
 
 .rg-dice-return,
