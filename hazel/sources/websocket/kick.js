@@ -3865,7 +3865,7 @@ async function refreshKickStreamInfo() {
         throw new Error('Unable to load current Kick channel information.');
     }
     updateKickStreamEditorFields(channel);
-    log('Loaded current Kick stream title/category.', 'info');
+    log('Loaded current Kick stream title - category.', 'info');
     return channel;
 }
 
@@ -3905,7 +3905,7 @@ async function updateKickStreamInfoFromInputs() {
         method: 'PATCH',
         body: JSON.stringify(payload)
     });
-    log('Kick stream title/category updated.', 'info');
+    log('Kick stream title - category updated.', 'info');
     // Reflect submitted values immediately - the Kick API caches stale data
     // after a PATCH so an immediate re-fetch would overwrite the inputs with
     // old values.  After a short delay the cache should have cleared.

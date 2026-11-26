@@ -3145,15 +3145,15 @@ async function cleanupCurrentConnection() {
 			if (!response.ok) {
 				const errorData = await response.json().catch(() => ({}));
 				console.error('updateChannelInformation failed', errorData);
-				addEvent('Stream title/category update failed');
+				addEvent('Stream title - category update failed');
 				return false;
 			}
 			await refreshChannelInformation();
-			addEvent('Stream title/category updated');
+			addEvent('Stream title - category updated');
 			return true;
 		} catch (error) {
 			console.error('updateChannelInformation error', error);
-			addEvent('Stream title/category update failed');
+				addEvent('Stream title - category update failed');
 			return false;
 		}
 	}
