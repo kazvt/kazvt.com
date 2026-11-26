@@ -190,12 +190,12 @@
 
 .rg-control-group { min-width: 0; margin: 0 0 17px; padding: 0; border: 0; }
 .rg-control-group legend { margin-bottom: 8px; color: #486c2f; font-size: 13px; font-weight: 900; }
-.rg-berry-picker { display: grid; gap: 7px; }
+.rg-berry-picker { display: grid; grid-template-columns: repeat(3, 60px); gap: 7px; }
 .rg-berry-choice { display: grid; width: 60px; min-width: 60px; min-height: 60px; place-items: center; padding: 5px; }
 .rg-berry-choice[aria-pressed="true"],
 .rg-placement-choice[aria-pressed="true"] { color: #fff; background: #8b2626; }
 .rg-berry-choice-image { display: block; width: 44px; height: 44px; object-fit: cover; image-rendering: pixelated; pointer-events: none; }
-.rg-placement-picker { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+.rg-placement-picker { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
 .rg-placement-choice { padding: 6px; font-size: 11px; }
 .rg-slot-help { min-height: 3em; margin: 4px 0 12px; }
 .rg-secondary-button { padding: 7px 12px; font-size: 11px; letter-spacing: .04em; }
@@ -206,33 +206,23 @@
   position: relative;
   display: grid;
   min-width: 0;
-  min-height: 62px;
-  aspect-ratio: 1.25;
+  min-height: 48px;
+  aspect-ratio: 1;
   place-items: center;
   padding: 3px;
-  border: 3px outset #111;
-  color: #111;
-  background: #ffdf00;
+  border: 2px solid #d7c24f;
+  color: #17121a;
+  background: #30262f;
   font-size: clamp(8px, 1vw, 12px);
   font-weight: 900;
   line-height: 1.05;
   text-align: center;
   overflow-wrap: anywhere;
-  cursor: pointer;
+  cursor: default;
 }
-.rg-slot-cell:hover { color: #fff; background: #c000ff; }
-.rg-slot-cell:active,
-.rg-slot-cell.is-filled { border-style: inset; color: #fff; background: #f12b24; }
-.rg-slot-cell.is-filled:hover { color: #fff; background: #c000ff; }
-.rg-slot-cell:focus-visible { outline: 3px solid #111; outline-offset: 2px; }
+.rg-slot-cell.is-filled { border-style: solid; color: #17121a; background: #f2eecf; }
 .rg-slot-cell-index { position: absolute; top: 2px; left: 4px; font-size: 8px; opacity: .7; }
 .rg-slot-cell-berry { display: block; width: 74%; height: 74%; object-fit: contain; image-rendering: pixelated; pointer-events: none; }
-.rg-slot-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; font-size: 9px; font-weight: 900; }
-.rg-slot-legend span { display: inline-flex; align-items: center; gap: 5px; }
-.rg-state-dot { width: 12px; height: 12px; border: 1px solid #111; }
-.rg-state-normal { background: #ffdf00; }
-.rg-state-hover { background: #c000ff; }
-.rg-state-click { background: #f12b24; }
 
 .rg-trivia-heading { align-items: end; }
 .rg-round-pickers { display: flex; gap: 8px; }
