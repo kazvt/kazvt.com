@@ -1,15 +1,16 @@
-import { renderTriviaResponses } from "/ramblegamble/trivia-live-view.mjs?v=submission-audit-20261126-v1";
-import { activeRoomRound, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, newTriviaId, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, updateTrivia, answerSummary } from "/ramblegamble/live-trivia.mjs?v=submission-audit-20261126-v1";
+import { applyCardShowAction } from "/ramblegamble/card-show-actions.mjs?v=show-stage-20261126-v1";
+import { renderTriviaResponses } from "/ramblegamble/trivia-live-view.mjs?v=show-stage-20261126-v1";
+import { activeRoomRound, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, newTriviaId, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, updateTrivia, answerSummary } from "/ramblegamble/live-trivia.mjs?v=show-stage-20261126-v1";
 import { withRoomSubmissionLock } from "/ramblegamble/card-room-election.mjs";
-import { mountCardRoom } from "/ramblegamble/card-room-host.mjs?v=submission-audit-20261126-v1";
+import { mountCardRoom } from "/ramblegamble/card-room-host.mjs?v=show-stage-20261126-v1";
 import {
   RG_CONTESTANTS,
   readPointScores,
   writePointScores,
 } from "/ramblegamble/points-store.mjs?v=points-console-20261120-v1";
-import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=submission-audit-20261126-v1";
-import { createSmeemoGame } from "/ramblegamble/card-games.mjs?v=scene-table-20261126-v1";
-import { readCardGames, writeCardGames, subscribeCardGames } from "/ramblegamble/card-games-store.mjs?v=live-trivia-20261126-v1";
+import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=show-stage-20261126-v1";
+import { createSmeemoGame } from "/ramblegamble/card-games.mjs?v=show-stage-20261126-v1";
+import { readCardGames, writeCardGames, subscribeCardGames } from "/ramblegamble/card-games-store.mjs?v=show-stage-20261126-v1";
 
 const output = document.getElementById("terminal-output");
 const form = document.getElementById("terminal-form");
@@ -61,6 +62,21 @@ async function execute(rawCommand) {
     return;
   }
   if (parsed.action === "answers") { triviaOnly=false; answersPanel.open=true; refreshAnswers(); return; }
+  if (parsed.action.startsWith("card-")) {
+    try {
+      await withRoomSubmissionLock(() => {
+        const action = parsed.action.slice(5), state = readCardGames();
+        if (action !== "start" && action !== "show" && activeRoomRound()?.id !== state.round?.id) throw Error("No active card round.");
+        const next = applyCardShowAction(state, action, parsed);
+        const result = writeCardGames(next, { requirePersistence: true, activate: action === "show" });
+        if (!result.persisted) throw Error("Could not save card round.");
+        cardRoom.publish(); refreshAnswers();
+        const round = result.state.round;
+        addLine(action === "start" ? `${round.mode}: ${round.prompt}` : `${round.mode}: ${round.phase} (${round.revealedCount || 0}/${round.responses.length})`);
+      });
+    } catch(error) { addLine(error.message, "terminal-error"); }
+    return;
+  }
   if (parsed.action === "smeemo-start") {
     await withRoomSubmissionLock(() => {
     const state = readCardGames();

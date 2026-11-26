@@ -33,6 +33,7 @@ test('new same-mode remote rounds and Smeemo starts open; updates and clearing d
 import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
 import * as games from './card-games.mjs';
+import { applyCardShowAction } from './card-show-actions.mjs';
 class FakeElement {
   constructor() { this.children=[]; this.dataset={}; this.hidden=false; this.value=''; this.events={}; this.attributes={}; const classes=new Set(); this.classList={add:(...items)=>items.forEach(v=>classes.add(v)),remove:(...items)=>items.forEach(v=>classes.delete(v)),contains:v=>classes.has(v),toggle:(v,force= !classes.has(v))=>{if(force)classes.add(v);else classes.delete(v);}}; }
   append(...children){ this.children.push(...children); children.forEach(child=>child.parentElement=this); }
@@ -57,8 +58,8 @@ function mountUI(saved) {
   const window={matchMedia:()=>({matches:true}), clearTimeout(id){timers.delete(id);},setTimeout(fn){timers.set(++timerId,fn);return timerId;},addEventListener:(type,fn)=>listeners.set(type,fn),dispatchEvent(event){calls.push(event.type);listeners.get(event.type)?.(event);}};
   class FakeEvent {constructor(type,opts={}){this.type=type;this.detail=opts.detail;}}
   const code=readFileSync(new URL('./card-games-ui.js',import.meta.url),'utf8').replace(/^import\s+[\s\S]*?;\n/gm,'');
-  vm.runInNewContext(code,{...games,activeCardStage,cardStageChange,window,document:{querySelector:get,querySelectorAll:()=>[],createElement:()=>new FakeElement()},CustomEvent:FakeEvent,Event:FakeEvent,readCardGames:()=>data,writeCardGames:value=>({state:data=normalizeCardGamesState(value),persisted:true}),subscribeLiveTrivia:()=>{},activeRoomRound:()=>data.round,subscribeCardGames:fn=>{subscriber=fn;fn(data);},readPointScores:()=>({kaz:0,faroe:0,erin:0}),subscribePointScores:fn=>fn({kaz:0,faroe:0,erin:0}),mountCardRoom:()=>({publish(){}}),foley:{start(channel,cue){sounds.push(cue);},stop(){},play(cue){sounds.push(cue);}},withRoomSubmissionLock:async fn=>fn()});
-  return {get,calls,sounds,window,update(next){data=normalizeCardGamesState(next);subscriber(data);},flushTimers(){for(const [id,fn] of [...timers]){timers.delete(id);fn();}}};
+  vm.runInNewContext(code,{...games,applyCardShowAction,activeCardStage,cardStageChange,window,document:{querySelector:get,querySelectorAll:()=>[],createElement:()=>new FakeElement()},CustomEvent:FakeEvent,Event:FakeEvent,readCardGames:()=>data,writeCardGames:value=>({state:data=normalizeCardGamesState(value),persisted:true}),subscribeLiveTrivia:()=>{},activeRoomRound:()=>data.round,subscribeCardGames:fn=>{subscriber=fn;fn(data);},readPointScores:()=>({kaz:0,faroe:0,erin:0}),subscribePointScores:fn=>fn({kaz:0,faroe:0,erin:0}),mountCardRoom:()=>({publish(){}}),foley:{start(channel,cue){sounds.push(cue);},stop(){},play(cue){sounds.push(cue);}},withRoomSubmissionLock:async fn=>fn()});
+  return {get,calls,sounds,window,get state(){return data;},update(next){data=normalizeCardGamesState(next);subscriber(data);},flushTimers(){for(const [id,fn] of [...timers]){timers.delete(id);fn();}}};
 }
 test('actual card UI keeps restored shop hidden, resumes on request, and only opens newly started rounds',()=>{
   const round=createShopRound(decks);
@@ -88,8 +89,8 @@ test('actual card UI does not reopen saved Berryblast, Red Handed, or Smeemo on 
   }
 });
 
-test('mode menu uses only full authored faces and stays flipped during room updates; another selection is possible',()=>{
-  const ui=mountUI({});ui.window.dispatchEvent({type:'rg:show-card-menu'});
+test('actual menu left click starts a show round, right click opens staff only',async()=>{
+  const ui=mountUI({decks:{evidence:['Card'],suspects:['Suspect'],quiplash:['Prompt']}});ui.window.dispatchEvent({type:'rg:show-card-menu'});
   const content=ui.get('#rg-card-games-content'),grid=content.children[0];
   assert.equal(grid.children.length,3);
   for(const [i,mode] of ['red-handed','quiplash','shop'].entries()){
@@ -97,12 +98,31 @@ test('mode menu uses only full authored faces and stays flipped during room upda
     assert.ok(choice.attributes['aria-label']);assert.equal(card.children.length,2);
     assert.ok(card.children[0].src.endsWith(`menu-${mode}-face.png`));assert.ok(card.children[1].src.endsWith('menu-card-back.png'));
   }
+  grid.children[1].events.contextmenu({preventDefault(){},stopPropagation(){}});
+  assert.equal(ui.calls.filter(x=>x==='rg:open-host-panel').length,1);
   grid.children[0].click();assert.ok(grid.classList.contains('is-animating'));assert.ok(grid.children[0].classList.contains('is-selected'));
   grid.children[1].click();assert.ok(!grid.children[1].classList.contains('is-selected'));
-  ui.update({});assert.equal(content.children[0],grid);ui.flushTimers();assert.ok(!grid.classList.contains('is-animating'));
+  ui.update(ui.state);assert.equal(content.children[0],grid);ui.flushTimers();await Promise.resolve();
   assert.equal(ui.calls.filter(x=>x==='rg:open-host-panel').length,1);
-  grid.children[1].click();assert.ok(grid.children[1].classList.contains('is-selected'));assert.ok(!grid.children[0].classList.contains('is-selected'));
-  ui.flushTimers();assert.equal(ui.calls.filter(x=>x==='rg:open-host-panel').length,2);
+  assert.equal(ui.state.round.mode,'red-handed');assert.equal(ui.state.round.prompt,'Suspect');
+  assert.equal(ui.get('#rg-card-games-title').textContent,'RED HANDED');
+});
+
+function allText(element){return [element.textContent||'',...(element.children||[]).map(allText)].join(' ');}
+function findText(element,text){return element.textContent===text?element:(element.children||[]).map(child=>findText(child,text)).find(Boolean);}
+test('actual show renderer withholds answer text from the DOM and exposes only explicitly revealed answers',async()=>{
+  const ui=mountUI({});let round=games.createQuiplashRound(['Prompt']);ui.update({round});
+  for(const player of games.CARD_GAME_PLAYERS){round=games.submitRoundAnswer(round,player,`secret-${player}`);ui.update({round});}
+  const content=ui.get('#rg-card-games-content');
+  assert.doesNotMatch(allText(content),/secret-/);assert.ok(findText(content,'REVEAL NEXT'));
+  findText(content,'REVEAL NEXT').click();await Promise.resolve();
+  assert.equal(ui.state.round.revealedCount,1);assert.match(allText(content),new RegExp(ui.state.round.responses[0].text));
+  assert.doesNotMatch(allText(content),new RegExp(ui.state.round.responses[1].text));
+  findText(content,'ALL').click();await Promise.resolve();assert.equal(ui.state.round.phase,'voting');
+  for(const response of ui.state.round.responses)assert.match(allText(content),new RegExp(response.text));
+  assert.ok(findText(content,'RESULTS'));
+  findText(content,'RESULTS').click();await Promise.resolve();assert.equal(ui.state.round.phase,'results');
+  assert.ok(findText(content,'NEW ROUND'));
 });
 
 

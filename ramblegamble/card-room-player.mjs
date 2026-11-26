@@ -1,8 +1,8 @@
 import { ACK_TIMEOUT_MS, matchesAck, pendingReceipt, validRequestId } from "./card-room-delivery.mjs?v=submission-audit-20261126-v1";
 import { foley } from "./game-foley.mjs?v=expanded-foley-20261126-v1";
-import { renderLiveQuestion } from "./trivia-live-view.mjs?v=submission-audit-20261126-v1";
+import { renderLiveQuestion } from "./trivia-live-view.mjs?v=show-stage-20261126-v1";
 import { nonce, validNonce, validPublicKey, channelBinding, transcript, verifyHost, proveSeat } from "./card-room-auth.mjs?v=host-security-20261126-v1";
-import { ROOM_VERSION, isPlayer, decodePacket, encodePacket } from "./card-room-protocol.mjs?v=submission-audit-20261126-v1";
+import { ROOM_VERSION, isPlayer, decodePacket, encodePacket } from "./card-room-protocol.mjs?v=show-stage-20261126-v1";
 import { loadPeer } from "./card-room-peer.mjs";
 const $ = id => document.getElementById(id);
 const invite = decodePacket(location.hash.slice(1));
@@ -39,7 +39,7 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
     if (changed && next) foley.play("question");
     if (changed) { clearTimeout(ackTimer); ackTimer=null; pending = next ? recover(next.id) : null; if (next && !pending) remember(null); $('answer').value = next?.mode==='quiplash'?(loadDraft(next.id)?.text||''):''; $('submission').textContent = ''; $('fallback').hidden = true; $('choices').replaceChildren(); }
     round = next;
-    const receipt=resolvePending(next); if(next?.submitted||receipt==='accepted'||next?.phase==='closed')clearDraft();
+    const receipt=resolvePending(next); if(next?.submitted||receipt==='accepted'||(next && next.phase!=='submissions'))clearDraft();
     $('round').hidden = !round;
     if (!round) { $('trivia-player-content').hidden=true; triviaRenderKey=''; return; }
     if (round.mode === 'trivia') { renderTrivia(round, changed); return; }

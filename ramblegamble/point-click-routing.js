@@ -84,5 +84,6 @@ export function resolveHostContextAction(interaction) {
   if(interaction?.machine === "roulette") return "trivia";
   if(interaction?.machine === "slot") return "slots";
   if(interaction?.machine === "card-table") return "card-games";
+  if(interaction?.machine === "dice-door") return "dice";
   return "";
 }

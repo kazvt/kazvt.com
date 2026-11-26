@@ -1,7 +1,8 @@
-import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia } from "./live-trivia.mjs?v=submission-audit-20261126-v1";
+import { applyCardShowAction } from "./card-show-actions.mjs?v=show-stage-20261126-v1";
+import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia } from "./live-trivia.mjs?v=show-stage-20261126-v1";
 import { activeCardStage, cardStageChange } from "./card-stage-state.mjs?v=wildcard-shared-20261126-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
-import { mountCardRoom } from "./card-room-host.mjs?v=submission-audit-20261126-v1";
+import { mountCardRoom } from "./card-room-host.mjs?v=show-stage-20261126-v1";
 import { foley } from "./game-foley.mjs?v=expanded-foley-20261126-v1";
 import {
   CARD_GAME_CATEGORIES,
@@ -15,11 +16,11 @@ import {
   normalizeTextList,
   parseShopCardList,
   recordAudienceVote,
-  revealAudienceResults,
+  visibleCardResponses,
   submitRoundAnswer,
   buyShopCard,
-} from "./card-games.mjs?v=wildcard-shared-20261126-v1";
-import { readCardGames, writeCardGames, subscribeCardGames } from "./card-games-store.mjs?v=live-trivia-20261126-v1";
+} from "./card-games.mjs?v=show-stage-20261126-v1";
+import { readCardGames, writeCardGames, subscribeCardGames } from "./card-games-store.mjs?v=show-stage-20261126-v1";
 import { readPointScores, subscribePointScores, writePointScores } from "./points-store.mjs?v=points-console-20261120-v1";
 
 (() => {
@@ -32,12 +33,6 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   const content = $("#rg-card-games-content");
   const liveStatus = $("#rg-card-live-status");
   const roomButton = $("#rg-card-room");
-  const hostButton = document.createElement("button");
-  hostButton.type = "button";
-  hostButton.className = "rg-card-room-button rg-card-host-button";
-  hostButton.textContent = "HOST";
-  hostButton.setAttribute("aria-label", "Open card game host controls");
-  roomButton.before(hostButton);
 
   const modeSelect = $("#rg-card-mode");
   const saveButton = $("#rg-card-save");
@@ -87,6 +82,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   let smeemoScheduledSignal = "";
   let menuTimer = 0;
   let menuSelection = "";
+  let lastPresentation = { id: null, visible: [], phase: null };
 
   function element(tag, className = "", text = "") {
     const item = document.createElement(tag);
@@ -162,15 +158,17 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     answerTextWrap.hidden = round?.mode !== "quiplash";
     answerText.disabled = round?.mode !== "quiplash" || Boolean(round?.submissions?.[playerSelect.value]);
     submitButton.disabled = !isSubmitting || Boolean(round?.submissions?.[playerSelect.value]);
-    voteControls.hidden = !round || round.phase !== "voting";
+    voteControls.hidden = !round || !["reveal", "voting"].includes(round.phase);
     revealButton.disabled = !round?.responses?.length;
+    revealButton.textContent = round?.phase === "reveal" ? "REVEAL NEXT" : "REVEAL RESULTS";
     shopAdmin.hidden = round?.mode !== "shop" || round.phase !== "shopping";
     if (round?.mode === "red-handed") setAnswerChoices(round, playerSelect.value);
     if (!round) adminStatus.textContent = "Add decks, then choose a game.";
     else if (round.phase === "submissions") {
       const submitted = CARD_GAME_PLAYERS.filter((player) => round.submissions[player]).length;
       adminStatus.textContent = `${modeNames[activeMode]} - ${submitted} of 3 submitted.`;
-    } else if (round.phase === "voting") adminStatus.textContent = "Answers are revealed without names. Audience votes on the card table.";
+    } else if (round.phase === "reveal") adminStatus.textContent = `${round.revealedCount || 0} / ${round.responses.length} revealed.`;
+    else if (round.phase === "voting") adminStatus.textContent = "Answers are revealed without names. Audience votes on the card table.";
     else if (round.phase === "results") adminStatus.textContent = "Results are on the card table.";
     else if (round.phase === "shopping") adminStatus.textContent = "Choose a buyer on the card table, then select a face-down card.";
     resetButton.hidden = !round;
@@ -181,10 +179,14 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     if (!dismissedActive && !menuOpen && before?.id && before.id === after?.id && !layer.hidden) {
       const prior = Object.values(before.submissions || {}).filter(Boolean).length;
       const current = Object.values(after.submissions || {}).filter(Boolean).length;
-      if (current > prior) foley.play(after.phase === "voting" ? "cardFan" : "submit");
+      if (current > prior) foley.play(after.phase === "reveal" ? "cardFan" : "submit");
+      if ((after.revealedCount || 0) > (before.revealedCount || 0)) foley.play("flip");
+      if (after.phase === "results" && before.phase !== "results") foley.play("confirm");
     }
+    const explicitlyActivated = Boolean(next.activityRevision && next.activityRevision !== state?.activityRevision);
+    const decksChanged = JSON.stringify(state?.decks) !== JSON.stringify(next.decks);
     state = next;
-    loadDeckInputs(state.decks);
+    if (decksChanged) loadDeckInputs(state.decks);
     setDeckVisibility();
     setAdminState(state);
     network?.publish();
@@ -197,7 +199,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       smeemoPhaseTimer = 0;
       smeemoScheduledSignal = "";
     }
-    if (opened) {
+    if (opened || (active && explicitlyActivated)) {
       foley.start("cards-motion", "deal");
       menuOpen = false;
       dismissedActive = false;
@@ -218,7 +220,8 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   }
 
   function sync(next) {
-    const result = writeCardGames(next);
+    const result = writeCardGames(next, { requirePersistence: true });
+    if (!result.persisted) throw Error("Could not save game state.");
     updateFromState(result.state);
     return result;
   }
@@ -243,15 +246,18 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     smeemoPhaseTimer = window.setTimeout(() => {
       smeemoPhaseTimer = 0;
       smeemoScheduledSignal = "";
-      const latest = state.smeemo;
-      if (!latest || latest.id !== game.id || latest.phase !== game.phase) return;
-      const advanced = advanceSmeemoPhase(latest, game.phase);
-      if (advanced === latest) return;
-      if (!dismissedActive && !layer.hidden) {
-        if (advanced.phase === "stacking") foley.start("cards-motion", "shuffle");
-        if (advanced.phase === "dealing") foley.start("cards-motion", "deal");
-      }
-      sync({ ...state, smeemo: advanced });
+      // Automatic show animation is safe to advance while host controls are locked.
+      withRoomSubmissionLock(() => {
+        const current = readCardGames(), latest = current.smeemo;
+        if (!latest || latest.id !== game.id || latest.phase !== game.phase) return;
+        const advanced = advanceSmeemoPhase(latest, game.phase);
+        if (advanced === latest) return;
+        if (!dismissedActive && !layer.hidden && !document.documentElement?.hasAttribute("data-rg-host-locked")) {
+          if (advanced.phase === "stacking") foley.start("cards-motion", "shuffle");
+          if (advanced.phase === "dealing") foley.start("cards-motion", "deal");
+        }
+        sync({ ...current, smeemo: advanced });
+      }).catch(error => { liveStatus.textContent = error.message; });
     }, wait);
   }
 
@@ -281,6 +287,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     card.append(face(imageName, "front"), face("menu-card-back.png", "back"));
     choice.append(card);
     choice.addEventListener("click", () => chooseMode(mode, choice));
+    choice.addEventListener("contextmenu", event => { event.preventDefault(); event.stopPropagation(); openHostPanel(mode); });
     return choice;
   }
 
@@ -289,9 +296,9 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     menuTimer = 0;
     menuSelection = "";
     layer.hidden = false;
-    hostButton.hidden = true;
     setStageTitle("CARD TABLE", "menu");
     liveStatus.textContent = "Choose a card game.";
+    lastPresentation = { id: null, visible: [], phase: null };
     content.replaceChildren();
     const grid = element("div", "rg-card-menu-grid");
     grid.append(
@@ -338,8 +345,19 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       menuTimer = 0;
       grid.classList.remove("is-animating");
       if (!menuOpen) return;
-      openHostPanel(mode);
-      modeSelect.focus({ preventScroll: true });
+      if (document.documentElement?.hasAttribute("data-rg-host-locked")) { renderMenu(); return; }
+      runRoomMutation(() => {
+        const latest = readCardGames();
+        if (latest.round?.mode === mode && !latest.smeemo) {
+          const result = writeCardGames(latest, { activate: true, requirePersistence: true });
+          if (!result.persisted) throw Error("Could not resume game.");
+          menuOpen = false; dismissedActive = false; updateFromState(result.state);
+          window.dispatchEvent(new CustomEvent("rg:card-game-active", { detail: { mode } }));
+          return;
+        }
+        const next = applyCardShowAction(latest, "start", { mode });
+        menuOpen = false; dismissedActive = false; sync(next); closeHostPanel();
+      }, error => { renderMenu(); content.append(element("p", "rg-show-notice", error.message)); });
     }, reducedMotion.matches ? 20 : 760);
   }
 
@@ -348,17 +366,12 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     progress.setAttribute("aria-label", "Player submission status");
     for (const player of CARD_GAME_PLAYERS) {
       const item = element("div", `rg-card-player-progress${round.submissions[player] ? " is-submitted" : ""}`);
-      if (round.submissions[player]) {
+      {
         const image = element("img");
         image.src = berryImages[player];
-        image.alt = `${playerNames[player]} submitted`;
+        image.alt = `${playerNames[player]} ${round.submissions[player] ? "submitted" : "waiting"}`;
         item.append(image);
-      } else {
-        const placeholder = element("span", "rg-card-progress-empty");
-        placeholder.setAttribute("aria-hidden", "true");
-        item.append(placeholder);
       }
-      item.append(element("span", "", playerNames[player]));
       progress.append(item);
     }
     return progress;
@@ -372,64 +385,73 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     return card;
   }
 
+  function showAction(action, roundId, responseId) {
+    return runRoomMutation(() => {
+      const latest = readCardGames();
+      if (activeRoomRound()?.id !== roundId) throw Error("Round changed.");
+      const next = applyCardShowAction(latest, action, { roundId, responseId });
+      sync(next);
+      if (action === "vote") foley.play("vote");
+    });
+  }
+
   function renderRound(round) {
     layer.hidden = false;
-    hostButton.hidden = false;
     setStageTitle(modeNames[round.mode] || "CARD TABLE", round.mode);
+    if (round.mode === "shop") { renderShop(round); return; }
+    const visible = visibleCardResponses(round);
+    const sameRound = lastPresentation.id === round.id;
+    const fresh = new Set(visible.filter(r => !sameRound || !lastPresentation.visible.includes(r.id)).map(r => r.id));
+    const resultsNow = round.phase === "results" && (!sameRound || lastPresentation.phase !== "results");
+    lastPresentation = { id: round.id, visible: visible.map(r => r.id), phase: round.phase };
     content.replaceChildren();
-    if (round.mode === "shop") {
-      renderShop(round);
-      return;
-    }
-    const prompt = promptCard(round.prompt, round.mode === "red-handed" ? "suspect" : "quiplash");
-    const shell = element("div", `rg-card-round${round.mode === "quiplash" ? " is-berryblast" : ""}`);
+    const shell = element("div", `rg-card-round rg-show-round${round.mode === "quiplash" ? " is-berryblast" : ""}`);
     const promptSide = element("div", "rg-card-prompt-side");
-    promptSide.append(prompt);
+    promptSide.append(promptCard(round.prompt, round.mode === "red-handed" ? "suspect" : "quiplash"), berryProgress(round));
+    const submitted = CARD_GAME_PLAYERS.filter(player => round.submissions[player]).length;
+    const answers = element("div", "rg-card-answer-grid rg-show-answer-grid");
+    const right = element("div", "rg-show-answers");
     if (round.phase === "submissions") {
-      const submitted = CARD_GAME_PLAYERS.filter((player) => round.submissions[player]).length;
-      promptSide.append(berryProgress(round), element("p", "rg-card-round-status", `${submitted} / 3`));
-      liveStatus.textContent = `${modeNames[round.mode]}: ${submitted} of 3 players have submitted.`;
-      const waiting = element("div", "rg-card-waiting");
-      waiting.append(element("h2", "rg-card-results-title", "ANSWERS"), element("p", "rg-card-round-status", "Waiting for all three berries."));
-      shell.append(promptSide, waiting);
-    } else if (round.phase === "voting") {
-      const voteTotal = Object.values(round.votes).reduce((total, count) => total + count, 0);
-      liveStatus.textContent = `Audience voting is open. ${voteTotal} votes cast.`;
-      const answers = element("div", "rg-card-answer-grid");
-      for (const response of round.responses) {
-        const answer = element("button", "rg-card-answer");
-        answer.type = "button";
-        answer.setAttribute("aria-label", `Vote for anonymous answer: ${response.text}`);
-        answer.append(element("span", "rg-card-answer-copy", response.text));
-        const count = element("span", "rg-card-vote-count", `${round.votes[response.id] || 0} VOTES`);
-        answer.append(count);
-        answer.addEventListener("click", () => {
-          const updated = recordAudienceVote(state.round, response.id);
-          if (updated === state.round) return;
-          foley.play("vote");
-          sync({ ...state, round: updated });
-        });
-        answers.append(answer);
-      }
-      shell.classList.add("is-voting");
-      shell.append(promptSide, answers);
+      right.append(element("p", "rg-show-status", `${submitted} / 3`));
+      liveStatus.textContent = `${submitted} of 3 submitted.`;
     } else {
-      liveStatus.textContent = "Vote results revealed.";
-      const results = element("div", "rg-card-results");
-      results.append(element("h2", "rg-card-results-title", round.winnerIds.length ? "VOTE RESULTS" : "NO VOTES"));
-      const answers = element("div", "rg-card-answer-grid");
-      const ordered = [...round.responses].sort((a, b) => (round.votes[b.id] || 0) - (round.votes[a.id] || 0));
-      for (const response of ordered) {
-        const answer = element("article", `rg-card-answer${round.winnerIds.includes(response.id) ? " is-winner" : ""}`);
+      for (const [i, response] of visible.entries()) {
+        const canVote = round.phase === "voting";
+        const winner = round.phase === "results" && round.winnerIds.includes(response.id);
+        const answer = element(canVote ? "button" : "article", `rg-card-answer${winner ? " is-winner" : ""}${fresh.has(response.id) ? " rg-show-reveal" : ""}${winner && resultsNow ? " rg-show-winner" : ""}`);
+        if (canVote) { answer.type = "button"; answer.setAttribute("aria-label", `Vote for anonymous answer: ${response.text}`); answer.addEventListener("click", () => showAction("vote", round.id, response.id)); }
         answer.append(element("span", "rg-card-answer-copy", response.text));
-        answer.append(element("span", "rg-card-vote-count", `${round.votes[response.id] || 0} VOTES`));
+        if (round.phase !== "reveal") answer.append(element("span", "rg-card-vote-count", `${round.votes[response.id] || 0} VOTES`));
         answers.append(answer);
       }
-      results.append(answers);
-      shell.classList.add("rg-card-results-layout");
-      shell.append(promptSide, results);
+      if (round.phase === "reveal") {
+        for (let i = visible.length; i < round.responses.length; i++) {
+          const back = element("div", "rg-show-answer-back");
+          back.setAttribute("aria-label", "Unrevealed answer");
+          answers.append(back);
+        }
+        liveStatus.textContent = `${visible.length} of ${round.responses.length} answers revealed.`;
+      } else liveStatus.textContent = round.phase === "results" ? "Vote results." : "Voting open.";
+      right.append(answers);
     }
-    content.append(shell);
+    const controls = element("div", "rg-show-actions");
+    const addAction = (label, action) => {
+      const button = element("button", "rg-card-room-button rg-show-action", label);
+      button.type = "button"; button.dataset.foley = "off";
+      button.addEventListener("click", () => showAction(action, round.id)); controls.append(button);
+    };
+    if (round.phase === "submissions" && submitted > 0) addAction("LOCK ANSWERS", "close");
+    if (round.phase === "reveal") { addAction("REVEAL NEXT", "reveal"); if (round.responses.length - round.revealedCount > 1) addAction("ALL", "all"); }
+    if (round.phase === "voting") addAction("RESULTS", "results");
+    if (round.phase === "results") {
+      const button = element("button", "rg-card-room-button rg-show-action", "NEW ROUND");
+      button.type = "button"; button.dataset.foley = "off";
+      button.addEventListener("click", () => runRoomMutation(() => {
+        const latest = readCardGames(); if (latest.round?.id !== round.id) return;
+        sync(applyCardShowAction(latest, "start", { mode: round.mode }));
+      }, error => { liveStatus.textContent = error.message; content.append(element("p", "rg-show-notice", error.message)); })); controls.append(button);
+    }
+    right.append(controls); shell.append(promptSide, right); content.append(shell);
   }
 
   function renderShop(round) {
@@ -466,18 +488,27 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
         button.append(element("span", "rg-shop-card-owner", `TAKEN BY ${playerNames[card.buyer]}`));
       }
       button.addEventListener("click", () => {
-        const purchase = buyShopCard(state.round, card.id, selectedBuyer, pointScores);
+        const buyer = selectedBuyer;
+        return runRoomMutation(() => {
+        const latest = readCardGames();
+        if (latest.round?.id !== round.id || latest.smeemo) return;
+        const priorScores = readPointScores();
+        const purchase = buyShopCard(latest.round, card.id, buyer, priorScores);
         if (purchase.error) {
-          const message = purchase.error === "not-enough-points" ? `${playerNames[selectedBuyer]} needs more points.` : "That card is no longer available.";
+          const message = purchase.error === "not-enough-points" ? `${playerNames[buyer]} needs more points.` : "That card is no longer available.";
           foley.play("error");
           setStatusMessage(message);
           return;
         }
+        const savedScores = writePointScores(purchase.scores);
+        if (!savedScores.persisted) { writePointScores(priorScores); throw Error("Could not save points."); }
+        try { sync({ ...latest, round: purchase.round }); }
+        catch (error) { writePointScores(priorScores); throw error; }
+        pointScores = savedScores.scores;
         foley.play("flip");
         foley.play("purchase");
-        pointScores = writePointScores(purchase.scores).scores;
-        sync({ ...state, round: purchase.round });
-        setStatusMessage(`${playerNames[selectedBuyer]} bought ${card.name}.`);
+        setStatusMessage(`${playerNames[buyer]} bought ${card.name}.`);
+        });
       });
       const label = element("span", "rg-shop-card-type", `${card.category} card`);
       const price = element("span", "rg-shop-card-price", `${card.price} POINTS`);
@@ -494,7 +525,6 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
 
   function renderSmeemo(game) {
     layer.hidden = false;
-    hostButton.hidden = true;
     setStageTitle("SMEEMO SCRAMBLE", "smeemo");
     content.replaceChildren();
     const board = element("div", `rg-smeemo-board is-${game.phase}`);
@@ -535,16 +565,16 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       back.setAttribute("aria-hidden", "true");
       inner.append(front, back);
       button.append(inner);
-      button.addEventListener("click", () => {
-        const current = state.smeemo;
+      button.addEventListener("click", () => runRoomMutation(() => {
+        const latest = readCardGames(), current = latest.smeemo;
         if (!current || current.id !== game.id) return;
         const result = drawSmeemoCard(current, card.id);
         if (result.error) return;
         foley.play("flip");
         if (card.smeemo) foley.play("jackpot");
-        sync({ ...state, smeemo: result.game });
+        sync({ ...latest, smeemo: result.game });
         window.queueMicrotask(() => content.querySelector(".rg-smeemo-card.is-available")?.focus({ preventScroll: true }));
-      });
+      }));
       rail.append(button);
     }
 
@@ -644,7 +674,12 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     closeHostPanel();
   }
 
-  function runRoomMutation(action) { withRoomSubmissionLock(action).catch(() => { adminStatus.textContent = "Card room update failed; retry."; }); }
+  function runRoomMutation(action, onError = error => { adminStatus.textContent = error.message || "Card room update failed; retry."; liveStatus.textContent = adminStatus.textContent; if(!layer.hidden) content.append(element("p", "rg-show-notice", adminStatus.textContent)); }) {
+    return withRoomSubmissionLock(() => {
+      if (document.documentElement?.hasAttribute("data-rg-host-locked")) return;
+      return action();
+    }).catch(onError);
+  }
   saveButton.addEventListener("click", () => runRoomMutation(saveDecks));
   startButton.addEventListener("click", () => runRoomMutation(startSelectedGame));
   menuButton.addEventListener("click", openCardMenu);
@@ -652,21 +687,17 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   playerSelect.addEventListener("change", () => setAdminState(state));
   submitButton.addEventListener("click", submitPrivateAnswer);
   answerText.addEventListener("keydown", event => { if (event.key === "Enter" && !event.shiftKey && !event.isComposing) { event.preventDefault(); submitPrivateAnswer(); } });
-  revealButton.addEventListener("click", () => {
-    const round = revealAudienceResults(state.round);
-    if (round === state.round) return;
-    foley.play("flip");
-    foley.play(round.winnerIds?.length ? "confirm" : "close");
-    sync({ ...state, round });
-  });
+  revealButton.addEventListener("click", () => showAction(state.round?.phase === "reveal" ? "reveal" : "results", state.round?.id));
+  layer.addEventListener("contextmenu", event => { event.preventDefault(); openHostPanel(menuOpen ? menuSelection || modeSelect.value : state.round?.mode); });
   resetButton.addEventListener("click", () => runRoomMutation(() => {
     foley.stop("cards-motion");
     foley.play("erase");
     sync({ ...readCardGames(), round: null });
     adminStatus.textContent = "Current card game reset.";
   }));
-  shopRefreshButton.addEventListener("click", () => {
-    const round = createShopRound(state.decks.shop);
+  shopRefreshButton.addEventListener("click", () => runRoomMutation(() => {
+    const latest = readCardGames();
+    const round = createShopRound(latest.decks.shop);
     if (!round) {
       foley.play("error");
       adminStatus.textContent = "Add at least one priced card to each shop list.";
@@ -675,10 +706,9 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     selectedBuyer = "faroe";
     menuOpen = false;
     dismissedActive = false;
-    sync({ ...state, round });
+    sync({ ...latest, round, smeemo:null });
     closeHostPanel();
-  });
-  hostButton.addEventListener("click", () => openHostPanel());
+  }));
   roomButton.addEventListener("click", () => {
     foley.stop("cards-motion");
     menuOpen = false;

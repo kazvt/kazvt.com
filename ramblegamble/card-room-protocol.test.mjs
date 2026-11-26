@@ -9,9 +9,9 @@ test('private player snapshots omit other hands, answers, votes and decks',()=>{
  const round=createRedHandedRound(Array.from({length:20},(_,i)=>`card ${i}`),['prompt']);
  const view=playerRound(round,'kaz'); assert.deepEqual(view.hand,round.hands.kaz); assert.equal(view.hand.length,5); assert.deepEqual(Object.keys(view).sort(),['hand','id','mode','phase','prompt','savedAnswer','submitted']); assert.equal(playerRound(round,'unknown'),null);
 });
-test('three authenticated remote players are independently accepted and anonymously revealed only at three',()=>{
+test('three authenticated remote players are accepted privately, then wait for the host',()=>{
  const room=createRoom(hostKey); let round=createQuiplashRound(['Question']); assert.ok(validRoom(room)); assert.equal(new Set(Object.values(room.tokens)).size,3);
- for(const [i,p] of ['kaz','faroe','erin'].entries()) {const m=message(room,round,p,`answer ${p}`); const result=acceptSubmission(room,round,m); assert.equal(result.status,'accepted'); round=result.round; assert.equal(round.phase,i===2?'voting':'submissions'); assert.equal(round.responses.length,i===2?3:0); assert.equal(acceptSubmission(room,round,m).round,round);}
+ for(const [i,p] of ['kaz','faroe','erin'].entries()) {const m=message(room,round,p,`answer ${p}`); const result=acceptSubmission(room,round,m); assert.equal(result.status,'accepted'); round=result.round; assert.equal(round.phase,i===2?'reveal':'submissions'); assert.equal(round.responses.length,i===2?3:0); assert.equal(acceptSubmission(room,round,m).round,round);}
  assert.deepEqual(round.responses.map(r=>r.text).sort(),['answer erin','answer faroe','answer kaz']); assert.ok(round.responses.every(r=>!('player'in r))); assert.equal(playerRound(round,'kaz').submitted,true);
 });
 test('rejects invalid identity, other room, wrong token, stale round and malformed text without changes',()=>{

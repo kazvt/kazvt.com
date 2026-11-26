@@ -481,3 +481,27 @@
 .rg-card-prompt-copy { pointer-events:auto; }
 .rg-card-games-shell.is-scrollable { pointer-events:auto; }
 @media(max-height:500px) { .rg-card-games-shell { max-height:94dvh; } }
+
+/* Show-facing HUD: use the authored cards, keep the room visible between them. */
+.rg-show-round { align-items:center; }
+.rg-show-answers { min-width:0; display:grid; gap:clamp(7px,1.3vw,13px); }
+.rg-show-status { color:#fff2ba; text-align:center; font-size:clamp(26px,5vw,56px); font-weight:900; letter-spacing:.08em; text-shadow:3px 3px #382066,5px 5px #8b2626; margin:0; }
+.rg-show-actions { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; }
+.rg-show-action { min-height:40px; color:#fff2ba; border:2px solid #fff2ba; background:rgba(88,65,170,.86); box-shadow:3px 3px #8b2626; font-weight:900; letter-spacing:.07em; transition:transform .15s,background .15s; }
+.rg-show-action:hover { background:#7056d8; transform:translateY(-2px); }
+.rg-show-action:active { transform:translate(2px,2px); }
+.rg-show-notice { color:#fff2ba; text-align:center; font-weight:900; text-shadow:2px 2px #1e0b01; }
+.rg-show-answer-back { width:min(100%,180px); aspect-ratio:33/47; justify-self:center; background:url('/ramblegamble/assets/card-games/menu-card-back.png') center/100% 100% no-repeat; image-rendering:pixelated; filter:drop-shadow(4px 5px 0 #21172e); }
+.is-berryblast .rg-show-answer-back { width:100%; min-height:48px; aspect-ratio:auto; border:2px solid rgba(248,238,156,.7); background:repeating-linear-gradient(135deg,rgba(104,85,205,.65) 0 10px,rgba(61,42,133,.72) 10px 20px); }
+.rg-show-round .rg-card-player-progress { min-width:0; }
+.rg-show-round .rg-card-player-progress img { opacity:.48; filter:grayscale(.8); }
+.rg-show-round .rg-card-player-progress.is-submitted img { opacity:1; filter:none; animation:none; }
+.rg-show-round .rg-card-player-progress.is-submitted { border-bottom:3px solid #ffdf75; }
+.rg-show-round.is-berryblast .rg-card-prompt.is-quiplash { background:rgba(217,209,255,.94); border:3px solid #e7e1fc; box-shadow:4px 4px #3b2475; filter:none; }
+.rg-show-round.is-berryblast .rg-card-answer { background:rgba(248,238,214,.95); border:2px solid #b77beb; }
+.rg-show-reveal { animation:rg-show-deal 450ms cubic-bezier(.16,.8,.25,1) both; }
+.rg-show-winner { animation:rg-show-win 650ms cubic-bezier(.18,.9,.25,1) both; }
+@keyframes rg-show-deal { from { opacity:0; transform:translateY(18px) rotateX(-28deg) scale(.92); } 75% { opacity:1; transform:translateY(-3px) scale(1.025); } to { opacity:1; transform:none; } }
+@keyframes rg-show-win { 0% { filter:brightness(1); } 40% { filter:brightness(1.22) drop-shadow(0 0 12px #ffdf75); } 100% { filter:drop-shadow(3px 3px 0 #8b2626); } }
+@media(max-width:680px) { .rg-show-round .rg-card-prompt.is-suspect { max-height:30dvh; } .rg-show-answer-back { width:100%; } }
+@media(prefers-reduced-motion:reduce) { .rg-show-reveal,.rg-show-winner,.rg-show-action { animation:none!important; transition:none!important; } }

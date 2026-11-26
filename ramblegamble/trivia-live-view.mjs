@@ -2,7 +2,7 @@
 const foley = globalThis.location?.pathname?.replace(/\/$/, '') === '/rg/console'
  ? {play(){}} : (await import('./game-foley.mjs?v=expanded-foley-20261126-v1')).foley;
 import { snapComposePlacement } from './compose-placement.mjs';
-import { CHOICE_MODES, publicMedia, validTriviaAnswer, MAX_TRIVIA_ANSWER, answerSummary } from './live-trivia.mjs?v=submission-audit-20261126-v1';
+import { CHOICE_MODES, publicMedia, validTriviaAnswer, MAX_TRIVIA_ANSWER, answerSummary } from './live-trivia.mjs?v=show-stage-20261126-v1';
 const node=(tag,cls='',text='')=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text)e.textContent=text;return e;};
 const button=(text,fn)=>{const b=node('button','rg-live-button',text);b.type='button';b.addEventListener('click',fn);return b;};
 function image(src,alt='') {const url=publicMedia(src);if(!url)return null;const e=node('img','rg-live-image');e.src=url;e.alt=alt;e.referrerPolicy='no-referrer';e.draggable=false;return e;}

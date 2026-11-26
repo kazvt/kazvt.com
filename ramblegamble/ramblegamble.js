@@ -1,3 +1,4 @@
+import { createFocusOrbit, orbitPosition, bindFocusDrag } from "./focus-orbit.mjs?v=show-stage-20261126-v1";
 import { createExteriorMist } from "./exterior-mist.mjs?v=exterior-mist-20261126-v1";
 import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS } from "./arcade-framing.mjs?v=bottom-column-arrows-20261126-v1";
 import { foley } from "./game-foley.mjs?v=expanded-foley-20261126-v1";
@@ -9,7 +10,7 @@ import {
   resolveArcadeShortcut,
   resolveSlotContextCell,
   resolveHostContextAction,
-} from "./point-click-routing.js?v=arcade-framing-20261126-v1";
+} from "./point-click-routing.js?v=show-stage-20261126-v1";
 import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
 import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-door-wall-target-20261120-v1";
 import { readPointScores, subscribePointScores, writePointScores } from "./points-store.mjs?v=points-console-20261120-v1";
@@ -27,6 +28,7 @@ import {
   slotScreenPoint,
   slotMotionFrame,
 } from "./slot-reels.mjs?v=directional-reels-20261126-v1";
+import { createSlotWinAnimation, isSlotWinFinished, paintSlotWin } from "./slot-win-animation.mjs?v=show-stage-20261126-v1";
 import { createSlotLinePainter } from "./slot-reel-render.mjs?v=directional-reels-20261126-v1";
 import { getSlotEligibleIndexes, placeSlotBerry, placeSlotWildcard, removeSlotSymbol, resolveSlotPayouts, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs?v=wildcard-shared-20261126-v1";
 import {
@@ -139,6 +141,7 @@ import {
   let leverMotion = null;
   let slotReelMotion = null;
   let slotWildcardPop = null;
+  let slotWinCelebration = null;
   let lastSlotTravelRows = Object.create(null);
   let lastSlotTravelColumns = Object.create(null);
   let slotReelGrid = readSavedSlotGrid();
@@ -178,6 +181,9 @@ import {
   let currentView = { kind: "overview", look: 0 };
   let cameraTarget;
   let cameraTransition = null;
+  const focusOrbit = createFocusOrbit();
+  let focusBase = null;
+  let focusDrag = null;
   let overviewCameraBounds = null;
   let pendingCardGameMode = "";
   let pendingTrivia = false;
@@ -383,7 +389,7 @@ import {
         return;
       }
       const progress = Math.max(0, Math.min(1, (time - pop.startedAt) / pop.duration));
-      const eased = 1 - Math.pow(1 - progress, 3);
+      const eased = progress * progress * (3 - 2 * progress);
       const bounce = progress < 0.72
         ? 0.62 + 0.56 * (1 - Math.pow(1 - progress / 0.72, 3))
         : 1.18 - 0.18 * Math.pow((progress - 0.72) / 0.28, 2);
@@ -410,6 +416,10 @@ import {
       });
     }
 
+    if (slotWinCelebration) {
+      paintSlotWin(context, slotWinCelebration.animation, time, drawSlotSymbol);
+    }
+
     context.save();
     context.strokeStyle = "rgba(255, 242, 155, 0.62)";
     context.lineWidth = 3;
@@ -422,14 +432,14 @@ import {
       context.moveTo(0, row * cellHeight);
       context.lineTo(slotReelCanvas.width, row * cellHeight);
     }
-    if (slotHoverLine && !slotReelMotion && currentView.kind === "slot") {
+    if (slotHoverLine && !slotReelMotion && !slotWinCelebration && currentView.kind === "slot") {
       context.fillStyle = "rgba(255, 242, 155, 0.3)";
       if (slotHoverLine.axis === "row") context.fillRect(0, slotHoverLine.index * cellHeight, slotReelCanvas.width, cellHeight);
       else context.fillRect(slotHoverLine.index * cellWidth, 0, cellWidth, slotReelCanvas.height);
     }
     context.stroke();
     context.restore();
-    if (slotHoverCell >= 0 && !slotReelMotion && selectedSlotBerry === SLOT_REEL_WILDCARD && currentView.kind === "slot") {
+    if (slotHoverCell >= 0 && !slotReelMotion && !slotWinCelebration && selectedSlotBerry === SLOT_REEL_WILDCARD && currentView.kind === "slot") {
       const column = slotHoverCell % 5;
       const row = Math.floor(slotHoverCell / 5);
       context.fillStyle = "rgba(56, 242, 255, 0.23)";
@@ -734,10 +744,46 @@ import {
     return startSlotReelSpin([column]);
   }
 
-  function finishSlotAction(motion) {
+  function completeSlotPresentation(motion, outcome, showResult = true) {
+    // Presentation cleanup never writes scores or re-clears the board.
+    slotWinCelebration = null;
+    playing = false;
+    preview.classList.remove("is-playing");
+    drawSlotReelDisplay();
+    syncSlotPlacementControls();
+    if (showResult) showSlotPayout(outcome.totals);
+    window.dispatchEvent(new CustomEvent("rg:slot-action-finish", {
+      detail: {
+        kind: motion.action,
+        payouts: outcome.payouts,
+        totals: outcome.totals,
+        clearedCells: outcome.clearedCells,
+        grid: slotReelGrid.slice(),
+      },
+    }));
+  }
+
+  function endSlotCelebration(showResult = true) {
+    const celebration = slotWinCelebration;
+    if (!celebration) return;
+    completeSlotPresentation(celebration.motion, celebration.outcome, showResult);
+  }
+
+  function canShowSlotCelebration() {
+    return gameStarted && !pauseMenuOpen && !diceModeOpen && !document.hidden
+      && !document.documentElement.hasAttribute("data-rg-host-locked");
+  }
+
+  function finishSlotAction(motion, time = performance.now()) {
     foley.stop("slots");
     const outcome = resolveSlotPayouts(motion.targetGrid);
-    if (outcome.payouts.length && !pauseMenuOpen) {
+    const visible = canShowSlotCelebration();
+    const animation = visible ? createSlotWinAnimation(motion.targetGrid, outcome, time, reducedMotion.matches) : null;
+    // Retain the winning artwork before publishing the cleared board. The
+    // durable outcome and scores are committed NOW, not at the end of the FX.
+    // Reloads, camera changes and skipped animations cannot award twice.
+    if (animation) slotWinCelebration = { animation, motion, outcome };
+    if (outcome.payouts.length && visible) {
       foley.play("payout");
       if (outcome.payouts.some(payout => payout.points >= 50000)) foley.play("jackpot");
     }
@@ -747,20 +793,8 @@ import {
       if (amount > 0) scores[name] = Math.min(Number.MAX_SAFE_INTEGER, scores[name] + amount);
     }
     if (Object.values(outcome.totals).some((amount) => amount > 0)) writePointScores(scores);
-    playing = false;
-    preview.classList.remove("is-playing");
-    drawSlotReelDisplay();
-    syncSlotPlacementControls();
-    showSlotPayout(outcome.totals);
-    window.dispatchEvent(new CustomEvent("rg:slot-action-finish", {
-      detail: {
-        kind: motion.action,
-        payouts: outcome.payouts,
-        totals: outcome.totals,
-        clearedCells: outcome.clearedCells,
-        grid: outcome.grid.slice(),
-      },
-    }));
+    if (!animation) completeSlotPresentation(motion, outcome, visible);
+    else drawSlotReelDisplay(time);
   }
 
   applyTheme();
@@ -1295,6 +1329,7 @@ import {
   }
 
   function applyCameraPose(pose) {
+    focusBase = pose.position.clone();
     camera.position.copy(pose.position);
     cameraTarget.copy(pose.target);
     camera.lookAt(cameraTarget);
@@ -1304,7 +1339,9 @@ import {
   function transitionToView(nextView, { immediate = false } = {}) {
     hideGameCursor();
     if (!immediate && sceneReady && (currentView.kind !== nextView.kind || currentView.look !== (nextView.look ?? 0) || currentView.contestantId !== nextView.contestantId)) foley.play(nextView.kind === "overview" ? "back" : "navigate");
-    currentView = { ...nextView, look: nextView.look ?? 0 };
+    currentView = { ...nextView, look: nextView.kind === "overview" ? nextView.look ?? 0 : 0 };
+    focusOrbit.reset(currentView.kind);
+    focusDrag?.reset();
     const pose = getCameraPoseForView(currentView, camera.aspect);
     if (!pose) return;
 
@@ -1316,7 +1353,7 @@ import {
 
     cameraTransition = {
       started: performance.now(),
-      duration: 380,
+      duration: 520,
       fromPosition: camera.position.clone(),
       fromTarget: cameraTarget.clone(),
       toPosition: pose.position,
@@ -1325,6 +1362,7 @@ import {
   }
 
   function setLookDirection(look) {
+    if (currentView.kind !== "overview") { focusOrbit.nudge(-look * .012, 0); return; }
     if (currentView.look === look) return;
     transitionToView({ ...currentView, look });
   }
@@ -2100,8 +2138,9 @@ import {
   function activateCardGameMode(mode) {
     pendingTrivia=false;
     if (!new Set(["red-handed", "quiplash", "shop", "smeemo", "menu"]).has(mode)) return;
-    if (!sceneReady) {
+    if (!sceneReady || diceModeOpen) {
       pendingCardGameMode = mode;
+      if (diceModeOpen) window.dispatchEvent(new Event("rg:close-dice-mode"));
       return;
     }
     if (!gameStarted) {
@@ -2115,6 +2154,7 @@ import {
       try { menuMarquee.currentTime = 0; } catch {}
     }
     result.hidden = true;
+    window.dispatchEvent(new Event("rg:close-host-panel"));
     if (currentView.kind !== "card-table") transitionToView({ kind: "card-table" });
   }
 
@@ -2240,11 +2280,17 @@ import {
     else if (action === "show-trivia") window.dispatchEvent(new Event("rg:show-latest-trivia"));
   }
 
+  focusDrag = bindFocusDrag(canvas, {
+    enabled: () => gameStarted && sceneReady && !pauseMenuOpen && !diceModeOpen && !cameraTransition
+      && currentView.kind !== "overview" && !document.querySelector("dialog[open]") && !document.documentElement.hasAttribute("data-rg-host-locked"),
+    move: (dx,dy) => focusOrbit.nudge(dx,dy),
+    onMove: hideGameCursor,
+  });
   canvas.addEventListener("pointerenter", updatePointer);
   canvas.addEventListener("pointermove", updatePointer);
   canvas.addEventListener("pointercancel", hideGameCursor);
   canvas.addEventListener("click", (event) => {
-    if (event.button === 0) pointClickAt(event.clientX, event.clientY);
+    if (event.button === 0 && !focusDrag.consumeClick()) pointClickAt(event.clientX, event.clientY);
   });
   canvas.addEventListener("contextmenu", (event) => {
     if (!gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen || cameraTransition) return;
@@ -2256,7 +2302,10 @@ import {
     });
     if (index < 0) {
       const tab=resolveHostContextAction(interaction);
-      if(tab){event.preventDefault();window.dispatchEvent(new CustomEvent("rg:open-host-panel",{detail:{tab}}));}
+      if(tab){event.preventDefault();
+        if (tab === "dice") window.dispatchEvent(new CustomEvent("rg:open-dice-mode", {detail:{staff:true}}));
+        else window.dispatchEvent(new CustomEvent("rg:open-host-panel",{detail:{tab}}));
+      }
       return;
     }
     // Do not open a browser menu over a slot cell, even if it is empty or busy.
@@ -2306,12 +2355,13 @@ import {
       preview.classList.remove("is-dice-mode");
       camera.updateMatrixWorld(true);
       if(pendingTrivia)activateTriviaMode();
+      else if(pendingCardGameMode){ const mode=pendingCardGameMode; pendingCardGameMode=""; activateCardGameMode(mode); }
     }
   });
 
   window.addEventListener("keydown", (event) => {
     if (event.altKey || event.ctrlKey || event.metaKey) return;
-    if (document.querySelector("dialog:modal") || (event.target instanceof Element && event.target.closest("dialog[open]"))) return;
+    if (diceModeOpen || document.querySelector("dialog[open]") || (event.target instanceof Element && event.target.closest("dialog[open]"))) return;
     if (event.target instanceof Element && event.target.closest("input, textarea, select, [contenteditable='true']")) return;
     if (!gameStarted || pauseMenuOpen) return;
     const key = event.key.toLowerCase();
@@ -2332,6 +2382,7 @@ import {
     }
     else if (shortcut === "host") transitionToView({ kind: "host" });
     else if (shortcut === "card-table") transitionToView({ kind: "card-table" });
+    else if (key === "b" && event.shiftKey) window.dispatchEvent(new CustomEvent("rg:open-host-panel", {detail:{tab:"card-games"}}));
     else if (shortcut === "cheer") {
       if (!event.repeat) playCheer();
     }
@@ -2339,6 +2390,8 @@ import {
     else if (key === "3") transitionToView({ kind: "roulette" });
     else if (key === "arrowleft") setLookDirection(-1);
     else if (key === "arrowright") setLookDirection(1);
+    else if (key === "arrowup" && currentView.kind !== "overview") focusOrbit.nudge(0,.012);
+    else if (key === "arrowdown" && event.shiftKey && currentView.kind !== "overview") focusOrbit.nudge(0,-.012);
     else if (key === "arrowdown" || key === "backspace") goBack();
     else if (key === "enter" || key === " ") {
       const bounds = canvas.getBoundingClientRect();
@@ -2356,6 +2409,7 @@ import {
   window.addEventListener("rg:pull-slots", startLeverPull);
   window.addEventListener("rg:slot-grid-updated", (event) => {
     slotReelGrid = normalizeSlotGrid(event.detail?.grid);
+    if (slotWinCelebration && slotReelGrid.some((symbol, index) => symbol !== slotWinCelebration.outcome.grid[index])) endSlotCelebration(false);
     syncSlotPlacementControls();
     if (!slotReelMotion) drawSlotReelDisplay();
   });
@@ -2370,6 +2424,7 @@ import {
   window.addEventListener("storage", (event) => {
     if (event.key !== SLOT_GRID_STORAGE_KEY) return;
     slotReelGrid = normalizeSlotGrid(event.newValue);
+    if (slotWinCelebration && slotReelGrid.some((symbol, index) => symbol !== slotWinCelebration.outcome.grid[index])) endSlotCelebration(false);
     syncSlotPlacementControls();
     if (!slotReelMotion) drawSlotReelDisplay();
   });
@@ -2384,10 +2439,7 @@ import {
     camera.lookAt(cameraTarget);
     camera.updateMatrixWorld(true);
     if (progress >= 1) {
-      camera.position.copy(transition.toPosition);
-      cameraTarget.copy(transition.toTarget);
-      camera.lookAt(cameraTarget);
-      camera.updateMatrixWorld(true);
+      applyCameraPose({position:transition.toPosition, target:transition.toTarget});
       cameraTransition = null;
     }
   }
@@ -2494,7 +2546,7 @@ import {
   let cardTableBounds = null;
   function updateCardTableProjection() {
     if (!cardLayer) return;
-    const active = gameStarted && !pauseMenuOpen && !diceModeOpen && currentView.kind === "card-table" && cardTableModel;
+    const active = gameStarted && !pauseMenuOpen && !diceModeOpen && !cameraTransition && currentView.kind === "card-table" && cardTableModel;
     cardLayer.classList.toggle("is-off-table", !active);
     if (!active || cardLayer.hidden) return;
     cardTableBounds ||= new THREE.Box3().setFromObject(cardTableModel);
@@ -2518,10 +2570,21 @@ import {
     if (!renderer || !scene || !camera) return;
 
     updateCameraTransition(time);
+    if (!cameraTransition && focusBase && currentView.kind !== "overview" && gameStarted && !pauseMenuOpen && !diceModeOpen && !document.documentElement.hasAttribute("data-rg-host-locked")) {
+      const {yaw,pitch} = focusOrbit.step(time, reducedMotion.matches);
+      const pos = orbitPosition(focusBase, cameraTarget, yaw, pitch);
+      camera.position.set(pos.x,pos.y,pos.z);
+      camera.lookAt(cameraTarget); camera.updateMatrixWorld(true);
+    }
     preview.classList.toggle("is-trivia",currentView.kind === "trivia");
     if (triviaLayer) triviaLayer.hidden = !(gameStarted && !pauseMenuOpen && !diceModeOpen && sceneReady && !cameraTransition && currentView.kind === "trivia" && triviaLayer.dataset.ready === "true");
     updateCardTableProjection();
     exteriorMist?.update(time, reducedMotion.matches);
+    if (slotWinCelebration) {
+      if (!canShowSlotCelebration() || (reducedMotion.matches && !slotWinCelebration.animation.reduced)) endSlotCelebration(false);
+      else if (isSlotWinFinished(slotWinCelebration.animation, time)) endSlotCelebration();
+      else drawSlotReelDisplay(time);
+    }
     updateSkyAnimations(time);
     updateLiquidPortal(time);
     if (diceModeOpen) {
@@ -2607,7 +2670,7 @@ import {
       if (columnsSettled && rowsSettled) {
         const completedMotion = slotReelMotion;
         slotReelMotion = null;
-        finishSlotAction(completedMotion);
+        finishSlotAction(completedMotion, time);
       }
     }
 
@@ -2616,7 +2679,7 @@ import {
       if (time - slotWildcardPop.startedAt >= slotWildcardPop.duration) {
         const completedPop = slotWildcardPop;
         slotWildcardPop = null;
-        finishSlotAction(completedPop.motion);
+        finishSlotAction(completedPop.motion, time);
       }
     }
 
@@ -2700,6 +2763,7 @@ import {
 
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
+      endSlotCelebration(false);
       liquidPortal?.setActive(false);
       cancelAnimationFrame(animationFrame);
       animationFrame = 0;

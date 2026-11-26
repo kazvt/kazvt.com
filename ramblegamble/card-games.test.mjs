@@ -12,6 +12,9 @@ import {
   parseShopCardList,
   recordAudienceVote,
   revealAudienceResults,
+  revealCardAnswers,
+  visibleCardResponses,
+  closeCardSubmissions,
   submitRoundAnswer,
 } from "./card-games.mjs";
 
@@ -26,7 +29,7 @@ test("Red Handed deals five A-cards to each fixed contestant and selects a B-car
   assert.equal(createRedHandedRound(["card"], []), null);
 });
 
-test("answers remain hidden until all three have submitted, then appear without player identities", () => {
+test("answers remain private even after all three submit until the host reveals them", () => {
   let round = createRedHandedRound(["A", "B", "C", "D", "E"], ["Prompt"], stableRandom);
   const firstAnswer = round.hands.faroe[0];
   round = submitRoundAnswer(round, "faroe", firstAnswer, stableRandom);
@@ -35,20 +38,22 @@ test("answers remain hidden until all three have submitted, then appear without 
   round = submitRoundAnswer(round, "erin", round.hands.erin[0], stableRandom);
   assert.equal(round.phase, "submissions");
   round = submitRoundAnswer(round, "kaz", round.hands.kaz[0], stableRandom);
-  assert.equal(round.phase, "voting");
+  assert.equal(round.phase, "reveal");
+  assert.deepEqual(visibleCardResponses(round), []);
   assert.equal(round.responses.length, 3);
   assert.equal(round.responses.some((entry) => "player" in entry), false);
   assert.equal(submitRoundAnswer(round, "faroe", "late answer"), round);
 });
 
-test("Quiplash accepts one private text response per player and opens voting at three", () => {
+test("Berryblast accepts one private text response per player and waits for the host at three", () => {
   let round = createQuiplashRound(["Prompt one", "Prompt two"], stableRandom);
   assert.equal(round.prompt, "Prompt one");
   round = submitRoundAnswer(round, "faroe", "answer one", stableRandom);
   round = submitRoundAnswer(round, "erin", "answer two", stableRandom);
   assert.equal(round.phase, "submissions");
   round = submitRoundAnswer(round, "kaz", "answer three", stableRandom);
-  assert.equal(round.phase, "voting");
+  assert.equal(round.phase, "reveal");
+  assert.deepEqual(visibleCardResponses(round), []);
   assert.deepEqual(round.responses.map(({ text }) => text).sort(), ["answer one", "answer three", "answer two"]);
   assert.equal(submitRoundAnswer(round, "other", "nope"), round);
 });
@@ -56,6 +61,10 @@ test("Quiplash accepts one private text response per player and opens voting at 
 test("votes are validated, counted, and tied top answers are both winners", () => {
   let round = createQuiplashRound(["Prompt"], stableRandom);
   for (const player of CARD_GAME_PLAYERS) round = submitRoundAnswer(round, player, `answer ${player}`, stableRandom);
+  assert.equal(recordAudienceVote(round, round.responses[0].id), round);
+  assert.equal(revealAudienceResults(round), round);
+  round = revealCardAnswers(round, true);
+  assert.equal(round.phase, "voting");
   assert.equal(recordAudienceVote(round, "missing"), round);
   round = recordAudienceVote(round, round.responses[0].id, 2);
   round = recordAudienceVote(round, round.responses[1].id, 2);

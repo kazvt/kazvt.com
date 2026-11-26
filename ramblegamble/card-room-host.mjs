@@ -1,8 +1,8 @@
 import { validRequestId } from "./card-room-delivery.mjs?v=submission-audit-20261126-v1";
 import { loadHostIdentity, nonce, validNonce, transcript, channelBinding, signHost, verifySeat } from "./card-room-auth.mjs?v=host-security-20261126-v1";
-import { ROOM_VERSION, createRoom, validRoom, playerRound, encodePacket, decodePacket, acceptSubmission, isPlayer, randomToken } from "./card-room-protocol.mjs?v=submission-audit-20261126-v1";
+import { ROOM_VERSION, createRoom, validRoom, playerRound, encodePacket, decodePacket, acceptSubmission, isPlayer, randomToken } from "./card-room-protocol.mjs?v=show-stage-20261126-v1";
 import { loadPeer } from "./card-room-peer.mjs";
-import { CARD_GAME_PLAYERS } from "./card-games.mjs?v=scene-table-20261126-v1";
+import { CARD_GAME_PLAYERS } from "./card-games.mjs?v=show-stage-20261126-v1";
 import { electReader, withRoomSubmissionLock, ROOM_KEY, ENABLED_KEY, STATUS_KEY } from "./card-room-election.mjs";
 
 export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/rg/', env = globalThis, peerLoader = loadPeer, identityLoader = loadHostIdentity }) {

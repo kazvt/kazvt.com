@@ -1,3 +1,4 @@
+import { createFocusOrbit, orbitPosition, bindFocusDrag } from "./focus-orbit.mjs?v=show-stage-20261126-v1";
 import { VIP_LIQUID_SOURCE } from "./vip-liquid-preset.mjs?v=vip-black-liquid-20261126-v1";
 import { foley } from "./game-foley.mjs?v=expanded-foley-20261126-v1";
 import * as THREE from "three";
@@ -46,6 +47,17 @@ import {
   let isOpen = false;
   let isClosing = false;
   let closeFadeTimeout = 0;
+  const diceOrbit = createFocusOrbit();
+  const diceTarget = {x:0,y:1,z:0};
+  let diceBase = null;
+  function setStaffVisible(visible) {
+    for (const picker of dialog.querySelectorAll(".rg-die-picker")) picker.hidden = !visible;
+    dialog.classList.toggle("is-staff", visible);
+  }
+  const diceDrag = bindFocusDrag(dialog, {
+    enabled: event => isOpen && !isClosing && !event.target.closest?.("button, .rg-die-picker") && !document.documentElement.hasAttribute("data-rg-host-locked"),
+    move: (dx,dy) => diceOrbit.nudge(dx,dy), onMove: ensureRenderLoop,
+  });
 
   function makeFaceButton(dieState, face, faceIndex, parent) {
     const button = document.createElement("button");
@@ -242,8 +254,10 @@ import {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, compact ? 1.25 : 1.5));
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
+    camera.position.x = 0;
     camera.position.z = compact ? 11.2 : 9.2;
     camera.position.y = 1 + camera.position.z * 0.445;
+    diceBase = {x:0,y:camera.position.y,z:camera.position.z};
     camera.lookAt(0, 1, 0);
     const spread = compact ? 0.82 : 1.4;
     for (const [index, dieState] of dieStates.entries()) {
@@ -266,7 +280,7 @@ import {
       }
     }
     camera.updateProjectionMatrix();
-    if (isOpen && !rolling && scene) renderer.render(scene, camera);
+    if (isOpen && !rolling && scene) ensureRenderLoop();
   }
 
   function cryptoRandomUnit() {
@@ -374,8 +388,10 @@ import {
     const deltaSeconds = previousFrameTime === null ? 0 : Math.min(0.05, Math.max(0, (time - previousFrameTime) / 1000));
     previousFrameTime = time;
     updateRoll(deltaSeconds);
+    const orbit = diceOrbit.step(time, reducedMotion.matches);
+    if (diceBase) { const pos=orbitPosition(diceBase,diceTarget,orbit.yaw,orbit.pitch);camera.position.set(pos.x,pos.y,pos.z);camera.lookAt(0,1,0); }
     renderer.render(scene, camera);
-    if (rolling) frame = requestAnimationFrame(render);
+    if (rolling || orbit.moving) frame = requestAnimationFrame(render);
   }
 
   function ensureRenderLoop() {
@@ -451,6 +467,7 @@ import {
     previousFrameTime = null;
     if (dialog.open) dialog.close();
     dialog.classList.remove("rg-dice-entering", "rg-dice-exiting");
+    setStaffVisible(false); diceDrag.reset();
     liquid.removeAttribute("src");
     document.body.classList.remove("rg-dice-mode-open");
     window.dispatchEvent(new CustomEvent("rg:dice-mode-state", { detail: { open: false } }));
@@ -463,8 +480,10 @@ import {
     }
   }
 
-  function openDiceMode() {
-    if (isOpen) return;
+  function openDiceMode(event) {
+    if (isOpen) { if(event?.detail?.staff) setStaffVisible(true); return; }
+    setStaffVisible(Boolean(event?.detail?.staff));
+    diceOrbit.reset("dice"); diceDrag.reset();
     foley.play("portal");
     isOpen = true;
     isClosing = false;
@@ -505,6 +524,17 @@ import {
   buildFacePickers();
   returnButton.addEventListener("click", closeDiceMode);
   rollButton.addEventListener("click", startRoll);
+  dialog.addEventListener("contextmenu", event => {
+    if (!isOpen || isClosing) return;
+    event.preventDefault(); setStaffVisible(!dialog.classList.contains("is-staff"));
+  });
+  dialog.addEventListener("keydown", event => {
+    if(event.shiftKey && event.key.toLowerCase()==="d") {event.preventDefault();setStaffVisible(!dialog.classList.contains("is-staff"));}
+    else if(event.target === dialog || event.target === returnButton) {
+      const moves={ArrowLeft:[.012,0],ArrowRight:[-.012,0],ArrowUp:[0,.012],ArrowDown:[0,-.012]};
+      if(moves[event.key]) {event.preventDefault();diceOrbit.nudge(...moves[event.key]);ensureRenderLoop();}
+    }
+  });
   dialog.addEventListener("cancel", (event) => {
     event.preventDefault();
     closeDiceMode();

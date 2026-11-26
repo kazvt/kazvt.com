@@ -961,3 +961,13 @@ body.ramble-page *::after {
     transition: none;
   }
 }
+
+/* Dice show HUD: roll and result stay visible; face editing is opt-in. */
+.rg-die-picker[hidden] { display:none !important; }
+.rg-dice-center { grid-column:2; grid-row:1; }
+.rg-die-picker-left { grid-column:1; grid-row:1; }
+.rg-die-picker-right { grid-column:3; grid-row:1; }
+.rg-dice-dialog { touch-action:none; }
+.rg-dice-dialog:not(.is-staff) .rg-dice-layout { grid-template-columns: minmax(0,1fr) minmax(0,2fr) minmax(0,1fr); }
+.rg-dice-dialog:not(.is-staff) .rg-dice-roll { min-width:min(100%,180px); background:rgba(248,238,156,.78); color:#8b2626; border-color:#ffdf75; box-shadow:4px 4px #8b2626; }
+.rg-dice-dialog:not(.is-staff) .rg-dice-status { background:rgba(248,238,156,.78); color:#8b2626; }

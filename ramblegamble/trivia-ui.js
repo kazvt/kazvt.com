@@ -1,7 +1,7 @@
-import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, newTriviaId, updateTrivia, activeRoomRound, publicMedia } from "./live-trivia.mjs?v=submission-audit-20261126-v1";
-import { renderLiveQuestion, renderTriviaResponses } from "./trivia-live-view.mjs?v=submission-audit-20261126-v1";
+import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, newTriviaId, updateTrivia, activeRoomRound, publicMedia } from "./live-trivia.mjs?v=show-stage-20261126-v1";
+import { renderLiveQuestion, renderTriviaResponses } from "./trivia-live-view.mjs?v=show-stage-20261126-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
-import { readCardGames, subscribeCardGames } from "./card-games-store.mjs?v=live-trivia-20261126-v1";
+import { readCardGames, subscribeCardGames } from "./card-games-store.mjs?v=show-stage-20261126-v1";
 import { removeSlotSymbol } from "./slot-game.mjs?v=wildcard-shared-20261126-v1";
 import { foley } from "./game-foley.mjs?v=expanded-foley-20261126-v1";
 import {

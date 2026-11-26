@@ -1,7 +1,7 @@
 export const CARD_GAME_PLAYERS = Object.freeze(["faroe", "erin", "kaz"]);
 export const CARD_GAME_CATEGORIES = Object.freeze(["penalty", "challenge", "instant"]);
 export const CARD_GAME_STORAGE_KEY = "ramblegamble.card-games.v1";
-const ROUND_PHASES = new Set(["submissions", "voting", "results", "shopping"]);
+const ROUND_PHASES = new Set(["submissions", "reveal", "voting", "results", "shopping"]);
 const SMEEMO_PHASES = new Set(["preview", "stacking", "stacked", "dealing", "ready", "complete"]);
 const MAX_LIST_ITEMS = 500;
 const MAX_TEXT_LENGTH = 800;
@@ -91,6 +91,9 @@ function normalizeRound(value) {
       return [{ id: cleanText(card.id) || `shop-${index + 1}`, category, name, price, buyer, revealed: Boolean(card.revealed) }];
     }) : [];
   }
+  // Old voting/results rounds were already public. Never hide those again on upgrade.
+  round.revealedCount = phase === "voting" || phase === "results" ? round.responses.length
+    : phase === "reveal" ? Math.max(0, Math.min(round.responses.length, Number.isSafeInteger(value.revealedCount) ? value.revealedCount : 0)) : 0;
   const answerIds = new Set(round.responses.map((response) => response.id));
   for (const id of answerIds) {
     const votes = Number(value.votes?.[id]);
@@ -243,11 +246,12 @@ export function createQuiplashRound(prompts, random = secureRandomUnit) {
   };
 }
 
-function beginVoting(round, random) {
-  const entries = CARD_GAME_PLAYERS.map((player) => ({ player, text: round.submissions[player] }));
+function beginReveal(round, random) {
+  const entries = CARD_GAME_PLAYERS.filter(player => round.submissions[player]).map((player) => ({ player, text: round.submissions[player] }));
   const shuffled = shuffle(entries, random);
   round.responses = shuffled.map((entry, index) => ({ id: `answer-${index + 1}`, text: entry.text }));
-  round.phase = "voting";
+  round.phase = "reveal";
+  round.revealedCount = 0;
   round.votes = Object.fromEntries(round.responses.map(({ id }) => [id, 0]));
   return round;
 }
@@ -259,8 +263,28 @@ export function submitRoundAnswer(roundValue, player, answer, random = secureRan
   if (!text || round.submissions[player]) return roundValue;
   if (round.mode === "red-handed" && !round.hands[player].includes(text)) return roundValue;
   round.submissions[player] = text;
-  if (CARD_GAME_PLAYERS.every((name) => round.submissions[name])) beginVoting(round, random);
+  if (CARD_GAME_PLAYERS.every((name) => round.submissions[name])) beginReveal(round, random);
   return round;
+}
+
+// The queue is shuffled once, held on the host, and never sent to player views.
+export function closeCardSubmissions(roundValue, random = secureRandomUnit) {
+  const round = normalizeRound(roundValue);
+  if (!round || !["quiplash", "red-handed"].includes(round.mode) || round.phase !== "submissions" || !Object.values(round.submissions).some(Boolean)) return roundValue;
+  return beginReveal(round, random);
+}
+
+export function revealCardAnswers(roundValue, all = false) {
+  const round = normalizeRound(roundValue);
+  if (!round || round.phase !== "reveal" || !round.responses.length) return roundValue;
+  round.revealedCount = all ? round.responses.length : Math.min(round.responses.length, round.revealedCount + 1);
+  if (round.revealedCount === round.responses.length) round.phase = "voting";
+  return round;
+}
+
+export function visibleCardResponses(round) {
+  if (!round || round.phase === "submissions") return [];
+  return (round.responses || []).slice(0, round.phase === "reveal" ? (round.revealedCount || 0) : undefined);
 }
 
 export function recordAudienceVote(roundValue, responseId, amount = 1) {

@@ -1,6 +1,6 @@
 // A host-only saved snapshot; player projections are explicitly allowlisted.
 import { withRoomSubmissionLock } from './card-room-election.mjs';
-import { readCardGames } from './card-games-store.mjs?v=live-trivia-20261126-v1';
+import { readCardGames } from './card-games-store.mjs?v=show-stage-20261126-v1';
 import { MODE_NAMES } from './trivia-data.js?v=compose-repeat-grid-20261124-v1';
 import { scoreFourDigitGuess, compareNumberGuess, normalizeGuessLimit } from './trivia-game.mjs?v=changeable-number-feedback-20261124-v1';
 export const LIVE_TRIVIA_KEY = 'rg-live-trivia-v1';

@@ -77,7 +77,7 @@ test('console and display elect one reader, share invites, and fail over with th
   const bad=await join(h.peers[1],{...invites.kaz,player:'erin'},false);assert.equal(bad.sent.at(-1).type,'denied');bad.close();
   const faroe=await join(h.peers[1],invites.faroe);assert.deepEqual(faroe.sent.at(-1).round.hand,h.round.hands.faroe);
   const second={...invites.faroe,type:'submit',roundId:h.round.id,answer:h.round.hands.faroe[0]};display.selectors['[data-room-packet]'].value=encodePacket(second);await display.click('import');assert.ok(h.round.submissions.faroe);
-  const erin=await join(h.peers[1],invites.erin);erin.emit('data',{...invites.erin,type:'submit',roundId:h.round.id,answer:h.round.hands.erin[0]});await flush();assert.equal(h.round.phase,'voting');assert.equal(h.round.responses.length,3);
+  const erin=await join(h.peers[1],invites.erin);erin.emit('data',{...invites.erin,type:'submit',roundId:h.round.id,answer:h.round.hands.erin[0]});await flush();assert.equal(h.round.phase,'reveal');assert.equal(h.round.revealedCount,0);assert.equal(h.round.responses.length,3);
   h.round=createQuiplashRound(['next']);k2.emit('data',first);await flush();assert.equal(h.round.submissions.kaz,null);assert.ok(k2.sent.some(m=>m.type==='ack'&&m.status==='stale-round'));
   display.click('stop');await flush();assert.equal(h.values.get(ENABLED_KEY),'false');assert.equal(h.peers[1].destroyed,true);
  }finally{h.dispose();await flush();}

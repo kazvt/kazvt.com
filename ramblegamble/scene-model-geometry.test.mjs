@@ -124,3 +124,19 @@ test('closer roulette camera retains the entire supplied wheel across viewport s
   assert.ok(span(updated,1)>span(old,1)*1.12,`wheel should be noticeably larger at ${w}x${h}, look ${look}`);
  }
 });
+
+import { focusLimits, orbitPosition } from './focus-orbit.mjs';
+test('capped presentation orbit keeps slot interaction geometry inside the viewport without a dolly',()=>{
+ const {points}=slotGeometry(),target=box(points).center,b=basis(-.08,.14),[yawCap,pitchCap]=focusLimits('slot');
+ const obj=([x,y,z])=>({x,y,z});
+ for(const [w,h] of [[803,395],[1014,576],[1920,1080],[360,640],[320,240],[2560,720]]){
+  const f=fitSlotInteractionFrame(relative(points,target,b),{width:w,height:h});
+  const aim=add(add(target,mul(b.right,f.shiftX)),mul(b.up,f.shiftY)),base=add(aim,mul(b.dir,f.distance));
+  for(const yaw of [-yawCap,yawCap])for(const pitch of [-pitchCap,pitchCap]){
+   const p=orbitPosition(obj(base),obj(aim),yaw,pitch),offset=sub([p.x,p.y,p.z],aim),distance=Math.hypot(...offset);
+   assert.ok(Math.abs(distance-f.distance)<1e-8);
+   const actual=basis(Math.atan2(offset[0],offset[2]),offset[1]/distance);
+   for(const [x,y,z] of project(relative(points,aim,actual),{distance,shiftX:0,shiftY:0},w,h))assert.ok(z>.1&&Math.abs(x)<1&&Math.abs(y)<1,`${w}x${h}: ${x},${y}`);
+  }
+ }
+});
