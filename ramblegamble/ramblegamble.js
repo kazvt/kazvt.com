@@ -20,10 +20,11 @@ import {
   normalizeSlotGrid,
   sampleSlotReelColumn,
   sampleSlotReelRow,
+  SLOT_REEL_COLUMNS,
   SLOT_REEL_WILDCARD,
   slotCellIndexAtUv,
   slotScreenPoint,
-} from "./slot-reels.mjs?v=slot-machine-live-game-20261126-v2";
+} from "./slot-reels.mjs?v=slot-row-sideways-20261126-v1";
 import { getSlotEligibleIndexes, placeSlotBerry, placeSlotWildcard, resolveSlotPayouts, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs?v=slot-line-markers-20261126-v2";
 import {
   ROULETTE_BALL_COLOR,

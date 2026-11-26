@@ -3,10 +3,13 @@ import assert from "node:assert/strict";
 import {
   SLOT_REEL_CELL_COUNT,
   SLOT_REEL_WILDCARD,
+  createSlotRowMotion,
   createSlotReelMotion,
   normalizeReelColumns,
+  normalizeReelRows,
   normalizeSlotGrid,
   sampleSlotReelColumn,
+  sampleSlotReelRow,
   slotCellIndexAtUv,
   slotScreenPoint,
 } from "./slot-reels.mjs";
@@ -28,6 +31,11 @@ test("saved slot grids retain the star wildcard", () => {
 test("column selection is unique, numeric, and bounded to the five physical reels", () => {
   assert.deepEqual(normalizeReelColumns([4, 1, 4, -1, 5, "2", "nope"]), [4, 1, 2]);
   assert.deepEqual(normalizeReelColumns([]), []);
+});
+
+test("row selection is unique, numeric, and bounded to the three horizontal tracks", () => {
+  assert.deepEqual(normalizeReelRows([2, 1, 2, -1, 3, "0", "nope"]), [2, 1, 0]);
+  assert.deepEqual(normalizeReelRows([]), []);
 });
 
 test("reel motion preserves the configured stop, staggers columns, and settles exactly", () => {
@@ -72,6 +80,42 @@ test("the same reel gets a different travel distance on consecutive spins", () =
   assert.notEqual(second.columns[0].travelRows, first.columns[0].travelRows);
   assert.equal(first.columns[0].targetOffset, 3 + first.columns[0].travelRows);
   assert.equal(second.columns[0].targetOffset, 3 + second.columns[0].travelRows);
+});
+
+test("row placement animates across the row and settles on its exact horizontal target", () => {
+  const starting = ["faroeberry", null, "kazberry", null, "erinberry",
+    null, "erinberry", null, "faroeberry", null,
+    "kazberry", null, "erinberry", null, "faroeberry"];
+  const target = starting.slice();
+  target[6] = "kazberry";
+  const motion = createSlotRowMotion(starting, [1], {
+    targetGrid: target,
+    startedAt: 100,
+    duration: 1000,
+    random: () => 0,
+  });
+  const rowMotion = motion.rows[0];
+  assert.deepEqual(motion.columns, []);
+  assert.equal(rowMotion.row, 1);
+  assert.equal(rowMotion.travelColumns, 12);
+  assert.equal(rowMotion.targetOffset, 5 + rowMotion.travelColumns);
+  assert.deepEqual(rowMotion.start, starting.slice(5, 10));
+  assert.deepEqual(rowMotion.target, target.slice(5, 10));
+  assert.equal(sampleSlotReelRow(rowMotion, motion, 100).offset, 0);
+  const moving = sampleSlotReelRow(rowMotion, motion, 600);
+  assert.equal(moving.spinning, true);
+  assert.ok(moving.offset > 0 && moving.offset < rowMotion.targetOffset);
+  assert.deepEqual(sampleSlotReelRow(rowMotion, motion, 1100).symbols, target.slice(5, 10));
+  assert.deepEqual(motion.targetGrid, target, "rows outside the selected horizontal track stay unchanged");
+});
+
+test("a row's travel distance changes on its next horizontal animation", () => {
+  const first = createSlotRowMotion(Array(15).fill(null), [2], { random: () => 0 });
+  const second = createSlotRowMotion(Array(15).fill(null), [2], {
+    random: () => 0,
+    previousSpinColumns: { 2: first.rows[0].travelColumns },
+  });
+  assert.notEqual(second.rows[0].travelColumns, first.rows[0].travelColumns);
 });
 
 test("screen UV coordinates map to the correct top-left-origin row and column", () => {
