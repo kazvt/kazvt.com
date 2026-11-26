@@ -12,8 +12,8 @@ import {
   revealAudienceResults,
   submitRoundAnswer,
   buyShopCard,
-} from "./card-games.mjs?v=rg-smeemo-manual-20261125-v1";
-import { readCardGames, writeCardGames, subscribeCardGames } from "./card-games-store.mjs?v=rg-smeemo-manual-20261125-v1";
+} from "./card-games.mjs?v=rg-smeemo-secret-repeat-20261126-v1";
+import { readCardGames, writeCardGames, subscribeCardGames } from "./card-games-store.mjs?v=rg-smeemo-secret-repeat-20261126-v1";
 import { readPointScores, subscribePointScores, writePointScores } from "./points-store.mjs?v=points-console-20261120-v1";
 
 (() => {
@@ -73,6 +73,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   let dismissedActive = false;
   let selectedBuyer = "faroe";
   let lastActiveMode = null;
+  let lastSmeemoId = null;
   let smeemoPhaseTimer = 0;
   let smeemoScheduledSignal = "";
   let menuTimer = 0;
@@ -171,13 +172,15 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     setAdminState(state);
 
     const activeSmeemo = state.smeemo && ["playing", "complete"].includes(state.smeemo.status);
+    const newSmeemoGame = Boolean(activeSmeemo && state.smeemo.id && state.smeemo.id !== lastSmeemoId);
+    lastSmeemoId = activeSmeemo ? state.smeemo.id : null;
     if (!activeSmeemo) {
       window.clearTimeout(smeemoPhaseTimer);
       smeemoPhaseTimer = 0;
       smeemoScheduledSignal = "";
     }
     const nextMode = activeSmeemo ? "smeemo" : state.round?.mode || null;
-    if (nextMode && nextMode !== lastActiveMode) {
+    if (nextMode && (nextMode !== lastActiveMode || newSmeemoGame)) {
       lastActiveMode = nextMode;
       dismissedActive = false;
       window.dispatchEvent(new CustomEvent("rg:card-game-active", { detail: { mode: nextMode } }));
@@ -441,18 +444,17 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     const railViewport = element("div", "rg-smeemo-rail-viewport");
     const rail = element("div", "rg-smeemo-rail");
     const revealIds = new Set(game.draws.map(({ id }) => id));
-    const faceUp = ["preview", "stacking", "stacked"].includes(game.phase);
     const order = ["preview", "stacking", "stacked"].includes(game.phase)
       ? game.previewOrder.map((id) => game.cards.find((card) => card.id === id)).filter(Boolean)
       : game.cards;
 
     for (const [index, card] of order.entries()) {
       const revealed = revealIds.has(card.id);
-      const showingFront = faceUp || revealed;
+      const showingFront = revealed;
+      const smeemoRevealed = revealed && card.smeemo;
       const isAvailable = game.phase === "ready" && game.status === "playing" && !revealed;
-      const button = element("button", `rg-smeemo-card${showingFront ? " is-face-up" : " is-face-down"}${revealed ? " is-revealed" : ""}${isAvailable ? " is-available" : ""}${card.smeemo ? " is-smeemo" : ""}`);
+      const button = element("button", `rg-smeemo-card${showingFront ? " is-face-up" : " is-face-down"}${revealed ? " is-revealed" : ""}${isAvailable ? " is-available" : ""}${smeemoRevealed ? " is-smeemo" : ""}`);
       button.type = "button";
-      button.dataset.cardId = card.id;
       button.disabled = game.phase !== "ready" || game.status !== "playing" || revealed;
       button.setAttribute("aria-label", showingFront
         ? `Card ${index + 1}: ${card.smeemo ? "Smeemoberry" : "blank"}`
@@ -463,13 +465,13 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       button.style.setProperty("--flip-delay", `${index * 48 + 90}ms`);
       button.style.setProperty("--home-rotation", `${((index % 3) - 1) * 1.4}deg`);
       const inner = element("span", "rg-smeemo-card-inner");
-      const front = element("span", `rg-smeemo-card-front${card.smeemo ? " is-berry" : ""}`);
-      if (card.smeemo) {
+      const front = element("span", `rg-smeemo-card-front${smeemoRevealed ? " is-berry" : ""}`);
+      if (smeemoRevealed) {
         const berryMark = element("span", "rg-smeemo-berry-mark");
         berryMark.setAttribute("aria-hidden", "true");
         front.append(berryMark);
       }
-      front.append(element("span", "rg-smeemo-face-label", card.smeemo ? "SMEEMO!" : "BLANK"));
+      if (revealed) front.append(element("span", "rg-smeemo-face-label", smeemoRevealed ? "SMEEMO!" : "BLANK"));
       const back = element("span", "rg-smeemo-card-back");
       back.setAttribute("aria-hidden", "true");
       inner.append(front, back);
