@@ -1,6 +1,5 @@
 import { normalizeSlotGrid, SLOT_REEL_COLUMNS, SLOT_REEL_ROWS, SLOT_REEL_SYMBOLS } from "./slot-reels.mjs";
 
-const SIZE = SLOT_REEL_COLUMNS * SLOT_REEL_ROWS;
 const OWNER_BY_BERRY = Object.freeze({
   faroeberry: "faroe",
   erinberry: "erin",
@@ -105,6 +104,3 @@ export function resolveSlotPayouts(grid) {
   return { grid: next, payouts: wins, totals, clearedCells };
 }
 
-export function normalizeSlotGameGrid(value) {
-  return normalizeSlotGrid(value).slice(0, SIZE);
-}

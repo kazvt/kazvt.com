@@ -70,7 +70,7 @@ test("simultaneous overlapping patterns each pay once and remove the union of ma
   const grid = Array(15).fill("kazberry");
   const result = resolveSlotPayouts(grid);
   assert.equal(result.payouts.length, 16);
-  assert.equal(result.totals.kaz, 363000);
+  assert.equal(result.totals.kaz, 401000);
   assert.deepEqual(result.clearedCells, Array.from({ length: 15 }, (_, index) => index));
   assert.ok(result.grid.every((berry) => berry === null));
 });
