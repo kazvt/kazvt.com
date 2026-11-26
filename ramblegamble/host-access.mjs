@@ -20,7 +20,7 @@ let promptOpen=false;
 let access, booted=false, bootPromise=null, busy=false, locked=true, inertBefore=new Map();
 const isConsole=location.pathname.replace(/\/$/,'').endsWith('/console');
 const appModules=isConsole? ['/rg/console/console.js?v=live-trivia-20261126-v1'] : [
-  '/ramblegamble/ramblegamble.js?v=expanded-foley-20261126-v1',
+  '/ramblegamble/ramblegamble.js?v=bottom-column-arrows-20261126-v1',
   '/ramblegamble/dice-mode.js?v=expanded-foley-20261126-v1',
   '/ramblegamble/trivia-ui.js?v=expanded-foley-20261126-v1',
   '/ramblegamble/card-games-ui.js?v=expanded-foley-20261126-v1',

@@ -37,3 +37,30 @@ export function fitSlotInteractionFrame(points, {width, height, fov = 42, near =
   const shift = a => ((a.lower - a.hi * a.tan * distance) + (a.upper - a.lo * a.tan * distance)) / 2;
   return {distance, shiftX: shift(x), shiftY: shift(y), limits: {xMin, xMax, yMin, yMax}};
 }
+
+// Fit a square HTML arrow into the projected strip between the reel screen
+// and the physical spin buttons. All coordinates are CSS pixels in the canvas.
+// Include the physical controls' 5px picking padding so their hit areas stay free.
+export function fitSlotColumnArrow({ x, size, screenBottom, spinButtons, index }) {
+  const [left, right] = screenBottom;
+  const edgeY = px => left.y + (right.y - left.y) * (px - left.x) / (right.x - left.x);
+  if (!Number.isFinite(x) || !Number.isFinite(size) || size <= 0 || Math.abs(right.x - left.x) < 1e-6 || !spinButtons[index]) return null;
+  const band = side => {
+    const minX = x - side / 2, maxX = x + side / 2;
+    const top = Math.max(edgeY(minX), edgeY(maxX)) + 3;
+    const bottom = Math.min(spinButtons[index].top, ...spinButtons.filter(b => b.right + 5 >= minX && b.left - 5 <= maxX).map(b => b.top)) - 6;
+    return { top, bottom };
+  };
+  // Test the full square width: at angled views a neighboring physical button
+  // or the sloped screen edge can limit the available space.
+  let low = 0, high = size;
+  for (let i = 0; i < 18; i += 1) {
+    const mid = (low + high) / 2;
+    const { top, bottom } = band(mid);
+    if (bottom - top >= mid) low = mid;
+    else high = mid;
+  }
+  if (low < 1) return null;
+  const { top, bottom } = band(low);
+  return { x, y: (top + bottom) / 2, size: low };
+}

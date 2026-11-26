@@ -17,7 +17,7 @@ test('positive local X crank rotation moves the authored upper handle toward the
  const source=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');assert.match(source,/lever\.rotateX\(Math\.sin\(progress \* Math\.PI\) \* 0\.92\)/);
 });
 
-import { fitSlotInteractionFrame, rouletteRecessCenter, ROULETTE_RECESS } from './arcade-framing.mjs';
+import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS } from './arcade-framing.mjs';
 import { slotScreenPoint } from './slot-reels.mjs';
 const add=(a,b)=>a.map((x,i)=>x+b[i]);
 const sub=(a,b)=>a.map((x,i)=>x-b[i]);
@@ -36,14 +36,14 @@ function slotGeometry(){
  const m=model('rg_slots'), nodes=m.d.nodes.filter(n=>n.mesh!==undefined);
  const local=nodes.flatMap(n=>nodePoints(m,n)), all=box(local), scale=2.52/(all.max[1]-all.min[1]);
  const world=p=>[-p[0]*scale*1.08,p[1]*scale,-p[2]*scale];
- const wp=(x,y)=>{const p=slotScreenPoint(x,y,.16);return world([p.x,p.y,p.z]);};
+ const wp=(x,y,depth=.16)=>{const p=slotScreenPoint(x,y,depth);return world([p.x,p.y,p.z]);};
  const screen=[wp(5,16),wp(5,58),wp(75,16),wp(75,58)],points=[...screen];
- for(const [x,y] of [...Array.from({length:5},(_,i)=>[5+(i+.5)*14,9]),...Array.from({length:3},(_,i)=>[-2,16+(i+.5)*14])]){
+ for(const [x,y] of [...Array.from({length:5},(_,i)=>[5+(i+.5)*14,65]),...Array.from({length:3},(_,i)=>[-2,16+(i+.5)*14])]){
   const anchor=wp(x,y),width=Math.hypot(...sub(wp(x-14*.32,y),wp(x+14*.32,y))),height=Math.hypot(...sub(wp(x,y-14*.27),wp(x,y+14*.27))),half=Math.max(width,height)*.6;
   for(const a of [-half,half])for(const b of [-half,half])for(const c of [-half,half])points.push(add(anchor,[a,b,c]));
  }
  for(const n of nodes.filter(n=>/^(arm|button[1-5])$/.test(n.name)))points.push(...box(nodePoints(m,n).map(world)).corners);
- return {points,screen,cabinet:box(local.map(world))};
+ return {points,screen,wp,spinButtons: nodes.filter(n=>/^button[1-5]$/.test(n.name)).sort((a,b)=>a.name.localeCompare(b.name)).map(n=>box(nodePoints(m,n).map(world)).corners),cabinet:box(local.map(world))};
 }
 test('roulette world center is the authored recess midpoint with clearance from both sloping shoulders and lower lip',()=>{
  const m=model('rg_stage'),stage=nodePoints(m,m.d.nodes[0]);
@@ -68,4 +68,35 @@ test('slot frame fits actual screen, arrows, physical buttons and resting crank 
   }
  }
  const js=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');assert.match(js,/setupPicking\(\);\s+captureSlotFocusPoints\(\)/);assert.match(js,/fitSlotInteractionFrame\(points/);
+});
+
+
+test('all five bottom arrows stay aligned between the actual reel and spin buttons at all slot camera angles',()=>{
+ const {points,wp,spinButtons}=slotGeometry(),target=box(points).center;
+ for(const [w,h] of [[803,395],[1014,576],[1920,1080],[360,640],[320,240],[2560,720],[575,480]]) for(const look of [-1,0,1]){
+  const b=basis(-.08-look*.42,.14),f=fitSlotInteractionFrame(relative(points,target,b),{width:w,height:h});
+  const px=p=>{const [x,y]=project(relative([p],target,b),f,w,h)[0];return {x:(x+1)*w/2,y:(1-y)*h/2};};
+  const screenBottom=[px(wp(5,58,.065)),px(wp(75,58,.065))];
+  const buttons=spinButtons.map(corners=>{const p=corners.map(px);return {left:Math.min(...p.map(v=>v.x)),right:Math.max(...p.map(v=>v.x)),top:Math.min(...p.map(v=>v.y))};});
+  const edge=x=>screenBottom[0].y+(screenBottom[1].y-screenBottom[0].y)*(x-screenBottom[0].x)/(screenBottom[1].x-screenBottom[0].x);
+  const arrows=Array.from({length:5},(_,index)=>{
+   const x=5+(index+.5)*14,anchor=wp(x,65),a=px(anchor),adjX=px(wp(x+(index===4?-14:14),65)),adjY=px(wp(x,79));
+   const depth=f.distance-relative([anchor],target,b)[0].z;
+   const ww=Math.hypot(...sub(wp(x-14*.32,65),wp(x+14*.32,65))),wh=Math.hypot(...sub(wp(x,65-14*.27),wp(x,65+14*.27)));
+   const preferred=Math.min(Math.max(22,Math.min(ww,wh)*h/(2*Math.tan(42*Math.PI/360))/depth),Math.hypot(a.x-adjX.x,a.y-adjX.y)*.9,Math.hypot(a.x-adjY.x,a.y-adjY.y)*.9);
+   const placement=fitSlotColumnArrow({x:px(wp(x,58,.065)).x,size:preferred,screenBottom,spinButtons:buttons,index});
+   assert.ok(placement,`arrow ${index} visible at ${w}x${h} look ${look}`);
+   const {x:cx,y,size}=placement, half=size/2;
+   assert.ok(size >= (h <= 240 ? 3 : 8), `visible arrow ${size} at ${w}x${h} look ${look}`);
+   assert.ok(y-half>=Math.max(edge(cx-half),edge(cx+half))+3-1e-6);
+   assert.ok(y+half<=buttons[index].top-6+1e-6);
+   for(const button of buttons) if(cx+half>=button.left-5&&cx-half<=button.right+5) assert.ok(y+half<=button.top-6+1e-6);
+   assert.ok(cx-half>=0&&cx+half<=w&&y-half>=0&&y+half<=h);
+   return placement;
+  });
+  for(let i=1;i<arrows.length;i++) assert.ok(arrows[i].x-arrows[i].size/2>arrows[i-1].x+arrows[i-1].size/2);
+ }
+ const source=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
+ assert.match(source,/y: bottom \+ cellHeight \* 0\.5/);
+ assert.match(source,/fitSlotColumnArrow\(\{ x: toScreen/);
 });

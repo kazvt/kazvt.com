@@ -1,4 +1,4 @@
-import { fitSlotInteractionFrame, rouletteRecessCenter, ROULETTE_RECESS } from "./arcade-framing.mjs?v=arcade-framing-20261126-v1";
+import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS } from "./arcade-framing.mjs?v=bottom-column-arrows-20261126-v1";
 import { foley } from "./game-foley.mjs?v=expanded-foley-20261126-v1";
 import {
   resolvePointClickAction,
@@ -148,6 +148,7 @@ import {
   let selectedSlotBerry = "kazberry";
   let slotPlacementControls = [];
   let slotFocusPoints = [];
+  let slotSpinButtonCorners = [];
   let slotBerryPicker = null;
   let slotHoverLine = null;
   let slotHoverCell = -1;
@@ -570,7 +571,7 @@ import {
         index,
         label: String(index + 1),
         x: left + (index + 0.5) * cellWidth,
-        y: top - cellHeight * 0.5,
+        y: bottom + cellHeight * 0.5,
       })),
       ...Array.from({ length: 3 }, (_, index) => ({
         axis: "row",
@@ -1246,12 +1247,16 @@ import {
     }
     // Keep the physical spin buttons and resting crank reachable. Cache once:
     // a resize during a pull must not cause the camera to chase the moving arm.
-    for (const object of slotControlTargets.values()) {
+    slotSpinButtonCorners = [];
+    for (const [part, object] of slotControlTargets) {
+      const corners = [];
       const box = new THREE.Box3().setFromObject(object);
       if (box.isEmpty()) continue;
       for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) {
-        points.push(new THREE.Vector3(x, y, z));
+        corners.push(new THREE.Vector3(x, y, z));
       }
+      points.push(...corners);
+      if (/^button[1-5]$/.test(part)) slotSpinButtonCorners[Number(part.slice(-1)) - 1] = corners;
     }
     slotFocusPoints = points;
   }
@@ -2468,6 +2473,16 @@ import {
     const width = preview.clientWidth;
     const height = preview.clientHeight;
     const pixelsPerWorldUnitAtOne = height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
+    const toScreen = point => {
+      const p = point.clone().project(camera);
+      return { x: (p.x + 1) * width / 2, y: (1 - p.y) * height / 2 };
+    };
+    const { left, right, bottom } = SLOT_DISPLAY_PIXELS;
+    const screenBottom = [left, right].map(x => toScreen(slotWorldPoint(x, bottom, .065)));
+    const spinButtons = slotSpinButtonCorners.map(corners => {
+      const p = corners.map(toScreen);
+      return { left: Math.min(...p.map(v => v.x)), right: Math.max(...p.map(v => v.x)), top: Math.min(...p.map(v => v.y)) };
+    });
     for (const control of slotPlacementControls) {
       const cameraSpace = camera.worldToLocal(control.anchor.clone());
       const depth = -cameraSpace.z;
@@ -2486,11 +2501,18 @@ import {
         (ySpacingPoint.x - projected.x) * width * 0.5,
         (ySpacingPoint.y - projected.y) * height * 0.5,
       );
-      control.button.style.left = ((projected.x + 1) * 0.5 * width) + "px";
-      control.button.style.top = ((1 - projected.y) * 0.5 * height) + "px";
-      const size = Math.min(Math.max(22, Math.min(control.worldWidth, control.worldHeight) * pixelsPerWorldUnitAtOne / depth), horizontalGap * .9, verticalGap * .9);
-      control.button.style.width = size + "px";
-      control.button.style.height = size + "px";
+      const preferredSize = Math.min(Math.max(22, Math.min(control.worldWidth, control.worldHeight) * pixelsPerWorldUnitAtOne / depth), horizontalGap * .9, verticalGap * .9);
+      const placement = control.axis === "column"
+        ? fitSlotColumnArrow({ x: toScreen(slotWorldPoint(control.x, bottom, .065)).x, size: preferredSize, screenBottom, spinButtons, index: control.index })
+        : { x: (projected.x + 1) * width / 2, y: (1 - projected.y) * height / 2, size: preferredSize };
+      if (!placement) {
+        control.button.style.visibility = "hidden";
+        continue;
+      }
+      control.button.style.left = placement.x + "px";
+      control.button.style.top = placement.y + "px";
+      control.button.style.width = placement.size + "px";
+      control.button.style.height = placement.size + "px";
       control.button.style.visibility = "visible";
     }
   }
