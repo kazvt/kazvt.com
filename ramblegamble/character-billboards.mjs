@@ -2,7 +2,9 @@
 // Keep authored +Z as the neutral facing; only a fraction of eye bearing is followed.
 export const CHARACTER_YAW_WEIGHT = .4;
 export const CHARACTER_YAW_LIMIT = 12 * Math.PI / 180;
-export const CHARACTER_SOURCE_SIZE = 256;
+// Stable high-resolution viewport for the live source; do not resize on camera motion.
+export const CHARACTER_SOURCE_SIZE = 1024;
+export const HOST_CHARACTER_X_OFFSET = -.18;
 export const CHARACTER_WORLD_SIZE = 1.8;
 
 export function characterYaw(dx, dz) {
@@ -15,7 +17,7 @@ export function standingCharacterPose(bounds, host = false) {
   // y=.6096. The offset clears the chair's +Z face even at maximum yaw.
   const footY = host ? .6096 : .3048;
   return { worldWidth: CHARACTER_WORLD_SIZE, worldHeight: CHARACTER_WORLD_SIZE,
-    anchor: { x: (bounds.min.x + bounds.max.x) / 2, y: footY + CHARACTER_WORLD_SIZE / 2,
+    anchor: { x: (bounds.min.x + bounds.max.x) / 2 + (host ? HOST_CHARACTER_X_OFFSET : 0), y: footY + CHARACTER_WORLD_SIZE / 2,
       z: bounds.max.z + (host ? .24 : .32) } };
 }
 

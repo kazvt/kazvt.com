@@ -1,11 +1,11 @@
 import { createStageShow } from "./stage-show.mjs?v=all-curtain-20261127-v1";
 import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state.mjs?v=all-curtain-20261127-v1";
-import { createCharacterOcclusion } from "./character-occlusion.mjs?v=freecam-depth-20261127-v1";
+import { createCharacterOcclusion } from "./character-occlusion.mjs?v=fugi-stable-20261127-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { createAudienceRenderer } from "./audience-render.mjs?v=shop-motion-20261127-v1";
 import { createShowFX } from "./show-fx.mjs?v=freecam-depth-20261127-v1";
-import { CHARACTER_SOURCE_SIZE, CHARACTER_YAW_LIMIT, characterYaw, standingCharacterPose, projectCharacterQuad, pointInCharacterQuad } from "./character-billboards.mjs?v=standing-characters-20261127-v1";
+import { CHARACTER_SOURCE_SIZE, CHARACTER_YAW_LIMIT, characterYaw, standingCharacterPose, projectCharacterQuad, pointInCharacterQuad } from "./character-billboards.mjs?v=fugi-stable-20261127-v1";
 import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { createExteriorMist } from "./exterior-mist.mjs?v=exterior-mist-20261126-v1";
@@ -1770,6 +1770,7 @@ import {
       iframe.src = source.source;
       iframe.title = `${source.label} live browser source`;
       iframe.loading = "eager";
+      iframe.width = iframe.height = String(CHARACTER_SOURCE_SIZE);
       iframe.referrerPolicy = "strict-origin-when-cross-origin";
       iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
       iframe.tabIndex = -1;
@@ -2598,15 +2599,19 @@ import {
         billboard.panel.style.visibility = "hidden";
         continue;
       }
-      billboard.panel.style.transform = transform;
+      if (billboard.lastTransform !== transform) {
+        billboard.panel.style.transform = transform;
+        billboard.lastTransform = transform;
+      }
       const brightness=stageShow?.brightnessAt(billboard.anchor)??1;
-      billboard.panel.style.filter=brightness===1?"":`brightness(${brightness.toFixed(3)})`;
+      const filter=brightness===1?"":`brightness(${brightness.toFixed(3)})`;
+      if(billboard.panel.style.filter!==filter)billboard.panel.style.filter=filter;
       visible.push(billboard);
     }
     // Actual scene geometry masks the DOM planes at pixel granularity. The
     // iframe itself is never read or replaced; transparent pixels remain live.
     visible.sort((a,b)=>b.projectedQuad.depth-a.projectedQuad.depth);
-    visible.forEach((entry,index)=>{entry.panel.parentElement.style.zIndex=String(index+1);});
+    visible.forEach((entry,index)=>{const style=entry.panel.parentElement.style,value=String(index+1);if(style.zIndex!==value)style.zIndex=value;});
     try {
       if (!characterOcclusion) throw new Error("Character depth pass unavailable");
       scene.updateMatrixWorld(true);

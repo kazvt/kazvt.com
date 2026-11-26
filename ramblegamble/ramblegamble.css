@@ -254,15 +254,15 @@ body.ramble-page *::after {
   position: absolute;
   top: 0;
   left: 0;
-  width: 256px;
-  height: 256px;
+  width: 1024px;
+  height: 1024px;
   box-sizing: border-box;
   overflow: hidden;
-  border: 2px solid var(--ink);
+  border: 8px solid var(--ink);
   background: var(--paper);
-  box-shadow: 3px 3px 0 var(--pink);
+  box-shadow: 12px 12px 0 var(--pink);
   transform-origin: 0 0;
-  will-change: transform;
+  image-rendering: auto;
 }
 
 .rg-billboard.rg-billboard-live {
@@ -278,6 +278,7 @@ body.ramble-page *::after {
   border: 0;
   background: transparent;
   pointer-events: none;
+  image-rendering: auto;
 }
 
 .rg-billboard-placeholder {
@@ -286,10 +287,10 @@ body.ramble-page *::after {
   height: 100%;
   place-content: center;
   gap: .3em;
-  padding: 8px;
+  padding: 32px;
   color: var(--ink);
   background: color-mix(in srgb, var(--paper) 82%, var(--blue));
-  font-size: clamp(9px, 1.4vw, 13px);
+  font-size: clamp(36px, 5.6vw, 52px);
   font-weight: 900;
   letter-spacing: .08em;
   line-height: 1.2;
@@ -305,8 +306,8 @@ body.ramble-page *::after {
 
 @media (max-width: 640px) {
   .rg-billboard {
-    border-width: 1px;
-    box-shadow: 2px 2px 0 var(--pink);
+    border-width: 4px;
+    box-shadow: 8px 8px 0 var(--pink);
   }
 }
 
@@ -1011,6 +1012,6 @@ body.ramble-page *::after {
 .rg-preview.is-freecam #rg-canvas { cursor: move; }
 
 /* Screen-space mask on the wrapper; the child retains the exact projective transform. */
-.rg-character-visibility {position:absolute;inset:0;pointer-events:none;mask-repeat:no-repeat;-webkit-mask-repeat:no-repeat;mask-mode:alpha;}
+.rg-character-visibility {position:absolute;inset:0;pointer-events:none;image-rendering:auto;}
 .rg-preview.is-freecam-detached :is(#rg-card-games-layer,#rg-live-trivia,#rg-slot-control-layer,#rg-result),
 .rg-preview.is-freecam-detached :is(#rg-card-games-layer,#rg-live-trivia,#rg-slot-control-layer) * {visibility:hidden!important;pointer-events:none!important;}

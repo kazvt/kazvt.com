@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {characterYaw,characterCorners,pointInCharacterQuad,projectCharacterQuad,CHARACTER_YAW_LIMIT,CHARACTER_YAW_WEIGHT} from './character-billboards.mjs';
+import {characterYaw,characterCorners,pointInCharacterQuad,projectCharacterQuad,CHARACTER_YAW_LIMIT,CHARACTER_YAW_WEIGHT,CHARACTER_SOURCE_SIZE,HOST_CHARACTER_X_OFFSET,standingCharacterPose} from './character-billboards.mjs';
 
 test('horizontal character tracking is fractional, bounded, and upright',()=>{
  for(let i=-180;i<=180;i++){
@@ -23,4 +23,11 @@ test('projected quads reject near-plane crossings, rear views and off-screen art
  assert.equal(projectCharacterQuad(pose,eye,p=>({...project(p),x:3}),viewport,.1),null);
  assert.equal(projectCharacterQuad(pose,eye,p=>({...project(p),x:NaN}),viewport,.1),null);
  assert.equal(pointInCharacterQuad([{x:0,y:0},{x:10,y:5},{x:8,y:10},{x:2,y:8}],0,10),false);
+});
+
+test('high resolution source remains fixed and host alone shifts left',()=>{
+ assert.equal(CHARACTER_SOURCE_SIZE,1024);
+ const bounds={min:{x:2,y:0,z:0},max:{x:4,y:1,z:1}};
+ const host=standingCharacterPose(bounds,true),contestant=standingCharacterPose(bounds);
+ assert.equal(contestant.anchor.x,3);assert.equal(host.anchor.x,3+HOST_CHARACTER_X_OFFSET);assert.ok(HOST_CHARACTER_X_OFFSET<0);assert.equal(host.worldWidth,contestant.worldWidth);assert.equal(host.worldHeight,contestant.worldHeight);
 });
