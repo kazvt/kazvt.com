@@ -867,12 +867,6 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     updateGridStatus();
     publishSlotSettings();
   }));
-  $$("[data-placement]").forEach((button) => button.addEventListener("click", () => {
-    placementMode = button.dataset.placement;
-    $$("[data-placement]").forEach((choice) => choice.setAttribute("aria-pressed", String(choice === button)));
-    updateGridStatus();
-    publishSlotSettings();
-  }));
   $("#rg-slot-clear").addEventListener("click", () => {
     slotGrid = Array(gridSize).fill(null);
     persistGrid();
