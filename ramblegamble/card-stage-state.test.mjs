@@ -61,22 +61,28 @@ function mountUI(saved, initialPoints = {kaz:0,faroe:0,erin:0}) {
   vm.runInNewContext(code,{...games,applyCardShowAction,activeCardStage,cardStageChange,window,document:{querySelector:get,querySelectorAll:()=>[],createElement:()=>new FakeElement()},CustomEvent:FakeEvent,Event:FakeEvent,readCardGames:()=>data,writeCardGames:value=>failCards?{state:data,persisted:false}:({state:data=normalizeCardGamesState(value),persisted:true}),subscribeLiveTrivia:()=>{},activeRoomRound:()=>data.round,subscribeCardGames:fn=>{subscriber=fn;fn(data);},readPointScores:()=>({...balances}),writePointScores:value=>{if(failPoints)return {scores:{...balances},persisted:false};balances={...value};pointsSubscriber?.({...balances});return {scores:{...balances},persisted:true};},subscribePointScores:fn=>{pointsSubscriber=fn;fn({...balances});},withPointScoresLock:async fn=>fn(),mountCardRoom:()=>({publish(){}}),foley:{start(channel,cue){sounds.push(cue);},stop(){},play(cue){sounds.push(cue);}},withRoomSubmissionLock:async fn=>fn()});
   return {get,calls,sounds,window,get state(){return data;},get balances(){return balances;},setPoints(next){balances={...next};pointsSubscriber({...balances});},blockPoints(value){failPoints=value;},blockCards(value){failCards=value;},update(next){data=normalizeCardGamesState(next);subscriber(data);},flushTimers(){for(const [id,fn] of [...timers]){timers.delete(id);fn();}}};
 }
-test('actual card UI keeps restored shop hidden, resumes on request, and only opens newly started rounds',()=>{
+test('restored shop stays hidden, menu has only three choices, and choosing Shop starts fresh',async()=>{
   const round=createShopRound(decks);
-  const ui=mountUI({round});
+  const ui=mountUI({round,decks:{shop:decks}});
   assert.equal(ui.get('#rg-card-games-layer').hidden,true);
   assert.ok(!ui.calls.includes('rg:card-game-active'));
   const purchased=buyShopCard(round,round.cards[0].id,'kaz',{kaz:0}).round;
-  ui.update({round:purchased});
+  ui.update({round:purchased,decks:{shop:decks}});
   assert.equal(ui.get('#rg-card-games-layer').hidden,true);
   ui.window.dispatchEvent({type:'rg:show-card-menu'});
-  assert.equal(ui.get('#rg-card-games-layer').hidden,false);
-  const resume=ui.get('#rg-card-games-content').children.find(el=>el.textContent==='RESUME THE SHOP');
-  assert.ok(resume); resume.click();
+  const content=ui.get('#rg-card-games-content');
+  assert.equal(content.children.length,1);
+  assert.doesNotMatch(allText(content),/RESUME/);
+  content.children[0].children[2].click();ui.flushTimers();await Promise.resolve();
   assert.equal(ui.get('#rg-card-games-title').textContent,'THE SHOP');
-  assert.ok(ui.calls.includes('rg:card-game-active'));
+  assert.notEqual(ui.state.round.id,round.id);
+  assert.ok(ui.state.round.cards.every(c=>!c.revealed));
+  const newRound=ui.state.round;
+  ui.window.dispatchEvent({type:'rg:show-card-menu'});
+  assert.equal(ui.state.round.id,newRound.id);
+  assert.equal(ui.get('#rg-card-games-title').textContent,'THE SHOP');
   ui.get('#rg-card-room').click();
-  ui.update({round:purchased});
+  ui.update({round:newRound,decks:{shop:decks}});
   assert.equal(ui.get('#rg-card-games-layer').hidden,true);
   ui.update({round:createShopRound(decks)});
   assert.equal(ui.get('#rg-card-games-layer').hidden,false);
@@ -149,8 +155,8 @@ test('remote card submissions sound once per state change, restored state is qui
 function findClass(element, name){return element.className===name?element:(element.children||[]).map(child=>findClass(child,name)).find(Boolean);}
 test('actual shop UI updates balances without replacing cards and commits purchase only when points save',async()=>{
   const priced={penalty:[{name:'P',price:25}],challenge:[{name:'C',price:10}],instant:[{name:'I',price:5}]};
-  const ui=mountUI({round:createShopRound(priced)},{faroe:100,erin:50,kaz:10});
-  ui.window.dispatchEvent({type:'rg:show-card-menu'});await findText(ui.get('#rg-card-games-content'),'RESUME THE SHOP').click();
+  const ui=mountUI({}, {faroe:100,erin:50,kaz:10});
+  ui.update({round:createShopRound(priced)});
   const content=ui.get('#rg-card-games-content'), card=findClass(content,'rg-shop-card');assert.ok(card);
   ui.setPoints({faroe:120,erin:50,kaz:10});assert.equal(findClass(content,'rg-shop-card'),card);assert.ok(findText(content,'FAROE 120'));
   ui.blockPoints(true);await card.click();assert.equal(ui.balances.faroe,120);assert.equal(ui.state.round.cards[0].buyer,null);
@@ -169,4 +175,47 @@ test('shop animates only a committed new reveal and keeps the item name out of t
   const purchased=buyShopCard(round,round.cards.find(c=>c.name===secret).id,'faroe',{faroe:0}).round;
   ui.update({round:purchased});assert.ok(findNew(content));assert.match(allText(content),/Hidden prize unique 123/);
   ui.update({round:purchased});assert.equal(findNew(content),undefined);
+});
+
+
+test('dismissed Smeemo never interrupts the menu and selecting another game clears it',async()=>{
+  const game=createSmeemoGame();
+  const ui=mountUI({smeemo:game,decks:{evidence:['Evidence'],suspects:['Suspect']}});
+  ui.window.dispatchEvent({type:'rg:show-card-menu'});
+  const content=ui.get('#rg-card-games-content'), menu=content.children[0];
+  assert.equal(content.children.length,1);assert.doesNotMatch(allText(content),/RESUME/);
+  ui.update({smeemo:games.advanceSmeemoPhase(game,'preview'),decks:{evidence:['Evidence'],suspects:['Suspect']}});
+  assert.equal(content.children[0],menu);
+  menu.children[0].click();ui.flushTimers();await Promise.resolve();
+  assert.equal(ui.state.smeemo,null);assert.equal(ui.state.round.mode,'red-handed');
+  assert.equal(ui.get('#rg-card-games-title').textContent,'RED HANDED');
+});
+
+test('a pending menu selection cannot override an explicitly started newer game',async()=>{
+  const ui=mountUI({decks:{quiplash:['Prompt']}});
+  ui.window.dispatchEvent({type:'rg:show-card-menu'});
+  ui.get('#rg-card-games-content').children[0].children[1].click();
+  const game=createSmeemoGame();ui.update({smeemo:game,decks:{quiplash:['Prompt']}});
+  ui.flushTimers();await Promise.resolve();
+  assert.equal(ui.state.smeemo.id,game.id);assert.equal(ui.get('#rg-card-games-title').textContent,'SMEEMO SCRAMBLE');
+});
+
+test('red-handed and berryblast use distinct presentation classes without exposing hidden evidence',()=>{
+  for(const mode of ['red-handed','quiplash']) {
+    const ui=mountUI({});let round=mode==='red-handed'?games.createRedHandedRound(Array.from({length:15},(_,i)=>`evidence-${i}`),['Suspect']):createQuiplashRound(['Prompt']);
+    for(const p of games.CARD_GAME_PLAYERS)round=games.submitRoundAnswer(round,p,mode==='red-handed'?round.hands[p][0]:`answer-${p}`);
+    ui.update({round});const content=ui.get('#rg-card-games-content');
+    assert.ok(content.children[0].className.includes(mode==='red-handed'?'is-red-handed':'is-berryblast'));
+    assert.equal(content.children[0].children[1].children[0].children.length,3);
+    assert.ok(content.children[0].children[1].children[0].children.every(el=>el.className==='rg-show-answer-back'));
+    for(const r of round.responses)assert.ok(!allText(content).includes(r.text));
+  }
+});
+
+test('Smeemo image is present only for the revealed winning card',()=>{
+  let game=createSmeemoGame();for(const phase of ['preview','stacking','stacked','dealing'])game=games.advanceSmeemoPhase(game,phase);
+  const ui=mountUI({});ui.update({smeemo:game});const content=ui.get('#rg-card-games-content');
+  assert.equal(findClass(content,'rg-smeemo-berry-mark'),undefined);
+  const winner=game.cards.find(c=>c.smeemo);ui.update({smeemo:games.drawSmeemoCard(game,winner.id).game});
+  assert.ok(findClass(content,'rg-smeemo-berry-mark').src.endsWith('/smeemo-card-mark.png'));
 });

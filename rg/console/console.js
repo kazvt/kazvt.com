@@ -1,5 +1,5 @@
-import { mountCommandCompletion } from "/ramblegamble/console-completion.mjs?v=host-cell-cards-20261127-v1";
-import { applyCardShowAction } from "/ramblegamble/card-show-actions.mjs?v=show-stage-20261126-v1";
+import { mountCommandCompletion } from "/ramblegamble/console-completion.mjs?v=card-polish-20261127-v1";
+import { applyCardShowAction } from "/ramblegamble/card-show-actions.mjs?v=card-polish-20261127-v1";
 import { renderTriviaResponses } from "/ramblegamble/trivia-live-view.mjs?v=room-recovery-20261127-v1";
 import { activeRoomRound, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, newTriviaId, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, updateTrivia, answerSummary } from "/ramblegamble/live-trivia.mjs?v=show-stage-20261126-v1";
 import { withRoomSubmissionLock } from "/ramblegamble/card-room-election.mjs";
@@ -10,7 +10,7 @@ import {
   writePointScores,
   withPointScoresLock,
 } from "/ramblegamble/points-store.mjs?v=card-score-sync-20261127-v1";
-import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=host-cell-cards-20261127-v1";
+import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=card-polish-20261127-v1";
 import { createSmeemoGame } from "/ramblegamble/card-games.mjs?v=show-stage-20261126-v1";
 import { readCardGames, writeCardGames, subscribeCardGames } from "/ramblegamble/card-games-store.mjs?v=show-stage-20261126-v1";
 
@@ -70,9 +70,9 @@ async function execute(rawCommand) {
     try {
       await withRoomSubmissionLock(() => {
         const action = parsed.action.slice(5), state = readCardGames();
-        if (action !== "start" && action !== "show" && activeRoomRound()?.id !== state.round?.id) throw Error("No active card round.");
+        if (action !== "start" && activeRoomRound()?.id !== state.round?.id) throw Error("No active card round.");
         const next = applyCardShowAction(state, action, parsed);
-        const result = writeCardGames(next, { requirePersistence: true, activate: action === "show" });
+        const result = writeCardGames(next, { requirePersistence: true });
         if (!result.persisted) throw Error("Could not save card round.");
         cardRoom.publish(); refreshAnswers();
         const round = result.state.round;
@@ -81,23 +81,23 @@ async function execute(rawCommand) {
     } catch(error) { addLine(error.message, "terminal-error"); }
     return;
   }
-  if (parsed.action === "smeemo-start") {
-    await withRoomSubmissionLock(() => {
-    const state = readCardGames();
-    state.round = null;
-    state.smeemo = createSmeemoGame();
-    const result = writeCardGames(state); cardRoom.publish(); refreshAnswers();
-    addLine(`Smeemo Scramble started - reveal cards on the room page${result.persisted ? "" : " - update sent to open tabs only"}`);
-    });
-    return;
-  }
-  if (parsed.action === "smeemo-reset") {
-    await withRoomSubmissionLock(() => {
-    const state = readCardGames();
-    state.smeemo = null;
-    const result = writeCardGames(state); cardRoom.publish(); refreshAnswers();
-    addLine(`Smeemo Scramble reset${result.persisted ? "" : " - update sent to open tabs only"}`);
-    });
+  if (parsed.action === "smeemo-start" || parsed.action === "smeemo-reset") {
+    try {
+      await withRoomSubmissionLock(() => {
+        const state = readCardGames();
+        if (parsed.action === "smeemo-start") {
+          state.round = null;
+          state.smeemo = createSmeemoGame();
+        } else {
+          if (state.smeemo) state.round = null; // Never restore a legacy underlying round.
+          state.smeemo = null;
+        }
+        const result = writeCardGames(state, { requirePersistence: true });
+        if (!result.persisted) throw Error("Could not save Smeemo state; no update committed.");
+        cardRoom.publish(); refreshAnswers();
+        addLine(parsed.action === "smeemo-start" ? "Smeemo Scramble started - reveal cards on the room page" : "Smeemo Scramble reset");
+      });
+    } catch (error) { addLine(error.message, "terminal-error"); }
     return;
   }
   if (parsed.action === "trivia-start") {

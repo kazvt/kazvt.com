@@ -253,8 +253,7 @@
   border: 4px solid #1e0b01;
   border-radius: 14px 14px 22px 22px;
   color: #1e0b01;
-  background: #9a88ff url("/ramblegamble/assets/provided/card_deck.png") repeat;
-  background-size: 42px 64px;
+  background: #9a88ff url("/ramblegamble/assets/card-games/menu-card-back.png") center / 100% 100% no-repeat;
   box-shadow: 6px 7px 0 #8b2626;
   cursor: pointer;
   transform-style: preserve-3d;
@@ -315,10 +314,10 @@
 .rg-smeemo-card-front::before { top: 0; left: 0; clip-path: polygon(0 0,100% 0,0 100%); }
 .rg-smeemo-card-front::after { right: 0; bottom: 0; clip-path: polygon(100% 0,100% 100%,0 100%); }
 .rg-smeemo-card-front.is-berry { color: #fff5c7; background: linear-gradient(145deg, #b20000 0 48%, #8b2626 48% 100%); box-shadow: inset 0 0 0 4px #ffdf00, 0 0 24px #ffdf00, 3px 4px 0 #1e0b01; }
-.rg-smeemo-berry-mark { position: relative; display: block; width: 58%; aspect-ratio: 1; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(2px 3px 0 #1e0b01); }
+.rg-smeemo-berry-mark { position: relative; display: block; width: 70%; max-width: 100%; height: auto; min-width: 0; aspect-ratio: 1; object-fit: contain; object-position: center; justify-self: center; image-rendering: pixelated; filter: drop-shadow(2px 3px 0 #1e0b01); }
 .rg-smeemo-face-label { position: relative; z-index: 1; color: #8b2626; font-size: clamp(8px, 1vw, 14px); font-weight: 1000; letter-spacing: .04em; line-height: 1; text-align: center; text-shadow: 1px 1px #ffdf00; white-space: nowrap; }
 .rg-smeemo-card-front.is-berry .rg-smeemo-face-label { color: #fff5c7; font-size: clamp(9px, 1.1vw, 16px); text-shadow: 2px 2px #1e0b01; }
-.rg-smeemo-card-back { transform: rotateY(180deg); background: #9a88ff url("/ramblegamble/assets/provided/card_deck.png") no-repeat left top / 194% 136%; image-rendering: pixelated; }
+.rg-smeemo-card-back { transform: rotateY(180deg); background: #9a88ff url("/ramblegamble/assets/card-games/menu-card-back.png") center / 100% 100% no-repeat; image-rendering: pixelated; }
 .rg-smeemo-card-back::after { position: absolute; inset: 9%; content: ""; border: 2px dashed #fff6ac; box-shadow: inset 0 0 0 2px #493080; }
 .rg-smeemo-card:focus-visible { z-index: 2; outline: 4px solid #ffdf00; outline-offset: 5px; }
 .rg-smeemo-card.is-available { cursor: pointer; transition: filter 180ms ease, transform 180ms ease; }
@@ -566,7 +565,7 @@
 .rg-shop-card-inner,.rg-shop-card-front,.rg-shop-card-back { position:absolute;inset:0;display:grid;place-items:center;border-radius:14px 14px 22px 22px; }
 .rg-shop-card-inner { transform-style:preserve-3d;transition:transform 230ms cubic-bezier(.18,.8,.25,1);pointer-events:none; }
 .rg-shop-card-front,.rg-shop-card-back { border:4px solid #1e0b01;backface-visibility:hidden;box-shadow:4px 5px 0 #8b2626;overflow:hidden; }
-.rg-shop-card-back { transform:translateZ(2px);background:#9a88ff url('/ramblegamble/assets/provided/card_deck.png') repeat;background-size:42px 64px; }
+.rg-shop-card-back { transform:translateZ(2px);background:#9a88ff url('/ramblegamble/assets/card-games/menu-card-back.png') center / 100% 100% no-repeat;image-rendering:pixelated; }
 .rg-shop-card-front { transform:rotateY(180deg) translateZ(2px);padding:10%;align-content:center;gap:8px;background:#f2f2da;border-color:#ffdf00;box-shadow:0 0 0 3px #b77beb,0 0 20px #ffdf00,5px 6px 0 #8b2626; }
 .rg-shop-card:is(:hover,:focus-visible):not(:disabled) .rg-shop-card-inner { transform:translate3d(0,-7px,20px) rotateX(var(--tilt-x,-5deg)) rotateY(var(--tilt-y,7deg)); }
 .rg-shop-card.is-revealed .rg-shop-card-inner { transform:rotateY(180deg); }
@@ -593,3 +592,59 @@
 .rg-card-menu-grid.is-choosing .is-selected::after {animation:rg-card-halo 680ms 100ms ease-out both;}
 @keyframes rg-card-halo {0% {opacity:0;transform:rotate(-10deg) scale(.8);} 24% {opacity:.65;} 100% {opacity:0;transform:rotate(12deg) scale(1.2);} }
 @media(prefers-reduced-motion:reduce){.rg-mode-choice::before,.rg-mode-choice::after {animation:none!important;}}
+
+/* Red-Handed: use the full authored evidence back, with identical front/back
+   dimensions and enough central writing space for long responses. */
+.rg-card-games-shell:has(.rg-show-round.is-red-handed) { width:min(1080px,94vw); }
+.rg-show-round.is-red-handed { grid-template-columns:minmax(0,.72fr) minmax(0,1.55fr); gap:clamp(12px,2vw,24px); }
+.rg-show-round.is-red-handed .rg-card-prompt-side { min-width:0; display:grid; justify-items:center; }
+.rg-show-round.is-red-handed .rg-card-prompt.is-suspect { grid-template-columns:minmax(0,1fr); grid-template-rows:minmax(0,1fr); max-height:none; padding:clamp(22px,4.5dvh,38px) clamp(12px,2vw,26px); image-rendering:auto; background-color:transparent; }
+.rg-show-round.is-red-handed .rg-card-prompt-copy,
+.rg-show-round.is-red-handed .rg-card-answer-copy {
+  color:#fff5da;
+  -webkit-text-stroke:2px #1e0b01;
+  paint-order:stroke fill;
+  text-shadow:1px 2px 0 #1e0b01,2px 3px 0 #1e0b01;
+  min-width:0; min-height:0; max-width:100%; max-height:100%; overflow:auto;
+  overflow-wrap:anywhere; white-space:pre-wrap; text-align:center; pointer-events:auto;
+}
+.rg-show-round.is-red-handed .rg-show-answer-grid { grid-template-columns:repeat(3,minmax(0,1fr)); width:100%; max-width:none; gap:clamp(8px,1.25vw,16px); }
+.rg-show-round.is-red-handed .rg-show-answer-back,
+.rg-show-round.is-red-handed .rg-card-answer {
+  box-sizing:border-box; width:min(100%,230px,45dvh); aspect-ratio:415 / 618; min-height:0; align-self:center; justify-self:center;
+}
+.rg-show-round.is-red-handed .rg-show-answer-back {
+  background:transparent url('/ramblegamble/assets/card-games/red-handed-evidence-face.png') center / 100% 100% no-repeat;
+  transform:none; image-rendering:auto;
+}
+.rg-show-round.is-red-handed .rg-card-answer {
+  grid-template-columns:minmax(0,1fr); grid-template-rows:minmax(0,1fr); align-items:center; align-content:stretch;
+  padding:15% 9%; gap:5px; image-rendering:auto; background-color:transparent;
+}
+.rg-show-round.is-red-handed .rg-card-answer:has(.rg-card-vote-count) { grid-template-rows:minmax(0,1fr) auto; }
+.rg-show-round.is-red-handed .rg-card-answer-copy { font-size:clamp(13px,1.5vw,20px); line-height:1.28; }
+.rg-show-round.is-red-handed .rg-card-vote-count { max-width:100%; text-align:center; font-size:clamp(9px,1vw,12px); padding:3px 5px; overflow-wrap:anywhere; }
+/* Prevent intrinsic image sizing or label width from shifting the berry's grid track. */
+.rg-smeemo-card-front { grid-template-columns:minmax(0,1fr); grid-template-rows:minmax(0,1fr); align-content:stretch; }
+.rg-smeemo-card-front.is-berry { grid-template-rows:minmax(0,1fr) auto; gap:5%; }
+.rg-smeemo-card-front.is-berry .rg-smeemo-berry-mark { width:70%; height:100%; max-height:100%; min-height:0; aspect-ratio:auto; object-fit:contain; }
+.rg-smeemo-card-front.is-berry .rg-smeemo-face-label { max-width:100%; font-size:clamp(7px,1vw,14px); line-height:1.15; }
+@media(max-width:680px) {
+  .rg-card-games-shell:has(.rg-show-round.is-red-handed) { width:96vw; }
+  .rg-show-round.is-red-handed { grid-template-columns:minmax(0,1fr); }
+  .rg-show-round.is-red-handed .rg-card-prompt.is-suspect { width:min(100%,230px,30dvh); max-height:none; padding:clamp(20px,3.8dvh,32px) clamp(12px,3vw,20px); }
+  .rg-show-round.is-red-handed .rg-card-answer-copy { font-size:clamp(12px,2.3vw,17px); }
+}
+@media(max-width:480px) {
+  .rg-show-round.is-red-handed .rg-show-answer-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .rg-show-round.is-red-handed .rg-show-answer-grid > :nth-child(3):last-child { grid-column:1 / -1; }
+  .rg-show-round.is-red-handed .rg-card-answer,.rg-show-round.is-red-handed .rg-show-answer-back { width:min(100%,175px,45dvh); }
+  .rg-smeemo-card-front.is-berry .rg-smeemo-face-label { font-size:clamp(4px,1.35vw,8px); letter-spacing:0; }
+}
+
+/* Keep the winning announcement inside the shell instead of rotating it out
+   of the clipping viewport. The card itself retains its 3D reveal. */
+.rg-smeemo-winner { margin:14px 0 8px; padding:4px 8px; color:#fff5da; font-size:clamp(18px,3.2vw,42px); line-height:1.15; text-shadow:2px 3px #1e0b01,4px 4px #8b2626; overflow-wrap:anywhere; animation:none; }
+.rg-smeemo-winner.is-newly-won { animation:rg-smeemo-winner-pop 420ms cubic-bezier(.18,.8,.25,1) both; }
+@keyframes rg-smeemo-winner-pop { 0% { opacity:.4; transform:scale(.95); } 65% { opacity:1; transform:scale(1.025); } 100% { opacity:1; transform:none; } }
+@media(prefers-reduced-motion:reduce) { .rg-smeemo-winner.is-newly-won { animation:none; } }

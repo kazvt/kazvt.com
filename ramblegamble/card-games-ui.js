@@ -1,4 +1,4 @@
-import { applyCardShowAction } from "./card-show-actions.mjs?v=show-stage-20261126-v1";
+import { applyCardShowAction } from "./card-show-actions.mjs?v=card-polish-20261127-v1";
 import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia } from "./live-trivia.mjs?v=show-stage-20261126-v1";
 import { activeCardStage, cardStageChange } from "./card-stage-state.mjs?v=wildcard-shared-20261126-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
@@ -83,6 +83,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
   let smeemoScheduledSignal = "";
   let menuTimer = 0;
   let menuSelection = "";
+  let menuGeneration = 0;
   let lastPresentation = { id: null, visible: [], phase: null };
   let shopPresentation = { id: null, revealed: new Set() };
   let smeemoPresentation = { id: null, revealed: new Set() };
@@ -187,7 +188,6 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       if ((after.revealedCount || 0) > (before.revealedCount || 0)) foley.play("flip");
       if (after.phase === "results" && before.phase !== "results") foley.play("confirm");
     }
-    const explicitlyActivated = Boolean(next.activityRevision && next.activityRevision !== state?.activityRevision);
     const decksChanged = JSON.stringify(state?.decks) !== JSON.stringify(next.decks);
     state = next;
     if (decksChanged) loadDeckInputs(state.decks);
@@ -203,7 +203,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       smeemoPhaseTimer = 0;
       smeemoScheduledSignal = "";
     }
-    if (opened || (active && explicitlyActivated)) {
+    if (opened) {
       foley.stop("card-menu-hover");
       foley.start("cards-motion", "deal");
       menuOpen = false;
@@ -216,10 +216,9 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       content.replaceChildren();
       window.dispatchEvent(new Event("rg:close-card-games"));
     }
-    if (menuOpen) {
-      // Do not rebuild or interrupt the flip when a background room update arrives.
-      if (!menuSelection && (!content.querySelector(".rg-card-menu-grid") || opened || ended)) renderMenu();
-    } else if (dismissedActive || !active) layer.hidden = true;
+    // The menu has no saved-round controls. Background updates never rebuild it.
+    if (menuOpen) return;
+    if (dismissedActive || !active) layer.hidden = true;
     else if (activeSmeemo) renderSmeemo(state.smeemo);
     else renderRound(state.round);
   }
@@ -254,7 +253,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       // Automatic show animation is safe to advance while host controls are locked.
       withRoomSubmissionLock(() => {
         const current = readCardGames(), latest = current.smeemo;
-        if (!latest || latest.id !== game.id || latest.phase !== game.phase) return;
+        if (dismissedActive || menuOpen || layer.hidden || !latest || latest.id !== game.id || latest.phase !== game.phase) return;
         const advanced = advanceSmeemoPhase(latest, game.phase);
         if (advanced === latest) return;
         if (!dismissedActive && !layer.hidden && !document.documentElement?.hasAttribute("data-rg-host-locked")) {
@@ -341,6 +340,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     window.clearTimeout(menuTimer);
     menuTimer = 0;
     menuSelection = "";
+    menuGeneration++;
     layer.hidden = false;
     setStageTitle("Choose a card game", "menu");
     liveStatus.textContent = "Choose a card game.";
@@ -355,33 +355,12 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       makeModeChoice("shop", "menu-shop-face.png", "Shop"),
     );
     content.append(grid);
-    const active = activeCardStage(state);
-    if (active) {
-      const resume = element("button", "rg-card-room-button", `RESUME ${modeNames[active.mode] || "SMEEMO SCRAMBLE"}`);
-      resume.type = "button";
-      resume.addEventListener("click", resumeActiveStage);
-      content.append(resume);
-    }
-  }
-
-  function resumeActiveStage() {
-    return withRoomSubmissionLock(() => {
-      const latest = readCardGames();
-      const active = activeCardStage(latest);
-      if (!active) return;
-      const result = writeCardGames(latest, { activate: true, requirePersistence: true });
-      if (!result.persisted) throw Error("Card game could not be resumed.");
-      menuOpen = false;
-      dismissedActive = false;
-      window.clearTimeout(menuTimer);
-      menuTimer = 0;
-      updateFromState(result.state);
-      window.dispatchEvent(new CustomEvent("rg:card-game-active", { detail: { mode: active.mode } }));
-    }).catch(error => { adminStatus.textContent = error.message; });
   }
 
   function chooseMode(mode, choice) {
-    if (!menuOpen || menuTimer) return;
+    if (!menuOpen || menuTimer || menuSelection) return;
+    const generation = menuGeneration;
+    const expectedStage = activeCardStage(state)?.key;
     foley.stop("card-menu-hover");
     foley.play("flip");
     const grid = choice.parentElement;
@@ -396,17 +375,13 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       if (!menuOpen) return;
       if (document.documentElement?.hasAttribute("data-rg-host-locked")) { renderMenu(); return; }
       runRoomMutation(() => {
+        // A queued selection must not replace a newer round or a closed menu.
+        if (!menuOpen || menuSelection !== mode || generation !== menuGeneration) return;
         const latest = readCardGames();
-        if (latest.round?.mode === mode && !latest.smeemo) {
-          const result = writeCardGames(latest, { activate: true, requirePersistence: true });
-          if (!result.persisted) throw Error("Could not resume game.");
-          menuOpen = false; dismissedActive = false; updateFromState(result.state);
-          window.dispatchEvent(new CustomEvent("rg:card-game-active", { detail: { mode } }));
-          return;
-        }
+        if (activeCardStage(latest)?.key !== expectedStage) { updateFromState(latest); return; }
         const next = applyCardShowAction(latest, "start", { mode });
-        menuOpen = false; dismissedActive = false; sync(next); closeHostPanel();
-      }, error => { renderMenu(); content.append(element("p", "rg-show-notice", error.message)); });
+        sync(next); closeHostPanel();
+      }, error => { if (menuOpen && generation === menuGeneration) { renderMenu(); content.append(element("p", "rg-show-notice", error.message)); } else adminStatus.textContent = error.message; });
     }, reducedMotion.matches ? 20 : 940);
   }
 
@@ -454,7 +429,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     const resultsNow = round.phase === "results" && (!sameRound || lastPresentation.phase !== "results");
     lastPresentation = { id: round.id, visible: visible.map(r => r.id), phase: round.phase };
     content.replaceChildren();
-    const shell = element("div", `rg-card-round rg-show-round${round.mode === "quiplash" ? " is-berryblast" : ""}`);
+    const shell = element("div", `rg-card-round rg-show-round${round.mode === "quiplash" ? " is-berryblast" : " is-red-handed"}`);
     const promptSide = element("div", "rg-card-prompt-side");
     const prompt = promptCard(round.prompt, round.mode === "red-handed" ? "suspect" : "quiplash");
     if (!sameRound) prompt.classList.add("rg-prompt-deal");
@@ -472,7 +447,9 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
         const answer = element(canVote ? "button" : "article", `rg-card-answer${winner ? " is-winner" : ""}${fresh.has(response.id) ? " rg-show-reveal" : ""}${winner && resultsNow ? " rg-show-winner" : ""}`);
         if (canVote) { answer.type = "button"; answer.setAttribute("aria-label", `Vote for anonymous answer: ${response.text}`); answer.addEventListener("click", () => showAction("vote", round.id, response.id)); }
         answer.style.setProperty("--reveal-delay", `${Math.min(i, 2) * 75}ms`);
-        answer.append(element("span", "rg-card-answer-copy", response.text));
+        const copy = element("span", "rg-card-answer-copy", response.text);
+        if (!canVote) copy.tabIndex = 0;
+        answer.append(copy);
         if (round.phase !== "reveal") answer.append(element("span", "rg-card-vote-count", `${round.votes[response.id] || 0} VOTES`));
         answers.append(answer);
       }
@@ -637,7 +614,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       const front = element("span", `rg-smeemo-card-front${smeemoRevealed ? " is-berry" : ""}`);
       if (smeemoRevealed) {
         const berryMark = element("img", "rg-smeemo-berry-mark");
-        berryMark.src = "/ramblegamble/assets/berries/smeemo.png";
+        berryMark.src = "/ramblegamble/assets/berries/smeemo-card-mark.png";
         berryMark.alt = "";
         berryMark.setAttribute("aria-hidden", "true");
         front.append(berryMark);
@@ -682,9 +659,11 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     else if (["stacking", "stacked", "dealing"].includes(game.phase)) statusText = "SHUFFLING...";
     else if (game.phase === "ready" && game.status === "playing") statusText += " - CHOOSE A CARD";
     else if (game.status === "complete") statusText = "SMEEMOBERRY FOUND!";
-    content.append(element("p", `rg-card-round-status rg-smeemo-status${game.status === "complete" ? " is-complete" : ""}`, statusText));
+    if (game.status === "complete") {
+      const newlyWon = game.draws.some(draw => draw.smeemo && !priorReveals.has(draw.id));
+      content.append(element("p", `rg-smeemo-winner${newlyWon ? " is-newly-won" : ""}`, statusText));
+    } else content.append(element("p", "rg-card-round-status rg-smeemo-status", statusText));
     liveStatus.textContent = statusText;
-    if (game.status === "complete") content.append(element("p", "rg-smeemo-winner", "SMEEMOBERRY FOUND!"));
     scheduleSmeemoAdvance(game);
   }
 
@@ -721,8 +700,6 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       return;
     }
     const next = { ...readCardGames(), decks, round, smeemo: null };
-    menuOpen = false;
-    dismissedActive = false;
     sync(next);
     closeHostPanel();
   }
@@ -750,7 +727,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
   function openCardMenu() {
     foley.play("cardFan");
     menuOpen = true;
-    dismissedActive = false;
+    dismissedActive = Boolean(activeCardStage(state));
     renderMenu();
     window.dispatchEvent(new CustomEvent("rg:card-game-active", { detail: { mode: "menu" } }));
     closeHostPanel();
@@ -774,7 +751,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
   resetButton.addEventListener("click", () => runRoomMutation(() => {
     foley.stop("cards-motion");
     foley.play("erase");
-    sync({ ...readCardGames(), round: null });
+    sync({ ...readCardGames(), round: null, smeemo: null });
     adminStatus.textContent = "Current card game reset.";
   }));
   shopRefreshButton.addEventListener("click", () => runRoomMutation(() => {
@@ -786,8 +763,6 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       return;
     }
     selectedBuyer = "faroe";
-    menuOpen = false;
-    dismissedActive = false;
     sync({ ...latest, round, smeemo:null });
     closeHostPanel();
   }));
@@ -805,8 +780,10 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     window.dispatchEvent(new Event("rg:close-card-games"));
   });
   window.addEventListener("rg:show-card-menu", () => {
+    // Repeated table clicks are not permission to interrupt a running game.
+    if (!layer.hidden || menuOpen) return;
     menuOpen = true;
-    dismissedActive = false;
+    dismissedActive = Boolean(activeCardStage(state));
     renderMenu();
   });
 

@@ -1,7 +1,7 @@
 // A small command tree matching points-commands.mjs. Suggestions replace only
 // the active token (including text after the caret), never execute commands.
 const names = ['faroe', 'erin', 'kaz'];
-const cards = ['show', 'close', 'reveal', 'all', 'vote', 'results'];
+const cards = ['close', 'reveal', 'all', 'vote', 'results'];
 const trivia = ['answers', 'close', 'next', 'previous', 'hide', 'show'];
 const roots = ['help', 'clear', 'answers', 'points', 'berryblast', 'redhanded', 'red-handed', 'cards', 'smeemo', 'trivia'];
 const numbers = n => Array.from({length:n}, (_,i) => String(i+1));

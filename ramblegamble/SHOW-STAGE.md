@@ -2,7 +2,7 @@
 
 The display and console keep their existing authenticated host setup and elected WebRTC reader. Contestants keep their existing v2 private links. No backend or new service is required.
 
-- Left-click a card game to resume or start it using saved decks. Right-click a card tile or the card display for its staff editor. Configure the prompt/decks and room invitations there or use the console. Normal Dice entry shows only play controls; right-click the VIP door or inside Dice for face configuration (Shift+D also toggles it). Existing slot and roulette staff routing is retained.
+- Left-click a card game to start a fresh round using saved decks. Ordinary table clicks leave a currently displayed game alone; ROOM exits the presentation. There is no Resume action. Right-click a card tile or the card display for its staff editor. Configure the prompt/decks and room invitations there or use the console. Normal Dice entry shows only play controls; right-click the VIP door or inside Dice for face configuration (Shift+D also toggles it). Existing slot and roulette staff routing is retained.
 - While focused on a machine or wall (including Dice), moving a mouse or hovering pen without pressing a button smoothly follows the cursor in both axes. The orbit is bounded at twice the former per-view angles (roughly 2–5 degrees), preserves the authored target/radius and has no zoom/roll. It recenters on leaving the viewport and holds while over interactive controls to avoid moving hit targets. Drag and keyboard nudges remain available, including touch drag; an actual drag is not a click. Edge navigation, Back, overview framing and view resets remain unchanged. Reduced motion disables passive cursor-follow and keeps intentional manual nudges.
 - Card submissions are private until the host reveals them. Three accepted submissions end collection without revealing any text. LOCK ANSWERS can end collection early if there is an accepted answer; late submissions are rejected. REVEAL NEXT shows one shuffled anonymous answer; ALL shows the remainder. Voting is enabled only once all accepted answers are visible. RESULTS shows the votes, NEW ROUND uses the saved deck. The private console `answers` view remains available at any time.
 
@@ -12,7 +12,6 @@ The display and console keep their existing authenticated host setup and elected
 berryblast start
 berryblast start A custom prompt
 redhanded start
-cards show
 cards close
 cards reveal
 cards all
@@ -20,7 +19,7 @@ cards vote 1
 cards results
 ```
 
-`cards reveal all` also works. `cards vote` uses the visible anonymous response number, not a contestant's seat. Saved rounds remain hidden on page refresh until deliberately resumed or presented. Existing completed rounds are migrated without hiding answers that were already displayed. No player-facing protocol change or invitation replacement is necessary. Deploy the changed files together and reload all host/player tabs.
+`cards reveal all` also works. `cards vote` uses the visible anonymous response number, not a contestant's seat. Saved rounds remain hidden on page refresh; selecting a card game always starts a fresh round. Existing decks, point balances and saved submissions remain intact until a new round is deliberately started. Existing completed rounds are migrated without hiding answers that were already displayed. No player-facing protocol change or invitation replacement is necessary. Deploy the changed files together and reload all host/player tabs.
 
 ## Design references
 

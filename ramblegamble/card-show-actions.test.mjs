@@ -25,12 +25,13 @@ test('shared console/HUD actions guard round and mode, allow custom prompts, and
  const state=normalizeCardGamesState({decks:{quiplash:['Saved'],evidence:['Card'],suspects:['Saved suspect']}});
  const started=applyCardShowAction(state,'start',{mode:'quiplash',prompt:'Custom question?'});assert.equal(started.round.prompt,'Custom question?');assert.deepEqual(started.decks,state.decks);
  assert.throws(()=>applyCardShowAction(started,'reveal',{roundId:'old'}));assert.throws(()=>applyCardShowAction(started,'reveal',{mode:'red-handed'}));assert.throws(()=>applyCardShowAction(started,'reveal'));
- assert.equal(applyCardShowAction(started,'show'),started);
+ assert.throws(()=>applyCardShowAction(started,'show'));
  const red=applyCardShowAction(started,'start',{mode:'red-handed',prompt:'Another prompt'});assert.equal(red.round.prompt,'Another prompt');for(const player of CARD_GAME_PLAYERS)assert.equal(red.round.hands[player].length,5);
 });
 test('console supports explicit actions without treating prompt words as commands',()=>{
  assert.deepEqual(parsePointsCommand('berryblast start A prompt with  spaces'),{action:'card-start',mode:'quiplash',prompt:'A prompt with  spaces'});
  assert.deepEqual(parsePointsCommand('redhanded start'),{action:'card-start',mode:'red-handed',prompt:''});
- for(const action of ['show','close','reveal','all','results']) assert.deepEqual(parsePointsCommand('cards '+action),{action:'card-'+action});
+ for(const action of ['close','reveal','all','results']) assert.deepEqual(parsePointsCommand('cards '+action),{action:'card-'+action});
+ for(const command of ['cards show','redhanded show','berryblast show','smeemo resume']) assert.equal(parsePointsCommand(command).action,'error');
  assert.deepEqual(parsePointsCommand('cards reveal next'),{action:'card-reveal'});assert.deepEqual(parsePointsCommand('cards reveal all'),{action:'card-all'});assert.deepEqual(parsePointsCommand('cards vote 2'),{action:'card-vote',responseId:'answer-2'});assert.equal(parsePointsCommand('cards vote 4').action,'error');
 });

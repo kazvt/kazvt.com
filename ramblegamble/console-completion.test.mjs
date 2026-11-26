@@ -20,6 +20,8 @@ test('command and argument completions follow the existing grammar',()=>{
   assert.ok(options('trivia 0').includes('01'));
   assert.ok(!options('trivia ').includes('01'));
   assert.ok(!options('cards ').includes('start'));
+  for(const cmd of ['cards ','redhanded ','berryblast ']) assert.ok(!options(cmd).includes('show'));
+  assert.ok(options('trivia ').includes('show'));
 });
 test('completion replaces one token at caret and keeps remaining arguments',()=>{
   const line='  points remXXX   kaz  250';

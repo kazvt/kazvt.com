@@ -16,7 +16,6 @@ export function applyCardShowAction(state, action, { mode, prompt, roundId, resp
     return { ...state, round, smeemo: null };
   }
   if (!current || !["quiplash", "red-handed"].includes(current.mode) || state.smeemo || (roundId && current.id !== roundId) || (mode && current.mode !== mode)) throw Error("No matching active card round.");
-  if (action === "show") return state;
   const round = action === "close" ? closeCardSubmissions(current)
     : action === "reveal" ? revealCardAnswers(current)
     : action === "all" ? revealCardAnswers(current, true)

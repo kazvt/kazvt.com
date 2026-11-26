@@ -1,6 +1,6 @@
 import { RG_CONTESTANTS } from "./points-store.mjs?v=card-score-sync-20261127-v1";
 
-export const POINTS_HELP = "help - clear - answers - points [faroe|erin|kaz] - points add <name> [amount] - points remove <name> [amount] - points set <name> <total> - points reset [name] - berryblast|redhanded start [prompt] - cards show|close|reveal|all|vote <1-3>|results - smeemo start|reset - trivia <round 1-36> <difficulty 1-5> - trivia answers|close|next|previous|hide|show";
+export const POINTS_HELP = "help - clear - answers - points [faroe|erin|kaz] - points add <name> [amount] - points remove <name> [amount] - points set <name> <total> - points reset [name] - berryblast|redhanded start [prompt] - cards close|reveal|all|vote <1-3>|results - smeemo start|reset - trivia <round 1-36> <difficulty 1-5> - trivia answers|close|next|previous|hide|show";
 
 function parseName(value) {
   const name = String(value || "").trim().replace(/^@/, "").toLowerCase();
@@ -28,8 +28,8 @@ export function parsePointsCommand(rawCommand) {
     if (sub === "start" && mode) return { action: "card-start", mode, prompt: command.replace(/^\S+\s+\S+\s*/, "") };
     if (sub === "reveal" && args.length === 2 && ["next", "all"].includes(args[1].toLowerCase())) return { action: args[1].toLowerCase() === "all" ? "card-all" : "card-reveal", ...(mode ? {mode} : {}) };
     if (sub === "vote" && args.length === 2 && /^[1-3]$/.test(args[1])) return { action:"card-vote", responseId:`answer-${args[1]}`, ...(mode ? {mode} : {}) };
-    if (args.length === 1 && ["show", "close", "reveal", "all", "results"].includes(sub)) return { action: `card-${sub}`, ...(mode ? { mode } : {}) };
-    return { action: "error", message: "Use: berryblast|redhanded start [prompt], or cards show|close|reveal|all|vote <1-3>|results." };
+    if (args.length === 1 && ["close", "reveal", "all", "results"].includes(sub)) return { action: `card-${sub}`, ...(mode ? { mode } : {}) };
+    return { action: "error", message: "Use: berryblast|redhanded start [prompt], or cards close|reveal|all|vote <1-3>|results." };
   }
   if (action === "smeemo") {
     if (args.length !== 1) return { action: "error", message: "Use: smeemo start or smeemo reset." };
