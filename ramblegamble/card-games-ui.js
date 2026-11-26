@@ -21,7 +21,7 @@ import {
   buyShopCard,
 } from "./card-games.mjs?v=show-stage-20261126-v1";
 import { readCardGames, writeCardGames, subscribeCardGames } from "./card-games-store.mjs?v=show-stage-20261126-v1";
-import { readPointScores, subscribePointScores, writePointScores } from "./points-store.mjs?v=points-console-20261120-v1";
+import { readPointScores, subscribePointScores, writePointScores, withPointScoresLock } from "./points-store.mjs?v=card-score-sync-20261127-v1";
 
 (() => {
   "use strict";
@@ -73,6 +73,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   if (state.round && ["red-handed", "quiplash"].includes(state.round.mode) && !state.round.id) state = writeCardGames({ ...state, round: { ...state.round, id: newRoundId() } }).state;
   let network = null;
   let pointScores = readPointScores();
+  let shopBalanceNodes = new Map();
   let menuOpen = false;
   // A restored round is not an instruction to open its interface.
   let dismissedActive = Boolean(activeCardStage(state));
@@ -93,6 +94,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
 
   function setStageTitle(value, mode = "") {
     title.textContent = value;
+    title.classList.toggle("rg-visually-hidden", mode === "menu");
     if (mode) header.dataset.cardMode = mode;
     else delete header.dataset.cardMode;
   }
@@ -200,6 +202,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       smeemoScheduledSignal = "";
     }
     if (opened || (active && explicitlyActivated)) {
+      foley.stop("card-menu-hover");
       foley.start("cards-motion", "deal");
       menuOpen = false;
       dismissedActive = false;
@@ -285,26 +288,38 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       return image;
     };
     card.append(face(imageName, "front"), face("menu-card-back.png", "back"));
-    choice.append(card);
+    choice.append(card, element("span", "rg-mode-label", label));
+    const hover = () => {
+      if (!menuOpen || menuTimer || layer.hidden || document.documentElement?.hasAttribute("data-rg-host-locked")) return;
+      // Short recorded card-slide, not a second selection/flip sound.
+      foley.start("card-menu-hover", "deal", { volume: .9, maxDelay: 150 });
+    };
+    choice.addEventListener("pointerenter", event => {
+      if (event.isTrusted && (event.pointerType === "mouse" || event.pointerType === "pen")) hover();
+    });
+    choice.addEventListener("focus", event => {
+      if (event.isTrusted && choice.matches(":focus-visible")) hover();
+    });
     choice.addEventListener("click", () => chooseMode(mode, choice));
     choice.addEventListener("contextmenu", event => { event.preventDefault(); event.stopPropagation(); openHostPanel(mode); });
     return choice;
   }
 
   function renderMenu() {
+    foley.stop("card-menu-hover");
     window.clearTimeout(menuTimer);
     menuTimer = 0;
     menuSelection = "";
     layer.hidden = false;
-    setStageTitle("CARD TABLE", "menu");
+    setStageTitle("Choose a card game", "menu");
     liveStatus.textContent = "Choose a card game.";
     lastPresentation = { id: null, visible: [], phase: null };
     content.replaceChildren();
     const grid = element("div", "rg-card-menu-grid");
     grid.append(
-      makeModeChoice("red-handed", "menu-red-handed-face.png", "Red Handed"),
-      makeModeChoice("quiplash", "menu-quiplash-face.png", "Berryblast"),
-      makeModeChoice("shop", "menu-shop-face.png", "The Shop"),
+      makeModeChoice("red-handed", "menu-red-handed-face.png", "Red-Handed"),
+      makeModeChoice("quiplash", "menu-quiplash-face.png", "BerryBlast"),
+      makeModeChoice("shop", "menu-shop-face.png", "Shop"),
     );
     content.append(grid);
     const active = activeCardStage(state);
@@ -334,6 +349,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
 
   function chooseMode(mode, choice) {
     if (!menuOpen || menuTimer) return;
+    foley.stop("card-menu-hover");
     foley.play("flip");
     const grid = choice.parentElement;
     menuSelection = mode;
@@ -474,7 +490,12 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     }
     shell.append(buyers);
     const balances = element("div", "rg-shop-balance");
-    for (const player of CARD_GAME_PLAYERS) balances.append(element("span", "", `${playerNames[player]} ${pointScores[player] || 0}`));
+    shopBalanceNodes = new Map();
+    for (const player of CARD_GAME_PLAYERS) {
+      const node = element("span", "", `${playerNames[player]} ${pointScores[player] || 0}`);
+      shopBalanceNodes.set(player, node);
+      balances.append(node);
+    }
     shell.append(balances);
     const grid = element("div", "rg-shop-card-grid");
     for (const card of round.cards) {
@@ -489,26 +510,34 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       }
       button.addEventListener("click", () => {
         const buyer = selectedBuyer;
-        return runRoomMutation(() => {
-        const latest = readCardGames();
-        if (latest.round?.id !== round.id || latest.smeemo) return;
-        const priorScores = readPointScores();
-        const purchase = buyShopCard(latest.round, card.id, buyer, priorScores);
-        if (purchase.error) {
-          const message = purchase.error === "not-enough-points" ? `${playerNames[buyer]} needs more points.` : "That card is no longer available.";
-          foley.play("error");
-          setStatusMessage(message);
-          return;
-        }
-        const savedScores = writePointScores(purchase.scores);
-        if (!savedScores.persisted) { writePointScores(priorScores); throw Error("Could not save points."); }
-        try { sync({ ...latest, round: purchase.round }); }
-        catch (error) { writePointScores(priorScores); throw error; }
-        pointScores = savedScores.scores;
-        foley.play("flip");
-        foley.play("purchase");
-        setStatusMessage(`${playerNames[buyer]} bought ${card.name}.`);
-        });
+        return runRoomMutation(() => withPointScoresLock(() => {
+          if (document.documentElement?.hasAttribute("data-rg-host-locked")) return;
+          const latest = readCardGames();
+          if (latest.round?.id !== round.id || latest.smeemo) return;
+          const priorScores = readPointScores({ strict: true });
+          const purchase = buyShopCard(latest.round, card.id, buyer, priorScores);
+          if (purchase.error) {
+            const message = purchase.error === "not-enough-points" ? `${playerNames[buyer]} needs more points.` : "That card is no longer available.";
+            foley.play("error");
+            setStatusMessage(message);
+            return;
+          }
+          const savedScores = writePointScores(purchase.scores);
+          if (!savedScores.persisted) throw Error("Could not save points; purchase cancelled.");
+          let savedRound;
+          try {
+            savedRound = writeCardGames({ ...latest, round: purchase.round }, { requirePersistence: true });
+            if (!savedRound.persisted) throw Error("Could not save game state.");
+          } catch (error) {
+            if (!writePointScores(priorScores).persisted) throw Error("Purchase could not be saved or refunded; check points in the console.");
+            throw error;
+          }
+          pointScores = savedScores.scores;
+          updateFromState(savedRound.state);
+          foley.play("flip");
+          foley.play("purchase");
+          setStatusMessage(`${playerNames[buyer]} bought ${card.name}.`);
+        }));
       });
       const label = element("span", "rg-shop-card-type", `${card.category} card`);
       const price = element("span", "rg-shop-card-price", `${card.price} POINTS`);
@@ -517,8 +546,8 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       grid.append(wrap);
     }
     shell.append(grid, element("p", "rg-card-round-status", "Choose a berry, then a card."));
-    // Buyer selection, purchases, and balance updates all rerender this view.
-    // Replace the stage atomically so those refreshes cannot stack shop rows.
+    // Buyer selection and committed purchases replace the stage; score-only
+    // notifications update balance text in place and retain focus/hit targets.
     content.replaceChildren(shell);
     liveStatus.textContent = "Shop is open. Choose a berry, then a card.";
   }
@@ -710,6 +739,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     closeHostPanel();
   }));
   roomButton.addEventListener("click", () => {
+    foley.stop("card-menu-hover");
     foley.stop("cards-motion");
     menuOpen = false;
     dismissedActive = Boolean(activeCardStage(state));
@@ -732,9 +762,9 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   setDeckVisibility();
   subscribeCardGames(updateFromState);
   subscribeLiveTrivia(()=>network.publish());
-  window.addEventListener("rg:trivia-stage-open",()=>{ menuOpen=false; dismissedActive=Boolean(activeCardStage(state)); window.clearTimeout(smeemoPhaseTimer); smeemoPhaseTimer=0; window.clearTimeout(menuTimer); menuTimer=0; layer.hidden=true; });
+  window.addEventListener("rg:trivia-stage-open",()=>{ foley.stop("card-menu-hover"); menuOpen=false; dismissedActive=Boolean(activeCardStage(state)); window.clearTimeout(smeemoPhaseTimer); smeemoPhaseTimer=0; window.clearTimeout(menuTimer); menuTimer=0; layer.hidden=true; });
   subscribePointScores((scores) => {
     pointScores = scores;
-    if (state.round?.mode === "shop" && !layer.hidden && !menuOpen && !dismissedActive) renderShop(state.round);
+    for (const [player, node] of shopBalanceNodes) node.textContent = `${playerNames[player]} ${scores[player]}`;
   });
 })();

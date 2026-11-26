@@ -1,4 +1,4 @@
-import { RG_CONTESTANTS } from "./points-store.mjs?v=points-console-20261120-v1";
+import { RG_CONTESTANTS } from "./points-store.mjs?v=card-score-sync-20261127-v1";
 
 export const POINTS_HELP = "help - clear - answers - points [faroe|erin|kaz] - points add <name> [amount] - points set <name> <total> - points reset [name] - berryblast|redhanded start [prompt] - cards show|close|reveal|all|vote <1-3>|results - smeemo start|reset - trivia <round 1-36> <difficulty 1-5> - trivia answers|close|next|previous|hide|show";
 

@@ -13,7 +13,7 @@ import {
 } from "./point-click-routing.js?v=show-stage-20261126-v1";
 import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
 import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-door-wall-target-20261120-v1";
-import { readPointScores, subscribePointScores, writePointScores } from "./points-store.mjs?v=points-console-20261120-v1";
+import { readPointScores, subscribePointScores, writePointScores, withPointScoresLock } from "./points-store.mjs?v=card-score-sync-20261127-v1";
 import {
   createLiquidPortal,
   isLiquidPortalActive,
@@ -622,10 +622,14 @@ import {
     syncSlotPlacementControls();
   }
 
-  function saveSlotGrid(grid) {
-    slotReelGrid = normalizeSlotGrid(grid);
-    try { localStorage.setItem(SLOT_GRID_STORAGE_KEY, JSON.stringify(slotReelGrid)); }
-    catch (error) { console.warn("Ramble Gamble slot board could not be saved:", error); }
+  function saveSlotGrid(grid, { requirePersistence = false } = {}) {
+    const next = normalizeSlotGrid(grid);
+    try { localStorage.setItem(SLOT_GRID_STORAGE_KEY, JSON.stringify(next)); }
+    catch (error) {
+      if (requirePersistence) throw error;
+      console.warn("Ramble Gamble slot board could not be saved:", error);
+    }
+    slotReelGrid = next;
     window.dispatchEvent(new CustomEvent("rg:slot-grid-updated", { detail: { grid: slotReelGrid.slice() } }));
   }
 
@@ -774,25 +778,50 @@ import {
       && !document.documentElement.hasAttribute("data-rg-host-locked");
   }
 
-  function finishSlotAction(motion, time = performance.now()) {
+  async function finishSlotAction(motion, time = performance.now()) {
     foley.stop("slots");
     const outcome = resolveSlotPayouts(motion.targetGrid);
+    const hasPayout = Object.values(outcome.totals).some(amount => amount > 0);
+    try {
+      if (hasPayout) {
+        await withPointScoresLock(() => {
+          const prior = readPointScores({ strict: true });
+          const scores = { ...prior };
+          for (const [name, amount] of Object.entries(outcome.totals)) {
+            if (amount > 0) {
+              if (!Number.isSafeInteger(scores[name] + amount)) throw Error("Point total would exceed the safe integer limit; slot award cancelled.");
+              scores[name] += amount;
+            }
+          }
+          if (!writePointScores(scores).persisted) throw Error("Could not save points; slot award cancelled.");
+          try { saveSlotGrid(outcome.grid, { requirePersistence: true }); }
+          catch (error) {
+            if (!writePointScores(prior).persisted) throw Error("Slot board could not be saved or points refunded; check the console before continuing.");
+            throw Error("Could not save slot board; points restored.", { cause: error });
+          }
+        });
+      } else saveSlotGrid(outcome.grid);
+    } catch (error) {
+      playing = false;
+      preview.classList.remove("is-playing");
+      drawSlotReelDisplay();
+      syncSlotPlacementControls();
+      result.textContent = error.message;
+      result.hidden = false;
+      console.error("Ramble Gamble slot payout failed:", error);
+      window.dispatchEvent(new CustomEvent("rg:slot-action-finish", { detail: { kind: motion.action, reason: "save-failed", message: error.message, totals: {}, grid: slotReelGrid.slice() } }));
+      return;
+    }
+    // Score and board are committed before any presentation. Start the FX at
+    // the actual completion time, not the frame before waiting for the lock.
     const visible = canShowSlotCelebration();
+    time = performance.now();
     const animation = visible ? createSlotWinAnimation(motion.targetGrid, outcome, time, reducedMotion.matches) : null;
-    // Retain the winning artwork before publishing the cleared board. The
-    // durable outcome and scores are committed NOW, not at the end of the FX.
-    // Reloads, camera changes and skipped animations cannot award twice.
     if (animation) slotWinCelebration = { animation, motion, outcome };
     if (outcome.payouts.length && visible) {
       foley.play("payout");
       if (outcome.payouts.some(payout => payout.points >= 50000)) foley.play("jackpot");
     }
-    saveSlotGrid(outcome.grid);
-    const scores = readPointScores();
-    for (const [name, amount] of Object.entries(outcome.totals)) {
-      if (amount > 0) scores[name] = Math.min(Number.MAX_SAFE_INTEGER, scores[name] + amount);
-    }
-    if (Object.values(outcome.totals).some((amount) => amount > 0)) writePointScores(scores);
     if (!animation) completeSlotPresentation(motion, outcome, visible);
     else drawSlotReelDisplay(time);
   }

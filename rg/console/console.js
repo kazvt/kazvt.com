@@ -7,8 +7,9 @@ import {
   RG_CONTESTANTS,
   readPointScores,
   writePointScores,
-} from "/ramblegamble/points-store.mjs?v=points-console-20261120-v1";
-import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=show-stage-20261126-v1";
+  withPointScoresLock,
+} from "/ramblegamble/points-store.mjs?v=card-score-sync-20261127-v1";
+import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=card-score-sync-20261127-v1";
 import { createSmeemoGame } from "/ramblegamble/card-games.mjs?v=show-stage-20261126-v1";
 import { readCardGames, writeCardGames, subscribeCardGames } from "/ramblegamble/card-games-store.mjs?v=show-stage-20261126-v1";
 
@@ -109,38 +110,25 @@ async function execute(rawCommand) {
     if(action==='answers'){triviaOnly=true;answersPanel.open=true;refreshAnswers();for(const player of RG_CONTESTANTS)addLine(`${player}: ${answerSummary(round,player)}`);return;}
     try{await updateTrivia(current=>{if(!current||current.id!==round.id)throw Error('Question changed.');if(action==='close')return {...current,phase:'closed'};const q={...current.question};if(['next','previous'].includes(action)){if(!['image-sequence','text-sequence'].includes(q.kind))throw Error('Not a sequence.');q.sequenceIndex=Math.max(0,Math.min(q.items.length-1,q.sequenceIndex+(action==='next'?1:-1)));}else{if(q.kind!=='memory-number')throw Error('Not a memory question.');q.imageVisible=action==='show';q.promptImage=q.imageVisible?current.secret.memoryImage:'';}return {...current,question:q};});addLine(`Trivia ${action}.`);}catch(e){addLine(e.message,"terminal-error");}return;
   }
-  const scores = readPointScores();
-  if (parsed.action === "inspect-all") {
-    addLine(formatScores(scores));
-    return;
-  }
-  if (parsed.action === "inspect") {
-    addLine(`${parsed.name}: ${scores[parsed.name]}`);
-    return;
-  }
-  if (parsed.action === "add") {
-    if (scores[parsed.name] + parsed.amount > Number.MAX_SAFE_INTEGER) {
-      addLine("Point total would exceed the safe integer limit.", "terminal-error");
-      return;
-    }
-    scores[parsed.name] += parsed.amount;
-    const result = writePointScores(scores);
-    addLine(`${parsed.name}: ${result.scores[parsed.name]} (+${parsed.amount})${result.persisted ? "" : " - browser storage unavailable; update was sent to open tabs only"}`);
-    return;
-  }
-  if (parsed.action === "set") {
-    scores[parsed.name] = parsed.total;
-    const result = writePointScores(scores);
-    addLine(`${parsed.name}: ${result.scores[parsed.name]}${result.persisted ? "" : " - browser storage unavailable; update was sent to open tabs only"}`);
-    return;
-  }
-  if (parsed.action === "reset") {
-    if (parsed.name) scores[parsed.name] = 0;
-    else for (const contestant of RG_CONTESTANTS) scores[contestant] = 0;
-    const result = writePointScores(scores);
-    addLine(parsed.name ? `${parsed.name}: 0` : `Scores reset - ${formatScores(result.scores)}`);
-    if (!result.persisted) addLine("Browser storage unavailable; update was sent to open tabs only", "terminal-error");
-  }
+  try {
+    await withPointScoresLock(() => {
+      const latest = readPointScores({ strict: true });
+      if (parsed.action === "inspect-all") { addLine(formatScores(latest)); return; }
+      if (parsed.action === "inspect") { addLine(`${parsed.name}: ${latest[parsed.name]}`); return; }
+      if (parsed.action === "add") {
+        if (latest[parsed.name] + parsed.amount > Number.MAX_SAFE_INTEGER) throw Error("Point total would exceed the safe integer limit.");
+        latest[parsed.name] += parsed.amount;
+      } else if (parsed.action === "set") latest[parsed.name] = parsed.total;
+      else if (parsed.action === "reset") {
+        if (parsed.name) latest[parsed.name] = 0;
+        else for (const contestant of RG_CONTESTANTS) latest[contestant] = 0;
+      } else return;
+      const result = writePointScores(latest);
+      if (!result.persisted) throw Error("Could not save points; no update committed.");
+      addLine(parsed.name ? `${parsed.name}: ${result.scores[parsed.name]}${parsed.action === "add" ? ` (+${parsed.amount})` : ""}` : `Scores reset - ${formatScores(result.scores)}`);
+    });
+  } catch (error) { addLine(error.message, "terminal-error"); }
+
 }
 
 form.addEventListener("submit", (event) => {

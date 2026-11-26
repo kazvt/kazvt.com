@@ -100,16 +100,16 @@
   transition: transform 330ms cubic-bezier(.2,.85,.25,1);
 }
 .rg-mode-choice:focus-visible { outline: 4px dashed #8b2626; outline-offset: 6px; }
-.rg-mode-choice:hover { transform: translateY(-8px); }
+.rg-card-menu-grid:not(.is-choosing) .rg-mode-choice:is(:hover,:focus-visible) .rg-mode-card { translate:0 -6px; }
 .rg-mode-card {
   position: relative;
   display: block;
   width: min(100%, 230px, 42dvh);
   aspect-ratio: 33 / 47;
   transform-style: preserve-3d;
-  transition: transform 560ms cubic-bezier(.2,.8,.2,1);
+  transition: transform 560ms cubic-bezier(.2,.8,.2,1), translate 230ms cubic-bezier(.2,.85,.25,1);
 }
-/* Two physical faces: no tiled backing, thumbnail, synthetic border or label.
+/* Two physical faces: no tiled backing, thumbnail or synthetic border.
    Keep opacity/filter/overflow off the 3D carrier so it never flattens. */
 .rg-mode-face {
   position: absolute;
@@ -505,3 +505,21 @@
 @keyframes rg-show-win { 0% { filter:brightness(1); } 40% { filter:brightness(1.22) drop-shadow(0 0 12px #ffdf75); } 100% { filter:drop-shadow(3px 3px 0 #8b2626); } }
 @media(max-width:680px) { .rg-show-round .rg-card-prompt.is-suspect { max-height:30dvh; } .rg-show-answer-back { width:100%; } }
 @media(prefers-reduced-motion:reduce) { .rg-show-reveal,.rg-show-winner,.rg-show-action { animation:none!important; transition:none!important; } }
+
+/* Menu-only captions: labels sit outside the rotating artwork and share its hit target. */
+.rg-card-games-header[data-card-mode="menu"] h1.rg-visually-hidden { box-shadow:none; }
+.rg-mode-choice { gap:clamp(5px,1.2dvh,12px); align-content:start; }
+.rg-card-menu-grid { align-items:start; }
+.rg-mode-label {
+  display:block; width:max-content; max-width:100%; box-sizing:border-box;
+  padding:5px clamp(5px,1vw,14px); border:2px solid var(--mode-trim);
+  background:var(--mode-label-bg); color:#fff2da; box-shadow:3px 3px 0 #1e0b01;
+  font-size:clamp(11px,2vw,21px); font-weight:900; line-height:1.15;
+  letter-spacing:.025em; text-shadow:1px 2px 0 #1e0b01; overflow-wrap:anywhere;
+  transition:background-color 160ms, box-shadow 160ms;
+}
+.rg-mode-choice[data-mode="red-handed"] { --mode-trim:#ff6868; --mode-label-bg:#8b2626; }
+.rg-mode-choice[data-mode="quiplash"] { --mode-trim:#a99bff; --mode-label-bg:#49358e; }
+.rg-mode-choice[data-mode="shop"] { --mode-trim:#48e68b; --mode-label-bg:#19643e; }
+.rg-mode-choice:is(:hover,:focus-visible) .rg-mode-label { box-shadow:3px 3px 0 #1e0b01,0 0 12px var(--mode-trim); }
+@media(prefers-reduced-motion:reduce) { .rg-mode-label { transition:none; } }

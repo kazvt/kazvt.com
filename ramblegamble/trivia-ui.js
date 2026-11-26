@@ -961,6 +961,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
       .map(([name, amount]) => name.toUpperCase() + " +" + Number(amount).toLocaleString());
     $("#rg-arcade-status").textContent = scored.length
       ? scored.join(" - ")
+      : event.detail?.reason === "save-failed" ? event.detail.message || "Slot award could not be saved."
       : event.detail?.reason === "no-eligible-cell" ? "No open spot in that line." : "No pattern.";
   });
 

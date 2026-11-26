@@ -41,25 +41,25 @@ class FakeElement {
   replaceChildren(...children){this.children=[];this.append(...children);}
   setAttribute(key,value){this.attributes[key]=value;}
   addEventListener(type, listener){this.events[type]=listener;}
-  click(){this.events.click?.({});}
+  click(){return this.events.click?.({});}
   querySelector(){return null;}
   focus(){}
 }
-function mountUI(saved) {
+function mountUI(saved, initialPoints = {kaz:0,faroe:0,erin:0}) {
   const els=new Map();
   const get=selector=>{if(!els.has(selector)) els.set(selector,new FakeElement());return els.get(selector);};
   get('#rg-card-games-layer').hidden=true;
   get('#rg-card-games-layer').querySelector=get;
   get('#rg-card-mode').value='shop'; get('#rg-card-player').value='kaz';
-  let data=normalizeCardGamesState(saved), subscriber;
+  let data=normalizeCardGamesState(saved), subscriber, pointsSubscriber, balances={...initialPoints}, failPoints=false, failCards=false;
   const calls=[], sounds=[];
   const listeners=new Map();
   const timers=new Map();let timerId=0;
   const window={matchMedia:()=>({matches:true}), clearTimeout(id){timers.delete(id);},setTimeout(fn){timers.set(++timerId,fn);return timerId;},addEventListener:(type,fn)=>listeners.set(type,fn),dispatchEvent(event){calls.push(event.type);listeners.get(event.type)?.(event);}};
   class FakeEvent {constructor(type,opts={}){this.type=type;this.detail=opts.detail;}}
   const code=readFileSync(new URL('./card-games-ui.js',import.meta.url),'utf8').replace(/^import\s+[\s\S]*?;\n/gm,'');
-  vm.runInNewContext(code,{...games,applyCardShowAction,activeCardStage,cardStageChange,window,document:{querySelector:get,querySelectorAll:()=>[],createElement:()=>new FakeElement()},CustomEvent:FakeEvent,Event:FakeEvent,readCardGames:()=>data,writeCardGames:value=>({state:data=normalizeCardGamesState(value),persisted:true}),subscribeLiveTrivia:()=>{},activeRoomRound:()=>data.round,subscribeCardGames:fn=>{subscriber=fn;fn(data);},readPointScores:()=>({kaz:0,faroe:0,erin:0}),subscribePointScores:fn=>fn({kaz:0,faroe:0,erin:0}),mountCardRoom:()=>({publish(){}}),foley:{start(channel,cue){sounds.push(cue);},stop(){},play(cue){sounds.push(cue);}},withRoomSubmissionLock:async fn=>fn()});
-  return {get,calls,sounds,window,get state(){return data;},update(next){data=normalizeCardGamesState(next);subscriber(data);},flushTimers(){for(const [id,fn] of [...timers]){timers.delete(id);fn();}}};
+  vm.runInNewContext(code,{...games,applyCardShowAction,activeCardStage,cardStageChange,window,document:{querySelector:get,querySelectorAll:()=>[],createElement:()=>new FakeElement()},CustomEvent:FakeEvent,Event:FakeEvent,readCardGames:()=>data,writeCardGames:value=>failCards?{state:data,persisted:false}:({state:data=normalizeCardGamesState(value),persisted:true}),subscribeLiveTrivia:()=>{},activeRoomRound:()=>data.round,subscribeCardGames:fn=>{subscriber=fn;fn(data);},readPointScores:()=>({...balances}),writePointScores:value=>{if(failPoints)return {scores:{...balances},persisted:false};balances={...value};pointsSubscriber?.({...balances});return {scores:{...balances},persisted:true};},subscribePointScores:fn=>{pointsSubscriber=fn;fn({...balances});},withPointScoresLock:async fn=>fn(),mountCardRoom:()=>({publish(){}}),foley:{start(channel,cue){sounds.push(cue);},stop(){},play(cue){sounds.push(cue);}},withRoomSubmissionLock:async fn=>fn()});
+  return {get,calls,sounds,window,get state(){return data;},get balances(){return balances;},setPoints(next){balances={...next};pointsSubscriber({...balances});},blockPoints(value){failPoints=value;},blockCards(value){failCards=value;},update(next){data=normalizeCardGamesState(next);subscriber(data);},flushTimers(){for(const [id,fn] of [...timers]){timers.delete(id);fn();}}};
 }
 test('actual card UI keeps restored shop hidden, resumes on request, and only opens newly started rounds',()=>{
   const round=createShopRound(decks);
@@ -94,18 +94,28 @@ test('actual menu left click starts a show round, right click opens staff only',
   const content=ui.get('#rg-card-games-content'),grid=content.children[0];
   assert.equal(grid.children.length,3);
   for(const [i,mode] of ['red-handed','quiplash','shop'].entries()){
-    const choice=grid.children[i], card=choice.children[0];assert.equal(choice.children.length,1);
+    const choice=grid.children[i], card=choice.children[0];assert.equal(choice.children.length,2);
+    assert.equal(choice.children[1].textContent,["Red-Handed","BerryBlast","Shop"][i]);
     assert.ok(choice.attributes['aria-label']);assert.equal(card.children.length,2);
     assert.ok(card.children[0].src.endsWith(`menu-${mode}-face.png`));assert.ok(card.children[1].src.endsWith('menu-card-back.png'));
   }
+  assert.ok(ui.get('#rg-card-games-title').classList.contains("rg-visually-hidden"));
+  grid.children[0].events.pointerenter({isTrusted:true,pointerType:"mouse"});
+  assert.equal(ui.sounds.at(-1),"deal");
+  const beforeHover=ui.sounds.length;
+  grid.children[0].events.pointerenter({isTrusted:true,pointerType:"touch"});
+  grid.children[0].events.pointerenter({isTrusted:false,pointerType:"mouse"});
+  assert.equal(ui.sounds.length,beforeHover);
   grid.children[1].events.contextmenu({preventDefault(){},stopPropagation(){}});
   assert.equal(ui.calls.filter(x=>x==='rg:open-host-panel').length,1);
   grid.children[0].click();assert.ok(grid.classList.contains('is-animating'));assert.ok(grid.children[0].classList.contains('is-selected'));
   grid.children[1].click();assert.ok(!grid.children[1].classList.contains('is-selected'));
+  const duringFlip=ui.sounds.length;grid.children[2].events.pointerenter({isTrusted:true,pointerType:"mouse"});assert.equal(ui.sounds.length,duringFlip);
   ui.update(ui.state);assert.equal(content.children[0],grid);ui.flushTimers();await Promise.resolve();
   assert.equal(ui.calls.filter(x=>x==='rg:open-host-panel').length,1);
   assert.equal(ui.state.round.mode,'red-handed');assert.equal(ui.state.round.prompt,'Suspect');
   assert.equal(ui.get('#rg-card-games-title').textContent,'RED HANDED');
+  assert.ok(!ui.get('#rg-card-games-title').classList.contains("rg-visually-hidden"));
 });
 
 function allText(element){return [element.textContent||'',...(element.children||[]).map(allText)].join(' ');}
@@ -134,4 +144,17 @@ test('remote card submissions sound once per state change, restored state is qui
  const second=games.submitRoundAnswer(first,'faroe','Second');ui.update({round:second});
  const third=games.submitRoundAnswer(second,'erin','Third');ui.update({round:third});ui.update({round:third});
  assert.deepEqual(ui.sounds,['deal','submit','submit','cardFan']);
+});
+
+function findClass(element, name){return element.className===name?element:(element.children||[]).map(child=>findClass(child,name)).find(Boolean);}
+test('actual shop UI updates balances without replacing cards and commits purchase only when points save',async()=>{
+  const priced={penalty:[{name:'P',price:25}],challenge:[{name:'C',price:10}],instant:[{name:'I',price:5}]};
+  const ui=mountUI({round:createShopRound(priced)},{faroe:100,erin:50,kaz:10});
+  ui.window.dispatchEvent({type:'rg:show-card-menu'});await findText(ui.get('#rg-card-games-content'),'RESUME THE SHOP').click();
+  const content=ui.get('#rg-card-games-content'), card=findClass(content,'rg-shop-card');assert.ok(card);
+  ui.setPoints({faroe:120,erin:50,kaz:10});assert.equal(findClass(content,'rg-shop-card'),card);assert.ok(findText(content,'FAROE 120'));
+  ui.blockPoints(true);await card.click();assert.equal(ui.balances.faroe,120);assert.equal(ui.state.round.cards[0].buyer,null);
+  ui.blockPoints(false);ui.blockCards(true);await card.click();assert.equal(ui.balances.faroe,120);assert.equal(ui.state.round.cards[0].buyer,null);
+  ui.blockCards(false);await card.click();assert.equal(ui.balances.faroe,95);assert.equal(ui.state.round.cards[0].buyer,'faroe');assert.ok(findText(content,'FAROE 95'));
+  await card.click();assert.equal(ui.balances.faroe,95,'a stale second click does not charge twice');
 });
