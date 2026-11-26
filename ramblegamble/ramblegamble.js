@@ -1,16 +1,17 @@
+import { sampleVipAmbience } from "./vip-atmosphere.mjs?v=vip-atmosphere-20261127-v1";
 import { createStageShow } from "./stage-show.mjs?v=all-curtain-20261127-v1";
 import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state.mjs?v=all-curtain-20261127-v1";
 import { createCharacterOcclusion } from "./character-occlusion.mjs?v=fugi-stable-20261127-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { createAudienceRenderer } from "./audience-render.mjs?v=crowd-mist-20261127-v1";
-import { createShowFX } from "./show-fx.mjs?v=freecam-depth-20261127-v1";
+import { createShowFX } from "./show-fx.mjs?v=vip-atmosphere-20261127-v1";
 import { CHARACTER_SOURCE_SIZE, CHARACTER_YAW_LIMIT, characterYaw, standingCharacterPose, projectCharacterQuad, pointInCharacterQuad } from "./character-billboards.mjs?v=fugi-stable-20261127-v1";
 import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { createExteriorMist, EXTERIOR_FLOOR } from "./exterior-mist.mjs?v=crowd-mist-20261127-v1";
 import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=standing-characters-20261127-v1";
-import { foley } from "./game-foley.mjs?v=theatre-20261127-v1";
+import { foley } from "./game-foley.mjs?v=vip-atmosphere-20261127-v1";
 import {
   resolvePointClickAction,
   resolvePointClickBack,
@@ -2462,6 +2463,7 @@ import {
     if (open === diceModeOpen) return;
     if (open) { freecam?.stop(); stageShow?.reset(currentView.kind==="slot"); }
     diceModeOpen = open;
+    syncVipAmbience(gameStarted&&sceneReady&&!pauseMenuOpen&&!document.hidden&&!document.documentElement.hasAttribute("data-rg-host-locked"));
     // The modal is in the browser top layer: keep the one live score strip
     // inside it while playing Dice, then restore it to the room on exit.
     if (pointsHud && diceHeader) {
@@ -2702,6 +2704,13 @@ import {
     cardLayer.style.setProperty("--table-y", `${Math.max(halfHeight, Math.min(height - halfHeight, (1 - center.y) * height / 2))}px`);
   }
 
+  function syncVipAmbience(roomVisible, emotion=crowdState.active) {
+    const mix=sampleVipAmbience(camera?.position,DICE_DOOR_OPENING,{
+      inside:diceModeOpen,focused:!cameraDetached&&!freecam?.active&&!cameraTransition&&currentView.kind==="dice-door",
+    });
+    foley.setRoomAmbience(roomVisible,mix.room,emotion,mix.water,mix.cutoff);
+  }
+
   function animate(time) {
     animationFrame = requestAnimationFrame(animate);
     if (!renderer || !scene || !camera) return;
@@ -2710,7 +2719,6 @@ import {
     stageShow?.update(time,roomVisible&&!diceModeOpen,currentView.kind==="slot");
     if(roomVisible){if(crowdLastFrame!==null)crowdClock+=Math.max(0,Math.min(250,time-crowdLastFrame));crowdLastFrame=time;}else crowdLastFrame=null;
     const emotion=crowdState.step(crowdClock); updateCrowdStatus();
-    foley.setRoomAmbience(roomVisible,diceModeOpen ? .28 : 1,emotion);
     if(audience){audience.group.visible=roomVisible&&!diceModeOpen;audience.update(crowdClock,emotion,reducedMotion.matches);}
     if(diceModeOpen)showFX?.update(time,{active:false});
     freecam.step(time);
@@ -2724,6 +2732,7 @@ import {
       // Re-pick under a stationary cursor as the damped camera moves, including its final frame.
       if ((changed || moving) && lastScenePointer && !lastScenePointer.buttons) updatePointer(lastScenePointer);
     }
+    syncVipAmbience(roomVisible,emotion);
     preview.classList.toggle("is-trivia",!cameraDetached && currentView.kind === "trivia");
     if (triviaLayer) triviaLayer.hidden = !(gameStarted && !pauseMenuOpen && !diceModeOpen && sceneReady && !cameraTransition && !cameraDetached && currentView.kind === "trivia" && triviaLayer.dataset.ready === "true");
     updateCardTableProjection();

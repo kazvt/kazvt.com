@@ -1,3 +1,4 @@
+import { createPortalParticles } from "./vip-atmosphere.mjs?v=vip-atmosphere-20261127-v1";
 // Render-only world accents. No physics, point calculation, hit targets or camera pose changes.
 export function createShowFX(THREE,scene,{wheel, wheelPivot,ball,door}) {
   const group=new THREE.Group();group.name='rg-show-fx';scene.add(group);
@@ -47,9 +48,10 @@ export function createShowFX(THREE,scene,{wheel, wheelPivot,ball,door}) {
   const portal=lights(new THREE.BoxGeometry(.035,.075,.075),Array.from({length:36},(_,i)=>{const a=i/36*Math.PI*2;return [door.wallX-.07,(door.minY+door.maxY)/2+Math.sin(a)*(door.maxY-door.minY)*.48,(door.minZ+door.maxZ)/2+Math.cos(a)*(door.maxZ-door.minZ)*.49];}),[0xffffff,0xcda8ff],.5);
   // Closed cubes should blend once, rather than layering their back faces.
   portal.mesh.material.side=THREE.FrontSide;
+  const portalParticles=createPortalParticles(THREE,group,door);
   function clearRoulette(){if(wheelPivot)wheelPivot.position.y=wheelRestY;trailPoints.length=0;trail.visible=pocket.visible=wave.visible=sparks.visible=halo.visible=outer.visible=beam.visible=winnerEcho.visible=launchWave.visible=orbit.visible=confetti.visible=false;for(const r of victoryWaves)r.visible=false;impactAt=settleAt=spinAt=-Infinity;wasSpinning=false;lastTrail=-Infinity;}
   function update(time,{active=true,spinning=false,view={},reduced=false}={}){
-    group.visible=active;if(!active){clearRoulette();return;}
+    group.visible=active;portalParticles.update(time,active,reduced);if(!active){clearRoulette();return;}
     const roulette=view.kind==='roulette';
     if(!roulette||reduced){clearRoulette();}else{
       if(spinning&&!wasSpinning)spinAt=time;

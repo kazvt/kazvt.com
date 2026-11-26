@@ -121,3 +121,10 @@ test('Smeemo recorded hit sweeps upward and replaces stale requests',async()=>{
  assert.equal(await first,false);assert.equal(await second,true);assert.equal(f.started.length,1);assert.equal(f.started[0].playbackRate.value,1.25);assert.equal(f.started[0].playbackRate.ramp[0],1.4);assert.match(f.started[0].buffer,/smeemo-hit\.ogg$/);
  f.mixer.stop('smeemo-hit');assert.equal(f.stopped.length,1);
 });
+
+test('VIP silence applies only to ambient layers; recorded dice impacts, settlement and exit remain playable',async()=>{
+ const f=fixture();f.mixer.setRoomAmbience(true,0,'cheer',1,3400);
+ for(const cue of ['diceImpact','settlement','portalExit'])assert.equal(await f.mixer.play(cue),true);
+ assert.equal(f.started.length,3);
+ f.mixer.setAmbienceEnabled(false);assert.equal(await f.mixer.play('diceFace'),true);
+});

@@ -95,3 +95,14 @@ test('roulette launch, actual-pocket impact, delayed two-wave confetti and clean
  fx.update(4000,{view});assert.equal(confetti.visible,false);assert.equal(orbit.visible,false);
  fx.impact(4100,true);fx.update(4200,{view,reduced:true});assert.equal(confetti.visible,false);fx.impact(4300,true);fx.update(4400,{view});assert.equal(confetti.visible,true);fx.update(4500,{view:{kind:'overview'}});assert.equal(confetti.visible,false);assert.equal(pivot.position.y,.4);
 });
+
+
+test('portal embers are bounded, depth-tested, animated, and disabled with the room or reduced motion',()=>{
+ const fx=createShowFX(THREE,new Group(),{wheel:{},door:{wallX:1,minY:0,maxY:2,minZ:0,maxZ:1}});
+ const ember=fx.group.children.find(m=>m.name==='rg-vip-embers');assert.equal(ember.count,84);assert.equal(ember.visible,false);
+ fx.update(0,{view:{kind:'overview'}});assert.equal(ember.visible,true);assert.equal(ember.material.depthTest,true);assert.equal(ember.material.depthWrite,false);
+ const first=structuredClone(ember.matrices);fx.update(100,{view:{kind:'overview'}});assert.notDeepEqual(ember.matrices,first);
+ assert.ok(ember.matrices.every(m=>m.position.x<1&&m.scale.x>=0));
+ fx.update(200,{active:false});assert.equal(ember.visible,false);fx.update(2000,{reduced:true});assert.equal(ember.visible,false);
+ fx.update(2100,{});assert.equal(ember.visible,true);
+});
