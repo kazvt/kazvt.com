@@ -5,7 +5,7 @@ const invite = decodePacket(location.hash.slice(1));
 window.addEventListener("hashchange", () => location.reload());
 if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/.test(invite.room) && /^[a-f0-9]{32}$/.test(invite.token)) {
   const envelope = { v: ROOM_VERSION, room: invite.room, player: invite.player, token: invite.token };
-  let round = null, peer = null, conn = null, attempt = 0, online = false, pending = null;
+  let round = null, peer = null, conn = null, attempt = 0, online = false, pending = null, retryTimer = null, retryDelay = 1000;
   const pendingKey = `rg-card-pending:${invite.room}:${invite.player}`;
   function remember(value) { try { if (value) sessionStorage.setItem(pendingKey, JSON.stringify(value)); else sessionStorage.removeItem(pendingKey); } catch {} }
   function recover(roundId) { try { const saved = JSON.parse(sessionStorage.getItem(pendingKey)); return saved?.roundId === roundId && saved?.room === invite.room && saved?.token === invite.token ? saved : null; } catch { return null; } }
@@ -35,11 +35,18 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
     else if (!open) { pending = null; remember(null); $('fallback').hidden = true; $('submission').textContent = 'This round has closed.'; }
     else if (pending) { showPacket(); sendPending(); }
   }
-  function disconnect(message) { online = false; $('connect').disabled = false; status(message); }
+  function disconnect(message) {
+    ++attempt; online = false; $('connect').disabled = false;
+    const old = peer; peer = null; conn = null; try { old?.destroy(); } catch {}
+    clearTimeout(retryTimer);
+    if (invite.round) { status(message); return; }
+    status(`${message} Reconnecting automatically…`);
+    retryTimer = setTimeout(connect, retryDelay); retryDelay = Math.min(retryDelay * 2, 15000);
+  }
   async function connect() {
-    const generation = ++attempt; online = false; $('connect').disabled = true; status('Connecting to host…');
+    clearTimeout(retryTimer); const generation = ++attempt; online = false; $('connect').disabled = true; status('Connecting to host…');
     if (peer && !peer.destroyed) peer.destroy();
-    const timer = setTimeout(() => { if (generation === attempt && !online) { ++attempt; peer?.destroy(); disconnect('Host unreachable. Retry or ask the host for an OFFLINE ROUND link and copy a packet.'); } }, 18000);
+    const timer = setTimeout(() => { if (generation === attempt && !online) { disconnect('Host unreachable. Retry or ask the host for an OFFLINE ROUND link and copy a packet.'); } }, 18000);
     try {
       const Peer = await loadPeer(); if (generation !== attempt) return;
       peer = new Peer({debug:0});
@@ -52,9 +59,10 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
         conn.on('open', () => { if (generation === attempt) conn.send({...envelope,type:'join'}); });
         conn.on('data', message => {
           if (generation !== attempt || message?.v !== ROOM_VERSION) return;
-          if (message.type === 'round') { online = true; clearTimeout(timer); $('connect').disabled = false; status(message.round ? 'Connected to host.' : 'Connected — waiting for host to start a round.'); render(message.round); }
+          if (message.type === 'round') { online = true; retryDelay = 1000; clearTimeout(timer); $('connect').disabled = false; status(message.round ? 'Connected to host.' : 'Connected — waiting for host to start a round.'); render(message.round); }
           if (message.type === 'ack' && message.roundId === pending?.roundId) {
             if (message.status === 'accepted' || message.status === 'already-submitted') { const already = message.status === 'already-submitted'; pending = null; remember(null); $('fallback').hidden = true; $('submission').textContent = already ? 'Host already saved an answer for this round.' : 'Answer received by host!'; }
+            else if (['storage-error','reader-changed'].includes(message.status)) { showPacket(); status('Host could not save yet. Retrying connection…'); disconnect('Host could not save yet.'); }
             else { pending = null; remember(null); $('fallback').hidden = true; $('submission').textContent = `Host rejected answer: ${message.status}.`; render(round); }
           }
         });

@@ -23,7 +23,7 @@
     <script type="module" src="/ramblegamble/ramblegamble.js?v=scene-table-20261126-v1"></script>
     <script type="module" src="/ramblegamble/dice-mode.js?v=scene-table-20261126-v1"></script>
     <script type="module" src="/ramblegamble/trivia-ui.js?v=scene-table-20261126-v1"></script>
-    <script type="module" src="/ramblegamble/card-games-ui.js?v=scene-table-20261126-v1"></script>
+    <script type="module" src="/ramblegamble/card-games-ui.js?v=reader-election-20261126-v1"></script>
   </head>
   <body class="ramble-page" data-theme="p2">
     <main class="rg-preview" id="rg-preview">
@@ -302,8 +302,9 @@
           </div>
           <p class="rg-card-admin-note">One entry per line. Shop entries use <code>Name [price]</code>. Lists save in this browser.</p>
           <div id="rg-card-network" class="rg-card-network">
-              <p>Share one private link per player before starting. Keep this host tab open. New rounds arrive automatically while connected. Never show private invitations on stream.</p>
+              <p>Share one private link per player before starting. Keep either this page or the console open. One reader is elected automatically. New rounds arrive automatically while connected. Never show private invitations on stream.</p>
               <button type="button" class="rg-secondary-button" data-room-start>START ONLINE ROOM</button>
+              <button type="button" class="rg-secondary-button" data-room-stop>STOP ONLINE ROOM</button>
               <p data-room-status role="status">Offline invitations ready; start online room for live answers.</p>
               <div data-room-links></div>
               <details><summary>Offline fallback — import a private answer packet</summary><p>Use OFFLINE ROUND to send a fresh private round link to each player if live connection fails. Paste the player's returned packet below.</p><textarea data-room-packet aria-label="Private player packet" rows="3"></textarea><button type="button" class="rg-secondary-button" data-room-import>IMPORT ANSWER</button></details>

@@ -1,4 +1,5 @@
-import { mountCardRoom } from "./card-room-host.mjs";
+import { withRoomSubmissionLock } from "./card-room-election.mjs";
+import { mountCardRoom } from "./card-room-host.mjs?v=reader-election-20261126-v1";
 import { foley } from "./game-foley.mjs?v=slot-foley-20261126-v3";
 import {
   CARD_GAME_CATEGORIES,
@@ -16,7 +17,7 @@ import {
   submitRoundAnswer,
   buyShopCard,
 } from "./card-games.mjs?v=scene-table-20261126-v1";
-import { readCardGames, writeCardGames, subscribeCardGames } from "./card-games-store.mjs?v=scene-table-20261126-v1";
+import { readCardGames, writeCardGames, subscribeCardGames } from "./card-games-store.mjs?v=reader-election-20261126-v1";
 import { readPointScores, subscribePointScores, writePointScores } from "./points-store.mjs?v=points-console-20261120-v1";
 
 (() => {
@@ -544,7 +545,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   function saveDecks() {
     const decks = saveDeckInputs();
     if (!decks) return false;
-    const next = { ...state, decks };
+    const next = { ...readCardGames(), decks };
     const result = sync(next);
     adminStatus.textContent = result.persisted ? "Lists saved in this browser." : "Saved for open tabs only; browser storage is unavailable.";
     return true;
@@ -565,7 +566,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
           : "Add at least one priced card to each shop list.";
       return;
     }
-    const next = { ...state, decks, round, smeemo: null };
+    const next = { ...readCardGames(), decks, round, smeemo: null };
     menuOpen = false;
     dismissedActive = false;
     foley.start("cards-motion", "deal");
@@ -575,9 +576,13 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   }
 
   function submitPrivateAnswer() {
-    const round = state.round;
+    const expectedId = state.round?.id;
     const player = playerSelect.value;
-    const answer = round?.mode === "red-handed" ? answerSelect.value : answerText.value;
+    const answer = state.round?.mode === "red-handed" ? answerSelect.value : answerText.value;
+    runRoomMutation(() => {
+    const latest = readCardGames();
+    const round = latest.round;
+    if (!expectedId || round?.id !== expectedId) { adminStatus.textContent = "Round changed; choose the answer again."; return; }
     const updated = submitRoundAnswer(round, player, answer);
     if (updated === round) {
       adminStatus.textContent = "Choose an A-card or enter an answer first.";
@@ -585,8 +590,9 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     }
     answerText.value = "";
     foley.play("place");
-    sync({ ...state, round: updated });
+    sync({ ...latest, round: updated });
     closeHostPanel();
+    });
   }
 
   function openCardMenu() {
@@ -596,8 +602,9 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     closeHostPanel();
   }
 
-  saveButton.addEventListener("click", saveDecks);
-  startButton.addEventListener("click", startSelectedGame);
+  function runRoomMutation(action) { withRoomSubmissionLock(action).catch(() => { adminStatus.textContent = "Card room update failed; retry."; }); }
+  saveButton.addEventListener("click", () => runRoomMutation(saveDecks));
+  startButton.addEventListener("click", () => runRoomMutation(startSelectedGame));
   menuButton.addEventListener("click", openCardMenu);
   modeSelect.addEventListener("change", setDeckVisibility);
   playerSelect.addEventListener("change", () => setAdminState(state));
@@ -609,11 +616,11 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     foley.play("flip");
     sync({ ...state, round });
   });
-  resetButton.addEventListener("click", () => {
+  resetButton.addEventListener("click", () => runRoomMutation(() => {
     foley.stop("cards-motion");
-    sync({ ...state, round: null });
+    sync({ ...readCardGames(), round: null });
     adminStatus.textContent = "Current card game reset.";
-  });
+  }));
   shopRefreshButton.addEventListener("click", () => {
     const round = createShopRound(state.decks.shop);
     if (!round) {
@@ -649,7 +656,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     }
   });
 
-  network = mountCardRoom($("#rg-card-network"), { getRound: () => state.smeemo ? null : state.round, commitRound: round => { foley.play("place"); sync({ ...state, round }); }, onStatus: message => { adminStatus.textContent = message; } });
+  network = mountCardRoom($("#rg-card-network"), { getRound: () => { const latest = readCardGames(); return latest.smeemo ? null : latest.round; }, commitRound: round => { const result = writeCardGames({ ...readCardGames(), round }, { requirePersistence: true }); if (result.persisted) { foley.play("place"); updateFromState(result.state); } return result.persisted; }, onStatus: message => { adminStatus.textContent = message; } });
   loadDeckInputs(state.decks);
   setDeckVisibility();
   subscribeCardGames(updateFromState);

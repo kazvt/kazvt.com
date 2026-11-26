@@ -1,3 +1,5 @@
+import { withRoomSubmissionLock } from "/ramblegamble/card-room-election.mjs";
+import { mountCardRoom } from "/ramblegamble/card-room-host.mjs?v=reader-election-20261126-v1";
 import {
   RG_CONTESTANTS,
   readPointScores,
@@ -5,7 +7,7 @@ import {
 } from "/ramblegamble/points-store.mjs?v=points-console-20261120-v1";
 import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=rg-smeemo-manual-20261125-v1";
 import { createSmeemoGame } from "/ramblegamble/card-games.mjs?v=scene-table-20261126-v1";
-import { readCardGames, writeCardGames } from "/ramblegamble/card-games-store.mjs?v=scene-table-20261126-v1";
+import { readCardGames, writeCardGames, subscribeCardGames } from "/ramblegamble/card-games-store.mjs?v=reader-election-20261126-v1";
 
 const output = document.getElementById("terminal-output");
 const form = document.getElementById("terminal-form");
@@ -25,7 +27,7 @@ function formatScores(scores) {
   return RG_CONTESTANTS.map((name) => `${name}: ${scores[name]}`).join("  ");
 }
 
-function execute(rawCommand) {
+async function execute(rawCommand) {
   const command = rawCommand.trim();
   if (!command) return;
   addLine(`> ${command}`, "terminal-command");
@@ -44,18 +46,22 @@ function execute(rawCommand) {
     return;
   }
   if (parsed.action === "smeemo-start") {
+    await withRoomSubmissionLock(() => {
     const state = readCardGames();
     state.round = null;
     state.smeemo = createSmeemoGame();
     const result = writeCardGames(state);
     addLine(`Smeemo Scramble started - reveal cards on the room page${result.persisted ? "" : " - update sent to open tabs only"}`);
+    });
     return;
   }
   if (parsed.action === "smeemo-reset") {
+    await withRoomSubmissionLock(() => {
     const state = readCardGames();
     state.smeemo = null;
     const result = writeCardGames(state);
     addLine(`Smeemo Scramble reset${result.persisted ? "" : " - update sent to open tabs only"}`);
+    });
     return;
   }
   const scores = readPointScores();
@@ -117,3 +123,11 @@ input.addEventListener("keydown", (event) => {
 
 addLine("RG console - type help");
 addLine(formatScores(readPointScores()));
+
+const cardRoom = mountCardRoom(document.getElementById("console-card-room"), {
+  role: "/rg/console/",
+  getRound: () => { const state = readCardGames(); return state.smeemo ? null : state.round; },
+  commitRound: round => { return writeCardGames({ ...readCardGames(), round }, { requirePersistence: true }).persisted; },
+  onStatus: message => addLine(message),
+});
+subscribeCardGames(() => cardRoom.publish());

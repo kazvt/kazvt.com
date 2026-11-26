@@ -54,3 +54,11 @@ body {
   .terminal-form input { animation: terminal-caret 1.1s steps(2, jump-none) infinite; }
   @keyframes terminal-caret { 50% { caret-color: transparent; } }
 }
+
+.terminal-room { border-bottom: 1px solid #35543a; padding: 8px 0; max-height: 55dvh; overflow: auto; flex-shrink: 0; font-size: 13px; }
+.terminal-room summary { cursor: pointer; color: #e1ffd5; }
+.terminal-room p { margin: 7px 0; }
+.terminal-room button, .terminal-room textarea { font: inherit; color: inherit; background: #101a12; border: 1px solid #426548; padding: 4px 7px; margin: 2px; }
+.terminal-room button:disabled { opacity: .5; }
+.terminal-room a { color: #b4ff9b; margin-right: 8px; }
+.terminal-room textarea { display: block; width: 95%; }

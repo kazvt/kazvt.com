@@ -23,12 +23,12 @@ export function readCardGames() {
   }
 }
 
-export function writeCardGames(value) {
+export function writeCardGames(value, { requirePersistence = false } = {}) {
   const state = normalizeCardGamesState(value);
   let persisted = true;
   try { globalThis.localStorage.setItem(CARD_GAME_STORAGE_KEY, JSON.stringify(state)); }
   catch { persisted = false; }
-  getChannel()?.postMessage({ type: "state", state });
+  if (persisted || !requirePersistence) getChannel()?.postMessage({ type: "state", state, persisted });
   return { state, persisted };
 }
 
@@ -48,12 +48,11 @@ export function subscribeCardGames(onChange) {
   };
   const onStorage = (event) => {
     if (event.key !== CARD_GAME_STORAGE_KEY && event.key !== null) return;
-    try { publish(JSON.parse(event.newValue || "null")); }
-    catch { publish(emptyCardGamesState()); }
+    publish(readCardGames());
   };
   const shared = getChannel();
   const onMessage = (event) => {
-    if (event.data?.type === "state") publish(event.data.state);
+    if (event.data?.type === "state") publish(event.data.persisted === false ? event.data.state : readCardGames());
   };
   shared?.addEventListener("message", onMessage);
   globalThis.addEventListener?.("storage", onStorage);

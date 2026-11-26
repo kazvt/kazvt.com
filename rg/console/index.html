@@ -7,12 +7,22 @@
     <meta name="theme-color" content="#090b0a">
     <link rel="canonical" href="https://kazvt.com/rg/console/">
     <title>RG Console</title>
-    <link rel="stylesheet" href="/rg/console/console.css?v=points-console-20261120-v1">
-    <script type="module" src="/rg/console/console.js?v=scene-table-20261126-v1"></script>
+    <link rel="stylesheet" href="/rg/console/console.css?v=reader-election-20261126-v1">
+    <script type="module" src="/rg/console/console.js?v=reader-election-20261126-v1"></script>
   </head>
   <body>
     <main class="terminal" aria-label="Ramble Gamble points console">
-      <header class="terminal-header"><span>RG CONSOLE</span><span>POINTS / SMEEMO</span></header>
+      <header class="terminal-header"><span>RG CONSOLE</span><span>POINTS / SMEEMO / ROOM</span></header>
+      <details id="console-card-room" class="terminal-room">
+        <summary>PRIVATE CARD ROOM / READER</summary>
+        <p data-room-status role="status">Preparing shared room…</p>
+        <button type="button" data-room-start>START ONLINE ROOM</button>
+        <button type="button" data-room-stop>STOP ONLINE ROOM</button>
+        <p>Private invitations — do not show on stream. Either host page can receive submissions.</p>
+        <div data-room-links></div>
+        <label>Offline answer packet<textarea data-room-packet rows="2"></textarea></label>
+        <button type="button" data-room-import>IMPORT ANSWER</button>
+      </details>
       <section class="terminal-output" id="terminal-output" role="log" aria-live="polite" aria-relevant="additions text"></section>
       <form class="terminal-form" id="terminal-form" autocomplete="off">
         <label for="terminal-input" aria-hidden="true">&gt;</label>
