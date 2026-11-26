@@ -58,7 +58,7 @@ body.ramble-page *::after {
   width: 100%;
   height: 100%;
   outline: 0;
-  cursor: var(--cursor-pointer, pointer);
+  cursor: auto;
   touch-action: none;
 }
 
@@ -94,8 +94,20 @@ body.ramble-page *::after {
   will-change: transform;
 }
 
-.rg-preview.has-game-cursor #rg-canvas {
-  cursor: none;
+/* Native 32px Pixelarticons adaptations; tip coordinates are in image pixels.
+   The final keyword keeps a usable pointer even if an image fails to load. */
+#rg-canvas[data-rg-cursor="default"] { cursor: url("assets/cursors/pixelarticons/idle.png") 10 8, default; }
+#rg-canvas[data-rg-cursor="hover"] { cursor: url("assets/cursors/pixelarticons/interact.png") 11 5, pointer; }
+#rg-canvas[data-rg-cursor="left"] { cursor: url("assets/cursors/pixelarticons/left.png") 8 15, w-resize; }
+#rg-canvas[data-rg-cursor="right"] { cursor: url("assets/cursors/pixelarticons/right.png") 23 15, e-resize; }
+#rg-canvas[data-rg-cursor="back"] { cursor: url("assets/cursors/pixelarticons/back.png") 16 23, s-resize; }
+
+@media (forced-colors: active) {
+  #rg-canvas[data-rg-cursor="default"] { cursor: default; }
+  #rg-canvas[data-rg-cursor="hover"] { cursor: pointer; }
+  #rg-canvas[data-rg-cursor="left"] { cursor: w-resize; }
+  #rg-canvas[data-rg-cursor="right"] { cursor: e-resize; }
+  #rg-canvas[data-rg-cursor="back"] { cursor: s-resize; }
 }
 
 .rg-billboard-layer {
@@ -260,49 +272,10 @@ body.ramble-page *::after {
   letter-spacing: .05em;
 }
 
-.rg-game-cursor {
-  position: absolute;
-  z-index: 5;
-  top: 0;
-  left: 0;
-  width: 62px;
-  height: 35px;
-  pointer-events: none;
-  will-change: left, top;
-}
-
-.rg-game-cursor[hidden] {
-  display: none !important;
-}
-
-.rg-game-cursor img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: drop-shadow(1px 1px 0 color-mix(in srgb, var(--ink) 74%, transparent));
-  user-select: none;
-}
-
 @media (max-width: 640px) {
   .rg-billboard {
     border-width: 1px;
     box-shadow: 2px 2px 0 var(--pink);
-  }
-
-  .rg-game-cursor {
-    width: 54px;
-    height: 31px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .rg-preview.has-game-cursor #rg-canvas {
-    cursor: var(--cursor-pointer, pointer);
-  }
-
-  .rg-game-cursor {
-    display: none !important;
   }
 }
 
@@ -767,7 +740,6 @@ body.ramble-page *::after {
   pointer-events: none;
 }
 
-.rg-preview.is-menu .rg-game-cursor,
 .rg-preview.is-menu .rg-result {
   visibility: hidden !important;
 }

@@ -49,8 +49,6 @@ import {
   const liquidPortalFrame = document.getElementById("rg-liquid-portal-frame");
   const billboardLayer = document.getElementById("rg-billboard-layer");
   const slotControlLayer = document.getElementById("rg-slot-control-layer");
-  const gameCursor = document.getElementById("rg-game-cursor");
-  const gameCursorImage = document.getElementById("rg-game-cursor-image");
   const pointsHud = document.getElementById("rg-points-hud");
   const loading = document.getElementById("rg-loading");
   const result = document.getElementById("rg-result");
@@ -110,11 +108,6 @@ import {
     id: "lillie-host",
     label: "Lillie - Host",
     source: "https://reactive.fugi.tech/basic/185073584211755008",
-  };
-  const CURSOR_ASSETS = {
-    default: "/ramblegamble/assets/cursors/pointer-default.gif",
-    hover: "/ramblegamble/assets/cursors/pointer-hover.gif",
-    direction: "/ramblegamble/assets/cursors/direction-right.gif",
   };
   let renderer;
   let scene;
@@ -183,7 +176,6 @@ import {
   let cameraTarget;
   let cameraTransition = null;
   let overviewCameraBounds = null;
-  let cursorMode = "";
   let pendingCardGameMode = "";
   let pendingTrivia = false;
   const triviaLayer = document.getElementById("rg-live-trivia");
@@ -1327,6 +1319,7 @@ import {
   }
 
   function transitionToView(nextView, { immediate = false } = {}) {
+    hideGameCursor();
     currentView = { ...nextView, look: nextView.look ?? 0 };
     const pose = getCameraPoseForView(currentView, camera.aspect);
     if (!pose) return;
@@ -1959,11 +1952,16 @@ import {
   }
 
   function updatePointer(event) {
-    if (!gameStarted || pauseMenuOpen || event.pointerType === "touch" || !camera || event.buttons || cameraTransition) {
+    if (!gameStarted || pauseMenuOpen || diceModeOpen || !sceneReady || event.pointerType === "touch" || !camera || event.buttons || cameraTransition || document.documentElement.hasAttribute("data-rg-host-locked")) {
       hideGameCursor();
       return;
     }
     const rect = preview.getBoundingClientRect();
+    if (currentView.kind === "trivia") {
+      const backBand = Math.min(84, Math.max(48, rect.height * 0.11));
+      setGameCursor(event.clientY >= rect.bottom - backBand ? "back" : "default");
+      return;
+    }
     const interaction = getSceneInteractionAt(event.clientX, event.clientY);
     const hoveredCell = currentView.kind === "slot"
       && interaction?.machine === "slot"
@@ -1997,47 +1995,16 @@ import {
     const decorativeSlot = currentView.kind === "slot" && interaction?.machine === "slot"
       && (!interaction.part || interaction.part === "machine");
     const actionable = Boolean(interaction && !sameFocusedTarget && !decorativeSlot);
-    setGameCursor(resolvePointClickCursor({ zone, actionable }), event.clientX, event.clientY);
+    setGameCursor(resolvePointClickCursor({ zone, actionable }));
   }
 
-  function setGameCursor(mode, clientX, clientY) {
-    if (reducedMotion.matches) {
-      gameCursor.hidden = true;
-      preview.classList.remove("has-game-cursor");
-      return;
-    }
-
-    const imageSource = mode === "left" || mode === "right" || mode === "back"
-      ? CURSOR_ASSETS.direction
-      : CURSOR_ASSETS[mode] || CURSOR_ASSETS.default;
-    if (cursorMode !== mode) {
-      cursorMode = mode;
-      gameCursorImage.src = imageSource;
-      gameCursorImage.style.transform = mode === "left"
-        ? "scaleX(-1)"
-        : mode === "back"
-          ? "rotate(90deg)"
-          : "none";
-    }
-
-    const rect = preview.getBoundingClientRect();
-    const width = gameCursor.clientWidth || 62;
-    const height = gameCursor.clientHeight || 35;
-    const hotspots = {
-      default: [0.52, 0.45],
-      hover: [0.52, 0.49],
-      right: [0.61, 0.5],
-      left: [0.39, 0.5],
-      back: [0.5, 0.7],
-    };
-    const [hotspotX, hotspotY] = hotspots[mode] || hotspots.default;
-    gameCursor.style.left = `${clientX - rect.left - width * hotspotX}px`;
-    gameCursor.style.top = `${clientY - rect.top - height * hotspotY}px`;
-    gameCursor.hidden = false;
+  // Native CSS cursor images use fixed pixel hotspots and never intercept input.
+  function setGameCursor(mode) {
+    if (canvas.dataset.rgCursor !== mode) canvas.dataset.rgCursor = mode;
   }
 
   function hideGameCursor() {
-    gameCursor.hidden = true;
+    delete canvas.dataset.rgCursor;
   }
 
   function updateMarqueeMatteFallback() {
@@ -2280,7 +2247,9 @@ import {
     else if (action === "show-trivia") window.dispatchEvent(new Event("rg:show-latest-trivia"));
   }
 
+  canvas.addEventListener("pointerenter", updatePointer);
   canvas.addEventListener("pointermove", updatePointer);
+  canvas.addEventListener("pointercancel", hideGameCursor);
   canvas.addEventListener("click", (event) => {
     if (event.button === 0) pointClickAt(event.clientX, event.clientY);
   });
@@ -2383,15 +2352,6 @@ import {
     else if (shortcut !== "cheer") return;
     event.preventDefault();
   });
-
-  gameCursorImage.addEventListener("load", () => {
-    if (!reducedMotion.matches) preview.classList.add("has-game-cursor");
-  });
-  gameCursorImage.addEventListener("error", () => {
-    preview.classList.remove("has-game-cursor");
-    hideGameCursor();
-  });
-  gameCursorImage.src = CURSOR_ASSETS.default;
 
   window.addEventListener("rg:spin-wheel", startWheelSpin);
   window.addEventListener("rg:pull-slots", startLeverPull);
