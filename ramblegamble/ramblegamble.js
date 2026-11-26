@@ -154,6 +154,8 @@ import {
   let selectedSlotBerry = "kazberry";
   let slotPlacementAxis = "column";
   let slotHoverCellIndex = -1;
+  let slotResultTimeout = 0;
+  let slotResultToken = 0;
   const pickQuestion = createQuestionPicker();
   let playing = false;
   let gameStarted = false;
@@ -274,6 +276,9 @@ import {
 
   function finishTurn() {
     const prompt = nextHostQuestion();
+    slotResultToken += 1;
+    window.clearTimeout(slotResultTimeout);
+    slotResultTimeout = 0;
     result.textContent = prompt;
     result.hidden = !prompt;
     playing = false;
@@ -285,9 +290,31 @@ import {
     if (playing) return false;
     playing = true;
     preview.classList.add("is-playing");
-    result.hidden = true;
+    hideResult();
     window.dispatchEvent(new CustomEvent("rg:turn-start", { detail: { machine } }));
     return true;
+  }
+
+  function hideResult() {
+    slotResultToken += 1;
+    window.clearTimeout(slotResultTimeout);
+    slotResultTimeout = 0;
+    result.hidden = true;
+  }
+
+  function showSlotPayout(totals) {
+    const messages = Object.entries(totals)
+      .filter(([, amount]) => amount > 0)
+      .map(([name, amount]) => `${name.toUpperCase()} +${Number(amount).toLocaleString()}`);
+    if (!messages.length) return;
+    result.textContent = messages.join(" - ");
+    result.hidden = false;
+    const token = ++slotResultToken;
+    window.clearTimeout(slotResultTimeout);
+    slotResultTimeout = window.setTimeout(() => {
+      if (token === slotResultToken) result.hidden = true;
+      slotResultTimeout = 0;
+    }, 3200);
   }
 
   function startWheelSpin() {
