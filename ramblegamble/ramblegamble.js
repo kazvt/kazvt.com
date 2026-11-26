@@ -2295,6 +2295,32 @@ import {
     }
   }
 
+  function updateSlotPlacementControlProjection() {
+    if (!slotControlLayer || !camera || !sceneReady || preview.clientWidth < 1 || preview.clientHeight < 1) return;
+    const visible = gameStarted && !pauseMenuOpen && !diceModeOpen && !cameraTransition && currentView.kind === "slot";
+    slotControlLayer.hidden = !visible;
+    if (!visible || !slotPlacementControls.length) return;
+
+    camera.updateMatrixWorld(true);
+    const width = preview.clientWidth;
+    const height = preview.clientHeight;
+    const pixelsPerWorldUnitAtOne = height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
+    for (const control of slotPlacementControls) {
+      const cameraSpace = camera.worldToLocal(control.anchor.clone());
+      const depth = -cameraSpace.z;
+      const projected = control.anchor.clone().project(camera);
+      if (depth <= camera.near || projected.z < -1 || projected.z > 1) {
+        control.button.style.visibility = "hidden";
+        continue;
+      }
+      control.button.style.left = ((projected.x + 1) * 0.5 * width) + "px";
+      control.button.style.top = ((1 - projected.y) * 0.5 * height) + "px";
+      control.button.style.width = Math.max(28, Math.min(54, control.worldWidth * pixelsPerWorldUnitAtOne / depth)) + "px";
+      control.button.style.height = Math.max(28, Math.min(48, control.worldHeight * pixelsPerWorldUnitAtOne / depth)) + "px";
+      control.button.style.visibility = "visible";
+    }
+  }
+
   function animate(time) {
     animationFrame = requestAnimationFrame(animate);
     if (!renderer || !scene || !camera) return;
@@ -2307,6 +2333,7 @@ import {
     }
     if (sceneReady) {
       updateBillboardProjection();
+      updateSlotPlacementControlProjection();
       updateLiquidPortalProjection();
     }
 
@@ -2413,6 +2440,7 @@ import {
       createSlotReelDisplay();
 
       placeMachinesFromStage();
+      createSlotPlacementControls();
       setupPicking();
       applyTheme();
       sceneReady = true;
