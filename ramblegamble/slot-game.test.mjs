@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { SLOT_PAYOUT_PATTERNS, findSlotPayouts, placeSlotBerry, resolveSlotPayouts, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs";
+import { SLOT_PAYOUT_PATTERNS, findSlotPayouts, getSlotEligibleIndexes, placeSlotBerry, resolveSlotPayouts, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs";
 
 const blankBoard = () => Array(15).fill(null);
 
@@ -30,6 +30,18 @@ test("placement chooses uniformly from the chosen line, replacing other berries 
   assert.equal(second.placedIndex, 7);
   assert.equal(second.grid[7], "faroeberry");
   assert.equal(grid[7], "erinberry", "the source board is immutable");
+});
+
+test("line availability matches placement eligibility for each row and column", () => {
+  const grid = blankBoard();
+  grid[0] = "kazberry";
+  grid[5] = "kazberry";
+  grid[10] = "kazberry";
+  grid[11] = "erinberry";
+  assert.deepEqual(getSlotEligibleIndexes(grid, "kazberry", { axis: "column", index: 0 }), []);
+  assert.deepEqual(getSlotEligibleIndexes(grid, "kazberry", { axis: "column", index: 1 }), [1, 6, 11]);
+  assert.deepEqual(getSlotEligibleIndexes(grid, "kazberry", { axis: "row", index: 0 }), [1, 2, 3, 4]);
+  assert.deepEqual(getSlotEligibleIndexes(grid, "kazberry", { axis: "row", index: 9 }), []);
 });
 
 test("placement is a no-op when a selected line is already entirely the active player's berry", () => {

@@ -21,7 +21,7 @@ import {
   slotCellIndexAtUv,
   slotScreenPoint,
 } from "./slot-reels.mjs?v=slot-machine-live-game-20261126-v1";
-import { placeSlotBerry, resolveSlotPayouts, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs?v=slot-machine-live-game-20261126-v2";
+import { getSlotEligibleIndexes, placeSlotBerry, resolveSlotPayouts, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs?v=slot-line-markers-20261126-v1";
 import {
   ROULETTE_BALL_COLOR,
   ROULETTE_BALL_LANDING_RADIUS,
@@ -623,10 +623,10 @@ import {
     const berryNames = { faroeberry: "Faroeberry", erinberry: "Erinberry", kazberry: "Kazberry" };
     for (const control of slotPlacementControls) {
       control.image.src = SLOT_SYMBOL_IMAGE_PATH + selectedSlotBerry + ".png";
-      const cells = control.axis === "column"
-        ? Array.from({ length: 3 }, (_, row) => row * 5 + control.index)
-        : Array.from({ length: 5 }, (_, column) => control.index * 5 + column);
-      const available = cells.filter((cellIndex) => grid[cellIndex] !== selectedSlotBerry).length;
+      const available = getSlotEligibleIndexes(grid, selectedSlotBerry, {
+        axis: control.axis,
+        index: control.index,
+      }).length;
       const lineName = control.axis === "column" ? "column " + (control.index + 1) : "row " + control.label;
       control.button.disabled = Boolean(playing || slotReelMotion || available === 0);
       control.button.setAttribute("aria-label", "Place " + berryNames[selectedSlotBerry] + " in a random available cell in " + lineName + "; " + available + " available");
