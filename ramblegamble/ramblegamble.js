@@ -381,6 +381,20 @@ import {
       }
       context.restore();
     }
+    context.save();
+    context.strokeStyle = "rgba(255, 242, 155, 0.62)";
+    context.lineWidth = 3;
+    context.beginPath();
+    for (let column = 1; column < 5; column += 1) {
+      context.moveTo(column * cellWidth, 0);
+      context.lineTo(column * cellWidth, slotReelCanvas.height);
+    }
+    for (let row = 1; row < 3; row += 1) {
+      context.moveTo(0, row * cellHeight);
+      context.lineTo(slotReelCanvas.width, row * cellHeight);
+    }
+    context.stroke();
+    context.restore();
     slotReelTexture.needsUpdate = true;
   }
 
