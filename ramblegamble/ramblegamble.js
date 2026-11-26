@@ -20,7 +20,7 @@ import {
   sampleSlotReelColumn,
   slotScreenPoint,
 } from "./slot-reels.mjs?v=slot-machine-live-game-20261126-v1";
-import { findSlotPayouts, placeSlotBerry, resolveSlotPayouts, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs?v=slot-machine-live-game-20261126-v1";
+import { placeSlotBerry, resolveSlotPayouts, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs?v=slot-machine-live-game-20261126-v1";
 import {
   ROULETTE_BALL_COLOR,
   ROULETTE_BALL_LANDING_RADIUS,
@@ -61,7 +61,7 @@ import {
   const FORCED_THEME = "p2";
   const ROULETTE_PART_NAMES = new Set(["center", "wheel", "rim", "ball"]);
   const SLOT_PART_NAMES = new Set(["machine", "slot-reel-display", "arm", "button1", "button2", "button3", "button4", "button5"]);
-  const SLOT_GRID_STORAGE_KEY = "ramblegamble.slot-grid.v1";
+  const SLOT_GRID_STORAGE_KEY = "ramblegamble.slot-game-board.v1";
   const SLOT_DISPLAY_PIXELS = Object.freeze({ left: 5, right: 75, top: 16, bottom: 58 });
   const SLOT_SYMBOL_IMAGE_PATH = "/ramblegamble/assets/berries/";
   const REFERENCE_START_VIEW = Object.freeze({

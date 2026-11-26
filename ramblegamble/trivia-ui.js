@@ -28,7 +28,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
   const DRAFT_KEY = "ramblegamble.trivia.drafts.v1";
-  const GRID_KEY = "ramblegamble.slot-grid.v1";
+  const GRID_KEY = "ramblegamble.slot-game-board.v1";
   const gridSize = 15;
   const berryNames = { kazberry: "Kazberry", faroeberry: "Faroeberry", erinberry: "Erinberry" };
   const modeValues = Object.keys(MODE_NAMES);
