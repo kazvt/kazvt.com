@@ -1854,8 +1854,9 @@ import {
       && interaction.part === "slot-reel-display"
       ? interaction.cellIndex
       : -1;
-    if (hoveredCell !== slotHoverCellIndex) {
-      slotHoverCellIndex = hoveredCell;
+    const hoveredLine = hoveredCell >= 0 ? { axis: "column", index: hoveredCell % 5 } : null;
+    if (hoveredLine?.axis !== slotHoverLine?.axis || hoveredLine?.index !== slotHoverLine?.index) {
+      slotHoverLine = hoveredLine;
       drawSlotReelDisplay();
     }
     const zone = interaction ? "" : resolvePointClickZone({
@@ -2127,7 +2128,7 @@ import {
     else if (action === "spin-wheel") startWheelSpin();
     else if (action === "pull-lever") startLeverPull();
     else if (action.startsWith("spin-column-")) spinSlotColumn(Number(action.slice("spin-column-".length)));
-    else if (action === "place-slot-berry") placeSlotBerryFromDisplay(interaction.cellIndex);
+    else if (action === "place-slot-berry") placeSlotBerryOnLine("column", interaction.cellIndex % 5);
     else if (action === "open-slots") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "slots" } }));
     else if (action === "open-trivia") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "trivia" } }));
   }
@@ -2135,7 +2136,7 @@ import {
   canvas.addEventListener("pointermove", updatePointer);
   canvas.addEventListener("click", (event) => pointClickAt(event.clientX, event.clientY));
   canvas.addEventListener("pointerleave", () => {
-    slotHoverCellIndex = -1;
+    slotHoverLine = null;
     drawSlotReelDisplay();
     hideGameCursor();
   });
@@ -2217,18 +2218,19 @@ import {
   window.addEventListener("rg:pull-slots", startLeverPull);
   window.addEventListener("rg:slot-grid-updated", (event) => {
     slotReelGrid = normalizeSlotGrid(event.detail?.grid);
+    syncSlotPlacementControls();
     if (!slotReelMotion) drawSlotReelDisplay();
   });
   window.addEventListener("rg:slot-settings-updated", (event) => {
     const berry = event.detail?.berry;
-    const axis = event.detail?.axis;
     if (["faroeberry", "erinberry", "kazberry"].includes(berry)) selectedSlotBerry = berry;
-    if (axis === "row" || axis === "column") slotPlacementAxis = axis;
+    syncSlotPlacementControls();
     drawSlotReelDisplay();
   });
   window.addEventListener("storage", (event) => {
     if (event.key !== SLOT_GRID_STORAGE_KEY) return;
     slotReelGrid = normalizeSlotGrid(event.newValue);
+    syncSlotPlacementControls();
     if (!slotReelMotion) drawSlotReelDisplay();
   });
 
