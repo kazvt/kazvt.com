@@ -457,16 +457,30 @@ import {
     drawSlotReelDisplay();
   }
 
-  function startSlotReelSpin(columns, pullCrank = false) {
-    if (!beginTurn("slot")) return false;
+  function saveSlotGrid(grid) {
+    slotReelGrid = normalizeSlotGrid(grid);
+    try { localStorage.setItem(SLOT_GRID_STORAGE_KEY, JSON.stringify(slotReelGrid)); }
+    catch (error) { console.warn("Ramble Gamble slot board could not be saved:", error); }
+    window.dispatchEvent(new CustomEvent("rg:slot-grid-updated", { detail: { grid: slotReelGrid.slice() } }));
+  }
+
+  function startSlotAction(targetGrid, columns, { pullCrank = false, kind = "spin" } = {}) {
+    if (playing || slotReelMotion) return false;
     const startedAt = performance.now();
-    slotReelGrid = readSavedSlotGrid();
-    slotReelMotion = createSlotReelMotion(slotReelGrid, columns, {
+    const startingGrid = readSavedSlotGrid();
+    const settledGrid = normalizeSlotGrid(targetGrid);
+    slotReelMotion = createSlotReelMotion(startingGrid, columns, {
+      targetGrid: settledGrid,
       startedAt,
       duration: reducedMotion.matches ? 520 : 1950,
       stagger: reducedMotion.matches ? 55 : 120,
       reducedMotion: reducedMotion.matches,
     });
+    if (!slotReelMotion) return false;
+    slotReelMotion.action = kind;
+    playing = true;
+    preview.classList.add("is-playing");
+    result.hidden = true;
     if (pullCrank && lever) {
       leverMotion = {
         started: startedAt,
@@ -474,12 +488,59 @@ import {
         baseQuaternion: lever.quaternion.clone(),
       };
     }
+    window.dispatchEvent(new CustomEvent("rg:slot-action-start", { detail: { kind } }));
     drawSlotReelDisplay(startedAt);
     return true;
   }
 
+  function placeSlotBerryFromDisplay(cellIndex) {
+    if (playing || slotReelMotion || !Number.isInteger(cellIndex) || cellIndex < 0 || cellIndex >= 15) return false;
+    const line = slotPlacementAxis === "row" ? Math.floor(cellIndex / 5) : cellIndex % 5;
+    const placement = placeSlotBerry(readSavedSlotGrid(), selectedSlotBerry, {
+      axis: slotPlacementAxis,
+      index: line,
+      randomIndex: secureRandomIndex,
+    });
+    if (placement.placedIndex < 0) {
+      window.dispatchEvent(new CustomEvent("rg:slot-action-finish", { detail: { reason: "no-eligible-cell", totals: {} } }));
+      return false;
+    }
+    return startSlotAction(placement.grid, [placement.placedIndex % 5], { kind: "place" });
+  }
+
+  function startSlotReelSpin(columns, pullCrank = false) {
+    const startingGrid = readSavedSlotGrid();
+    const spin = rotateSlotColumns(startingGrid, columns, { randomIndex: secureRandomIndex });
+    return startSlotAction(spin.grid, Object.keys(spin.rotations).map(Number), {
+      pullCrank,
+      kind: pullCrank ? "spin-all" : "spin-column",
+    });
+  }
+
   function spinSlotColumn(column) {
     return startSlotReelSpin([column]);
+  }
+
+  function finishSlotAction(motion) {
+    const outcome = resolveSlotPayouts(motion.targetGrid);
+    saveSlotGrid(outcome.grid);
+    const scores = readPointScores();
+    for (const [name, amount] of Object.entries(outcome.totals)) {
+      if (amount > 0) scores[name] = Math.min(Number.MAX_SAFE_INTEGER, scores[name] + amount);
+    }
+    if (Object.values(outcome.totals).some((amount) => amount > 0)) writePointScores(scores);
+    playing = false;
+    preview.classList.remove("is-playing");
+    drawSlotReelDisplay();
+    window.dispatchEvent(new CustomEvent("rg:slot-action-finish", {
+      detail: {
+        kind: motion.action,
+        payouts: outcome.payouts,
+        totals: outcome.totals,
+        clearedCells: outcome.clearedCells,
+        grid: outcome.grid.slice(),
+      },
+    }));
   }
 
   applyTheme();
