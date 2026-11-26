@@ -1,7 +1,7 @@
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
-import { createAudienceRenderer } from "./audience-render.mjs?v=show-energy-20261127-v1";
-import { createShowFX } from "./show-fx.mjs?v=show-energy-20261127-v1";
+import { createAudienceRenderer } from "./audience-render.mjs?v=half-opacity-20261127-v1";
+import { createShowFX } from "./show-fx.mjs?v=half-opacity-20261127-v1";
 import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { createExteriorMist } from "./exterior-mist.mjs?v=exterior-mist-20261126-v1";

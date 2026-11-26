@@ -39,7 +39,9 @@ export function createShowFX(THREE,scene,{wheel, wheelPivot,ball,slot,host,conte
   const cabinetPositions=Array.from({length:24},(_,i)=>[THREE.MathUtils.lerp(slotBounds.min.x+.08,slotBounds.max.x-.08,i/23),slotBounds.max.y-.075,slotBounds.max.z+.02]);
   const bulbs=lights(new THREE.BoxGeometry(.075,.075,.035),cabinetPositions,[0xff80cf,0xffe67d],.83);
   const marquee=lights(new THREE.BoxGeometry(.095,.055,.028),Array.from({length:24},(_,i)=>[5.94+i*.198,2.72,-4.84]),[0xffe67d,0xf8b0ed],.85);
-  const portal=lights(new THREE.BoxGeometry(.035,.075,.075),Array.from({length:36},(_,i)=>{const a=i/36*Math.PI*2;return [door.wallX-.07,(door.minY+door.maxY)/2+Math.sin(a)*(door.maxY-door.minY)*.48,(door.minZ+door.maxZ)/2+Math.cos(a)*(door.maxZ-door.minZ)*.49];}),[0xffffff,0xcda8ff],.68);
+  const portal=lights(new THREE.BoxGeometry(.035,.075,.075),Array.from({length:36},(_,i)=>{const a=i/36*Math.PI*2;return [door.wallX-.07,(door.minY+door.maxY)/2+Math.sin(a)*(door.maxY-door.minY)*.48,(door.minZ+door.maxZ)/2+Math.cos(a)*(door.maxZ-door.minZ)*.49];}),[0xffffff,0xcda8ff],.5);
+  // Closed cubes should blend once, rather than layering their back faces.
+  portal.mesh.material.side=THREE.FrontSide;
   const stageLights=lights(new THREE.BoxGeometry(.14,.055,.055),Array.from({length:26},(_,i)=>[.2+i*.58,.045,.25]),[0xf38bdb,0xffdf71],.65);
   // Unlit authored materials cannot receive real spotlights; restrained floor pools simulate their visible sweep.
   const pools=[0xb199ff,0xff9dd5].map(color=>{const m=new THREE.Mesh(new THREE.CircleGeometry(.72,40),basic(color,.12));m.rotation.x=-Math.PI/2;group.add(m);return m;});
@@ -65,7 +67,7 @@ export function createShowFX(THREE,scene,{wheel, wheelPivot,ball,slot,host,conte
         ringAt(winnerEcho,settlePos);winnerEcho.position.y+=.017;winnerEcho.scale.setScalar(1+(since%700)/700);winnerEcho.material.opacity=.68*(1-since/2200)*(1-(since%700)/700);
       }
     }
-    chase(bulbs,time,reduced,.0042);chase(marquee,time,reduced,.005);chase(stageLights,time,reduced,.0023);chase(portal,time,reduced,.005,view.kind==='dice-door'?.35:.72);portal.mesh.material.opacity=view.kind==='dice-door'?.76:.31;
+    chase(bulbs,time,reduced,.0042);chase(marquee,time,reduced,.005);chase(stageLights,time,reduced,.0023);chase(portal,time,reduced,.005,view.kind==='dice-door'?.35:.72);
     pools.forEach((m,i)=>{m.position.set(4.1+i*4+Math.sin(reduced?i:time/1700+i)*1.15,.035,-.55+Math.cos(reduced?i:time/2000+i)*.45);m.scale.set(1.15,.75,1);m.material.opacity=.08;});
     for(const {r,entry} of podiums){r.visible=view.kind==='host'&&entry===host||view.kind==='contestant'&&entry.id===view.contestantId||view.kind==='contestants'&&entry!==host;r.material.opacity=reduced?.55:.48+.24*Math.sin(time/420);r.scale.setScalar(reduced?1:1+.045*Math.sin(time/420));}
   }
