@@ -1,9 +1,17 @@
+import { ROOM_VERSION, decodePacket, isPlayer } from './card-room-protocol.mjs?v=submission-audit-20261126-v1';
+import { validNonce, validPublicKey } from './card-room-auth.mjs?v=host-security-20261126-v1';
 import { foley } from "./game-foley.mjs?v=expanded-foley-20261126-v1";
 import { createClientSubmission, validateClientActivity, CLIENT_PACKET_MAX_BYTES } from "./trivia-client.mjs?v=player-handoff-20261125-v1";
 import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-place-20261124-v1";
 
 (() => {
   "use strict";
+  // Legacy activity URLs with a private invitation are aliases of the same
+  // authenticated live controller, not a second independent seat/connection.
+  const invite = decodePacket(location.hash.slice(1));
+  if(invite?.v===ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/.test(invite.room) && validNonce(invite.token) && validPublicKey(invite.hostKey)) {
+    location.replace('/rg/player/'+location.hash); return;
+  }
 
   const $ = (selector, root = document) => root.querySelector(selector);
   const expectedMode = document.body.dataset.rgClientMode;

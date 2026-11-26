@@ -1,6 +1,6 @@
 import { RG_CONTESTANTS } from "./points-store.mjs?v=points-console-20261120-v1";
 
-export const POINTS_HELP = "help - clear - points [faroe|erin|kaz] - points add <name> [amount] - points set <name> <total> - points reset [name] - smeemo start|reset - trivia <round 1-36> <difficulty 1-5> - trivia answers|close|next|previous|hide|show";
+export const POINTS_HELP = "help - clear - answers - points [faroe|erin|kaz] - points add <name> [amount] - points set <name> <total> - points reset [name] - smeemo start|reset - trivia <round 1-36> <difficulty 1-5> - trivia answers|close|next|previous|hide|show";
 
 function parseName(value) {
   const name = String(value || "").trim().replace(/^@/, "").toLowerCase();
@@ -21,6 +21,7 @@ export function parsePointsCommand(rawCommand) {
   const action = verb.toLowerCase();
   if (action === "help") return args.length ? { action: "error" } : { action: "help" };
   if (action === "clear") return args.length ? { action: "error" } : { action: "clear" };
+  if (action === "answers") return args.length ? { action: "error" } : { action: "answers" };
   if (action === "smeemo") {
     if (args.length !== 1) return { action: "error", message: "Use: smeemo start or smeemo reset." };
     const subcommand = args[0].toLowerCase();

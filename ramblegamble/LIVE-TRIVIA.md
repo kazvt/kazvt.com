@@ -2,6 +2,8 @@
 
 ## Host workflow
 
+See [PLAYER-SUBMISSIONS.md](PLAYER-SUBMISSIONS.md) for the current unified live controller, acknowledgement/retry behavior and private console answer viewer.
+
 1. Deploy the changed files together on GitHub Pages. Refresh `/rg/`, `/rg/console/` and the existing contestant invitation pages once. The authenticated room protocol remains v2; no new invitations are required if they already use v2.
 2. Open and unlock `/rg/` and `/rg/console/` in the same browser profile and origin. Import the authored question bank into the existing staff editor in `/rg/`; the bank/drafts are still session-local and are not published as site assets.
 3. Start the shared online room from either host page if it is not already running. Kaz, Faroe and Erin keep their existing private `/rg/player/` invitation pages open.

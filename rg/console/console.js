@@ -1,12 +1,13 @@
-import { activeRoomRound, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, newTriviaId, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, updateTrivia, answerSummary } from "/ramblegamble/live-trivia.mjs";
+import { renderTriviaResponses } from "/ramblegamble/trivia-live-view.mjs?v=submission-audit-20261126-v1";
+import { activeRoomRound, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, newTriviaId, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, updateTrivia, answerSummary } from "/ramblegamble/live-trivia.mjs?v=submission-audit-20261126-v1";
 import { withRoomSubmissionLock } from "/ramblegamble/card-room-election.mjs";
-import { mountCardRoom } from "/ramblegamble/card-room-host.mjs?v=live-trivia-20261126-v1";
+import { mountCardRoom } from "/ramblegamble/card-room-host.mjs?v=submission-audit-20261126-v1";
 import {
   RG_CONTESTANTS,
   readPointScores,
   writePointScores,
 } from "/ramblegamble/points-store.mjs?v=points-console-20261120-v1";
-import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=live-trivia-20261126-v1";
+import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=submission-audit-20261126-v1";
 import { createSmeemoGame } from "/ramblegamble/card-games.mjs?v=scene-table-20261126-v1";
 import { readCardGames, writeCardGames, subscribeCardGames } from "/ramblegamble/card-games-store.mjs?v=live-trivia-20261126-v1";
 
@@ -28,6 +29,19 @@ function formatScores(scores) {
   return RG_CONTESTANTS.map((name) => `${name}: ${scores[name]}`).join("  ");
 }
 
+const answersPanel=document.getElementById('console-answers'), answersContent=document.getElementById('console-answer-content');
+let triviaOnly=false;
+function refreshAnswers(){
+  if(!answersPanel.open)return;
+  const round=triviaOnly?readLiveTrivia():activeRoomRound();
+  answersContent.replaceChildren();
+  if(!round){answersContent.textContent='No active round.';return;}
+  const heading=document.createElement('p');heading.textContent=round.prompt||round.mode;answersContent.append(heading);
+  const body=document.createElement('div');answersContent.append(body);
+  if(round.mode==='trivia'){renderTriviaResponses(body,round);return;}
+  for(const name of RG_CONTESTANTS){const row=document.createElement('p');row.textContent=`${name.toUpperCase()}: ${round.submissions?.[name]||'Waiting'}`;body.append(row);}
+}
+answersPanel.addEventListener('toggle',refreshAnswers);
 async function execute(rawCommand) {
   const command = rawCommand.trim();
   if (!command) return;
@@ -46,12 +60,13 @@ async function execute(rawCommand) {
     addLine(parsed.message || "Invalid command. Type help.", "terminal-error");
     return;
   }
+  if (parsed.action === "answers") { triviaOnly=false; answersPanel.open=true; refreshAnswers(); return; }
   if (parsed.action === "smeemo-start") {
     await withRoomSubmissionLock(() => {
     const state = readCardGames();
     state.round = null;
     state.smeemo = createSmeemoGame();
-    const result = writeCardGames(state);
+    const result = writeCardGames(state); cardRoom.publish(); refreshAnswers();
     addLine(`Smeemo Scramble started - reveal cards on the room page${result.persisted ? "" : " - update sent to open tabs only"}`);
     });
     return;
@@ -60,7 +75,7 @@ async function execute(rawCommand) {
     await withRoomSubmissionLock(() => {
     const state = readCardGames();
     state.smeemo = null;
-    const result = writeCardGames(state);
+    const result = writeCardGames(state); cardRoom.publish(); refreshAnswers();
     addLine(`Smeemo Scramble reset${result.persisted ? "" : " - update sent to open tabs only"}`);
     });
     return;
@@ -75,7 +90,7 @@ async function execute(rawCommand) {
   if (parsed.action.startsWith("trivia-")) {
     const action=parsed.action.slice(7),round=readLiveTrivia();
     if(!round){addLine("No live trivia question.","terminal-error");return;}
-    if(action==='answers'){for(const player of RG_CONTESTANTS)addLine(`${player}: ${answerSummary(round,player)}`);return;}
+    if(action==='answers'){triviaOnly=true;answersPanel.open=true;refreshAnswers();for(const player of RG_CONTESTANTS)addLine(`${player}: ${answerSummary(round,player)}`);return;}
     try{await updateTrivia(current=>{if(!current||current.id!==round.id)throw Error('Question changed.');if(action==='close')return {...current,phase:'closed'};const q={...current.question};if(['next','previous'].includes(action)){if(!['image-sequence','text-sequence'].includes(q.kind))throw Error('Not a sequence.');q.sequenceIndex=Math.max(0,Math.min(q.items.length-1,q.sequenceIndex+(action==='next'?1:-1)));}else{if(q.kind!=='memory-number')throw Error('Not a memory question.');q.imageVisible=action==='show';q.promptImage=q.imageVisible?current.secret.memoryImage:'';}return {...current,question:q};});addLine(`Trivia ${action}.`);}catch(e){addLine(e.message,"terminal-error");}return;
   }
   const scores = readPointScores();
@@ -142,9 +157,9 @@ const cardRoom = mountCardRoom(document.getElementById("console-card-room"), {
   role: "/rg/console/",
   getRound: () => activeRoomRound(),
   commitRound: round => { if(round.mode==='trivia')return writeLiveTrivia(round); return writeCardGames({ ...readCardGames(), round }, { requirePersistence: true }).persisted; },
-  onStatus: message => addLine(message),
+  onStatus: message => {addLine(message);refreshAnswers();},
 });
-subscribeCardGames(() => cardRoom.publish());
+subscribeCardGames(() => {cardRoom.publish();refreshAnswers();});
 
-subscribeLiveTrivia(()=>cardRoom.publish());
+subscribeLiveTrivia(()=>{cardRoom.publish();refreshAnswers();});
 window.addEventListener("storage",event=>{if(event.key!==TRIVIA_REPLY_KEY)return;try{const reply=JSON.parse(event.newValue);if(reply?.message)addLine(reply.message,reply.ok?"":"terminal-error");}catch{}});

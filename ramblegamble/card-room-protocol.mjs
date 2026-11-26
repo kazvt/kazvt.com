@@ -1,4 +1,5 @@
-import { publicTriviaRound, acceptTriviaAnswer } from "./live-trivia.mjs";
+import { validRequestId } from "./card-room-delivery.mjs?v=submission-audit-20261126-v1";
+import { publicTriviaRound, acceptTriviaAnswer } from "./live-trivia.mjs?v=submission-audit-20261126-v1";
 import { CARD_GAME_PLAYERS, submitRoundAnswer } from "./card-games.mjs?v=scene-table-20261126-v1";
 import { validPublicKey } from "./card-room-auth.mjs?v=host-security-20261126-v1";
 export const ROOM_VERSION = 2;
@@ -16,6 +17,7 @@ export function playerRound(round, player) {
   if (!["red-handed", "quiplash"].includes(round.mode)) return null;
   return { id: round.id, mode: round.mode, phase: round.phase, prompt: round.prompt,
     submitted: Boolean(round.submissions[player]),
+    savedAnswer: round.submissions[player] || null,
     ...(round.phase === "submissions" && round.mode === "red-handed" ? { hand: [...round.hands[player]] } : {}) };
 }
 export function encodePacket(value) {
@@ -32,8 +34,10 @@ export function authorized(room, message) {
 }
 export function acceptSubmission(room, round, message) {
   if (!authorized(room, message) || message.type !== "submit") return { round, status: "unauthorized" };
+  if (message.requestId !== undefined && !validRequestId(message.requestId)) return { round, status: "invalid-answer" };
   if (!round?.id || message.roundId !== round.id) return { round, status: "stale-round" };
   if (round.mode === "trivia") return acceptTriviaAnswer(round, message.player, message.answer);
+  if (!["red-handed", "quiplash"].includes(round.mode)) return { round, status: "closed" };
   if (typeof message.answer !== "string" || !message.answer.trim() || message.answer.length > 800) return { round, status: "invalid-answer" };
   if (round.submissions[message.player]) return { round, status: round.submissions[message.player] === message.answer.trim() ? "accepted" : "already-submitted" };
   if (round.phase !== "submissions") return { round, status: "closed" };

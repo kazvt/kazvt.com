@@ -39,18 +39,19 @@ class Locks {
 function harness(){
  const locks=new Locks(), values=new Map(), tabs=[], peers=[];
  const identity=generateHostIdentity();
+ let failSave=false;
  let round=createRedHandedRound(Array.from({length:15},(_,i)=>`evidence ${i}`),['prompt']);
  class Peer extends EventEmitter {constructor(id){super();this.id=id;this.destroyed=false;peers.push(this);}destroy(){this.destroyed=true;this.emit('close');}}
  function tab(role,legacy=null,withLocks=true){
   const selectors=Object.fromEntries(['status','links','start','stop','packet','import','rotate'].map(k=>[`[data-room-${k}]`,new Element()]));
   const bus=new EventEmitter();const env={confirm:()=>true,document:{createElement:()=>new Element()},location:{href:`https://example.test${role}`},navigator:{locks:withLocks?locks:undefined},sessionStorage:{getItem:()=>legacy?JSON.stringify(legacy):null},localStorage:{getItem:k=>values.get(k)||null,setItem(k,v){if(values.get(k)===v)return;values.set(k,v);for(const other of tabs)if(other.env!==env)queueMicrotask(()=>other.bus.emit('storage',{key:k}));}},addEventListener:(e,f)=>bus.on(e,f),removeEventListener:(e,f)=>bus.off(e,f)};
   const t={env,bus,selectors,role};tabs.push(t);
-  t.room=mountCardRoom({querySelector:s=>selectors[s]},{env,role,peerLoader:async()=>Peer,identityLoader:()=>identity,getRound:()=>round,commitRound:r=>{round=r;for(const x of tabs)x.room?.publish();return true;}});
+  t.room=mountCardRoom({querySelector:s=>selectors[s]},{env,role,peerLoader:async()=>Peer,identityLoader:()=>identity,getRound:()=>round,commitRound:r=>{if(failSave)return false;round=r;for(const x of tabs)x.room?.publish();return true;}});
   t.click=k=>selectors[`[data-room-${k}]`].events.click();
   t.invites=()=>Object.fromEntries(selectors['[data-room-links]'].children.map(row=>{const url=new URL(row.children[0].href);assert.equal(url.pathname,'/rg/player/');const invite=decodePacket(url.hash.slice(1));assert.ok(!('round'in invite));return [invite.player,invite]}));
   return t;
  }
- return {tab,peers,values,locks,get round(){return round},set round(r){round=r;for(const x of tabs)x.room.publish()},dispose(){for(const t of tabs)t.room.dispose();}};
+ return {tab,peers,values,locks,set failSave(v){failSave=v;},get round(){return round},set round(r){round=r;for(const x of tabs)x.room.publish()},dispose(){for(const t of tabs)t.room.dispose();}};
 }
 async function join(peer,invite, expect=true){
  const conn=new Connection();peer.emit('connection',conn);const clientNonce=nonce();
@@ -112,4 +113,26 @@ test('authenticated live trivia reaches all seats and survives elected-reader ha
  h.round=createLiveTrivia({round:'25',difficulty:5,format:{mode:'choice-text'},content:{question:'Question?',subtitle:'Context',options:[{label:'A',correct:true},{label:'B'}],acceptedAnswers:['private']},cards:{}});await flush();for(const c of [k,f,e]){const r=c.sent.at(-1).round;assert.equal(r.mode,'trivia');assert.equal(r.question.subtitle,'Context');assert.ok(!JSON.stringify(r).includes('private'));assert.equal('correct'in r.question.options[0],false);}
  const answer=JSON.stringify({selected:[0]});const id=h.round.id;k.emit('data',{v:ROOM_VERSION,type:'submit',roundId:id,answer});await until(()=>h.round.submissions.kaz===answer);assert.equal(h.round.submissions.faroe,null);a.room.dispose();await flush();assert.equal(h.peers.length,2);h.peers[1].emit('open');await flush();const k2=await join(h.peers[1],invites.kaz);assert.equal(k2.sent.at(-1).round.submitted,true);const e2=await join(h.peers[1],invites.erin);e2.emit('data',{v:ROOM_VERSION,type:'submit',roundId:'old',answer});await until(()=>e2.sent.some(m=>m.status==='stale-round'));assert.equal(h.round.submissions.erin,null);e2.emit('data',{v:ROOM_VERSION,type:'submit',roundId:id,answer});await until(()=>h.round.submissions.erin===answer);
  }finally{h.dispose();}
+});
+
+test('all 16 formats traverse authenticated room transport for all three seats, echo request IDs, and retain privacy',async()=>{
+ const {createLiveTrivia}=await import('./live-trivia.mjs');const {MODE_NAMES}=await import('./trivia-data.js');const h=harness();try{
+ const tab=h.tab('/rg/console/');await tab.room.ready;const invites=tab.invites();tab.click('start');await flush();h.peers[0].emit('open');await flush();
+ const players=['kaz','faroe','erin'];const conns=await Promise.all(players.map(p=>join(h.peers[0],invites[p])));
+ const cases={'choice-text':{selected:[0]},'choice-image':{selected:[0]},'choice-image-wide':{selected:[1]},'image-grid':{selected:[1]},'short-answer':{text:'answer'},'number-grid':{guess:'1123',id:'a'},'number-stepper':{guess:'25',id:'b'},'memory-number':{guess:'25',id:'c'},'draw-over-image':{strokes:[[[0,1000],[1000,0]]]},'compose-image':{placements:[{item:0,at:[500,500]}]},'categorize-images':{groups:[0,1]},'timeline':{order:[1,0]},'match-pairs':{matches:[0,1]},'image-sequence':{text:'answer'},'text-sequence':{text:'answer'},'video':{text:'answer'}};
+ for(const kind of Object.keys(MODE_NAMES)){
+  h.round=createLiveTrivia({round:'25',difficulty:5,format:{mode:kind,reorder:true},content:{question:'Question?',options:[{label:'A',correct:true},{label:'B'}],items:[{label:'First'},{label:'Second'}],pairs:[{left:'A',right:'B'},{left:'C',right:'D'}],categories:['X','Y'],numberCode:'1123',numberValue:25,guessLimit:2,acceptedAnswers:['host-only']},cards:{}});
+  const id=h.round.id;
+  const answers=players.map(p=>JSON.stringify(cases[kind].text?{text:`${p}-private`}:cases[kind]));
+  for(const [i,c] of conns.entries())c.emit('data',{v:ROOM_VERSION,type:'submit',roundId:id,requestId:`req-${i}`,answer:answers[i]});
+  await until(()=>conns.every((c,i)=>c.sent.some(m=>m.type==='ack'&&m.roundId===id&&m.requestId===`req-${i}`&&m.status==='accepted')));
+  for(const [i,c] of conns.entries()){
+   assert.equal(h.round.submissions[players[i]],answers[i]);const view=c.sent.filter(m=>m.type==='round').at(-1).round;assert.equal(view.savedAnswer,answers[i]);assert.ok(!('secret'in view));assert.ok(!('submissions'in view));assert.ok(!JSON.stringify(view).includes('host-only'));if(cases[kind].text)for(const p of players.filter(p=>p!==players[i]))assert.ok(!JSON.stringify(view).includes(`${p}-private`));
+  }
+ }
+ }finally{h.dispose();await flush();}
+});
+test('storage failure is never confirmed as saved; same request can be retried after recovery',async()=>{
+ const h=harness();try{const t=h.tab('/rg/console/');await t.room.ready;t.click('start');await flush();h.peers[0].emit('open');await flush();const invite=t.invites().kaz;const c=await join(h.peers[0],invite);const answer=h.round.hands.kaz[0],id=h.round.id;const msg={v:ROOM_VERSION,type:'submit',roundId:id,requestId:'retry-me',answer};h.failSave=true;c.emit('data',msg);await until(()=>c.sent.some(m=>m.type==='ack'&&m.status==='storage-error'));assert.equal(h.round.submissions.kaz,null);assert.equal(c.sent.filter(m=>m.type==='round').at(-1).round.submitted,false);h.failSave=false;c.emit('data',msg);await until(()=>c.sent.some(m=>m.type==='ack'&&m.status==='accepted'&&m.requestId==='retry-me'));assert.equal(h.round.submissions.kaz,answer);assert.equal(c.sent.filter(m=>m.type==='round').at(-1).round.savedAnswer,answer);}
+ finally{h.dispose();await flush();}
 });

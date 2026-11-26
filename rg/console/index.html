@@ -7,16 +7,17 @@
     <meta name="theme-color" content="#090b0a">
     <link rel="canonical" href="https://kazvt.com/rg/console/">
     <title>RG Console</title>
-    <link rel="stylesheet" href="/rg/console/console.css?v=host-security-20261126-v1">
+    <link rel="stylesheet" href="/rg/console/console.css?v=submission-audit-20261126-v1">
+    <link rel="stylesheet" href="/ramblegamble/trivia-live.css?v=submission-audit-20261126-v1">
     <link rel="stylesheet" href="/ramblegamble/host-access.css?v=host-toggle-20261126-v1">
-    <script type="module" src="/ramblegamble/host-access.mjs?v=bottom-column-arrows-20261126-v1"></script>
+    <script type="module" src="/ramblegamble/host-access.mjs?v=submission-audit-20261126-v1"></script>
   </head>
   <body>
     <main class="terminal" aria-label="Ramble Gamble points console">
       <header class="terminal-header"><span>RG CONSOLE</span><span>POINTS / SMEEMO / ROOM</span></header>
       <div class="terminal-host-lock"><button type="button" data-host-lock>LOCK HOST</button> <button type="button" data-host-policy-download>DOWNLOAD SITE LOCK</button></div>
       <details id="console-card-room" class="terminal-room">
-        <summary>PRIVATE CARD ROOM / READER</summary>
+        <summary>PRIVATE PLAYER ROOM / READER</summary>
         <p data-room-status role="status">Preparing shared room…</p>
         <button type="button" data-room-start>START ONLINE ROOM</button>
         <button type="button" data-room-stop>STOP ONLINE ROOM</button>
@@ -26,6 +27,7 @@
         <label>Offline answer packet<textarea data-room-packet rows="2"></textarea></label>
         <button type="button" data-room-import>IMPORT ANSWER</button>
       </details>
+      <details id="console-answers" class="terminal-room"><summary>PRIVATE ANSWERS</summary><div id="console-answer-content"></div></details>
       <section class="terminal-output" id="terminal-output" role="log" aria-live="polite" aria-relevant="additions text"></section>
       <form class="terminal-form" id="terminal-form" autocomplete="off">
         <label for="terminal-input" aria-hidden="true">&gt;</label>

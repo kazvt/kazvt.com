@@ -347,5 +347,5 @@ test("both VIP surfaces have neutral fallback colors and Dice does not blend wit
   const gate = readFileSync(new URL("./host-access.mjs", import.meta.url), "utf8");
   const html = readFileSync(new URL("../rg/index.html", import.meta.url), "utf8");
   assert.match(gate, /dice-mode\.js\?v=expanded-foley-20261126-v1/);
-  assert.match(html, /host-access\.mjs\?v=bottom-column-arrows-20261126-v1/);
+  assert.match(html, /host-access\.mjs\?v=submission-audit-20261126-v1/);
 });

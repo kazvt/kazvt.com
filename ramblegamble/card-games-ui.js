@@ -1,7 +1,7 @@
-import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia } from "./live-trivia.mjs";
+import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia } from "./live-trivia.mjs?v=submission-audit-20261126-v1";
 import { activeCardStage, cardStageChange } from "./card-stage-state.mjs?v=wildcard-shared-20261126-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
-import { mountCardRoom } from "./card-room-host.mjs?v=live-trivia-20261126-v1";
+import { mountCardRoom } from "./card-room-host.mjs?v=submission-audit-20261126-v1";
 import { foley } from "./game-foley.mjs?v=expanded-foley-20261126-v1";
 import {
   CARD_GAME_CATEGORIES,

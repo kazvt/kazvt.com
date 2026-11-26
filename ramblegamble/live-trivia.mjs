@@ -55,6 +55,11 @@ export function createLiveTrivia({round,difficulty,format,content,cards,id=newTr
     reorder:mode==='timeline'&&Boolean(format.reorder),guessLimit:normalizeGuessLimit(content.guessLimit),imageVisible:content.imageVisible!==false,
     sequenceIndex:0,gridSize:Math.max(0,Math.min(128,Number(format.gridSize)||0)),imageAspect:text(format.imageAspect,30),columns:Math.max(0,Math.min(6,Number(format.columns)||0))};
   if(mode==='memory-number'&&!q.imageVisible)q.promptImage='';
+  if(CHOICE_MODES.includes(mode) && (!q.options.some(o=>o.label||o.image) || q.requiredCount>q.options.length))throw Error('Add enough answer choices first.');
+  if(['timeline','categorize-images','compose-image','image-sequence','text-sequence'].includes(mode) && !q.items.some(o=>o.label||o.image))throw Error('Add the question items first.');
+  if(mode==='categorize-images'&&!q.categories.some(v=>v.trim()))throw Error('Add category names first.');
+  if(mode==='match-pairs'&&(!q.left.length||q.right.some(v=>!v.trim())||q.left.some(v=>!v.label&&!v.image)))throw Error('Complete the matching pairs first.');
+
   if(!q.prompt&&!q.subtitle&&!q.promptImage&&!q.backgroundImage&&!q.videoUrl&&!list(content.options).some(o=>o?.label||o?.image)&&!q.items.some(o=>o.label||o.image)&&!q.left.length&&!(mode==="memory-number"&&media(content.promptImage))&&!(mode==="number-grid"&&/^\d{4}$/.test(text(content.numberCode,4))))throw Error('No authored question for that round/difficulty.');
   const secret={correct:list(content.options).flatMap((o,i)=>o?.correct?[i]:[]),accepted:list(content.acceptedAnswers).map(v=>text(v)),numberCode:text(content.numberCode,4),numberValue:Number(content.numberValue),rightOrder,itemOrder,memoryImage:mode==="memory-number"?media(content.promptImage):""};
   if(mode==='number-grid'&&!/^\d{4}$/.test(secret.numberCode))throw Error('Set the four-digit secret first.');
@@ -69,7 +74,7 @@ export function publicQuestion(round) {
   return q;
 }
 export function publicTriviaRound(round,player) {
-  return {id:round.id,mode:'trivia',phase:round.phase,prompt:round.prompt,question:publicQuestion(round),submitted:Boolean(round.submissions[player]),attempts:round.attempts[player]||[]};
+  return {id:round.id,mode:'trivia',phase:round.phase,prompt:round.prompt,question:publicQuestion(round),submitted:Boolean(round.submissions[player]),savedAnswer:round.submissions[player]||null,attempts:round.attempts[player]||[]};
 }
 const index=(x,n)=>Number.isInteger(x)&&x>=0&&x<n;
 const unique=(a,n)=>Array.isArray(a)&&a.length<=n&&a.every(v=>index(v,n))&&new Set(a).size===a.length;
@@ -83,8 +88,8 @@ export function validTriviaAnswer(q,a) {
   if(k==='timeline'&&q.reorder)return unique(a.order,q.items.length)&&a.order.length===q.items.length&&q.items.length>0;
   if(k==='match-pairs')return unique(a.matches,q.right.length)&&a.matches.length===q.left.length&&q.left.length>0;
   if(k==='categorize-images')return Array.isArray(a.groups)&&a.groups.length===q.items.length&&a.groups.length>0&&a.groups.every(v=>index(v,q.categories.length));
-  if(k==='compose-image')return Array.isArray(a.placements)&&a.placements.length>0&&a.placements.length<=64&&a.placements.every(p=>index(p?.item,q.items.length)&&xy(p?.at));
-  if(k==='draw-over-image')return Array.isArray(a.strokes)&&a.strokes.length>0&&a.strokes.length<=80&&a.strokes.every(s=>Array.isArray(s)&&s.length>0&&s.length<=500&&s.every(xy));
+  if(k==='compose-image')return Array.isArray(a.placements)&&a.placements.length>0&&a.placements.length<=64&&a.placements.every(p=>p && Object.keys(p).every(k=>k==="item"||k==="at")&&index(p.item,q.items.length)&&xy(p.at));
+  if(k==='draw-over-image')return Array.isArray(a.strokes)&&a.strokes.length>0&&a.strokes.length<=80&&a.strokes.reduce((n,s)=>n+(Array.isArray(s)?s.length:0),0)<=1400&&a.strokes.every(s=>Array.isArray(s)&&s.length>0&&s.length<=500&&s.every(xy));
   return typeof a.text==='string'&&a.text.trim().length>0&&a.text.length<=800;
 }
 export function acceptTriviaAnswer(round,player,raw) {

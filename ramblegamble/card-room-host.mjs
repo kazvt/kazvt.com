@@ -1,5 +1,6 @@
+import { validRequestId } from "./card-room-delivery.mjs?v=submission-audit-20261126-v1";
 import { loadHostIdentity, nonce, validNonce, transcript, channelBinding, signHost, verifySeat } from "./card-room-auth.mjs?v=host-security-20261126-v1";
-import { ROOM_VERSION, createRoom, validRoom, playerRound, encodePacket, decodePacket, acceptSubmission, isPlayer, randomToken } from "./card-room-protocol.mjs?v=live-trivia-20261126-v1";
+import { ROOM_VERSION, createRoom, validRoom, playerRound, encodePacket, decodePacket, acceptSubmission, isPlayer, randomToken } from "./card-room-protocol.mjs?v=submission-audit-20261126-v1";
 import { loadPeer } from "./card-room-peer.mjs";
 import { CARD_GAME_PLAYERS } from "./card-games.mjs?v=scene-table-20261126-v1";
 import { electReader, withRoomSubmissionLock, ROOM_KEY, ENABLED_KEY, STATUS_KEY } from "./card-room-election.mjs";
@@ -33,7 +34,7 @@ export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/
       const offline = new URL(url); const offlineFits = JSON.stringify(round).length < 40000; if (offlineFits) offline.hash = encodePacket({ ...envelope, round });
       const row = doc.createElement('div');
       const link = doc.createElement('a'); link.href = url.href; link.target = '_blank'; link.rel = 'noopener noreferrer';
-      link.textContent = `${player.toUpperCase()} — ${enabled() && current?.connected?.includes(player) ? 'connected' : 'invite'}`;
+      link.textContent = `${player.toUpperCase()} — ${enabled() && current?.connected?.includes(player) ? 'connected' : 'offline'}${round?.submitted ? ' · saved' : round?.phase === 'submissions' ? ' · waiting' : ''}`;
       function copyButton(label, value, message) {
         const copy = doc.createElement('button'); copy.type = 'button'; copy.textContent = label;
         copy.addEventListener('click', async () => {
@@ -65,7 +66,7 @@ export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/
     refreshStatus();
   }
   function sendState(conn, player, force=false) {
-    if (leader && enabled() && conn.open && room && read(ROOM_KEY)?.id === room.id && read(ROOM_KEY)?.tokens?.[player] === room.tokens[player]) { try { const payload={v:ROOM_VERSION,type:"round",round:playerRound(getRound(),player)};const key=JSON.stringify(payload);if(force||sentStates.get(conn)!==key){conn.send(payload);sentStates.set(conn,key);} } catch {} }
+    if (leader && enabled() && conn.open && room && read(ROOM_KEY)?.id === room.id && read(ROOM_KEY)?.tokens?.[player] === room.tokens[player]) { try { const payload={v:ROOM_VERSION,type:"round",round:playerRound(getRound(),player)};const key=JSON.stringify(payload);if(force||sentStates.get(conn)!==key){conn.send(payload);sentStates.set(conn,key);} } catch { try { conn.close(); } catch {} } }
   }
   function publish() {
     refreshLinks();
@@ -115,11 +116,11 @@ export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/
           const previous=clients.get(identity); clients.set(identity,conn); if(previous && previous!==conn) previous.close();
           report('Online. Share private invites.'); publish(); return;
         }
-        if (phase !== 'joined' || !current() || message.type !== 'submit') { conn.close(); return; }
-        const submission={v:ROOM_VERSION,type:'submit',room:room.id,player:identity,token:seatToken,roundId:message.roundId,answer:message.answer};
+        if (phase !== 'joined' || !current() || message.type !== 'submit' || typeof message.roundId!=='string' || message.roundId.length>160 || (message.requestId!==undefined&&!validRequestId(message.requestId))) { conn.close(); return; }
+        const submission={v:ROOM_VERSION,type:'submit',room:room.id,player:identity,token:seatToken,roundId:message.roundId,answer:message.answer,requestId:message.requestId};
         let result;
         try { result=await accept(submission,current); } catch { result='storage-error'; }
-        if(current()) { try { conn.send({v:ROOM_VERSION,type:'ack',roundId:submission.roundId,status:result}); } catch {} sendState(conn,identity,true); }
+        if(current()) { try { conn.send({v:ROOM_VERSION,type:'ack',roundId:submission.roundId,...(submission.requestId===undefined?{}:{requestId:submission.requestId}),status:result}); } catch {} sendState(conn,identity,true); }
       } catch { conn.close(); }
     });
     function cleanup() {

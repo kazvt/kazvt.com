@@ -7,7 +7,7 @@ const hostKey=(await generateHostIdentity()).publicKey;
 const message = (room, round, player, answer) => ({v:ROOM_VERSION,room:room.id,token:room.tokens[player],type:'submit',player,roundId:round.id,answer});
 test('private player snapshots omit other hands, answers, votes and decks',()=>{
  const round=createRedHandedRound(Array.from({length:20},(_,i)=>`card ${i}`),['prompt']);
- const view=playerRound(round,'kaz'); assert.deepEqual(view.hand,round.hands.kaz); assert.equal(view.hand.length,5); assert.deepEqual(Object.keys(view).sort(),['hand','id','mode','phase','prompt','submitted']); assert.equal(playerRound(round,'unknown'),null);
+ const view=playerRound(round,'kaz'); assert.deepEqual(view.hand,round.hands.kaz); assert.equal(view.hand.length,5); assert.deepEqual(Object.keys(view).sort(),['hand','id','mode','phase','prompt','savedAnswer','submitted']); assert.equal(playerRound(round,'unknown'),null);
 });
 test('three authenticated remote players are independently accepted and anonymously revealed only at three',()=>{
  const room=createRoom(hostKey); let round=createQuiplashRound(['Question']); assert.ok(validRoom(room)); assert.equal(new Set(Object.values(room.tokens)).size,3);

@@ -16,7 +16,7 @@ for(const kind of Object.keys(MODE_NAMES))test(`${kind}: private projection and 
  const a=answerFor[kind];assert.ok(validTriviaAnswer(p.question,a));const result=submit(r,'kaz',a);assert.equal(result.status,'accepted');assert.ok(result.round.submissions.kaz);assert.equal(result.round.submissions.faroe,null);assert.equal(publicTriviaRound(result.round,'faroe').submitted,false);assert.equal(submit(result.round,'kaz',a).status,'accepted');assert.equal(submit({...r,phase:'closed'},'kaz',a).status,'closed');assert.equal(submit(r,'kaz',{...a,secret:'extra'}).status,'invalid-answer');
 });
 test('all 180 authored round/tier structures produce correct modes, including round 25 difficulty 5',()=>{
- for(let n=1;n<=36;n++)for(let d=1;d<=5;d++){const round=String(n).padStart(2,'0'),format=resolveRoundFormat(round,d);const r=createLiveTrivia({round,difficulty:d,format,content,cards,id:`${round}-${d}`});assert.equal(r.question.kind,format.mode);assert.equal(r.question.difficulty,d);}
+ for(let n=1;n<=36;n++)for(let d=1;d<=5;d++){const round=String(n).padStart(2,'0'),format=resolveRoundFormat(round,d);const r=createLiveTrivia({round,difficulty:d,format,content:{...content,options:Array.from({length:Math.max(2,format.requiredCorrectCount||0)},(_,i)=>({label:`Choice ${i}`}))},cards,id:`${round}-${d}`});assert.equal(r.question.kind,format.mode);assert.equal(r.question.difficulty,d);}
  assert.equal(resolveRoundFormat('25',5).mode,'short-answer');
 });
 test('sequence snapshot never sends future slides; memory image hides without revealing target',()=>{
@@ -44,4 +44,10 @@ test('console and scene routing preserve separate staff actions and roulette pla
 });
 test('existing authenticated seat protocol rejects unauthorized and stale trivia without leaking answers',async()=>{
  const identity=await generateHostIdentity(),room=createRoom(identity.publicKey);let r=make('short-answer');const m={v:ROOM_VERSION,type:'submit',room:room.id,player:'kaz',token:room.tokens.kaz,roundId:r.id,answer:JSON.stringify({text:'private response'})};assert.equal(acceptSubmission(room,r,{...m,token:room.tokens.erin}).status,'unauthorized');assert.equal(acceptSubmission(room,r,{...m,roundId:'old'}).status,'stale-round');const result=acceptSubmission(room,r,m);assert.equal(result.status,'accepted');assert.equal(playerRound(result.round,'kaz').submitted,true);assert.ok(!JSON.stringify(playerRound(result.round,'erin')).includes('private response'));
+});
+test('rejects unsendable incomplete authored activities and nested placement metadata',()=>{
+ assert.throws(()=>make('choice-text',{options:[]}),/answer choices/);
+ assert.throws(()=>make('compose-image',{items:[]}),/question items/);
+ assert.throws(()=>make('match-pairs',{pairs:[{left:'A',right:''}]}),/matching pairs/);
+ assert.equal(submit(make('compose-image'),'kaz',{placements:[{item:0,at:[10,20],extra:'no'}]}).status,'invalid-answer');
 });

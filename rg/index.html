@@ -9,8 +9,8 @@
     <title>Ramble Gamble - kazvt</title>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
     <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=vip-black-liquid-20261126-v1">
-    <link rel="stylesheet" href="/ramblegamble/host-console.css?v=scene-table-20261126-v1">
-    <link rel="stylesheet" href="/ramblegamble/trivia-live.css?v=live-trivia-20261126-v1">
+    <link rel="stylesheet" href="/ramblegamble/host-console.css?v=submission-audit-20261126-v1">
+    <link rel="stylesheet" href="/ramblegamble/trivia-live.css?v=submission-audit-20261126-v1">
     <link rel="stylesheet" href="/ramblegamble/card-games.css?v=arcade-framing-20261126-v1">
     <script type="importmap">
       {
@@ -22,7 +22,7 @@
       }
     </script>
     <link rel="stylesheet" href="/ramblegamble/host-access.css?v=host-toggle-20261126-v1">
-    <script type="module" src="/ramblegamble/host-access.mjs?v=bottom-column-arrows-20261126-v1"></script>
+    <script type="module" src="/ramblegamble/host-access.mjs?v=submission-audit-20261126-v1"></script>
   </head>
   <body class="ramble-page" data-theme="p2">
     <main class="rg-preview" id="rg-preview">
@@ -212,14 +212,14 @@
             <p class="rg-import-status" id="rg-import-status" role="status" aria-live="polite">No file selected.</p>
             <pre class="rg-import-preview" id="rg-import-preview" hidden></pre>
           </section>
-          <section class="rg-client-transfer" aria-labelledby="rg-client-transfer-title">
+          <details class="rg-client-transfer" aria-labelledby="rg-client-transfer-title"><summary>OFFLINE FILE FALLBACK</summary>
             <div class="rg-client-transfer-heading">
-              <div><h3 id="rg-client-transfer-title">PLAYER HANDOFF</h3><p>Send the task file to players. They return an answer file for import here.</p></div>
-              <span class="rg-client-transfer-badge">CLIENT-SIDE</span>
+              <div><h3 id="rg-client-transfer-title">OFFLINE TASKS</h3><p>For live play, use PRESENT and private invitations.</p></div>
+              <span class="rg-client-transfer-badge">OFFLINE</span>
             </div>
             <div class="rg-client-task-row">
               <span id="rg-client-task-status" role="status" aria-live="polite">Choose a sort, picture-placement, or drawing task.</span>
-              <a class="rg-secondary-button rg-client-open-link" id="rg-client-open-link" href="/rg/sort3/" target="_blank" rel="noopener" hidden>OPEN PLAYER PAGE</a>
+              <a class="rg-secondary-button rg-client-open-link" id="rg-client-open-link" href="/rg/sort3/" target="_blank" rel="noopener" hidden>OPEN OFFLINE PAGE</a>
               <button class="rg-secondary-button" id="rg-client-export-task" type="button" disabled>EXPORT TASK .JSON</button>
             </div>
             <div class="rg-client-import-row">
@@ -232,7 +232,7 @@
             <pre class="rg-client-import-preview" id="rg-client-import-preview" hidden></pre>
             <div class="rg-client-submissions" id="rg-client-submissions" aria-label="Imported player answers"></div>
             <details class="rg-client-transfer-help"><summary>HOW THE HANDOFF WORKS</summary><p>Export the task JSON and give it to the players. They open its matching player page, load the task, choose their name, and download an answer JSON. Import those answer files here. No answers are sent automatically; this page uses no server.</p></details>
-          </section>
+          </details>
           <section class="rg-question-bank" aria-labelledby="rg-question-bank-title">
             <div class="rg-question-bank-heading">
               <div><h3 id="rg-question-bank-title">SESSION QUESTION BANK</h3><p>Questions here are drawn at random by the wheel. They last for this browser tab's session.</p></div>

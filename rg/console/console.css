@@ -67,3 +67,5 @@ body {
 .terminal-host-lock button {font:inherit;font-size:12px;color:#b4ff9b;background:#101a12;border:1px solid #426548;padding:4px 7px;cursor:pointer;}
 .terminal-host-lock button:focus-visible {outline:2px solid #b4ff9b;outline-offset:2px;}
 .terminal-host-lock button[hidden] {display:none!important;}
+
+#console-answers{max-height:45dvh} #console-answer-content .rg-live-response{border-color:#35543a;text-shadow:none} #console-answer-content .rg-live-artboard{max-height:none;width:min(100%,360px)} #console-answer-content .rg-live-image{max-height:90px} #console-answer-content p{white-space:pre-wrap;overflow-wrap:anywhere}
