@@ -158,6 +158,7 @@
 
         <fieldset class="mb-4">
           <legend class="h5">Surface</legend>
+          <div class="mb-3"><label class="form-label w-100" for="opacity">Opacity <code>opacity</code><output class="float-end" id="opacityValue"></output></label><input class="form-range" id="opacity" name="opacity" type="range" min="0" max="1" step="0.01" value="1"></div>
           <div class="mb-3"><label class="form-label w-100" for="gloss">Gloss strength <code>gloss</code><output class="float-end" id="glossValue"></output></label><input class="form-range" id="gloss" name="gloss" type="range" min="0" max="1.8" step="0.01" value="1"></div>
           <div class="mb-3"><label class="form-label w-100" for="sharpness">Highlight sharpness <code>sharpness</code><output class="float-end" id="sharpnessValue"></output></label><input class="form-range" id="sharpness" name="sharpness" type="range" min="0" max="100" step="1" value="85"></div>
           <div class="mb-3"><label class="form-label w-100" for="blur">Blur <code>blur</code><output class="float-end" id="blurValue"></output></label><input class="form-range" id="blur" name="blur" type="range" min="0" max="8" step="0.1" value="0"><div class="form-text">Output-space blur; zero keeps folds crisp.</div></div>
@@ -187,7 +188,7 @@
       const defaults = {
         colorLow: "#031f16", colorMid: "#076831", colorHigh: "#84c226",
         viscosity: 50, speed: 1, foldSize: 1, zoom: 1, wrapEdges: false, heightRange: 1, relief: 1.15,
-        detail: 0.12, gloss: 1, sharpness: 85, blur: 0, saturation: 1,
+        detail: 0.12, opacity: 1, gloss: 1, sharpness: 85, blur: 0, saturation: 1,
         contrast: 1, brightness: 0, quality: 1
       };
       const presets = {
@@ -526,7 +527,7 @@
           viscosity: value => `${Math.round(value)}%`, speed: value => `${value.toFixed(2)}×`,
           foldSize: value => `${value.toFixed(2)}×`, zoom: value => `${value.toFixed(2)}×`,
           heightRange: value => `${value.toFixed(2)}×`, relief: value => `${value.toFixed(2)}×`,
-          detail: value => `${Math.round(value * 100)}%`, gloss: value => `${value.toFixed(2)}×`,
+          detail: value => `${Math.round(value * 100)}%`, opacity: value => `${Math.round(value * 100)}%`, gloss: value => `${value.toFixed(2)}×`,
           sharpness: value => `${Math.round(value)}%`, blur: value => `${value.toFixed(1)} px`,
           saturation: value => `${value.toFixed(2)}×`, contrast: value => `${value.toFixed(2)}×`,
           brightness: value => `${value > 0 ? "+" : ""}${value.toFixed(3)}`,
@@ -665,7 +666,7 @@
       }
       function updateAutomationValues(elapsedMs = automationElapsed) {
         if (!automationRanges.size) return;
-        let qualityIsAutomated = false, blurIsAutomated = false;
+        let qualityIsAutomated = false, blurIsAutomated = false, opacityIsAutomated = false;
         automationRanges.forEach((range, id) => {
           const input = controls[id];
           const animated = oscillatedValue(id, elapsedMs);
@@ -680,13 +681,14 @@
           }
           if (id === "quality") qualityIsAutomated = true;
           if (id === "blur") blurIsAutomated = true;
+          if (id === "opacity") opacityIsAutomated = true;
         });
         if (gl && qualityIsAutomated) {
           const rect = stage.getBoundingClientRect();
           const scale = Math.min(window.devicePixelRatio || 1, 1.25) * renderQuality();
           if (Math.max(2, Math.round(rect.width * scale)) !== canvas.width || Math.max(2, Math.round(rect.height * scale)) !== canvas.height) resize();
-          else if (blurIsAutomated) syncSurfaceEffects(rect);
-        } else if (blurIsAutomated && gl) {
+          else if (blurIsAutomated || opacityIsAutomated) syncSurfaceEffects(rect);
+        } else if ((blurIsAutomated || opacityIsAutomated) && gl) {
           syncSurfaceEffects(stage.getBoundingClientRect());
         }
       }
@@ -819,6 +821,7 @@
 
       function syncSurfaceEffects(rect = stage.getBoundingClientRect()) {
         const blur = value("blur");
+        canvas.style.opacity = String(value("opacity"));
         canvas.style.filter = blur > 0 ? `blur(${blur}px)` : "none";
         viewMargin = Math.min(0.45, (3 * blur) / Math.max(Math.min(rect.width, rect.height), 1));
         wrapMargin = controls.wrapEdges.checked ? viewMargin : 0;
@@ -1493,7 +1496,8 @@
       });
       function createStageCaptureCanvas(blur) {
         const width = canvas.width, height = canvas.height;
-        if (blur <= 0 && viewMargin === 0) return canvas;
+        const opacity = value("opacity");
+        if (blur <= 0 && viewMargin === 0 && opacity >= 1) return canvas;
         const scale = 1 / (1 - 2 * viewMargin);
         const cropX = viewMargin * width, cropY = viewMargin * height;
         const cropWidth = width - 2 * cropX, cropHeight = height - 2 * cropY;
@@ -1522,6 +1526,7 @@
         context.fillStyle = getComputedStyle(stage).backgroundColor;
         context.fillRect(0, 0, width, height);
         if (blur > 0) context.filter = `blur(${blurRadius}px)`;
+        context.globalAlpha = opacity;
         context.drawImage(padded, -pad, -pad);
         return output;
       }
