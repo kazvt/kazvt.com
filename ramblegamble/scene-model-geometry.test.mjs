@@ -213,3 +213,26 @@ test('the measured cabinet fits through the curtain opening and fully inside the
  function inside(x,z,t){const a=t.map(([xx,,zz])=>[xx,zz]);const signs=a.map((v,i)=>{const b=a[(i+1)%3];return (b[0]-v[0])*(z-v[1])-(b[1]-v[1])*(x-v[0]);});return signs.every(v=>v>=-1e-6)||signs.every(v=>v<=1e-6);}
  for(const x of [bounds.min.x,center,bounds.max.x])for(const z of [bounds.min.z-layout.retract,bounds.max.z-layout.retract])assert.ok(floorTris.some(t=>inside(x,z,t)),`floor supports ${x},${z}`);
 });
+
+test('roulette base and outer rim rest on the actual exterior floor without submerging the pocket surface',()=>{
+ const stage=model('rg_stage'),wheel=model('rg_roulette');
+ const exterior=stage.d.nodes[0];
+ const floorY=-.625;
+ const ground=nodePoints(stage,exterior).filter(p=>Math.abs(p[1]-floorY)<1e-5);
+ assert.ok(ground.some(p=>p[0]<11.811&&p[2]<-1.3716));
+ assert.ok(ground.some(p=>p[0]>11.811&&p[2]>4));
+ const rim=wheel.d.nodes.find(n=>n.name==='rim');
+ const pivot=wheel.d.nodes.find(n=>n.name==='wheel'&&n.children);
+ const moving=wheel.d.nodes.find(n=>n.name==='wheel'&&n.mesh!==undefined);
+ const rimY=box(nodePoints(wheel,rim)).min[1];
+ const wheelY=box(nodePoints(wheel,moving)).min[1]+pivot.translation[1];
+ assert.ok(Math.abs(rimY-wheelY)<1e-6,'outer rim underside meets the rotating assembly base');
+ const scale=.13,rigY=floorY-scale*Math.min(rimY,wheelY);
+ assert.ok(Math.abs(rigY+rimY*scale-floorY)<1e-7);
+ // Even at the lowest existing visual wheel wobble, the pocket remains above ground.
+ assert.ok(rigY+(pivot.translation[1]+1.1-.055)*scale>floorY);
+ const js=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
+ assert.match(js,/rouletteRig\.position\.set\(\s*recess\.x - rouletteLocalCenter\.x,\s*EXTERIOR_FLOOR\.y - rouletteLocalBounds\.min\.y,\s*recess\.z - rouletteLocalCenter\.z/);
+ assert.match(js,/slotRig\.position\.set\(\s*slotTargetCenter\.x - slotCenter\.x,\s*floorY - slotBounds\.min\.y/);
+ assert.match(js,/rg_roulette\.gltf\?v=roulette-ground-20261127-v1/);
+});

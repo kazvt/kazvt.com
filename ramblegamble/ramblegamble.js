@@ -8,7 +8,7 @@ import { createShowFX } from "./show-fx.mjs?v=freecam-depth-20261127-v1";
 import { CHARACTER_SOURCE_SIZE, CHARACTER_YAW_LIMIT, characterYaw, standingCharacterPose, projectCharacterQuad, pointInCharacterQuad } from "./character-billboards.mjs?v=fugi-stable-20261127-v1";
 import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
-import { createExteriorMist } from "./exterior-mist.mjs?v=crowd-mist-20261127-v1";
+import { createExteriorMist, EXTERIOR_FLOOR } from "./exterior-mist.mjs?v=crowd-mist-20261127-v1";
 import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=standing-characters-20261127-v1";
 import { foley } from "./game-foley.mjs?v=theatre-20261127-v1";
 import {
@@ -1559,7 +1559,7 @@ import {
     const recess = rouletteRecessCenter(radius);
     rouletteRig.position.set(
       recess.x - rouletteLocalCenter.x,
-      floorY - rouletteLocalBounds.min.y,
+      EXTERIOR_FLOOR.y - rouletteLocalBounds.min.y,
       recess.z - rouletteLocalCenter.z,
     );
     rouletteRig.updateMatrixWorld(true);
@@ -2852,7 +2852,7 @@ import {
       const loader = new GLTFLoader();
       const [stageGltf, rouletteGltf, slotsGltf] = await Promise.all([
         loader.loadAsync("/ramblegamble/assets/provided/rg_stage.gltf?v=all-curtain-20261127-v1"),
-        loader.loadAsync("/ramblegamble/assets/provided/rg_roulette.gltf"),
+        loader.loadAsync("/ramblegamble/assets/provided/rg_roulette.gltf?v=roulette-ground-20261127-v1"),
         loader.loadAsync("/ramblegamble/assets/provided/rg_slots.gltf"),
       ]);
 
