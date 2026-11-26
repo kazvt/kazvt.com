@@ -1,6 +1,6 @@
 import { activeCardStage, cardStageChange } from "./card-stage-state.mjs?v=wildcard-shared-20261126-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
-import { mountCardRoom } from "./card-room-host.mjs?v=reader-election-20261126-v1";
+import { mountCardRoom } from "./card-room-host.mjs?v=host-security-20261126-v1";
 import { foley } from "./game-foley.mjs?v=slot-foley-20261126-v3";
 import {
   CARD_GAME_CATEGORIES,

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="p2">
+<html data-rg-host-locked lang="en" data-theme="p2">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -7,12 +7,14 @@
     <meta name="theme-color" content="#090b0a">
     <link rel="canonical" href="https://kazvt.com/rg/console/">
     <title>RG Console</title>
-    <link rel="stylesheet" href="/rg/console/console.css?v=reader-election-20261126-v1">
-    <script type="module" src="/rg/console/console.js?v=reader-election-20261126-v1"></script>
+    <link rel="stylesheet" href="/rg/console/console.css?v=host-security-20261126-v1">
+    <link rel="stylesheet" href="/ramblegamble/host-access.css?v=host-security-20261126-v1">
+    <script type="module" src="/ramblegamble/host-access.mjs?v=host-security-20261126-v1"></script>
   </head>
   <body>
     <main class="terminal" aria-label="Ramble Gamble points console">
       <header class="terminal-header"><span>RG CONSOLE</span><span>POINTS / SMEEMO / ROOM</span></header>
+      <div class="terminal-host-lock"><button type="button" data-host-lock>LOCK HOST</button> <button type="button" data-host-policy-download>DOWNLOAD SITE LOCK</button></div>
       <details id="console-card-room" class="terminal-room">
         <summary>PRIVATE CARD ROOM / READER</summary>
         <p data-room-status role="status">Preparing shared room…</p>
@@ -20,6 +22,7 @@
         <button type="button" data-room-stop>STOP ONLINE ROOM</button>
         <p>Private invitations — do not show on stream. Either host page can receive submissions.</p>
         <div data-room-links></div>
+        <button type="button" data-room-rotate>REPLACE ALL ROOM INVITATIONS</button>
         <label>Offline answer packet<textarea data-room-packet rows="2"></textarea></label>
         <button type="button" data-room-import>IMPORT ANSWER</button>
       </details>
@@ -29,5 +32,15 @@
         <input id="terminal-input" name="command" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" autofocus aria-label="Enter console command">
       </form>
     </main>
+    <section id="rg-host-gate" aria-labelledby="rg-host-lock-title">
+      <div class="rg-lock-panel"><h1 id="rg-host-lock-title">RAMBLE GAMBLE / HOST</h1>
+      <p data-host-description>Host controls require unlocking.</p>
+      <form method="post"><label>Host passphrase<input type="password" name="passphrase" disabled required maxlength="1024" autocomplete="current-password"></label>
+      <label data-confirm hidden>Confirm passphrase<input type="password" name="confirmation" maxlength="1024" disabled></label>
+      <label class="rg-lock-remember"><input type="checkbox" name="remember" checked> Remember this browser</label>
+      <button type="submit" disabled>UNLOCK HOST</button></form>
+      <p role="status" aria-live="polite"></p><p class="rg-lock-note">Local UI lock only; GitHub Pages serves public files. Contestants use their private player links.</p>
+      <noscript>JavaScript is required to unlock host controls.</noscript></div>
+    </section>
   </body>
 </html>

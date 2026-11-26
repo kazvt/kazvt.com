@@ -1,5 +1,5 @@
 import { withRoomSubmissionLock } from "/ramblegamble/card-room-election.mjs";
-import { mountCardRoom } from "/ramblegamble/card-room-host.mjs?v=reader-election-20261126-v1";
+import { mountCardRoom } from "/ramblegamble/card-room-host.mjs?v=host-security-20261126-v1";
 import {
   RG_CONTESTANTS,
   readPointScores,

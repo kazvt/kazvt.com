@@ -62,3 +62,8 @@ body {
 .terminal-room button:disabled { opacity: .5; }
 .terminal-room a { color: #b4ff9b; margin-right: 8px; }
 .terminal-room textarea { display: block; width: 95%; }
+
+.terminal-host-lock {display:flex;flex-wrap:wrap;gap:4px;padding:6px 0;border-bottom:1px solid #35543a;}
+.terminal-host-lock button {font:inherit;font-size:12px;color:#b4ff9b;background:#101a12;border:1px solid #426548;padding:4px 7px;cursor:pointer;}
+.terminal-host-lock button:focus-visible {outline:2px solid #b4ff9b;outline-offset:2px;}
+.terminal-host-lock button[hidden] {display:none!important;}

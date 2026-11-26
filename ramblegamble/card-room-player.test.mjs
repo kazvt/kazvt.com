@@ -1,0 +1,19 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {EventEmitter} from 'node:events';
+import {generateHostIdentity,nonce,transcript,channelBinding,signHost,verifySeat} from './card-room-auth.mjs';
+import {createRoom,ROOM_VERSION,encodePacket} from './card-room-protocol.mjs';
+const desc=x=>({sdp:`a=fingerprint:sha-256 ${Array(32).fill(x).join(':')}\r\n`});
+const until=async pred=>{for(let i=0;i<200;i++){if(pred())return;await new Promise(r=>setTimeout(r,5));}assert.fail('Timeout');};
+class Element {children=[];events={};value='';hidden=false;disabled=false;addEventListener(e,f){this.events[e]=f;}replaceChildren(){this.children=[];}append(...nodes){this.children.push(...nodes);}}
+async function harness(t,which){
+ const host=await generateHostIdentity(),room=createRoom(host.publicKey),invite={v:ROOM_VERSION,room:room.id,player:'kaz',token:room.tokens.kaz,hostKey:host.publicKey};
+ const el=new Map();const get=id=>{if(!el.has(id))el.set(id,new Element());return el.get(id);};
+ const values=new Map(),peers=[];class Conn extends EventEmitter{open=true;sent=[];peerConnection={localDescription:desc('ab'),remoteDescription:desc('cd')};send(m){this.sent.push(m);}}
+ class Peer extends EventEmitter{constructor(){super();peers.push(this);this.conn=new Conn();}connect(){return this.conn;}destroy(){this.destroyed=true;this.conn.open=false;}}
+ const globals={document:{getElementById:get,createElement:()=>new Element(),querySelector:()=>null},location:{hash:'#'+encodePacket(invite)},window:{addEventListener(){}},sessionStorage:{setItem:(k,v)=>values.set(k,v),getItem:k=>values.get(k)||null,removeItem:k=>values.delete(k)},Peer};
+ for(const [k,v] of Object.entries(globals)){const old=Object.getOwnPropertyDescriptor(globalThis,k);Object.defineProperty(globalThis,k,{value:v,writable:true,configurable:true});t.after(()=>old?Object.defineProperty(globalThis,k,old):delete globalThis[k]);}
+ await import(`./card-room-player.mjs?case=${which}`);await until(()=>peers.length===1);const peer=peers[0];peer.emit('open');peer.conn.emit('open');await until(()=>peer.conn.sent.length===1);const hello=peer.conn.sent[0];assert.equal(hello.type,'hello');assert.equal('token' in hello,false);assert.ok(!JSON.stringify(hello).includes(invite.token));
+ const fields={room:invite.room,player:invite.player,clientNonce:hello.clientNonce,hostNonce:nonce()};const text=transcript(fields,channelBinding(peer.conn,false));
+ return {host,invite,peer,conn:peer.conn,fields,text,get};
+}
+test('actual player sends proof only after validating host, then sends answer without reusable token',async t=>{const h=await harness(t,'valid');const sig=await signHost(h.host,h.text);h.conn.emit('data',{v:ROOM_VERSION,type:'challenge',...h.fields,signature:sig});await until(()=>h.conn.sent.length===2);assert.equal(h.conn.sent[1].type,'proof');assert.ok(await verifySeat(h.invite.token,h.text,h.conn.sent[1].proof));assert.ok(!JSON.stringify(h.conn.sent).includes(h.invite.token));h.conn.emit('data',{v:ROOM_VERSION,type:'round',round:{id:'round1',mode:'quiplash',phase:'submissions',prompt:'Question',submitted:false}});await until(()=>h.get('prompt').textContent==='Question');h.get('answer').value='A private answer';h.get('form').events.submit({preventDefault(){}});assert.deepEqual(h.conn.sent.at(-1),{v:ROOM_VERSION,type:'submit',roundId:'round1',answer:'A private answer'});h.conn.emit('data',{v:ROOM_VERSION,type:'ack',roundId:'round1',status:'accepted'});assert.equal(h.get('submission').textContent,'Answer received by host!');});
+test('actual player rejects fake host signature and sends no credential or answer',async t=>{const h=await harness(t,'fake');const attacker=await generateHostIdentity();h.conn.emit('data',{v:ROOM_VERSION,type:'challenge',...h.fields,signature:await signHost(attacker,h.text)});await until(()=>h.peer.destroyed);assert.equal(h.conn.sent.length,1);assert.match(h.get('connection').textContent,/could not be verified/);});

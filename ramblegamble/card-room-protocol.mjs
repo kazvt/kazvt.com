@@ -1,12 +1,13 @@
 import { CARD_GAME_PLAYERS, submitRoundAnswer } from "./card-games.mjs?v=scene-table-20261126-v1";
-export const ROOM_VERSION = 1;
+import { validPublicKey } from "./card-room-auth.mjs?v=host-security-20261126-v1";
+export const ROOM_VERSION = 2;
 export const isPlayer = p => CARD_GAME_PLAYERS.includes(p);
 export const randomToken = () => Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, "0")).join("");
-export function createRoom() {
-  return { id: `rg-${randomToken()}`, tokens: Object.fromEntries(CARD_GAME_PLAYERS.map(p => [p, randomToken()])) };
+export function createRoom(hostKey) {
+  return { hostKey, id: `rg-${randomToken()}`, tokens: Object.fromEntries(CARD_GAME_PLAYERS.map(p => [p, randomToken()])) };
 }
 export function validRoom(room) {
-  return /^rg-[a-f0-9]{32}$/.test(room?.id || "") && CARD_GAME_PLAYERS.every(p => /^[a-f0-9]{32}$/.test(room?.tokens?.[p] || ""));
+  return validPublicKey(room?.hostKey) && /^rg-[a-f0-9]{32}$/.test(room?.id || "") && CARD_GAME_PLAYERS.every(p => /^[a-f0-9]{32}$/.test(room?.tokens?.[p] || ""));
 }
 export function playerRound(round, player) {
   if (!isPlayer(player) || !round?.id || !["red-handed", "quiplash"].includes(round.mode)) return null;

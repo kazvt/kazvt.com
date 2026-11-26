@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="p2" class="ramble-document">
+<html data-rg-host-locked lang="en" data-theme="p2" class="ramble-document">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -20,10 +20,8 @@
         }
       }
     </script>
-    <script type="module" src="/ramblegamble/ramblegamble.js?v=vip-world-plane-20261126-v1"></script>
-    <script type="module" src="/ramblegamble/dice-mode.js?v=scene-table-20261126-v1"></script>
-    <script type="module" src="/ramblegamble/trivia-ui.js?v=wildcard-shared-20261126-v1"></script>
-    <script type="module" src="/ramblegamble/card-games-ui.js?v=wildcard-shared-20261126-v1"></script>
+    <link rel="stylesheet" href="/ramblegamble/host-access.css?v=host-security-20261126-v1">
+    <script type="module" src="/ramblegamble/host-access.mjs?v=host-security-20261126-v1"></script>
   </head>
   <body class="ramble-page" data-theme="p2">
     <main class="rg-preview" id="rg-preview">
@@ -64,6 +62,7 @@
       <div class="rg-ready-stack">
         <p class="rg-ready-title" id="rg-ready-title">READY...?</p>
         <button class="rg-menu-button rg-go-button" id="rg-go" type="button">GO!</button>
+        <button class="rg-menu-button" data-host-lock type="button">LOCK HOST</button>
       </div>
     </section>
 
@@ -91,6 +90,7 @@
         <nav class="rg-pause-actions" aria-label="Pause menu actions">
           <button class="rg-menu-button" id="rg-play" type="button">PLAY!</button>
           <button class="rg-menu-button" id="rg-controls-open" type="button">CONTROLS!</button>
+          <button class="rg-menu-button" data-host-lock type="button">LOCK HOST</button>
         </nav>
       </div>
     </section>
@@ -307,6 +307,7 @@
               <button type="button" class="rg-secondary-button" data-room-stop>STOP ONLINE ROOM</button>
               <p data-room-status role="status">Offline invitations ready; start online room for live answers.</p>
               <div data-room-links></div>
+        <button type="button" data-room-rotate>REPLACE ALL ROOM INVITATIONS</button>
               <details><summary>Offline fallback — import a private answer packet</summary><p>Use OFFLINE ROUND to send a fresh private round link to each player if live connection fails. Paste the player's returned packet below.</p><textarea data-room-packet aria-label="Private player packet" rows="3"></textarea><button type="button" class="rg-secondary-button" data-room-import>IMPORT ANSWER</button></details>
             </div>
           <section class="rg-card-private-entry" id="rg-card-private-entry" hidden>
@@ -332,5 +333,15 @@
         </section>
       </div>
     </dialog>
+    <section id="rg-host-gate" aria-labelledby="rg-host-lock-title">
+      <div class="rg-lock-panel"><h1 id="rg-host-lock-title">RAMBLE GAMBLE / HOST</h1>
+      <p data-host-description>Host controls require unlocking.</p>
+      <form method="post"><label>Host passphrase<input type="password" name="passphrase" disabled required maxlength="1024" autocomplete="current-password"></label>
+      <label data-confirm hidden>Confirm passphrase<input type="password" name="confirmation" maxlength="1024" disabled></label>
+      <label class="rg-lock-remember"><input type="checkbox" name="remember" checked> Remember this browser</label>
+      <button type="submit" disabled>UNLOCK HOST</button></form>
+      <p role="status" aria-live="polite"></p><p class="rg-lock-note">Local UI lock only; GitHub Pages serves public files. Contestants use their private player links.</p>
+      <noscript>JavaScript is required to unlock host controls.</noscript></div>
+    </section>
   </body>
 </html>
