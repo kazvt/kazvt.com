@@ -1,13 +1,14 @@
+import { fitSlotInteractionFrame, rouletteRecessCenter, ROULETTE_RECESS } from "./arcade-framing.mjs?v=arcade-framing-20261126-v1";
 import { foley } from "./game-foley.mjs?v=slot-foley-20261126-v3";
 import {
   resolvePointClickAction,
   resolvePointClickBack,
   resolvePointClickCursor,
-  resolvePointClickZone,
+  resolveSceneNavigationZone,
   resolveArcadeShortcut,
   resolveSlotContextCell,
   resolveHostContextAction,
-} from "./point-click-routing.js?v=live-trivia-20261126-v1";
+} from "./point-click-routing.js?v=arcade-framing-20261126-v1";
 import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
 import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-door-wall-target-20261120-v1";
 import { readPointScores, subscribePointScores, writePointScores } from "./points-store.mjs?v=points-console-20261120-v1";
@@ -89,18 +90,8 @@ import {
     // The back-wall recess in rg_stage.gltf spans x=9.14..14.48 at z=-6.10.
     // A small size increase matches the reference cabinet while staying inside the recess.
     slotBay: Object.freeze({ left: 9.14, right: 14.48, wallZ: -6.10, height: 2.52, widthScale: 1.08, clearance: 0.025 }),
-    // The raised stage's forward lip ends at z=0.06; keep the whole wheel
-    // footprint beyond it, rather than merely moving its center off the stage.
-    stageFrontZ: 0.06,
-    rouletteCenterX: 15.0,
+    // The roulette is placed against the actual recessed lip in world space.
     rouletteScale: 0.13,
-    rouletteClearance: 0.12,
-    // Ease the wheel back a fraction from the previous rightward move, then
-    // nudge it forward toward the recess; both offsets scale with the wheel.
-    rouletteRightOffsetDiameters: 0.55,
-    rouletteForwardOffsetDiameters: 0.22,
-    // Normalized canvas point at the center of the red marked floor area.
-    rouletteScreenAnchor: Object.freeze({ x: 0.60, y: 0.71 }),
   });
   const SKY_CONFIG = Object.freeze({
     radius: 260,
@@ -164,6 +155,7 @@ import {
   const slotReelImages = new Map();
   let selectedSlotBerry = "kazberry";
   let slotPlacementControls = [];
+  let slotFocusPoints = [];
   let slotBerryPicker = null;
   let slotHoverLine = null;
   let slotHoverCell = -1;
@@ -1173,16 +1165,18 @@ import {
       const distance = Math.max(1.45 / tan, 1.9 / (tan * Math.max(.5, aspect)));
       return {target,position:target.clone().add(new THREE.Vector3(0,0,distance))};
     }
-    const bounds = getViewBounds(view);
+    const bounds = view.kind === "slot" && slotFocusPoints.length
+      ? new THREE.Box3().setFromPoints(slotFocusPoints)
+      : getViewBounds(view);
     if (bounds.isEmpty()) return null;
     const target = bounds.getCenter(new THREE.Vector3());
     // The Dice entrance is on the room's right-hand wall, so approach it from
     // inside the room along the X axis instead of aiming at the rear wall.
-    const yaw = (view.kind === "dice-door" ? -Math.PI / 2 : REFERENCE_START_VIEW.yaw) - view.look * 0.42;
+    const yaw = (view.kind === "dice-door" ? -Math.PI / 2 : view.kind === "slot" ? -0.08 : REFERENCE_START_VIEW.yaw) - view.look * 0.42;
     // The roulette interaction is best inspected from above, like looking down
     // at a real table. Keep the room and every other close-up at the authored angle.
     // Preserve the reference's elevated oblique view instead of a near-vertical map view.
-    const elevation = view.kind === "roulette" ? 0.86 : view.kind === "card-table" ? 0.72 : REFERENCE_START_VIEW.elevation;
+    const elevation = view.kind === "roulette" ? 0.86 : view.kind === "card-table" ? 0.72 : view.kind === "slot" ? 0.14 : REFERENCE_START_VIEW.elevation;
     const horizontal = Math.sqrt(1 - elevation * elevation);
     const direction = new THREE.Vector3(
       Math.sin(yaw) * horizontal,
@@ -1192,6 +1186,16 @@ import {
     const worldUp = new THREE.Vector3(0, 1, 0);
     const right = new THREE.Vector3().crossVectors(worldUp, direction).normalize();
     const viewUp = new THREE.Vector3().crossVectors(direction, right).normalize();
+    if (view.kind === "slot" && slotFocusPoints.length) {
+      const points = slotFocusPoints.map(point => {
+        const relative = point.clone().sub(target);
+        return { x: relative.dot(right), y: relative.dot(viewUp), z: relative.dot(direction) };
+      });
+      const height = Math.max(1, preview.clientHeight);
+      const frame = fitSlotInteractionFrame(points, { width: height * aspect, height, fov: camera.fov, near: camera.near });
+      target.addScaledVector(right, frame.shiftX).addScaledVector(viewUp, frame.shiftY);
+      return { target, position: target.clone().addScaledVector(direction, frame.distance) };
+    }
     const wideComposition = view.kind === "overview"
       ? THREE.MathUtils.smoothstep(aspect, 1, REFERENCE_START_VIEW.wideAspect)
       : 0;
@@ -1229,6 +1233,29 @@ import {
       * (view.kind === "overview" ? 1.14 : view.kind === "card-table" ? 1.12 : 1.18)
       * overviewDistanceScale;
     return { target, position: target.clone().addScaledVector(direction, distance) };
+  }
+
+  function captureSlotFocusPoints() {
+    const { left, right, top, bottom } = SLOT_DISPLAY_PIXELS;
+    const points = [slotWorldPoint(left, top), slotWorldPoint(left, bottom),
+      slotWorldPoint(right, top), slotWorldPoint(right, bottom)];
+    // Include the full arrow footprints, not merely their centers.
+    for (const control of slotPlacementControls) {
+      const half = Math.max(control.worldWidth, control.worldHeight) * .6;
+      for (const x of [-half, half]) for (const y of [-half, half]) for (const z of [-half, half]) {
+        points.push(control.anchor.clone().add(new THREE.Vector3(x, y, z)));
+      }
+    }
+    // Keep the physical spin buttons and resting crank reachable. Cache once:
+    // a resize during a pull must not cause the camera to chase the moving arm.
+    for (const object of slotControlTargets.values()) {
+      const box = new THREE.Box3().setFromObject(object);
+      if (box.isEmpty()) continue;
+      for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) {
+        points.push(new THREE.Vector3(x, y, z));
+      }
+    }
+    slotFocusPoints = points;
   }
 
   function getViewBounds(view) {
@@ -1369,57 +1396,6 @@ import {
     return bounds;
   }
 
-  function moveRouletteToMarkedFloorSpot(floorY) {
-    const { x, y } = ARCADE_REFERENCE_LAYOUT.rouletteScreenAnchor;
-    const rect = canvas.getBoundingClientRect();
-    if (!camera || !rouletteRig || rect.width < 1 || rect.height < 1) return;
-
-    pointer.set(x * 2 - 1, 1 - y * 2);
-    raycaster.setFromCamera(pointer, camera);
-    const ray = raycaster.ray;
-    if (Math.abs(ray.direction.y) < 1e-5) return;
-    const distance = (floorY - ray.origin.y) / ray.direction.y;
-    if (!Number.isFinite(distance) || distance <= 0) return;
-
-    // The red mark identifies the roulette unit's floor footprint, not its raised top.
-    const floorPoint = ray.at(distance, new THREE.Vector3());
-    const currentBounds = new THREE.Box3().setFromObject(rouletteRig);
-    const currentCenter = currentBounds.getCenter(new THREE.Vector3());
-    rouletteRig.position.x += floorPoint.x - currentCenter.x;
-    rouletteRig.position.z += floorPoint.z - currentCenter.z;
-    rouletteRig.updateMatrixWorld(true);
-
-    // Move along the close-up camera's horizontal screen-right axis. That maps
-    // the red-arrow direction into the room without changing the wheel's size
-    // or elevation. Then ease it forward toward the recess while preserving
-    // the stage clearance from the earlier off-stage requirement.
-    const wheelDiameter = rouletteRig.userData.referenceBounds?.diameter || 0;
-    const screenRightOffset = wheelDiameter * ARCADE_REFERENCE_LAYOUT.rouletteRightOffsetDiameters;
-    const yaw = REFERENCE_START_VIEW.yaw;
-    rouletteRig.position.x += Math.cos(yaw) * screenRightOffset;
-    rouletteRig.position.z -= Math.sin(yaw) * screenRightOffset;
-    rouletteRig.updateMatrixWorld(true);
-
-    const requiredStageGap = ARCADE_REFERENCE_LAYOUT.stageFrontZ + ARCADE_REFERENCE_LAYOUT.rouletteClearance;
-    const afterRightBounds = new THREE.Box3().setFromObject(rouletteRig);
-    const requestedForwardOffset = wheelDiameter * ARCADE_REFERENCE_LAYOUT.rouletteForwardOffsetDiameters;
-    const maxForwardOffset = Math.max(0, (afterRightBounds.min.z - requiredStageGap) / Math.cos(yaw));
-    const forwardOffset = Math.min(requestedForwardOffset, maxForwardOffset);
-    rouletteRig.position.x -= Math.sin(yaw) * forwardOffset;
-    rouletteRig.position.z -= Math.cos(yaw) * forwardOffset;
-    rouletteRig.updateMatrixWorld(true);
-
-    const placedBounds = new THREE.Box3().setFromObject(rouletteRig);
-    if (placedBounds.min.z < requiredStageGap - 0.001) {
-      throw new Error("The right-and-forward roulette adjustment crossed the stage clearance.");
-    }
-    rouletteRig.userData.referenceBounds = {
-      min: placedBounds.min.toArray(),
-      max: placedBounds.max.toArray(),
-      diameter: Math.max(placedBounds.getSize(new THREE.Vector3()).x, placedBounds.getSize(new THREE.Vector3()).z),
-    };
-  }
-
   function normalizeNodeName(name) {
     return String(name || "").toLowerCase().replace(/(?:[._]\d+)+$/, "");
   }
@@ -1434,8 +1410,8 @@ import {
     const tableBounds = new THREE.Box3().setFromObject(table);
     const floorY = tableBounds.min.y;
 
-    // Position the roulette by its transformed footprint. The supplied stage
-    // deck ends at z=0.06, so the nearest wheel edge gets a real clearance gap.
+    // Use the actual recessed stage edge, independent of viewport or camera.
+    // The outer/lower lip is closer to the wheel than the upper deck edge.
     rouletteRig.position.set(0, 0, 0);
     rouletteModel.scale.setScalar(ARCADE_REFERENCE_LAYOUT.rouletteScale);
     rouletteModel.position.set(0, 0, 0);
@@ -1444,15 +1420,17 @@ import {
     const rouletteLocalBounds = new THREE.Box3().setFromObject(rouletteModel);
     const rouletteLocalCenter = rouletteLocalBounds.getCenter(new THREE.Vector3());
     const rouletteBoundsSize = rouletteLocalBounds.getSize(new THREE.Vector3());
+    const radius = Math.max(rouletteBoundsSize.x, rouletteBoundsSize.z) / 2;
+    const recess = rouletteRecessCenter(radius);
     rouletteRig.position.set(
-      ARCADE_REFERENCE_LAYOUT.rouletteCenterX - rouletteLocalCenter.x,
+      recess.x - rouletteLocalCenter.x,
       floorY - rouletteLocalBounds.min.y,
-      ARCADE_REFERENCE_LAYOUT.stageFrontZ + ARCADE_REFERENCE_LAYOUT.rouletteClearance - rouletteLocalBounds.min.z,
+      recess.z - rouletteLocalCenter.z,
     );
     rouletteRig.updateMatrixWorld(true);
     const rouletteBounds = new THREE.Box3().setFromObject(rouletteModel);
-    if (rouletteBounds.min.z < ARCADE_REFERENCE_LAYOUT.stageFrontZ + ARCADE_REFERENCE_LAYOUT.rouletteClearance - 0.001) {
-      throw new Error("The roulette footprint overlaps the raised stage clearance zone.");
+    if (rouletteBounds.min.z < ROULETTE_RECESS.frontZ + ROULETTE_RECESS.clearance - 0.001) {
+      throw new Error("The roulette footprint overlaps the recessed stage lip.");
     }
 
     // Place the cabinet in the actual recessed back-wall bay, not under the
@@ -2003,7 +1981,8 @@ import {
       slotHoverLine = hoveredLine;
       drawSlotReelDisplay();
     }
-    const zone = interaction ? "" : resolvePointClickZone({
+    const zone = resolveSceneNavigationZone({
+      interaction, view: currentView.kind,
       x: event.clientX - rect.left,
       y: event.clientY - rect.top,
       width: rect.width,
@@ -2015,7 +1994,9 @@ import {
       : interaction?.machine === "contestant"
         && currentView.kind === "contestant"
         && currentView.contestantId === interaction.contestantId;
-    const actionable = Boolean(interaction && !sameFocusedTarget);
+    const decorativeSlot = currentView.kind === "slot" && interaction?.machine === "slot"
+      && (!interaction.part || interaction.part === "machine");
+    const actionable = Boolean(interaction && !sameFocusedTarget && !decorativeSlot);
     setGameCursor(resolvePointClickCursor({ zone, actionable }), event.clientX, event.clientY);
   }
 
@@ -2225,19 +2206,18 @@ import {
     const rect = preview.getBoundingClientRect();
     if(currentView.kind==="trivia") { if(clientY>=rect.bottom-Math.min(84,Math.max(48,rect.height*.11)))goBack(); return; }
     const interaction = getSceneInteractionAt(clientX, clientY);
-    if (!interaction) {
-      const zone = resolvePointClickZone({
-        x: clientX - rect.left,
-        y: clientY - rect.top,
-        width: rect.width,
-        height: rect.height,
-        canGoBack: canGoBack(),
-      });
-      if (zone === "left") return setLookDirection(-1);
-      if (zone === "right") return setLookDirection(1);
-      if (zone === "back") return goBack();
-      return;
-    }
+    const zone = resolveSceneNavigationZone({
+      interaction, view: currentView.kind,
+      x: clientX - rect.left,
+      y: clientY - rect.top,
+      width: rect.width,
+      height: rect.height,
+      canGoBack: canGoBack(),
+    });
+    if (zone === "left") return setLookDirection(-1);
+    if (zone === "right") return setLookDirection(1);
+    if (zone === "back") return goBack();
+    if (!interaction) return;
 
     if (interaction.machine === "dice-door") {
       const action = resolvePointClickAction({
@@ -2710,11 +2690,10 @@ import {
       placeMachinesFromStage();
       createSlotPlacementControls();
       setupPicking();
+      captureSlotFocusPoints();
       applyTheme();
       sceneReady = true;
-      fitCamera();
-      moveRouletteToMarkedFloorSpot(new THREE.Box3().setFromObject(stageModel.getObjectByName("table")).min.y);
-      // Refit from the final wheel location so both adjustments remain in frame.
+      // Fit the overview only after all machines have their final world placement.
       overviewCameraBounds = getArcadeBounds();
       fitCamera();
       if (pendingCardGameMode) {

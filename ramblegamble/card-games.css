@@ -92,74 +92,42 @@
   display: grid;
   min-width: 0;
   justify-items: center;
-  gap: 10px;
-  padding: 0 4px 8px;
+  padding: 4px;
   border: 0;
-  color: inherit;
   background: transparent;
   cursor: pointer;
-  transform-style: preserve-3d;
-  transition: transform 330ms cubic-bezier(.2,.85,.25,1), filter 330ms ease;
+  perspective: 1000px;
+  transition: transform 330ms cubic-bezier(.2,.85,.25,1);
 }
 .rg-mode-choice:focus-visible { outline: 4px dashed #8b2626; outline-offset: 6px; }
-.rg-mode-choice:hover { transform: translateY(-8px) rotateY(-4deg); }
+.rg-mode-choice:hover { transform: translateY(-8px); }
 .rg-mode-card {
   position: relative;
-  display: grid;
-  width: min(100%, 230px);
-  aspect-ratio: .68;
-  place-items: center;
-  overflow: hidden;
-  border: 4px solid #1e0b01;
-  border-radius: 14px 14px 22px 22px;
-  background: #9a88ff url("/ramblegamble/assets/provided/card_deck.png") repeat;
-  background-size: 42px 64px;
-  box-shadow: 6px 7px 0 #8b2626, 0 0 0 4px #f2f2da, 0 14px 24px rgb(20 10 30 / 32%);
+  display: block;
+  width: min(100%, 230px, 42dvh);
+  aspect-ratio: 33 / 47;
   transform-style: preserve-3d;
-  transition: transform 560ms cubic-bezier(.2,.8,.2,1), box-shadow 420ms ease, filter 420ms ease;
+  transition: transform 560ms cubic-bezier(.2,.8,.2,1);
 }
-.rg-mode-card::after {
+/* Two physical faces: no tiled backing, thumbnail, synthetic border or label.
+   Keep opacity/filter/overflow off the 3D carrier so it never flattens. */
+.rg-mode-face {
   position: absolute;
   inset: 0;
-  content: "";
-  opacity: 0;
-  background: url("/ramblegamble/assets/provided/card_deck.png") repeat;
-  background-size: 42px 64px;
-  transform: rotateY(180deg);
-  backface-visibility: hidden;
-}
-.rg-mode-card img {
-  width: 74%;
-  height: 74%;
+  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   image-rendering: pixelated;
+  backface-visibility: hidden;
+  pointer-events: none;
   filter: drop-shadow(3px 4px 0 #1e0b01);
-  transition: transform 520ms cubic-bezier(.2,.8,.2,1);
 }
-.rg-mode-label {
-  display: block;
-  max-width: 240px;
-  padding: 7px 10px;
-  color: #f2f2da;
-  background: #8b2626;
-  box-shadow: 3px 3px 0 #1e0b01;
-  font-size: clamp(12px, 1.8vw, 18px);
-  font-weight: 900;
-  letter-spacing: .04em;
-  line-height: 1.1;
-  text-align: center;
-  text-transform: uppercase;
-}
-.rg-card-menu-grid.is-choosing .rg-mode-choice { pointer-events: none; }
-.rg-card-menu-grid.is-choosing .rg-mode-choice:not(.is-selected) { filter: saturate(.55) brightness(.8); }
-.rg-card-menu-grid.is-choosing .rg-mode-choice:not(.is-selected) .rg-mode-card { transform: rotateY(180deg) scale(.9); }
-.rg-card-menu-grid.is-choosing .rg-mode-choice.is-selected { z-index: 2; filter: drop-shadow(0 0 24px #ffdf00); transform: translateY(-13px) scale(1.1); }
-.rg-card-menu-grid.is-choosing .rg-mode-choice.is-selected .rg-mode-card {
-  border-color: #ffdf00;
-  box-shadow: 0 0 0 5px #b77beb, 0 0 32px 10px #ffdf00, 10px 12px 0 #8b2626;
-  transform: rotateY(360deg) scale(1.08);
-}
-.rg-card-menu-grid.is-choosing .rg-mode-choice.is-selected .rg-mode-card img { transform: scale(1.12) rotate(-3deg); }
+.rg-mode-back { transform: rotateY(180deg); }
+.rg-card-menu-grid.is-animating .rg-mode-choice { pointer-events: none; }
+.rg-card-menu-grid.is-choosing .rg-mode-choice:not(.is-selected) .rg-mode-card { transform: rotateY(180deg); }
+.rg-card-menu-grid.is-choosing .rg-mode-choice.is-selected { z-index: 2; transform: translateY(-3px) scale(1.025); }
+.rg-card-menu-grid.is-choosing .rg-mode-choice.is-selected .rg-mode-card { transform: rotateY(360deg); }
 
 .rg-card-round {
   display: grid;
@@ -424,8 +392,6 @@
   .rg-card-games-layer { align-items: start; }
   .rg-card-games-shell { margin-block: auto; }
   .rg-card-menu-grid { gap: 8px; }
-  .rg-mode-card { border-width: 3px; box-shadow: 4px 5px 0 #8b2626, 0 0 0 3px #f2f2da; }
-  .rg-mode-label { padding: 6px 4px; font-size: 10px; }
   .rg-card-round { grid-template-columns: 1fr; }
   .rg-card-prompt { min-height: 180px; }
   .rg-card-prompt.is-suspect { width: min(100%, 230px, 38.9dvh); min-height: 0; }
@@ -438,11 +404,8 @@
 @media (max-width: 420px) {
   .rg-card-games-layer { padding: 6px; }
   .rg-card-games-shell { padding: 9px; }
-  .rg-card-menu-grid { grid-template-columns: 1fr; width: min(260px, 100%); }
-  .rg-mode-choice { grid-template-columns: 70px minmax(0, 1fr); justify-items: start; align-items: center; }
-  .rg-mode-card { width: 66px; aspect-ratio: .68; }
-  .rg-mode-card img { width: 72%; height: 72%; }
-  .rg-mode-label { max-width: none; font-size: 12px; }
+  .rg-card-menu-grid { gap: 6px; }
+  .rg-mode-choice { padding: 2px; }
   .rg-shop-card-grid { gap: 5px; }
   .rg-shop-card { padding: 6px; border-width: 2px; }
   .rg-shop-card-type { padding: 3px; font-size: 9px; }
@@ -517,4 +480,4 @@
 .is-berryblast .rg-card-answer-copy { max-height:24dvh; }
 .rg-card-prompt-copy { pointer-events:auto; }
 .rg-card-games-shell.is-scrollable { pointer-events:auto; }
-@media(max-height:500px) { .rg-card-games-shell { max-height:94dvh; } .rg-mode-card { max-height:40dvh; } }
+@media(max-height:500px) { .rg-card-games-shell { max-height:94dvh; } }

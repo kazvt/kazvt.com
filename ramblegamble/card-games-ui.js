@@ -85,6 +85,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   let smeemoPhaseTimer = 0;
   let smeemoScheduledSignal = "";
   let menuTimer = 0;
+  let menuSelection = "";
 
   function element(tag, className = "", text = "") {
     const item = document.createElement(tag);
@@ -193,14 +194,17 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       menuOpen = false;
       dismissedActive = false;
       window.clearTimeout(menuTimer);
+      menuTimer = 0;
       window.dispatchEvent(new CustomEvent("rg:card-game-active", { detail: { mode: active.mode } }));
     } else if (ended && !menuOpen && !dismissedActive) {
       layer.hidden = true;
       content.replaceChildren();
       window.dispatchEvent(new Event("rg:close-card-games"));
     }
-    if (menuOpen) renderMenu();
-    else if (dismissedActive || !active) layer.hidden = true;
+    if (menuOpen) {
+      // Do not rebuild or interrupt the flip when a background room update arrives.
+      if (!menuSelection) renderMenu();
+    } else if (dismissedActive || !active) layer.hidden = true;
     else if (activeSmeemo) renderSmeemo(state.smeemo);
     else renderRound(state.round);
   }
@@ -259,18 +263,23 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     choice.dataset.mode = mode;
     choice.setAttribute("aria-label", label);
     const card = element("span", "rg-mode-card");
-    const image = element("img");
-    image.src = `/ramblegamble/assets/card-games/${imageName}`;
-    image.alt = "";
-    image.draggable = false;
-    const text = element("span", "rg-mode-label", label);
-    card.append(image);
-    choice.append(card, text);
+    const face = (name, side) => {
+      const image = element("img", `rg-mode-face rg-mode-${side}`);
+      image.src = `/ramblegamble/assets/card-games/${name}`;
+      image.alt = "";
+      image.draggable = false;
+      return image;
+    };
+    card.append(face(imageName, "front"), face("menu-card-back.png", "back"));
+    choice.append(card);
     choice.addEventListener("click", () => chooseMode(mode, choice));
     return choice;
   }
 
   function renderMenu() {
+    window.clearTimeout(menuTimer);
+    menuTimer = 0;
+    menuSelection = "";
     layer.hidden = false;
     hostButton.hidden = true;
     setStageTitle("CARD TABLE", "menu");
@@ -278,9 +287,9 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     content.replaceChildren();
     const grid = element("div", "rg-card-menu-grid");
     grid.append(
-      makeModeChoice("red-handed", "menu-red-handed.png", "Red Handed"),
-      makeModeChoice("quiplash", "menu-quiplash.png", "Berryblast"),
-      makeModeChoice("shop", "menu-shop.png", "The Shop"),
+      makeModeChoice("red-handed", "menu-red-handed-face.png", "Red Handed"),
+      makeModeChoice("quiplash", "menu-quiplash-face.png", "Berryblast"),
+      makeModeChoice("shop", "menu-shop-face.png", "The Shop"),
     );
     content.append(grid);
     const active = activeCardStage(state);
@@ -302,19 +311,24 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       menuOpen = false;
       dismissedActive = false;
       window.clearTimeout(menuTimer);
+      menuTimer = 0;
       updateFromState(result.state);
       window.dispatchEvent(new CustomEvent("rg:card-game-active", { detail: { mode: active.mode } }));
     }).catch(error => { adminStatus.textContent = error.message; });
   }
 
   function chooseMode(mode, choice) {
-    window.clearTimeout(menuTimer);
+    if (!menuOpen || menuTimer) return;
     const grid = choice.parentElement;
-    grid.classList.add("is-choosing");
-    choice.classList.add("is-selected");
+    menuSelection = mode;
+    grid.classList.add("is-choosing", "is-animating");
+    for (const button of grid.children) button.classList.toggle("is-selected", button === choice);
     modeSelect.value = mode;
     setDeckVisibility();
     menuTimer = window.setTimeout(() => {
+      menuTimer = 0;
+      grid.classList.remove("is-animating");
+      if (!menuOpen) return;
       openHostPanel(mode);
       modeSelect.focus({ preventScroll: true });
     }, reducedMotion.matches ? 20 : 760);
@@ -657,6 +671,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     smeemoPhaseTimer = 0;
     smeemoScheduledSignal = "";
     window.clearTimeout(menuTimer);
+    menuTimer = 0;
     layer.hidden = true;
     window.dispatchEvent(new Event("rg:close-card-games"));
   });
@@ -671,7 +686,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   setDeckVisibility();
   subscribeCardGames(updateFromState);
   subscribeLiveTrivia(()=>network.publish());
-  window.addEventListener("rg:trivia-stage-open",()=>{ menuOpen=false; dismissedActive=Boolean(activeCardStage(state)); window.clearTimeout(smeemoPhaseTimer); smeemoPhaseTimer=0; window.clearTimeout(menuTimer); layer.hidden=true; });
+  window.addEventListener("rg:trivia-stage-open",()=>{ menuOpen=false; dismissedActive=Boolean(activeCardStage(state)); window.clearTimeout(smeemoPhaseTimer); smeemoPhaseTimer=0; window.clearTimeout(menuTimer); menuTimer=0; layer.hidden=true; });
   subscribePointScores((scores) => {
     pointScores = scores;
     if (state.round?.mode === "shop" && !layer.hidden && !menuOpen && !dismissedActive) renderShop(state.round);

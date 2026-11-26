@@ -16,3 +16,56 @@ test('positive local X crank rotation moves the authored upper handle toward the
  const yaw=2*Math.atan2(arm.rotation[1],arm.rotation[3])+Math.PI;const worldZ=v=>-Math.sin(yaw)*v[0]+Math.cos(yaw)*v[2];const angle=.92;const moved=[center[0],center[1]*Math.cos(angle)-center[2]*Math.sin(angle),center[1]*Math.sin(angle)+center[2]*Math.cos(angle)];assert.ok(worldZ(moved)>worldZ(center));
  const source=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');assert.match(source,/lever\.rotateX\(Math\.sin\(progress \* Math\.PI\) \* 0\.92\)/);
 });
+
+import { fitSlotInteractionFrame, rouletteRecessCenter, ROULETTE_RECESS } from './arcade-framing.mjs';
+import { slotScreenPoint } from './slot-reels.mjs';
+const add=(a,b)=>a.map((x,i)=>x+b[i]);
+const sub=(a,b)=>a.map((x,i)=>x-b[i]);
+const mul=(a,n)=>a.map(x=>x*n);
+const dot=(a,b)=>a.reduce((s,x,i)=>s+x*b[i],0);
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const unit=a=>mul(a,1/Math.hypot(...a));
+function rotateQuaternion(v,q=[0,0,0,1]) {const u=q.slice(0,3);return add(v,mul(add(mul(cross(u,v),q[3]),cross(u,cross(u,v))),2));}
+function nodePoints(m,n){return m.d.meshes[n.mesh].primitives.flatMap(p=>m.values(p.attributes.POSITION)).map(v=>add(rotateQuaternion(v,n.rotation),n.translation||[0,0,0]));}
+function box(points){const min=[0,1,2].map(i=>Math.min(...points.map(p=>p[i]))),max=[0,1,2].map(i=>Math.max(...points.map(p=>p[i])));return {min,max,center:mul(add(min,max),.5),corners:[min[0],max[0]].flatMap(x=>[min[1],max[1]].flatMap(y=>[min[2],max[2]].map(z=>[x,y,z])))};}
+function basis(yaw,elevation){const h=Math.sqrt(1-elevation**2),dir=[Math.sin(yaw)*h,elevation,Math.cos(yaw)*h],right=unit(cross([0,1,0],dir)),up=unit(cross(dir,right));return {dir,right,up};}
+function relative(points,target,{dir,right,up}){return points.map(p=>{const r=sub(p,target);return {x:dot(r,right),y:dot(r,up),z:dot(r,dir)};});}
+function project(points,frame,width,height){const tan=Math.tan(42*Math.PI/360);return points.map(p=>[(p.x-frame.shiftX)/(tan*width/height*(frame.distance-p.z)),(p.y-frame.shiftY)/(tan*(frame.distance-p.z)),frame.distance-p.z]);}
+function span(points,i){return Math.max(...points.map(p=>p[i]))-Math.min(...points.map(p=>p[i]));}
+function slotGeometry(){
+ const m=model('rg_slots'), nodes=m.d.nodes.filter(n=>n.mesh!==undefined);
+ const local=nodes.flatMap(n=>nodePoints(m,n)), all=box(local), scale=2.52/(all.max[1]-all.min[1]);
+ const world=p=>[-p[0]*scale*1.08,p[1]*scale,-p[2]*scale];
+ const wp=(x,y)=>{const p=slotScreenPoint(x,y,.16);return world([p.x,p.y,p.z]);};
+ const screen=[wp(5,16),wp(5,58),wp(75,16),wp(75,58)],points=[...screen];
+ for(const [x,y] of [...Array.from({length:5},(_,i)=>[5+(i+.5)*14,9]),...Array.from({length:3},(_,i)=>[-2,16+(i+.5)*14])]){
+  const anchor=wp(x,y),width=Math.hypot(...sub(wp(x-14*.32,y),wp(x+14*.32,y))),height=Math.hypot(...sub(wp(x,y-14*.27),wp(x,y+14*.27))),half=Math.max(width,height)*.6;
+  for(const a of [-half,half])for(const b of [-half,half])for(const c of [-half,half])points.push(add(anchor,[a,b,c]));
+ }
+ for(const n of nodes.filter(n=>/^(arm|button[1-5])$/.test(n.name)))points.push(...box(nodePoints(m,n).map(world)).corners);
+ return {points,screen,cabinet:box(local.map(world))};
+}
+test('roulette world center is the authored recess midpoint with clearance from both sloping shoulders and lower lip',()=>{
+ const m=model('rg_stage'),stage=nodePoints(m,m.d.nodes[0]);
+ const vertices=[[8.5086,-.4572],[10.0326,-1.3716],[13.5894,-1.3716],[15.1134,-.4572]];
+ for(const [x,z] of vertices) assert.ok(stage.some(p=>Math.hypot(p[0]-x,p[2]-z)<.0001),'measured lower lip vertex');
+ const r=model('rg_roulette'),rim=r.d.nodes.find(n=>n.name==='rim');const rimBox=box(nodePoints(r,rim));
+ const radius=Math.max(rimBox.max[0]-rimBox.min[0],rimBox.max[2]-rimBox.min[2])*.13/2;
+ const c=rouletteRecessCenter(radius);assert.ok(Math.abs(c.x-11.811)<1e-9);assert.ok(c.z<1.5);assert.ok(Math.abs(c.z-radius-ROULETTE_RECESS.frontZ-ROULETTE_RECESS.clearance)<1e-9);
+ for(let i=1;i<vertices.length;i++){const a=vertices[i-1],b=vertices[i],p=[c.x,c.z],ab=sub(b,a),t=Math.max(0,Math.min(1,dot(sub(p,a),ab)/dot(ab,ab)));assert.ok(Math.hypot(...sub(p,add(a,mul(ab,t))))>=radius+ROULETTE_RECESS.clearance-1e-8);}
+ const js=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');assert.match(js,/rouletteRecessCenter\(radius\)/);assert.doesNotMatch(js,/moveRouletteToMarkedFloorSpot|rouletteScreenAnchor/);
+});
+test('slot frame fits actual screen, arrows, physical buttons and resting crank for desktop, narrow and portrait views',()=>{
+ const {points,screen,cabinet}=slotGeometry(),target=box(points).center;
+ for(const [w,h] of [[803,395],[1014,576],[1920,1080],[360,640],[320,240],[2560,720]]) for(const look of [-1,0,1]){
+  const b=basis(-.08-look*.42,.14),p=relative(points,target,b),f=fitSlotInteractionFrame(p,{width:w,height:h});const projected=project(p,f,w,h);
+  for(const [x,y,depth] of projected){assert.ok(depth>.1);assert.ok(x>=f.limits.xMin-1e-8&&x<=f.limits.xMax+1e-8);assert.ok(y>=f.limits.yMin-1e-8&&y<=f.limits.yMax+1e-8);}
+  if(look===0&&w/h>1.5&&h>=395){
+   const oldBasis=basis(-.38,.24),oldTarget=cabinet.center,oldCorners=cabinet.corners.map(p=>p.map((v,i)=>v+(v<oldTarget[i]?-.35:.35))),oldP=relative(oldCorners,oldTarget,oldBasis),tan=Math.tan(42*Math.PI/360);
+   const oldDistance=Math.max(1,...oldP.map(p=>Math.max(Math.abs(p.x)/(tan*w/h),Math.abs(p.y)/tan)+p.z))*1.18;
+   const oldScreen=project(relative(screen,oldTarget,oldBasis),{distance:oldDistance,shiftX:0,shiftY:0},w,h),newScreen=project(relative(screen,target,b),f,w,h);
+   assert.ok(span(newScreen,1)>span(oldScreen,1)*1.25,`screen height at ${w}x${h}: ${span(newScreen,1)/span(oldScreen,1)}`);
+  }
+ }
+ const js=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');assert.match(js,/setupPicking\(\);\s+captureSlotFocusPoints\(\)/);assert.match(js,/fitSlotInteractionFrame\(points/);
+});

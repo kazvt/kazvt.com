@@ -35,6 +35,14 @@ export function resolvePointClickZone({ x, y, width, height, canGoBack = false }
   return "";
 }
 
+// A tightly framed cabinet can fill the screen edges. Its decorative body
+// must not trap the player in the close-up; real controls still take priority.
+export function resolveSceneNavigationZone({ interaction, view, ...geometry } = {}) {
+  const decorativeSlot = view === "slot" && interaction?.machine === "slot"
+    && (!interaction.part || interaction.part === "machine");
+  return interaction && !decorativeSlot ? "" : resolvePointClickZone(geometry);
+}
+
 export function resolvePointClickAction({ zone = "", machine = "", part = "", focused = false, canGoBack = false } = {}) {
   if (zone === "left") return "look-left";
   if (zone === "right") return "look-right";

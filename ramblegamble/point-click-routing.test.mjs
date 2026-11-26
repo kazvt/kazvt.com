@@ -8,6 +8,7 @@ import {
   resolvePointClickBack,
   resolvePointClickCursor,
   resolvePointClickZone,
+  resolveSceneNavigationZone,
 } from "./point-click-routing.js";
 
 test("participant and host aliases coexist with their number shortcuts, and C is cheer", () => {
@@ -114,4 +115,12 @@ test("back returns to the starting overview view and never retreats past it", ()
   for (let i=0; i<15; i++) assert.equal(resolveSlotContextCell({...base, interaction:{...base.interaction,cellIndex:i}}),i);
   for (const overrides of [{button:0},{button:1},{view:"overview"},{selected:"kazberry"},{interaction:null},{interaction:{...base.interaction,part:"arm"}},{interaction:{...base.interaction,machine:"roulette"}}]) assert.equal(resolveSlotContextCell({...base,...overrides}),-1);
   for (const i of [-1,15,NaN,null,1.5,"1"]) assert.equal(resolveSlotContextCell({...base,interaction:{...base.interaction,cellIndex:i}}),-1);
+});
+
+test("focused slot decorative body allows navigation bands without stealing interactive controls",()=>{
+  const geometry={x:400,y:390,width:803,height:395,canGoBack:true,view:"slot"};
+  for(const part of ["machine", ""])assert.equal(resolveSceneNavigationZone({...geometry,interaction:{machine:"slot",part}}),"back");
+  for(const part of ["slot-reel-display","arm","button1"])assert.equal(resolveSceneNavigationZone({...geometry,interaction:{machine:"slot",part}}),"");
+  assert.equal(resolveSceneNavigationZone({...geometry,view:"overview",interaction:{machine:"slot",part:"machine"}}),"");
+  assert.equal(resolveSceneNavigationZone({...geometry,x:10,y:150,interaction:{machine:"slot",part:"machine"}}),"left");
 });

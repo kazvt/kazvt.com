@@ -34,11 +34,11 @@ import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
 import * as games from './card-games.mjs';
 class FakeElement {
-  constructor() { this.children=[]; this.dataset={}; this.hidden=false; this.value=''; this.events={}; this.classList={add(){},remove(){},toggle(){}}; }
-  append(...children){ this.children.push(...children); }
+  constructor() { this.children=[]; this.dataset={}; this.hidden=false; this.value=''; this.events={}; this.attributes={}; const classes=new Set(); this.classList={add:(...items)=>items.forEach(v=>classes.add(v)),remove:(...items)=>items.forEach(v=>classes.delete(v)),contains:v=>classes.has(v),toggle:(v,force= !classes.has(v))=>{if(force)classes.add(v);else classes.delete(v);}}; }
+  append(...children){ this.children.push(...children); children.forEach(child=>child.parentElement=this); }
   before(){}
-  replaceChildren(...children){this.children=children;}
-  setAttribute(){}
+  replaceChildren(...children){this.children=[];this.append(...children);}
+  setAttribute(key,value){this.attributes[key]=value;}
   addEventListener(type, listener){this.events[type]=listener;}
   click(){this.events.click?.({});}
   querySelector(){return null;}
@@ -53,11 +53,12 @@ function mountUI(saved) {
   let data=normalizeCardGamesState(saved), subscriber;
   const calls=[];
   const listeners=new Map();
-  const window={matchMedia:()=>({matches:true}), clearTimeout(){},setTimeout(){return 1;},addEventListener:(type,fn)=>listeners.set(type,fn),dispatchEvent(event){calls.push(event.type);listeners.get(event.type)?.(event);}};
+  const timers=new Map();let timerId=0;
+  const window={matchMedia:()=>({matches:true}), clearTimeout(id){timers.delete(id);},setTimeout(fn){timers.set(++timerId,fn);return timerId;},addEventListener:(type,fn)=>listeners.set(type,fn),dispatchEvent(event){calls.push(event.type);listeners.get(event.type)?.(event);}};
   class FakeEvent {constructor(type,opts={}){this.type=type;this.detail=opts.detail;}}
   const code=readFileSync(new URL('./card-games-ui.js',import.meta.url),'utf8').replace(/^import\s+[\s\S]*?;\n/gm,'');
   vm.runInNewContext(code,{...games,activeCardStage,cardStageChange,window,document:{querySelector:get,querySelectorAll:()=>[],createElement:()=>new FakeElement()},CustomEvent:FakeEvent,Event:FakeEvent,readCardGames:()=>data,writeCardGames:value=>({state:data=normalizeCardGamesState(value),persisted:true}),subscribeLiveTrivia:()=>{},activeRoomRound:()=>data.round,subscribeCardGames:fn=>{subscriber=fn;fn(data);},readPointScores:()=>({kaz:0,faroe:0,erin:0}),subscribePointScores:fn=>fn({kaz:0,faroe:0,erin:0}),mountCardRoom:()=>({publish(){}}),foley:{start(){},stop(){},play(){}},withRoomSubmissionLock:async fn=>fn()});
-  return {get,calls,window,update(next){data=normalizeCardGamesState(next);subscriber(data);}};
+  return {get,calls,window,update(next){data=normalizeCardGamesState(next);subscriber(data);},flushTimers(){for(const [id,fn] of [...timers]){timers.delete(id);fn();}}};
 }
 test('actual card UI keeps restored shop hidden, resumes on request, and only opens newly started rounds',()=>{
   const round=createShopRound(decks);
@@ -85,4 +86,21 @@ test('actual card UI does not reopen saved Berryblast, Red Handed, or Smeemo on 
     assert.equal(ui.get('#rg-card-games-layer').hidden,true);
     assert.ok(!ui.calls.includes('rg:card-game-active'));
   }
+});
+
+test('mode menu uses only full authored faces and stays flipped during room updates; another selection is possible',()=>{
+  const ui=mountUI({});ui.window.dispatchEvent({type:'rg:show-card-menu'});
+  const content=ui.get('#rg-card-games-content'),grid=content.children[0];
+  assert.equal(grid.children.length,3);
+  for(const [i,mode] of ['red-handed','quiplash','shop'].entries()){
+    const choice=grid.children[i], card=choice.children[0];assert.equal(choice.children.length,1);
+    assert.ok(choice.attributes['aria-label']);assert.equal(card.children.length,2);
+    assert.ok(card.children[0].src.endsWith(`menu-${mode}-face.png`));assert.ok(card.children[1].src.endsWith('menu-card-back.png'));
+  }
+  grid.children[0].click();assert.ok(grid.classList.contains('is-animating'));assert.ok(grid.children[0].classList.contains('is-selected'));
+  grid.children[1].click();assert.ok(!grid.children[1].classList.contains('is-selected'));
+  ui.update({});assert.equal(content.children[0],grid);ui.flushTimers();assert.ok(!grid.classList.contains('is-animating'));
+  assert.equal(ui.calls.filter(x=>x==='rg:open-host-panel').length,1);
+  grid.children[1].click();assert.ok(grid.children[1].classList.contains('is-selected'));assert.ok(!grid.children[0].classList.contains('is-selected'));
+  ui.flushTimers();assert.equal(ui.calls.filter(x=>x==='rg:open-host-panel').length,2);
 });
