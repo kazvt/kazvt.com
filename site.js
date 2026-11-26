@@ -1525,7 +1525,7 @@ function homeWelcomePanel() {
     children: [
       el("div", { className: "welcome-grid" }, [
         el("div", { className: "welcome-copy" }, [
-          el("div", { className: "welcome-kicker" }, ["★ welcome.exe ★"]),
+          el("div", { className: "welcome-kicker" }, ["★ welcome ★"]),
           el("p", { className: "welcome-lede", "data-i18n": "home.welcome_lede" }, [translatedText("home.welcome_lede")]),
           el("p", { className: "welcome-copy-text", "data-i18n": "home.welcome_copy" }, [translatedText("home.welcome_copy")]),
           el("div", { className: "welcome-status-strip scribble-box" }, [
@@ -1544,7 +1544,7 @@ function homeWelcomePanel() {
         ]),
         el("div", { className: "welcome-console scribble-box" }, [
           el("div", { className: "scrapbook-tape", ariaHidden: "true" }),
-          el("div", { className: "welcome-console-bar" }, ["HOME_NET.EXE"]),
+          el("div", { className: "welcome-console-bar" }, ["HOME_NET"]),
           el("div", { className: "welcome-console-face", ariaHidden: "true" }, [":-)  ♥  :-P"]),
           el("p", { className: "welcome-console-copy", "data-i18n": "home.console_message" }, [translatedText("home.console_message")]),
           el("div", { className: "welcome-stamp" }, [

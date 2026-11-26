@@ -1303,9 +1303,9 @@ function oldWebPanel() {
           el("span", { "data-i18n": "webcorner.webring" }, ["webring:"]),
           " ",
           el("a", { href: "#links", "data-i18n": "webcorner.prev" }, ["prev"]),
-          " / ",
+          " - ",
           el("a", { href: "#badges", "data-i18n": "webcorner.random" }, ["random"]),
-          " / ",
+          " - ",
           el("a", { href: "#guestbook", "data-i18n": "webcorner.next" }, ["next"]),
         ]),
       ]),
@@ -1425,7 +1425,7 @@ function paintPanel() {
   return panel({
     id: "paint",
     title: "doodle pad",
-    stamp: "stylus.exe",
+    stamp: "stylus",
     titleKey: "panel.paint.title",
     stampKey: "panel.paint.stamp",
     children: [
@@ -1755,7 +1755,7 @@ function createMultistreamGuideModal() {
           el("span", { id: "multistream-guide-modal-title", className: "guide-window-title", "data-i18n": "guide.panel_title" }, ["multistream setup guide"]),
         ]),
         el("div", { className: "guide-window-controls", ariaLabel: "guide window controls" }, [
-          el("span", { className: "guide-window-stamp", ariaHidden: "true" }, ["YES / NO MAP"]),
+          el("span", { className: "guide-window-stamp", ariaHidden: "true" }, ["YES - NO MAP"]),
           el("button", { type: "button", className: "guide-window-button guide-window-close", "data-guide-close": "true", ariaLabel: "close multistream guide", title: "close" }, ["X"]),
         ]),
       ]),
@@ -2611,7 +2611,7 @@ async function render(statusOverrides = {}) {
     paintPanel(),
     badgesPanel(),
     el("footer", { className: "page-footer scribble-box" }, [
-      el("span", { "data-i18n": "footer.message" }, ["kazvt.com / press start / come back soon"]),
+      el("span", { "data-i18n": "footer.message" }, ["kazvt.com - press start - come back soon"]),
       createVisitCounter({ key: "kazvt-home-visits", label: translatedText("footer.counter", "you are visitor") }),
     ]),
   );

@@ -374,7 +374,7 @@
     const isWriter = document.body.dataset.page === "blog-write";
     const article = $(".blog-article");
     const postTitle = article?.querySelector("h2")?.textContent?.trim();
-    const title = isWriter ? "post desk.exe // kazvt" : postTitle ? `${postTitle} // kazvt blog` : "blog.exe // kazvt";
+    const title = isWriter ? "post desk - kazvt" : postTitle ? `${postTitle} - kazvt blog` : "blog - kazvt";
     const summary = article?.querySelector(".blog-post-summary")?.textContent?.trim()
       || article?.querySelector(".blog-rich-content .ql-editor")?.textContent?.trim().slice(0, 155);
     document.title = title;
@@ -675,11 +675,11 @@
           detail.hidden = true;
           filterPanel.hidden = false;
           resultsPanel.hidden = false;
-          document.title = "blog.exe // kazvt";
+          document.title = "blog - kazvt";
           const description = $("meta[name=description]");
           if (description) description.content = "Notes, experiments, and dispatches from kaz's treehouse.";
           const ogTitle = $("meta[property='og:title']");
-          if (ogTitle) ogTitle.content = "blog.exe // kazvt";
+          if (ogTitle) ogTitle.content = "blog - kazvt";
           const ogDescription = $("meta[property='og:description']");
           if (ogDescription) ogDescription.content = "Notes, experiments, and dispatches from kaz's treehouse.";
           applyURLFilters();
@@ -1029,7 +1029,7 @@
       $("[data-blog-post-noun]").textContent = workingPosts.length === 1 ? "post" : "posts";
       const changed = hasMeaningfulDraft() && formFingerprint() !== preparedFingerprint;
       if (changed) {
-        setStatus(exportStatus, "The current draft has changes not yet included in the export file. Add / update it before downloading.", "warning");
+        setStatus(exportStatus, "The current draft has changes not yet included in the export file. Add - update it before downloading.", "warning");
       } else {
         setStatus(exportStatus, `${workingPosts.length} ${workingPosts.length === 1 ? "post" : "posts"} in the export file. This is still local until you replace posts.json and push it.`, "ok");
       }
@@ -1123,7 +1123,7 @@
 
     function createVideoEmbedInEditor(url) {
       const media = parseVideoURL(url);
-      if (!media) throw new Error("Use YouTube, Vimeo, Spotify, SoundCloud, or a direct HTTPS MP4 / WebM link.");
+      if (!media) throw new Error("Use YouTube, Vimeo, Spotify, SoundCloud, or a direct HTTPS MP4 - WebM link.");
       const range = quill.getSelection(true) || { index: quill.getLength() - 1, length: 0 };
       quill.insertEmbed(range.index, "video", media.url, "user");
       quill.setSelection(range.index + 1, 0, "silent");
@@ -1353,7 +1353,7 @@
 
     async function exportManifest() {
       if (hasMeaningfulDraft() && formFingerprint() !== preparedFingerprint) {
-        const proceed = window.confirm("The current draft has changes that are not in the export file. Download the last prepared list anyway? Choose Cancel, then use “add / update in export” to include those changes.");
+        const proceed = window.confirm("The current draft has changes that are not in the export file. Download the last prepared list anyway? Choose Cancel, then use “add - update in export” to include those changes.");
         if (!proceed) return;
       }
       const posts = [...workingPosts].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt));
