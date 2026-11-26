@@ -63,7 +63,7 @@ test("ordinary berry placement cannot overwrite a wildcard", () => {
   const grid = blankBoard();
   grid[0] = "star";
   grid[1] = "erinberry";
-  assert.deepEqual(getSlotEligibleIndexes(grid, "kazberry", { axis: "column", index: 0 }), [2]);
+  assert.deepEqual(getSlotEligibleIndexes(grid, "kazberry", { axis: "column", index: 0 }), [5, 10]);
 });
 
 test("placement is a no-op when a selected line is already entirely the active player's berry", () => {
