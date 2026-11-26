@@ -832,8 +832,8 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     const filled = slotGrid.filter(Boolean).length;
     $("#rg-slot-count").textContent = filled + " / 15";
     $("#rg-slot-help").textContent = placementMode === "row"
-      ? "Click a row on the machine screen to place one berry."
-      : "Click a column on the machine screen to place one berry.";
+      ? "Click a row on the machine screen."
+      : "Click a column on the machine screen.";
   }
 
   function renderGrid() {

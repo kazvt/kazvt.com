@@ -45,10 +45,19 @@ test("a reel spin rotates only chosen columns by one or two cells", () => {
   const grid = ["faroeberry", "erinberry", "kazberry", null, null,
     "erinberry", "kazberry", "faroeberry", null, null,
     "kazberry", "faroeberry", "erinberry", null, null];
-  const result = rotateSlotColumns(grid, [0, 0, 6], { randomIndex: () => 0 });
+  const result = rotateSlotColumns(grid, [0, 0, 6], { randomIndex: () => 1 });
   assert.deepEqual(result.rotations, { 0: 1 });
   assert.deepEqual([result.grid[0], result.grid[5], result.grid[10]], ["kazberry", "faroeberry", "erinberry"]);
   assert.deepEqual(result.grid.slice(1, 5), grid.slice(1, 5));
+});
+
+test("a reel spin can settle in its starting orientation after a full turn", () => {
+  const grid = ["faroeberry", "erinberry", "kazberry", null, null,
+    "erinberry", "kazberry", "faroeberry", null, null,
+    "kazberry", "faroeberry", "erinberry", null, null];
+  const result = rotateSlotColumns(grid, [0], { randomIndex: () => 0 });
+  assert.deepEqual(result.rotations, { 0: 0 });
+  assert.deepEqual(result.grid, grid);
 });
 
 test("every authored mask pays for its owner, regardless of who caused the board change", () => {

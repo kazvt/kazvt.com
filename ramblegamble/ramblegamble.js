@@ -21,7 +21,7 @@ import {
   slotCellIndexAtUv,
   slotScreenPoint,
 } from "./slot-reels.mjs?v=slot-machine-live-game-20261126-v1";
-import { placeSlotBerry, resolveSlotPayouts, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs?v=slot-machine-live-game-20261126-v1";
+import { placeSlotBerry, resolveSlotPayouts, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs?v=slot-machine-live-game-20261126-v2";
 import {
   ROULETTE_BALL_COLOR,
   ROULETTE_BALL_LANDING_RADIUS,

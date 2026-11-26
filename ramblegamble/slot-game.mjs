@@ -71,7 +71,8 @@ export function rotateSlotColumns(grid, columns, { randomIndex = secureRandomInd
     .map(Number).filter((value) => Number.isInteger(value) && value >= 0 && value < SLOT_REEL_COLUMNS))];
   const rotations = {};
   for (const columnIndex of uniqueColumns) {
-    const shift = 1 + Math.max(0, Math.min(SLOT_REEL_ROWS - 2, Number(randomIndex(SLOT_REEL_ROWS - 1)) || 0));
+    // A complete spin may stop on the reel's existing orientation too.
+    const shift = Math.max(0, Math.min(SLOT_REEL_ROWS - 1, Number(randomIndex(SLOT_REEL_ROWS)) || 0));
     rotations[columnIndex] = shift;
     const original = Array.from({ length: SLOT_REEL_ROWS }, (_, rowIndex) => next[cell(columnIndex, rowIndex)]);
     for (let rowIndex = 0; rowIndex < SLOT_REEL_ROWS; rowIndex += 1) {
