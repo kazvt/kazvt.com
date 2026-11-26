@@ -2333,6 +2333,7 @@ import {
   window.addEventListener("rg:slot-settings-updated", (event) => {
     const berry = event.detail?.berry;
     if (["faroeberry", "erinberry", "kazberry", SLOT_REEL_WILDCARD].includes(berry)) selectedSlotBerry = berry;
+    slotHoverLine = null;
     syncSlotPlacementControls();
     slotHoverCell = -1;
     drawSlotReelDisplay();
