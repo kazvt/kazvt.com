@@ -2,8 +2,8 @@
 html[data-rg-host-locked] body > :not(#rg-host-gate) { opacity:0!important;visibility:hidden!important;pointer-events:none!important; }
 #rg-host-gate[hidden], #rg-host-gate [hidden] {display:none!important;}
 #rg-host-gate {position:fixed;inset:0;z-index:2147483647;overflow:auto;display:grid;place-items:center;padding:20px;background:#211b3a;color:#f3efd9;font:16px/1.5 system-ui,sans-serif;cursor:auto;box-sizing:border-box;}
-#rg-host-gate .rg-lock-panel {width:min(100%,420px);box-sizing:border-box;border:2px solid #d279ac;background:#30254c;padding:24px;box-shadow:0 12px 48px #0c0925;}
-#rg-host-gate h1 {font-size:24px;color:#ffdb59;margin:0 0 12px;}
+#rg-host-gate .rg-lock-panel {width:min(100%,360px);box-sizing:border-box;border:2px solid #d279ac;background:#30254c;padding:24px;box-shadow:0 12px 48px #0c0925;}
+#rg-host-gate h1 {font-size:20px;color:#ffdb59;margin:0 0 16px;}
 #rg-host-gate form {display:grid;gap:12px;}
 #rg-host-gate label:not(.rg-lock-remember) {display:grid;gap:4px;}
 #rg-host-gate input[type=password] {box-sizing:border-box;width:100%;padding:10px;background:#151126;color:white;border:1px solid #b8a7d1;font:inherit;cursor:text;}
@@ -11,4 +11,4 @@ html[data-rg-host-locked] body > :not(#rg-host-gate) { opacity:0!important;visib
 #rg-host-gate button:disabled {opacity:.65;cursor:wait;}
 #rg-host-gate :focus-visible {outline:3px solid #ffdb59;outline-offset:2px;}
 #rg-host-gate p {margin:8px 0;}
-#rg-host-gate .rg-lock-note {font-size:13px;color:#d4c9eb;}
+#rg-host-gate [role=status]:empty {display:none;}

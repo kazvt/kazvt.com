@@ -21,8 +21,8 @@
         }
       }
     </script>
-    <link rel="stylesheet" href="/ramblegamble/host-access.css?v=host-security-20261126-v1">
-    <script type="module" src="/ramblegamble/host-access.mjs?v=live-trivia-20261126-v1"></script>
+    <link rel="stylesheet" href="/ramblegamble/host-access.css?v=compact-lock-20261126-v1">
+    <script type="module" src="/ramblegamble/host-access.mjs?v=compact-lock-20261126-v1"></script>
   </head>
   <body class="ramble-page" data-theme="p2">
     <main class="rg-preview" id="rg-preview">
@@ -342,12 +342,11 @@
     </dialog>
     <section id="rg-host-gate" aria-labelledby="rg-host-lock-title">
       <div class="rg-lock-panel"><h1 id="rg-host-lock-title">RAMBLE GAMBLE / HOST</h1>
-      <p data-host-description>Host controls require unlocking.</p>
-      <form method="post"><label>Host passphrase<input type="password" name="passphrase" disabled required maxlength="1024" autocomplete="current-password"></label>
-      <label data-confirm hidden>Confirm passphrase<input type="password" name="confirmation" maxlength="1024" disabled></label>
+      <form method="post"><label>Password<input type="password" name="passphrase" disabled required maxlength="1024" autocomplete="current-password"></label>
+      <label data-confirm hidden>Confirm password<input type="password" name="confirmation" maxlength="1024" disabled></label>
       <label class="rg-lock-remember"><input type="checkbox" name="remember" checked> Remember this browser</label>
-      <button type="submit" disabled>UNLOCK HOST</button></form>
-      <p role="status" aria-live="polite"></p><p class="rg-lock-note">Local UI lock only; GitHub Pages serves public files. Contestants use their private player links.</p>
+      <button type="submit" disabled>UNLOCK</button></form>
+      <p role="status" aria-live="polite"></p>
       <noscript>JavaScript is required to unlock host controls.</noscript></div>
     </section>
   </body>

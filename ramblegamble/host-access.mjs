@@ -1,5 +1,5 @@
 import { SITE_HOST_VERIFIER } from './host-access-policy.mjs?v=host-security-20261126-v1';
-import { createAccessState, createVerifier, verifyPassword, validVerifier, PROFILE_KEY, GRANT_KEY, EPOCH_KEY } from './host-access-core.mjs?v=host-security-20261126-v1';
+import { createAccessState, createVerifier, verifyPassword, validVerifier, PROFILE_KEY, GRANT_KEY, EPOCH_KEY } from './host-access-core.mjs?v=compact-lock-20261126-v1';
 
 // Presentation-only gate: static source and local storage are not an auth boundary.
 // Initial boot requires unlock; manual lock of an already-running tab leaves its reader alive.
@@ -32,8 +32,7 @@ function setLocked(next) {
     const setup=access?.profile()===null;
     confirmLabel.hidden=!setup; confirmField.disabled=!setup; confirmField.required=setup;
     password.autocomplete=setup?'new-password':'current-password';
-    submit.textContent=setup?'SET UP HOST LOCK':'UNLOCK HOST';
-    gate.querySelector('[data-host-description]').textContent=setup?'Set a unique passphrase for this browser. A site-wide casual-visitor lock can be published from the console.':'Enter the host passphrase. Locking controls does not stop an already running room.';
+    submit.textContent=setup?'SET PASSWORD':'UNLOCK';
     password.focus();
   }else{
     root.removeAttribute('data-rg-host-locked');gate.hidden=true;
@@ -66,21 +65,21 @@ try{
   password.disabled=false;submit.disabled=false;setLocked(true);reconcile();
 }catch(error){access=null;submit.disabled=true;message.textContent=`Host lock unavailable: ${error.message}. Use HTTPS and enable site storage.`;}
 form.addEventListener('submit',async e=>{
-  e.preventDefault();if(!access||busy)return;busy=true;submit.disabled=true;message.textContent='Checking passphrase…';
+  e.preventDefault();if(!access||busy)return;busy=true;submit.disabled=true;message.textContent='Checking…';
   const secret=password.value, confirmation=confirmField.value;password.value='';confirmField.value='';
   const work=async()=>{
     const before=access.epoch();let verifier=access.profile();
-    if(verifier===null){if(secret!==confirmation)throw Error('Passphrases do not match.');verifier=await createVerifier(secret);if(access.epoch()!==before)throw Error('Host was locked in another tab. Try again.');access.enroll(verifier);}
-    else if(!await verifyPassword(secret,verifier))throw Error('Incorrect passphrase.');
+    if(verifier===null){if(secret!==confirmation)throw Error('Passwords do not match.');verifier=await createVerifier(secret);if(access.epoch()!==before)throw Error('Host was locked in another tab. Try again.');access.enroll(verifier);}
+    else if(!await verifyPassword(secret,verifier))throw Error('Incorrect password.');
     if(access.epoch()!==before)throw Error('Host was locked in another tab. Try again.');
     access.grant(verifier,remember.checked);
   };
-  try{if(navigator.locks?.request)await navigator.locks.request('rg-host-lock-enroll-v1',work);else await work();message.textContent='Loading host controls…';await reconcile();}
+  try{if(navigator.locks?.request)await navigator.locks.request('rg-host-lock-enroll-v1',work);else await work();message.textContent='Loading…';await reconcile();}
   catch(error){message.textContent=error.message||'Unlock failed.';setLocked(true);}
   finally{busy=false;submit.disabled=false;}
 });
 for(const button of lockButtons)button.addEventListener('click',()=>{
-  try{access.lock();setLocked(true);message.textContent='Controls locked. An already running reader remains online.';}catch{setLocked(true);message.textContent='Could not persist the lock. Close other host tabs if needed.';}
+  try{access.lock();setLocked(true);message.textContent='';}catch{setLocked(true);message.textContent='Could not persist the lock. Close other host tabs if needed.';}
 });
 window.addEventListener('storage',event=>{if([PROFILE_KEY,GRANT_KEY,EPOCH_KEY,null].includes(event.key))reconcile();});
 window.addEventListener('pageshow',()=>reconcile());
@@ -88,7 +87,7 @@ const download=document.querySelector('[data-host-policy-download]');
 if(download){download.hidden=SITE_HOST_VERIFIER!==null;download.addEventListener('click',()=>{
   if(!access?.authorized())return;
   const verifier=access.profile();if(!validVerifier(verifier))return;
-  if(!window.confirm('Publish a PUBLIC password verifier for casual-visitor deterrence? Only use a unique strong passphrase. GitHub Pages still serves public source files.'))return;
+  if(!window.confirm('Publish public site lock? Short passwords are easy to guess.'))return;
   const blob=new Blob([`// Public verifier only; not server-side authentication.\nexport const SITE_HOST_VERIFIER = ${JSON.stringify(verifier,null,2)};\n`],{type:'text/javascript'});
   const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='host-access-policy.mjs';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 });}

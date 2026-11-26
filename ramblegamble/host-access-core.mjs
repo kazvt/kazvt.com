@@ -13,7 +13,7 @@ async function derive(password,salt) {
   return hex(await crypto.subtle.deriveBits({name:'PBKDF2',salt:unhex(salt),iterations:ITERATIONS,hash:'SHA-256'},key,256));
 }
 export async function createVerifier(password) {
-  if(typeof password!=='string' || password.length<16 || password.length>1024) throw Error('Use a unique passphrase of at least 16 characters.');
+  if(typeof password!=='string' || password.length===0 || password.length>1024) throw Error('Enter a password.');
   const salt=randomEpoch(); return {version:1,iterations:ITERATIONS,salt,hash:await derive(password,salt)};
 }
 export async function verifyPassword(password,verifier) {
