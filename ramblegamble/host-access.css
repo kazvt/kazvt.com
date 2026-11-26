@@ -7,8 +7,11 @@ html[data-rg-host-locked] body > :not(#rg-host-gate) { opacity:0!important;visib
 #rg-host-gate form {display:grid;gap:12px;}
 #rg-host-gate label:not(.rg-lock-remember) {display:grid;gap:4px;}
 #rg-host-gate input[type=password] {box-sizing:border-box;width:100%;padding:10px;background:#151126;color:white;border:1px solid #b8a7d1;font:inherit;cursor:text;}
-#rg-host-gate button {padding:10px;background:#8b2626;color:white;border:1px solid #e9a0ab;font:700 15px system-ui;cursor:pointer;}
+#rg-host-gate .rg-lock-panel button {padding:10px;background:#8b2626;color:white;border:1px solid #e9a0ab;font:700 15px system-ui;cursor:pointer;}
 #rg-host-gate button:disabled {opacity:.65;cursor:wait;}
-#rg-host-gate :focus-visible {outline:3px solid #ffdb59;outline-offset:2px;}
+#rg-host-gate .rg-lock-panel :focus-visible {outline:3px solid #ffdb59;outline-offset:2px;}
 #rg-host-gate p {margin:8px 0;}
 #rg-host-gate [role=status]:empty {display:none;}
+
+#rg-host-gate > .rg-ready-screen {font-family:inherit;}
+#rg-host-gate [data-unlock-landing].rg-lock-panel {width:auto;}

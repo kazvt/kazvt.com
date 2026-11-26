@@ -13,6 +13,10 @@ const remember=gate.querySelector('[name=remember]');
 const message=gate.querySelector('[role=status]');
 const submit=gate.querySelector('[type=submit]');
 const lockButtons=[...document.querySelectorAll('[data-host-lock]')];
+const landing=gate.querySelector('[data-unlock-landing]');
+const panel=gate.querySelector('[data-unlock-panel]');
+const unlock=gate.querySelector('[data-host-unlock]');
+let promptOpen=false;
 let access, booted=false, bootPromise=null, busy=false, locked=true, inertBefore=new Map();
 const isConsole=location.pathname.replace(/\/$/,'').endsWith('/console');
 const appModules=isConsole? ['/rg/console/console.js?v=live-trivia-20261126-v1'] : [
@@ -21,20 +25,28 @@ const appModules=isConsole? ['/rg/console/console.js?v=live-trivia-20261126-v1']
   '/ramblegamble/trivia-ui.js?v=live-trivia-20261126-v1',
   '/ramblegamble/card-games-ui.js?v=live-trivia-20261126-v1',
 ];
+function renderLockedGate({focus=false}={}) {
+  const setup=access?.profile()===null;
+  const showPrompt=!access || setup || promptOpen;
+  landing.hidden=showPrompt;
+  panel.hidden=!showPrompt;
+  confirmLabel.hidden=!setup; confirmField.disabled=!setup; confirmField.required=setup;
+  password.autocomplete=setup?'new-password':'current-password';
+  submit.textContent=setup?'SET PASSWORD':'UNLOCK HOST';
+  if(focus)(showPrompt?password:unlock).focus();
+}
 function setLocked(next) {
   const changed=locked!==next;locked=next;
+  for(const button of lockButtons)button.textContent=next?'UNLOCK HOST':'LOCK HOST';
   if(next){
-    if(changed){password.value="";confirmField.value="";}
+    if(changed){password.value="";confirmField.value="";promptOpen=false;message.textContent="";}
     // Top-layer modal dialogs otherwise escape ancestor inertness.
     for(const dialog of document.querySelectorAll('dialog[open]')) { dialog.dispatchEvent(new Event('cancel',{cancelable:true})); if(dialog.open)dialog.close(); }
     for(const child of document.body.children) if(child!==gate && !inertBefore.has(child)){inertBefore.set(child,child.inert);child.inert=true;}
     root.setAttribute('data-rg-host-locked',''); gate.hidden=false;
-    const setup=access?.profile()===null;
-    confirmLabel.hidden=!setup; confirmField.disabled=!setup; confirmField.required=setup;
-    password.autocomplete=setup?'new-password':'current-password';
-    submit.textContent=setup?'SET PASSWORD':'UNLOCK';
-    password.focus();
+    renderLockedGate({focus:changed || !booted});
   }else{
+    promptOpen=false;
     root.removeAttribute('data-rg-host-locked');gate.hidden=true;
     for(const [child,prior] of inertBefore)child.inert=prior;inertBefore.clear();
   }
@@ -51,7 +63,7 @@ async function reconcile(){
   if(!allowed){setLocked(true);return;}
   if(!booted){
     if(!bootPromise)bootPromise=(async()=>{for(const path of appModules)await import(path);booted=true;})();
-    try{await bootPromise;}catch{message.textContent='Host application could not load. Reload and try again.';setLocked(true);return;}
+    try{await bootPromise;}catch{promptOpen=true;setLocked(true);message.textContent='Host application could not load. Reload and try again.';return;}
   }
   // A different tab may lock while scripts are downloading.
   try{if(access.authorized())setLocked(false);else setLocked(true);}catch{setLocked(true);}
@@ -62,10 +74,11 @@ try{
   // Test storage before allowing enrollment or unlocking.
   localStorage.getItem(PROFILE_KEY);sessionStorage.getItem(GRANT_KEY);
   if(access.profile()!==null&&!validVerifier(access.profile()))throw Error('Invalid host lock profile');
-  password.disabled=false;submit.disabled=false;setLocked(true);reconcile();
-}catch(error){access=null;submit.disabled=true;message.textContent=`Host lock unavailable: ${error.message}. Use HTTPS and enable site storage.`;}
+  password.disabled=false;submit.disabled=false;unlock.disabled=false;setLocked(true);reconcile();
+}catch(error){access=null;submit.disabled=true;unlock.disabled=true;renderLockedGate();message.textContent=`Host lock unavailable: ${error.message}. Use HTTPS and enable site storage.`;}
+unlock.addEventListener('click',()=>{if(!locked||!access)return;promptOpen=true;renderLockedGate({focus:true});});
 form.addEventListener('submit',async e=>{
-  e.preventDefault();if(!access||busy)return;busy=true;submit.disabled=true;message.textContent='Checking…';
+  e.preventDefault();if(!locked||!access||busy||panel.hidden)return;busy=true;submit.disabled=true;message.textContent='Checking…';
   const secret=password.value, confirmation=confirmField.value;password.value='';confirmField.value='';
   const work=async()=>{
     const before=access.epoch();let verifier=access.profile();
@@ -75,11 +88,12 @@ form.addEventListener('submit',async e=>{
     access.grant(verifier,remember.checked);
   };
   try{if(navigator.locks?.request)await navigator.locks.request('rg-host-lock-enroll-v1',work);else await work();message.textContent='Loading…';await reconcile();}
-  catch(error){message.textContent=error.message||'Unlock failed.';setLocked(true);}
+  catch(error){promptOpen=true;setLocked(true);message.textContent=error.message||'Unlock failed.';}
   finally{busy=false;submit.disabled=false;}
 });
 for(const button of lockButtons)button.addEventListener('click',()=>{
-  try{access.lock();setLocked(true);message.textContent='';}catch{setLocked(true);message.textContent='Could not persist the lock. Close other host tabs if needed.';}
+  if(locked||!access)return;
+  try{access.lock();setLocked(true);}catch{setLocked(true);promptOpen=true;renderLockedGate({focus:true});message.textContent='Could not persist the lock. Close other host tabs if needed.';}
 });
 window.addEventListener('storage',event=>{if([PROFILE_KEY,GRANT_KEY,EPOCH_KEY,null].includes(event.key))reconcile();});
 window.addEventListener('pageshow',()=>reconcile());

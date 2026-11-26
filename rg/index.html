@@ -21,8 +21,8 @@
         }
       }
     </script>
-    <link rel="stylesheet" href="/ramblegamble/host-access.css?v=compact-lock-20261126-v1">
-    <script type="module" src="/ramblegamble/host-access.mjs?v=compact-lock-20261126-v1"></script>
+    <link rel="stylesheet" href="/ramblegamble/host-access.css?v=host-toggle-20261126-v1">
+    <script type="module" src="/ramblegamble/host-access.mjs?v=host-toggle-20261126-v1"></script>
   </head>
   <body class="ramble-page" data-theme="p2">
     <main class="rg-preview" id="rg-preview">
@@ -340,8 +340,14 @@
         </section>
       </div>
     </dialog>
-    <section id="rg-host-gate" aria-labelledby="rg-host-lock-title">
-      <div class="rg-lock-panel"><h1 id="rg-host-lock-title">RAMBLE GAMBLE / HOST</h1>
+    <section id="rg-host-gate" aria-label="Host access">
+      <div data-unlock-landing class="rg-ready-screen" hidden>
+        <div class="rg-ready-stack">
+          <p class="rg-ready-title">READY...?</p>
+          <button class="rg-menu-button" type="button" data-host-unlock disabled>UNLOCK HOST</button>
+        </div>
+      </div>
+      <div class="rg-lock-panel" data-unlock-panel><h1 id="rg-host-lock-title">RAMBLE GAMBLE / HOST</h1>
       <form method="post"><label>Password<input type="password" name="passphrase" disabled required maxlength="1024" autocomplete="current-password"></label>
       <label data-confirm hidden>Confirm password<input type="password" name="confirmation" maxlength="1024" disabled></label>
       <label class="rg-lock-remember"><input type="checkbox" name="remember" checked> Remember this browser</label>
