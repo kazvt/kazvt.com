@@ -1,3 +1,4 @@
+import { VIP_LIQUID_SOURCE } from "./vip-liquid-preset.mjs?v=vip-black-liquid-20261126-v1";
 import { foley } from "./game-foley.mjs?v=slot-foley-20261126-v3";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
@@ -468,7 +469,7 @@ import {
     dialog.classList.add("rg-dice-entering");
     dialog.showModal();
     document.body.classList.add("rg-dice-mode-open");
-    liquid.src = "/liquid/?theatre=on";
+    liquid.src = VIP_LIQUID_SOURCE;
     window.dispatchEvent(new CustomEvent("rg:dice-mode-state", { detail: { open: true } }));
     loadDiceModel();
     ensureRenderLoop();

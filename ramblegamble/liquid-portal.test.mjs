@@ -63,9 +63,9 @@ test("liquid portal URL requests a clean theatre view and applies the provided s
   const parameters = new URL(`https://kazvt.com${LIQUID_PORTAL_SOURCE}`).searchParams;
   assert.equal(parameters.get("theatre"), "on");
   assert.equal(parameters.get("fullscreen"), "on");
-  assert.equal(parameters.get("color_low"), "#031f16");
-  assert.equal(parameters.get("color_mid"), "#076831");
-  assert.equal(parameters.get("color_high"), "#84c226");
+  assert.equal(parameters.get("color_low"), "#030303");
+  assert.equal(parameters.get("color_mid"), "#171717");
+  assert.equal(parameters.get("color_high"), "#626262");
   assert.equal(parameters.get("speed"), "2");
   assert.equal(parameters.get("fold_size"), "0.65");
   assert.equal(parameters.get("zoom"), "0.74");
@@ -288,8 +288,8 @@ test("scene wiring preloads one plane, updates it before every room render, and 
   assert.match(js, /liquidPortal\?\.dispose\(\)/);
   assert.match(css, /#rg-canvas \{[^}]*z-index: 1;/);
   assert.match(css, /\.rg-liquid-portal-layer \{[^}]*z-index: 0;[^}]*pointer-events: none;/);
-  assert.match(readFileSync(new URL("./host-access.mjs", import.meta.url), "utf8"), /ramblegamble\.js\?v=berry-score-hud-20261126-v1/);
-  assert.match(html, /ramblegamble\.css\?v=berry-score-hud-20261126-v1/);
+  assert.match(readFileSync(new URL("./host-access.mjs", import.meta.url), "utf8"), /ramblegamble\.js\?v=vip-black-liquid-20261126-v1/);
+  assert.match(html, /ramblegamble\.css\?v=vip-black-liquid-20261126-v1/);
 });
 
 
@@ -311,4 +311,41 @@ test("actual frame callbacks detect stalled pictures even if media time keeps ad
   assert.equal(video.frameCallback, null);
   assert.match(f.frame.style.transform, /^matrix3d\(/);
   f.dispose();
+});
+
+import { VIP_LIQUID_SOURCE } from "./vip-liquid-preset.mjs";
+
+test("both VIP surfaces share one neutral black preset with all supplied motion and surface settings", () => {
+  assert.equal(LIQUID_PORTAL_SOURCE, VIP_LIQUID_SOURCE);
+  const url = new URL(VIP_LIQUID_SOURCE, "https://kazvt.com/rg/");
+  assert.equal(url.pathname, "/liquid/");
+  assert.equal(url.hash, "");
+  assert.deepEqual(Object.fromEntries(url.searchParams), {
+    theatre: "on", fullscreen: "on", color_low: "#030303", color_mid: "#171717", color_high: "#626262",
+    viscosity: "0", speed: "2", fold_size: "0.65", zoom: "0.74", wrap_edges: "off", height_range: "0.45",
+    relief: "1.65", detail: "61%", gloss: "1.80", sharpness: "33", blur: "0", saturation: "0.88",
+    contrast: "0.90", brightness: "-0.060", render_quality: "50%",
+  });
+  assert.equal(url.searchParams.size, 20);
+  assert.match(url.search, /color_low=%23030303/);
+  assert.match(url.search, /detail=61%25/);
+  const dice = readFileSync(new URL("./dice-mode.js", import.meta.url), "utf8");
+  assert.match(dice, /import \{ VIP_LIQUID_SOURCE \} from "\.\/vip-liquid-preset\.mjs\?v=vip-black-liquid-20261126-v1"/);
+  assert.match(dice, /liquid\.src = VIP_LIQUID_SOURCE;/);
+  assert.match(dice, /liquid\.removeAttribute\("src"\)/);
+  assert.doesNotMatch(dice, /liquid\.src\s*=\s*["']\/liquid/);
+});
+
+test("both VIP surfaces have neutral fallback colors and Dice does not blend with the purple room", () => {
+  const css = readFileSync(new URL("./ramblegamble.css", import.meta.url), "utf8");
+  assert.match(css, /\.rg-liquid-portal-frame \{[^}]*background: #030303;/);
+  assert.match(css, /\.rg-dice-dialog \{[^}]*background: #030303;/);
+  assert.match(css, /\.rg-dice-liquid \{[^}]*background: #030303;[^}]*opacity: 1;/);
+  const f = fixture();
+  assert.equal(f.surface.material.color, 0x030303);
+  f.dispose();
+  const gate = readFileSync(new URL("./host-access.mjs", import.meta.url), "utf8");
+  const html = readFileSync(new URL("../rg/index.html", import.meta.url), "utf8");
+  assert.match(gate, /dice-mode\.js\?v=vip-black-liquid-20261126-v1/);
+  assert.match(html, /host-access\.mjs\?v=vip-black-liquid-20261126-v1/);
 });

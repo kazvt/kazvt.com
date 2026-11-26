@@ -15,7 +15,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
 import {
   createLiquidPortal,
   isLiquidPortalActive,
-} from "./liquid-portal.mjs?v=vip-world-plane-20261126-v1";
+} from "./liquid-portal.mjs?v=vip-black-liquid-20261126-v1";
 import {
   createSlotLineMotion,
   normalizeSlotGrid,

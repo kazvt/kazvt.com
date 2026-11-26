@@ -1,27 +1,6 @@
-const LIQUID_PARAMETERS = [
-  ["theatre", "on"],
-  ["fullscreen", "on"],
-  ["color_low", "#031f16"],
-  ["color_mid", "#076831"],
-  ["color_high", "#84c226"],
-  ["viscosity", "0"],
-  ["speed", "2"],
-  ["fold_size", "0.65"],
-  ["zoom", "0.74"],
-  ["wrap_edges", "off"],
-  ["height_range", "0.45"],
-  ["relief", "1.65"],
-  ["detail", "61%"],
-  ["gloss", "1.80"],
-  ["sharpness", "33"],
-  ["blur", "0"],
-  ["saturation", "0.88"],
-  ["contrast", "0.90"],
-  ["brightness", "-0.060"],
-  ["render_quality", "50%"],
-];
+import { VIP_LIQUID_SOURCE } from "./vip-liquid-preset.mjs?v=vip-black-liquid-20261126-v1";
 
-export const LIQUID_PORTAL_SOURCE = `/liquid/?${new URLSearchParams(LIQUID_PARAMETERS)}`;
+export const LIQUID_PORTAL_SOURCE = VIP_LIQUID_SOURCE;
 export const LIQUID_PORTAL_WIDTH = 512;
 export const LIQUID_PORTAL_HEIGHT = 1024;
 
@@ -124,7 +103,7 @@ export function findLiquidCanvas(frame) {
 export function createLiquidPortal({ THREE, scene, frame, layer, opening, preview, createVideo = () => document.createElement("video") }) {
   const plane = getLiquidPortalPlane(opening);
   const geometry = new THREE.PlaneGeometry(plane.width, plane.height);
-  const baseMaterial = new THREE.MeshBasicMaterial({ color: 0x031f16, toneMapped: false, depthTest: true, depthWrite: true });
+  const baseMaterial = new THREE.MeshBasicMaterial({ color: 0x030303, toneMapped: false, depthTest: true, depthWrite: true });
   // Compatibility path for pages that have no capturable canvas or browsers
   // that reject captureStream. The real iframe is BELOW the WebGL canvas.
   // This opaque-pass shader writes zero alpha AND depth at the same world

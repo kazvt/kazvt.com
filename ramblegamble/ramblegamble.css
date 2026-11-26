@@ -86,7 +86,7 @@ body.ramble-page *::after {
   padding: 0;
   border: 0;
   opacity: 1;
-  background: #031f16;
+  background: #030303;
   filter: none;
   mix-blend-mode: normal;
   pointer-events: none;
@@ -384,7 +384,7 @@ body.ramble-page *::after {
   overflow: hidden;
   border: 0;
   color: var(--ink);
-  background: transparent;
+  background: #030303;
   font-family: Arial, Helvetica, sans-serif !important;
   opacity: 0;
   transition: opacity 320ms ease;
@@ -416,7 +416,8 @@ body.ramble-page *::after {
 
 .rg-dice-liquid {
   z-index: 0;
-  opacity: .5;
+  background: #030303;
+  opacity: 1;
   pointer-events: none;
 }
 
