@@ -1,6 +1,6 @@
 import { RG_CONTESTANTS } from "./points-store.mjs?v=points-console-20261120-v1";
 
-export const POINTS_HELP = "help - clear - points [faroe|erin|kaz] - points add <name> [amount] - points set <name> <total> - points reset [name] - smeemo start|reset";
+export const POINTS_HELP = "help - clear - points [faroe|erin|kaz] - points add <name> [amount] - points set <name> <total> - points reset [name] - smeemo start|reset - trivia <round 1-36> <difficulty 1-5> - trivia answers|close|next|previous|hide|show";
 
 function parseName(value) {
   const name = String(value || "").trim().replace(/^@/, "").toLowerCase();
@@ -27,6 +27,12 @@ export function parsePointsCommand(rawCommand) {
     return ["start", "reset"].includes(subcommand)
       ? { action: `smeemo-${subcommand}` }
       : { action: "error", message: "Use: smeemo start or smeemo reset." };
+  }
+  if (action === "trivia") {
+    if(args.length===1 && ["answers","close","next","previous","hide","show"].includes(args[0].toLowerCase()))return {action:`trivia-${args[0].toLowerCase()}`};
+    const round=parseWholeNumber(args[0],{positive:true}),difficulty=parseWholeNumber(args[1],{positive:true});
+    if(args.length===2&&round!==null&&round<=36&&difficulty!==null&&difficulty<=5)return {action:"trivia-start",round:String(round).padStart(2,"0"),difficulty};
+    return {action:"error",message:"Use: trivia <round 1-36> <difficulty 1-5>, or trivia answers/close/next/previous/hide/show."};
   }
   if (action !== "points") return { action: "error", message: `Unknown command: ${verb}. Type help.` };
   if (!args.length) return { action: "inspect-all" };

@@ -1,5 +1,5 @@
 import { loadHostIdentity, nonce, validNonce, transcript, channelBinding, signHost, verifySeat } from "./card-room-auth.mjs?v=host-security-20261126-v1";
-import { ROOM_VERSION, createRoom, validRoom, playerRound, encodePacket, decodePacket, acceptSubmission, isPlayer, randomToken } from "./card-room-protocol.mjs?v=host-security-20261126-v1";
+import { ROOM_VERSION, createRoom, validRoom, playerRound, encodePacket, decodePacket, acceptSubmission, isPlayer, randomToken } from "./card-room-protocol.mjs?v=live-trivia-20261126-v1";
 import { loadPeer } from "./card-room-peer.mjs";
 import { CARD_GAME_PLAYERS } from "./card-games.mjs?v=scene-table-20261126-v1";
 import { electReader, withRoomSubmissionLock, ROOM_KEY, ENABLED_KEY, STATUS_KEY } from "./card-room-election.mjs";
@@ -12,7 +12,7 @@ export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/
   const write = (key, value) => { try { storage.setItem(key, JSON.stringify(value)); return true; } catch { return false; } };
   let initFailed = false, hostIdentity = null, room = null, leader = false, awake = true, disposed = false, shared = false;
   let peer = null, retry = null, connectionTimer = null, retryDelay = 1000, generation = 0;
-  const clients = new Map(), incomingConnections = new Map();
+  const clients = new Map(), incomingConnections = new Map(), sentStates = new WeakMap();
   const status = root.querySelector('[data-room-status]');
   const links = root.querySelector('[data-room-links]');
   const start = root.querySelector('[data-room-start]');
@@ -30,7 +30,7 @@ export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/
       const envelope = { v: ROOM_VERSION, room: room.id, player, token: room.tokens[player], hostKey: room.hostKey };
       url.hash = encodePacket(envelope);
       const round = playerRound(getRound(), player);
-      const offline = new URL(url); offline.hash = encodePacket({ ...envelope, round });
+      const offline = new URL(url); const offlineFits = JSON.stringify(round).length < 40000; if (offlineFits) offline.hash = encodePacket({ ...envelope, round });
       const row = doc.createElement('div');
       const link = doc.createElement('a'); link.href = url.href; link.target = '_blank'; link.rel = 'noopener noreferrer';
       link.textContent = `${player.toUpperCase()} — ${enabled() && current?.connected?.includes(player) ? 'connected' : 'invite'}`;
@@ -45,7 +45,7 @@ export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/
       row.append(link, copyButton('COPY LINK', url.href, `Copied ${player.toUpperCase()} live invite.`));
       const revoke = doc.createElement('button'); revoke.type='button'; revoke.textContent='REVOKE / REISSUE';
       revoke.addEventListener('click', () => { if (env.confirm?.(`Revoke ${player.toUpperCase()}’s invitation? Send the replacement privately. Saved answers stay.`)) return changeCredentials(player); }); row.append(revoke);
-      if (round?.phase === 'submissions' && !round.submitted) row.append(copyButton('OFFLINE ROUND', offline.href, `Copied ${player.toUpperCase()} offline round link.`));
+      if (round?.phase === 'submissions' && !round.submitted && offlineFits && offline.hash.length <= 60001) row.append(copyButton('OFFLINE ROUND', offline.href, `Copied ${player.toUpperCase()} offline round link.`));
       links.append(row);
     }
   }
@@ -64,8 +64,8 @@ export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/
     write(STATUS_KEY, { role, text, connected: [...clients.keys()] });
     refreshStatus();
   }
-  function sendState(conn, player) {
-    if (leader && enabled() && conn.open && room && read(ROOM_KEY)?.id === room.id && read(ROOM_KEY)?.tokens?.[player] === room.tokens[player]) { try { conn.send({ v: ROOM_VERSION, type: 'round', round: playerRound(getRound(), player) }); } catch {} }
+  function sendState(conn, player, force=false) {
+    if (leader && enabled() && conn.open && room && read(ROOM_KEY)?.id === room.id && read(ROOM_KEY)?.tokens?.[player] === room.tokens[player]) { try { const payload={v:ROOM_VERSION,type:"round",round:playerRound(getRound(),player)};const key=JSON.stringify(payload);if(force||sentStates.get(conn)!==key){conn.send(payload);sentStates.set(conn,key);} } catch {} }
   }
   function publish() {
     refreshLinks();
@@ -119,7 +119,7 @@ export function mountCardRoom(root, { getRound, commitRound, onStatus, role = '/
         const submission={v:ROOM_VERSION,type:'submit',room:room.id,player:identity,token:seatToken,roundId:message.roundId,answer:message.answer};
         let result;
         try { result=await accept(submission,current); } catch { result='storage-error'; }
-        if(current()) { try { conn.send({v:ROOM_VERSION,type:'ack',roundId:submission.roundId,status:result}); } catch {} sendState(conn,identity); }
+        if(current()) { try { conn.send({v:ROOM_VERSION,type:'ack',roundId:submission.roundId,status:result}); } catch {} sendState(conn,identity,true); }
       } catch { conn.close(); }
     });
     function cleanup() {

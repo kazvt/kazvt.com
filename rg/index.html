@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
     <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=vip-world-plane-20261126-v1">
     <link rel="stylesheet" href="/ramblegamble/host-console.css?v=scene-table-20261126-v1">
+    <link rel="stylesheet" href="/ramblegamble/trivia-live.css?v=live-trivia-20261126-v1">
     <link rel="stylesheet" href="/ramblegamble/card-games.css?v=scene-table-20261126-v1">
     <script type="importmap">
       {
@@ -21,7 +22,7 @@
       }
     </script>
     <link rel="stylesheet" href="/ramblegamble/host-access.css?v=host-security-20261126-v1">
-    <script type="module" src="/ramblegamble/host-access.mjs?v=host-security-20261126-v1"></script>
+    <script type="module" src="/ramblegamble/host-access.mjs?v=live-trivia-20261126-v1"></script>
   </head>
   <body class="ramble-page" data-theme="p2">
     <main class="rg-preview" id="rg-preview">
@@ -54,6 +55,10 @@
           <div class="rg-card-games-content" id="rg-card-games-content"></div>
         </div>
         <p class="rg-visually-hidden" id="rg-card-live-status" role="status" aria-live="polite" aria-atomic="true"></p>
+      </section>
+      <section id="rg-live-trivia" class="rg-live-stage" aria-label="Live trivia question" hidden>
+        <div id="rg-live-trivia-content" class="rg-live-stage-content"></div>
+        <button type="button" id="rg-live-trivia-back" class="rg-live-back" aria-label="Back to room">BACK</button>
       </section>
       <div class="rg-loading" id="rg-loading">Loading the 3D preview...</div>
     </main>
@@ -100,7 +105,8 @@
       <p>CLICK - CHOOSE - ← → - LOOK</p>
       <p>↓ / BACKSPACE - BACK - ESC - PAUSE</p>
       <p>P - PEOPLE - H - HOST - 2 - SLOTS - 3 - ROULETTE - 5 - CARDS - D - DOOR - CLICK AGAIN - DICE</p>
-      <p>C - CHEER - R - SPIN - S - LEVER</p>
+      <p>C - CHEER - R - SPIN - S - LEVER - T - LATEST TRIVIA</p>
+      <p>RIGHT CLICK - MACHINE HOST CONTROLS</p>
     </dialog>
 
     <dialog class="rg-dice-dialog" id="rg-dice-dialog" aria-labelledby="rg-dice-title">
@@ -188,13 +194,14 @@
 
         <section class="rg-console-panel" id="rg-panel-trivia" role="tabpanel" aria-labelledby="rg-tab-trivia" tabindex="0" hidden>
           <div class="rg-panel-heading rg-trivia-heading">
-            <div><p class="rg-kicker">HOST-OPERATED ROUND</p><h2>Trivia stage</h2><p class="rg-panel-copy">Opened by point-and-clicking the roulette center or rim.</p></div>
+            <div><p class="rg-kicker">HOST-OPERATED ROUND</p><h2>Trivia stage</h2><p class="rg-panel-copy">Right-click roulette for setup. Left-click its center or rim to view the latest question.</p></div>
             <div class="rg-round-pickers">
               <label>ROUND<select id="rg-round-select"></select></label>
               <label>DIFFICULTY<select id="rg-difficulty-select"><option value="1">01</option><option value="2">02</option><option value="3">03</option><option value="4">04</option><option value="5">05</option></select></label>
               <button class="rg-secondary-button rg-present-toggle" id="rg-present-toggle" type="button" aria-pressed="false">PRESENT</button>
             </div>
           </div>
+          <section class="rg-text-transfer"><h3>LIVE ANSWERS</h3><div id="rg-live-host-answers"></div><button class="rg-secondary-button" type="button" id="rg-live-host-close">CLOSE ANSWERS</button></section>
           <section class="rg-text-transfer" aria-labelledby="rg-text-transfer-title">
             <div class="rg-text-transfer-heading"><div><h3 id="rg-text-transfer-title">TRIVIA TEXT FILE</h3><p>Export a complete backup or import a .txt, .csv, .tsv, or JSON text file. Imports are previewed before they change this session.</p></div>
               <button class="rg-secondary-button" id="rg-export-trivia" type="button">EXPORT .TXT</button>

@@ -6,7 +6,8 @@ import {
   resolvePointClickZone,
   resolveArcadeShortcut,
   resolveSlotContextCell,
-} from "./point-click-routing.js?v=wildcard-shared-20261126-v1";
+  resolveHostContextAction,
+} from "./point-click-routing.js?v=live-trivia-20261126-v1";
 import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
 import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-door-wall-target-20261120-v1";
 import { readPointScores, subscribePointScores, writePointScores } from "./points-store.mjs?v=points-console-20261120-v1";
@@ -192,6 +193,8 @@ import {
   let overviewCameraBounds = null;
   let cursorMode = "";
   let pendingCardGameMode = "";
+  let pendingTrivia = false;
+  const triviaLayer = document.getElementById("rg-live-trivia");
   let skyRandomState = 0x4b415a56;
 
   function updateLiquidPortal(time = performance.now()) {
@@ -1162,6 +1165,14 @@ import {
   }
 
   function getCameraPoseForView(view, aspect) {
+    if (view.kind === "trivia") {
+      // The actual uninterrupted back-wall panels run x=4.51..9.14, z=-6.16.
+      // Face the central panel squarely, above the nearby raised-floor lip.
+      const target = new THREE.Vector3(7.15, 1.57, -6.10);
+      const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+      const distance = Math.max(1.45 / tan, 1.9 / (tan * Math.max(.5, aspect)));
+      return {target,position:target.clone().add(new THREE.Vector3(0,0,distance))};
+    }
     const bounds = getViewBounds(view);
     if (bounds.isEmpty()) return null;
     const target = bounds.getCenter(new THREE.Vector3());
@@ -2138,7 +2149,22 @@ import {
     canvas.focus({ preventScroll: true });
   }
 
+  function activateTriviaMode() {
+    if (!sceneReady || diceModeOpen) { pendingTrivia=true; if(diceModeOpen)window.dispatchEvent(new Event("rg:close-dice-mode")); return; }
+    pendingTrivia=false; pendingCardGameMode="";
+    if (!gameStarted) {
+      gameStarted=true;pauseMenuOpen=false;readyScreen.hidden=true;pauseMenu.hidden=true;preview.classList.remove("is-menu");setMenuSceneVisibility(true);menuMarquee.pause();
+      try{menuMarquee.currentTime=0;}catch{}
+    }
+    hideResult();hideGameCursor();
+    window.dispatchEvent(new Event("rg:trivia-stage-open"));
+    window.dispatchEvent(new Event("rg:close-host-panel"));
+    transitionToView({kind:"trivia"});
+  }
+  window.addEventListener("rg:show-trivia-stage",activateTriviaMode);
+  window.addEventListener("rg:hide-trivia-stage",()=>{pendingTrivia=false;if(currentView.kind==="trivia"&&sceneReady)transitionToView({kind:"overview"});});
   function activateCardGameMode(mode) {
+    pendingTrivia=false;
     if (!new Set(["red-handed", "quiplash", "shop", "smeemo", "menu"]).has(mode)) return;
     if (!sceneReady) {
       pendingCardGameMode = mode;
@@ -2197,6 +2223,7 @@ import {
   function pointClickAt(clientX, clientY) {
     if (!gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen || cameraTransition) return;
     const rect = preview.getBoundingClientRect();
+    if(currentView.kind==="trivia") { if(clientY>=rect.bottom-Math.min(84,Math.max(48,rect.height*.11)))goBack(); return; }
     const interaction = getSceneInteractionAt(clientX, clientY);
     if (!interaction) {
       const zone = resolvePointClickZone({
@@ -2270,7 +2297,7 @@ import {
       }
     }
     else if (action === "open-slots") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "slots" } }));
-    else if (action === "open-trivia") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "trivia" } }));
+    else if (action === "show-trivia") window.dispatchEvent(new Event("rg:show-latest-trivia"));
   }
 
   canvas.addEventListener("pointermove", updatePointer);
@@ -2279,12 +2306,17 @@ import {
   });
   canvas.addEventListener("contextmenu", (event) => {
     if (!gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen || cameraTransition) return;
-    if (currentView.kind !== "slot" || selectedSlotBerry !== SLOT_REEL_WILDCARD || event.button !== 2) return;
+    if(event.button!==2)return;
+    const interaction=getSceneInteractionAt(event.clientX,event.clientY);
     const index = resolveSlotContextCell({
       button: event.button, view: currentView.kind, selected: selectedSlotBerry,
-      interaction: getSceneInteractionAt(event.clientX, event.clientY),
+      interaction,
     });
-    if (index < 0) return;
+    if (index < 0) {
+      const tab=resolveHostContextAction(interaction);
+      if(tab){event.preventDefault();window.dispatchEvent(new CustomEvent("rg:open-host-panel",{detail:{tab}}));}
+      return;
+    }
     // Do not open a browser menu over a slot cell, even if it is empty or busy.
     event.preventDefault();
     if (playing || slotReelMotion || slotWildcardPop) return;
@@ -2325,6 +2357,7 @@ import {
       billboardLayer.classList.remove("rg-billboards-fading");
       preview.classList.remove("is-dice-mode");
       camera.updateMatrixWorld(true);
+      if(pendingTrivia)activateTriviaMode();
     }
   });
 
@@ -2337,6 +2370,7 @@ import {
     // Keep native button activation: the canvas shortcut must not steal row clicks.
     if ((key === "enter" || key === " ") && event.target instanceof Element && event.target.closest("button, [role='button']")) return;
     if (key === "escape") {
+      if(currentView.kind==="trivia"){goBack();event.preventDefault();return;}
       showPauseMenu();
       event.preventDefault();
       return;
@@ -2365,7 +2399,7 @@ import {
     else if (key === "r") startWheelSpin();
     else if (key === "s") startLeverPull();
     else if (key === "g") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "slots" } }));
-    else if (key === "t") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "trivia" } }));
+    else if (key === "t") { if(event.shiftKey)window.dispatchEvent(new CustomEvent("rg:open-host-panel",{detail:{tab:"trivia"}}));else window.dispatchEvent(new Event("rg:show-latest-trivia")); }
     else if (shortcut !== "cheer") return;
     event.preventDefault();
   });
@@ -2528,6 +2562,8 @@ import {
     if (!renderer || !scene || !camera) return;
 
     updateCameraTransition(time);
+    preview.classList.toggle("is-trivia",currentView.kind === "trivia");
+    if (triviaLayer) triviaLayer.hidden = !(gameStarted && !pauseMenuOpen && !diceModeOpen && sceneReady && !cameraTransition && currentView.kind === "trivia" && triviaLayer.dataset.ready === "true");
     updateCardTableProjection();
     updateSkyAnimations(time);
     updateLiquidPortal(time);
@@ -2686,6 +2722,7 @@ import {
         pendingCardGameMode = "";
         activateCardGameMode(mode);
       }
+      if(pendingTrivia)activateTriviaMode();
       loading.classList.add("is-hidden");
     } catch (error) {
       console.error("Ramble Gamble preview failed to start:", error);

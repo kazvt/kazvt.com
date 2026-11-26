@@ -1,6 +1,5 @@
 import {
   CARD_GAME_STORAGE_KEY,
-  emptyCardGamesState,
   normalizeCardGamesState,
 } from "./card-games.mjs?v=scene-table-20261126-v1";
 
@@ -15,16 +14,21 @@ function getChannel() {
   return channel;
 }
 
+const activityKey = state => JSON.stringify([state?.smeemo?.id || state?.smeemo?.mode || null,state?.round?.id || state?.round?.mode || null]);
+function normalizeStored(value) { return {...normalizeCardGamesState(value),activityRevision:typeof value?.activityRevision === "string" ? value.activityRevision : ""}; }
+
 export function readCardGames() {
   try {
-    return normalizeCardGamesState(JSON.parse(globalThis.localStorage.getItem(CARD_GAME_STORAGE_KEY) || "null"));
+    return normalizeStored(JSON.parse(globalThis.localStorage.getItem(CARD_GAME_STORAGE_KEY) || "null"));
   } catch {
-    return emptyCardGamesState();
+    return normalizeStored(null);
   }
 }
 
-export function writeCardGames(value, { requirePersistence = false } = {}) {
-  const state = normalizeCardGamesState(value);
+export function writeCardGames(value, { requirePersistence = false, activate = false } = {}) {
+  const previous = readCardGames();
+  const state = normalizeStored(value);
+  state.activityRevision = activate || activityKey(previous) !== activityKey(state) ? globalThis.crypto.randomUUID() : previous.activityRevision;
   let persisted = true;
   try { globalThis.localStorage.setItem(CARD_GAME_STORAGE_KEY, JSON.stringify(state)); }
   catch { persisted = false; }
@@ -40,7 +44,7 @@ export function updateCardGames(update) {
 export function subscribeCardGames(onChange) {
   let previous = "";
   const publish = (value) => {
-    const state = normalizeCardGamesState(value);
+    const state = normalizeStored(value);
     const serialized = JSON.stringify(state);
     if (serialized === previous) return;
     previous = serialized;

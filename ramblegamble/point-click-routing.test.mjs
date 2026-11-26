@@ -28,12 +28,12 @@ test("participant and host aliases coexist with their number shortcuts, and C is
 test("roulette parts distinguish direct play from opening trivia", () => {
   assert.equal(resolvePointClick("roulette", "wheel"), "spin-wheel");
   assert.equal(resolvePointClick("roulette", "ball"), "spin-wheel");
-  assert.equal(resolvePointClick("roulette", "center"), "open-trivia");
-  assert.equal(resolvePointClick("roulette", "rim"), "open-trivia");
+  assert.equal(resolvePointClick("roulette", "center"), "show-trivia");
+  assert.equal(resolvePointClick("roulette", "rim"), "show-trivia");
 });
 
-test("the slot cabinet opens its host editor, five hardware buttons spin reels, and arm spins all", () => {
-  assert.equal(resolvePointClick("slot", "machine"), "open-slots");
+test("the slot cabinet has no left-click staff action, hardware buttons spin reels, and arm spins all", () => {
+  assert.equal(resolvePointClick("slot", "machine"), "");
   assert.equal(resolvePointClick("slot", "slot-reel-display"), "place-slot-berry");
   assert.equal(resolvePointClick("slot", "button1"), "spin-column-0");
   assert.equal(resolvePointClick("slot", "button3"), "spin-column-2");

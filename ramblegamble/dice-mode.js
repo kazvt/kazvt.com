@@ -505,6 +505,7 @@ import {
     closeDiceMode();
   });
   window.addEventListener("rg:open-dice-mode", openDiceMode);
+  window.addEventListener("rg:close-dice-mode", closeDiceMode);
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
       cancelAnimationFrame(frame);

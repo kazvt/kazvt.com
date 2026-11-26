@@ -1,0 +1,38 @@
+/* Scene-facing presentation, not a modal. No full-screen backdrop or editor chrome. */
+.rg-live-stage {position:absolute;z-index:9;inset:5% 12% 8%;display:grid;grid-template-rows:minmax(0,1fr) auto;pointer-events:none;color:#fff;text-align:center;font-family:Arial,Helvetica,sans-serif;}
+.rg-live-stage[hidden], .rg-live-question[hidden] {display:none!important;}
+.rg-live-stage-content{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(4px,1.3vh,14px);min-height:0;overflow:auto;scrollbar-width:thin;pointer-events:auto;}
+.rg-live-question{font-size:clamp(20px,4.1vw,50px);font-weight:900;line-height:1.12;margin:0;max-width:100%;overflow-wrap:anywhere;text-shadow:0 2px 2px #3f2178;white-space:pre-wrap;}
+.rg-live-subtitle{font-size:clamp(13px,2.2vw,26px);font-weight:700;margin:0;color:#e1d3f9;line-height:1.2;overflow-wrap:anywhere;text-shadow:0 1px 2px #3f2178;white-space:pre-wrap;}
+.rg-live-prompt-image,.rg-live-video{max-width:100%;max-height:32vh;object-fit:contain;min-height:0;}
+.rg-live-body{min-height:0;width:100%;display:flex;flex-direction:column;gap:8px;align-items:center;overflow:auto;}
+.rg-live-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(5px,1vw,12px);width:100%;min-width:0;}
+.rg-live-tile{display:flex;flex-direction:column;justify-content:center;align-items:center;min-width:0;min-height:clamp(34px,6vh,75px);border:3px solid #6457ef;background:#a6a1fa;color:#211844;font-size:clamp(13px,2.2vw,27px);font-weight:800;padding:6px;overflow-wrap:anywhere;text-align:center;}
+.rg-live-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;width:100%;}
+.rg-live-image{display:block;max-width:100%;max-height:18vh;object-fit:contain;}
+.rg-live-stage-content[data-kind="choice-image"] .rg-live-grid,.rg-live-stage-content[data-kind="image-grid"] .rg-live-grid,.rg-live-stage-content[data-kind="choice-image-wide"] .rg-live-grid{grid-template-columns:repeat(3,minmax(0,1fr));}
+.rg-live-stage-content[data-kind="image-grid"] .rg-live-grid:is([data-count="10"],[data-count="12"],[data-count="13"],[data-count="15"],[data-count="16"],[data-count="20"],[data-count="24"]),.rg-live-stage-content[data-kind="choice-image"] .rg-live-grid[data-count="10"]{grid-template-columns:repeat(5,minmax(0,1fr));}
+.rg-live-stage-content[data-kind="choice-image-wide"] .rg-live-image{aspect-ratio:2.35;object-fit:contain;}
+.rg-live-stage-content:is([data-kind="image-grid"],[data-kind="choice-image"],[data-kind="choice-image-wide"]) .rg-live-tile{background:transparent;border:0;color:white;text-shadow:0 1px 2px #3f2178;padding:2px;min-height:0;}
+.rg-live-stage-content[data-kind="image-grid"] .rg-live-image{max-height:13vh;}
+.rg-live-number-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;max-width:260px;width:100%;}
+.rg-live-digit{display:grid;place-items:center;aspect-ratio:1;background:#a6a1fa;border:2px solid #6457ef;color:#211844;font-weight:800;}.rg-live-digit[data-result=green]{background:#65c489;}.rg-live-digit[data-result=yellow]{background:#ffde5a;}.rg-live-digit[data-result=grey]{background:#999;}
+.rg-live-artboard{position:relative;aspect-ratio:3/2;width:min(100%,520px);max-height:40vh;background:#e5dbfb;overflow:hidden;margin:auto;}.rg-live-artboard img,.rg-live-artboard canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;}.rg-live-artboard canvas{z-index:1;}
+.rg-live-button{font:inherit;cursor:pointer;padding:8px 14px;border:2px solid #6457ef;background:#a6a1fa;color:#211844;}.rg-live-button[aria-pressed=true]{outline:3px solid #5cf0b2;outline-offset:-3px;background:#d6d1ff;}.rg-live-input{font:inherit;max-width:100%;width:100%;padding:8px;border:2px solid #6457ef;color:#211844;background:#f3efff;}.rg-live-feedback{font-size:14px;margin:4px 0;color:#e1d3f9;}.rg-live-response{display:grid;gap:6px;border-bottom:1px solid #ad93dd;padding:7px;overflow-wrap:anywhere;}.rg-live-response .rg-live-artboard{max-height:200px;}
+.rg-live-back{pointer-events:auto;justify-self:center;font-size:12px;background:#4b317b;color:white;border:1px solid #a6a1fa;padding:5px 12px;}
+#trivia-player-content .rg-live-question{font-size:clamp(22px,5vw,32px);text-align:center;}#trivia-player-content .rg-live-subtitle{font-size:16px;text-align:center;}#trivia-player-content .rg-live-tile{font-size:16px;min-height:50px;}#trivia-player-content .rg-live-body{overflow:visible;}#trivia-player-content .rg-live-grid{gap:8px;}#trivia-player-content .rg-live-prompt-image{display:block;margin:auto;}#trivia-player-content .rg-live-button{min-height:44px;}#trivia-player-content .rg-live-image{max-height:160px;}
+@media(max-width:600px){.rg-live-stage{inset:5% 5% 7%;}.rg-live-stage-content[data-kind="image-grid"] .rg-live-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;}.rg-live-stage-content{justify-content:flex-start;}.rg-live-tile{font-size:14px;}}
+@media(prefers-reduced-motion:no-preference){.rg-live-stage:not([hidden]){animation:rg-live-in 180ms ease-out;}@keyframes rg-live-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}}
+
+/* Keep the stage uncluttered; high-cardinality grids compress instead of covering the room. */
+.rg-preview.is-trivia .rg-result,.rg-preview.is-trivia .rg-points-hud{display:none!important;}
+.rg-live-stage-content{justify-content:safe center;}
+.rg-live-stage-content .rg-live-grid{grid-template-columns:repeat(var(--rg-columns,2),minmax(0,1fr))!important;}
+.rg-live-stage-content .rg-live-body{flex-shrink:1;}
+.rg-live-stage-content .rg-live-question,.rg-live-stage-content .rg-live-subtitle{flex-shrink:0;}
+.rg-live-stage-content:is([data-kind="categorize-images"],[data-kind="match-pairs"]) .rg-live-tile{font-size:clamp(11px,1.5vw,19px);min-height:25px;}
+.rg-live-stage-content[data-kind="categorize-images"] .rg-live-image{max-height:10vh;}
+.rg-live-artboard{flex-shrink:0;max-height:none;width:min(100%,520px,68vh);}
+#trivia-player-content .rg-live-artboard{width:min(100%,520px);max-height:none;}
+.rg-live-button:focus-visible,.rg-live-input:focus-visible{outline:3px solid #5cf0b2;outline-offset:2px;}
+@media(max-width:600px){.rg-live-stage-content .rg-live-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;}.rg-live-stage-content:is([data-kind="image-grid"],[data-kind="choice-image"],[data-kind="choice-image-wide"],[data-kind="categorize-images"]) .rg-live-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;}}

@@ -1,13 +1,14 @@
+import { activeRoomRound, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, newTriviaId, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, updateTrivia, answerSummary } from "/ramblegamble/live-trivia.mjs";
 import { withRoomSubmissionLock } from "/ramblegamble/card-room-election.mjs";
-import { mountCardRoom } from "/ramblegamble/card-room-host.mjs?v=host-security-20261126-v1";
+import { mountCardRoom } from "/ramblegamble/card-room-host.mjs?v=live-trivia-20261126-v1";
 import {
   RG_CONTESTANTS,
   readPointScores,
   writePointScores,
 } from "/ramblegamble/points-store.mjs?v=points-console-20261120-v1";
-import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=rg-smeemo-manual-20261125-v1";
+import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=live-trivia-20261126-v1";
 import { createSmeemoGame } from "/ramblegamble/card-games.mjs?v=scene-table-20261126-v1";
-import { readCardGames, writeCardGames, subscribeCardGames } from "/ramblegamble/card-games-store.mjs?v=reader-election-20261126-v1";
+import { readCardGames, writeCardGames, subscribeCardGames } from "/ramblegamble/card-games-store.mjs?v=live-trivia-20261126-v1";
 
 const output = document.getElementById("terminal-output");
 const form = document.getElementById("terminal-form");
@@ -63,6 +64,19 @@ async function execute(rawCommand) {
     addLine(`Smeemo Scramble reset${result.persisted ? "" : " - update sent to open tabs only"}`);
     });
     return;
+  }
+  if (parsed.action === "trivia-start") {
+    const id=newTriviaId();
+    try { localStorage.setItem(TRIVIA_REQUEST_KEY,JSON.stringify({id,round:parsed.round,difficulty:parsed.difficulty,at:Date.now()})); addLine(`Trivia ${parsed.round} / ${parsed.difficulty} — sending to /rg/…`); }
+    catch { addLine("Could not send the trivia command; browser storage unavailable.","terminal-error"); return; }
+    setTimeout(()=>{try { if(JSON.parse(localStorage.getItem(TRIVIA_REPLY_KEY))?.id!==id&&JSON.parse(localStorage.getItem(TRIVIA_REQUEST_KEY))?.id===id)addLine("No display reply. Keep the /rg/ tab open and unlocked with the imported question bank.","terminal-error"); }catch{}},12000);
+    return;
+  }
+  if (parsed.action.startsWith("trivia-")) {
+    const action=parsed.action.slice(7),round=readLiveTrivia();
+    if(!round){addLine("No live trivia question.","terminal-error");return;}
+    if(action==='answers'){for(const player of RG_CONTESTANTS)addLine(`${player}: ${answerSummary(round,player)}`);return;}
+    try{await updateTrivia(current=>{if(!current||current.id!==round.id)throw Error('Question changed.');if(action==='close')return {...current,phase:'closed'};const q={...current.question};if(['next','previous'].includes(action)){if(!['image-sequence','text-sequence'].includes(q.kind))throw Error('Not a sequence.');q.sequenceIndex=Math.max(0,Math.min(q.items.length-1,q.sequenceIndex+(action==='next'?1:-1)));}else{if(q.kind!=='memory-number')throw Error('Not a memory question.');q.imageVisible=action==='show';q.promptImage=q.imageVisible?current.secret.memoryImage:'';}return {...current,question:q};});addLine(`Trivia ${action}.`);}catch(e){addLine(e.message,"terminal-error");}return;
   }
   const scores = readPointScores();
   if (parsed.action === "inspect-all") {
@@ -126,8 +140,11 @@ addLine(formatScores(readPointScores()));
 
 const cardRoom = mountCardRoom(document.getElementById("console-card-room"), {
   role: "/rg/console/",
-  getRound: () => { const state = readCardGames(); return state.smeemo ? null : state.round; },
-  commitRound: round => { return writeCardGames({ ...readCardGames(), round }, { requirePersistence: true }).persisted; },
+  getRound: () => activeRoomRound(),
+  commitRound: round => { if(round.mode==='trivia')return writeLiveTrivia(round); return writeCardGames({ ...readCardGames(), round }, { requirePersistence: true }).persisted; },
   onStatus: message => addLine(message),
 });
 subscribeCardGames(() => cardRoom.publish());
+
+subscribeLiveTrivia(()=>cardRoom.publish());
+window.addEventListener("storage",event=>{if(event.key!==TRIVIA_REPLY_KEY)return;try{const reply=JSON.parse(event.newValue);if(reply?.message)addLine(reply.message,reply.ok?"":"terminal-error");}catch{}});

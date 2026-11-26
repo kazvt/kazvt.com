@@ -15,11 +15,11 @@ const submit=gate.querySelector('[type=submit]');
 const lockButtons=[...document.querySelectorAll('[data-host-lock]')];
 let access, booted=false, bootPromise=null, busy=false, locked=true, inertBefore=new Map();
 const isConsole=location.pathname.replace(/\/$/,'').endsWith('/console');
-const appModules=isConsole? ['/rg/console/console.js?v=host-security-20261126-v1'] : [
-  '/ramblegamble/ramblegamble.js?v=vip-world-plane-20261126-v1',
-  '/ramblegamble/dice-mode.js?v=scene-table-20261126-v1',
-  '/ramblegamble/trivia-ui.js?v=wildcard-shared-20261126-v1',
-  '/ramblegamble/card-games-ui.js?v=host-security-20261126-v1',
+const appModules=isConsole? ['/rg/console/console.js?v=live-trivia-20261126-v1'] : [
+  '/ramblegamble/ramblegamble.js?v=live-trivia-20261126-v1',
+  '/ramblegamble/dice-mode.js?v=live-trivia-20261126-v1',
+  '/ramblegamble/trivia-ui.js?v=live-trivia-20261126-v1',
+  '/ramblegamble/card-games-ui.js?v=live-trivia-20261126-v1',
 ];
 function setLocked(next) {
   const changed=locked!==next;locked=next;

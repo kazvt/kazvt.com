@@ -12,13 +12,13 @@ export function resolveArcadeShortcut(key) {
 
 export function resolvePointClick(machine, part = "", focused = false) {
   if (machine === "dice-door") return focused ? "open-dice" : "focus-dice-door";
-  if (machine === "roulette") return ROULETTE_MENU_PARTS.has(part) ? "open-trivia" : "spin-wheel";
+  if (machine === "roulette") return ROULETTE_MENU_PARTS.has(part) ? "show-trivia" : "spin-wheel";
   if (machine === "slot") {
     if (part === "arm") return "pull-lever";
     if (part === "slot-reel-display") return "place-slot-berry";
     const button = /^button([1-5])$/.exec(part);
     if (button) return `spin-column-${Number(button[1]) - 1}`;
-    return "open-slots";
+    return "";
   }
   return "";
 }
@@ -42,6 +42,7 @@ export function resolvePointClickAction({ zone = "", machine = "", part = "", fo
   if (machine === "host") return focused ? "" : "focus-host";
   if (machine === "contestant") return focused ? "" : "focus-contestants";
   if (machine === "card-table") return focused ? "open-card-games" : "focus-card-table";
+  if (machine === "roulette" && ROULETTE_MENU_PARTS.has(part)) return "show-trivia";
   if ((machine === "roulette" || machine === "slot") && !focused) return `focus-${machine}`;
   return resolvePointClick(machine, part, focused);
 }
@@ -69,4 +70,11 @@ export function resolveSlotContextCell({ button, view, selected, interaction } =
   return button === 2 && view === "slot" && selected === "star"
     && interaction?.machine === "slot" && interaction.part === "slot-reel-display"
     && Number.isInteger(index) && index >= 0 && index < 15 ? index : -1;
+}
+
+export function resolveHostContextAction(interaction) {
+  if(interaction?.machine === "roulette") return "trivia";
+  if(interaction?.machine === "slot") return "slots";
+  if(interaction?.machine === "card-table") return "card-games";
+  return "";
 }

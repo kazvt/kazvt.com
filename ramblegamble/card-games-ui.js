@@ -1,6 +1,7 @@
+import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia } from "./live-trivia.mjs";
 import { activeCardStage, cardStageChange } from "./card-stage-state.mjs?v=wildcard-shared-20261126-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
-import { mountCardRoom } from "./card-room-host.mjs?v=host-security-20261126-v1";
+import { mountCardRoom } from "./card-room-host.mjs?v=live-trivia-20261126-v1";
 import { foley } from "./game-foley.mjs?v=slot-foley-20261126-v3";
 import {
   CARD_GAME_CATEGORIES,
@@ -18,7 +19,7 @@ import {
   submitRoundAnswer,
   buyShopCard,
 } from "./card-games.mjs?v=wildcard-shared-20261126-v1";
-import { readCardGames, writeCardGames, subscribeCardGames } from "./card-games-store.mjs?v=reader-election-20261126-v1";
+import { readCardGames, writeCardGames, subscribeCardGames } from "./card-games-store.mjs?v=live-trivia-20261126-v1";
 import { readPointScores, subscribePointScores, writePointScores } from "./points-store.mjs?v=points-console-20261120-v1";
 
 (() => {
@@ -292,14 +293,18 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   }
 
   function resumeActiveStage() {
-    const latest = readCardGames();
-    const active = activeCardStage(latest);
-    if (!active) return;
-    menuOpen = false;
-    dismissedActive = false;
-    window.clearTimeout(menuTimer);
-    updateFromState(latest);
-    window.dispatchEvent(new CustomEvent("rg:card-game-active", { detail: { mode: active.mode } }));
+    return withRoomSubmissionLock(() => {
+      const latest = readCardGames();
+      const active = activeCardStage(latest);
+      if (!active) return;
+      const result = writeCardGames(latest, { activate: true, requirePersistence: true });
+      if (!result.persisted) throw Error("Card game could not be resumed.");
+      menuOpen = false;
+      dismissedActive = false;
+      window.clearTimeout(menuTimer);
+      updateFromState(result.state);
+      window.dispatchEvent(new CustomEvent("rg:card-game-active", { detail: { mode: active.mode } }));
+    }).catch(error => { adminStatus.textContent = error.message; });
   }
 
   function chooseMode(mode, choice) {
@@ -661,10 +666,12 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     renderMenu();
   });
 
-  network = mountCardRoom($("#rg-card-network"), { getRound: () => { const latest = readCardGames(); return latest.smeemo ? null : latest.round; }, commitRound: round => { const result = writeCardGames({ ...readCardGames(), round }, { requirePersistence: true }); if (result.persisted) { foley.play("place"); updateFromState(result.state); } return result.persisted; }, onStatus: message => { adminStatus.textContent = message; } });
+  network = mountCardRoom($("#rg-card-network"), { getRound: () => activeRoomRound(), commitRound: round => { if(round.mode==='trivia')return writeLiveTrivia(round); const result = writeCardGames({ ...readCardGames(), round }, { requirePersistence: true }); if (result.persisted) { foley.play("place"); updateFromState(result.state); } return result.persisted; }, onStatus: message => { adminStatus.textContent = message; } });
   loadDeckInputs(state.decks);
   setDeckVisibility();
   subscribeCardGames(updateFromState);
+  subscribeLiveTrivia(()=>network.publish());
+  window.addEventListener("rg:trivia-stage-open",()=>{ menuOpen=false; dismissedActive=Boolean(activeCardStage(state)); window.clearTimeout(smeemoPhaseTimer); smeemoPhaseTimer=0; window.clearTimeout(menuTimer); layer.hidden=true; });
   subscribePointScores((scores) => {
     pointScores = scores;
     if (state.round?.mode === "shop" && !layer.hidden && !menuOpen && !dismissedActive) renderShop(state.round);

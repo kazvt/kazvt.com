@@ -1,3 +1,7 @@
+import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, newTriviaId, updateTrivia, activeRoomRound, publicMedia } from "./live-trivia.mjs";
+import { renderLiveQuestion, renderTriviaResponses } from "./trivia-live-view.mjs";
+import { withRoomSubmissionLock } from "./card-room-election.mjs";
+import { readCardGames, subscribeCardGames } from "./card-games-store.mjs?v=live-trivia-20261126-v1";
 import { removeSlotSymbol } from "./slot-game.mjs?v=wildcard-shared-20261126-v1";
 import { foley } from "./game-foley.mjs?v=slot-foley-20261126-v3";
 import {
@@ -815,7 +819,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     if (event.target === dialog) closeConsole();
   });
   dialog.addEventListener("close", () => { if (!dialog.open) { setPresentation(false); priorFocus?.focus?.(); } });
-  presentButton.addEventListener("click", () => setPresentation(!dialog.classList.contains("is-presenting"), true));
+  presentButton.addEventListener("click", () => publishSelectedTrivia().catch(e=>{ saveState.textContent=e.message; saveState.dataset.error="true"; }));
   returnToEditButton.addEventListener("click", () => setPresentation(false, true));
   tabs.forEach((tab, index) => {
     tab.addEventListener("click", () => setTab(index));
@@ -2406,4 +2410,69 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
   window.addEventListener("pageshow", (event) => { if (event.persisted) render(); });
 
   render();
+  // Presentation is transient; persisted questions never auto-open on reload.
+  const liveLayer=$("#rg-live-trivia"), liveContent=$("#rg-live-trivia-content"), liveAnswers=$("#rg-live-host-answers");
+  let lastLiveId=readLiveTrivia()?.id||"", lastRenderedQuestion="";
+  async function portableImage(url,asset,max=220000) {
+    if(asset){
+      const blob=await readMediaBlob(asset); let data=await blobToDataUrl(blob);
+      if(data.length>max&&blob.type!=="image/gif"&&typeof createImageBitmap==="function"){
+        const bitmap=await createImageBitmap(blob);
+        try{const canvas=document.createElement("canvas");for(const limit of [1000,720,480,320,200]){const scale=Math.min(1,limit/Math.max(bitmap.width,bitmap.height));canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));canvas.getContext("2d").drawImage(bitmap,0,0,canvas.width,canvas.height);data=canvas.toDataURL("image/webp",.8);if(data.length<=max)break;}}finally{bitmap.close();}
+      }
+      if(!publicMedia(data))throw Error("Uploaded image format or size is unsupported for live trivia.");return data;
+    }
+    const result=publicMedia(url)||publicMedia(safeUrl(url));if(url&&!result)throw Error("Question contains an unsupported media URL.");return result;
+  }
+  async function portableQuestion(content,format) {
+    const output=copy(content);
+    output.promptImage=await portableImage(content.promptImage,content.promptAsset);
+    output.backgroundImage=await portableImage(content.backgroundImage,"");
+    if(["choice-text","choice-image","choice-image-wide","image-grid"].includes(format.mode)) output.options=await Promise.all(content.options.map(async o=>({...o,image:await portableImage(o.image,o.asset,45000)})));else output.options=[];
+    if(["categorize-images","compose-image","timeline","image-sequence","text-sequence"].includes(format.mode)) output.items=await Promise.all(content.items.filter(i=>i.label||i.image||i.asset).map(async i=>({...i,image:await portableImage(i.image,i.asset,45000)})));else output.items=[];
+    if(format.mode==="match-pairs")output.pairs=await Promise.all(content.pairs.map(async p=>({...p,leftImage:await portableImage(p.leftImage,"")})));else output.pairs=[];
+    if(format.mode==="video")output.videoUrl=await portableImage(content.videoUrl,"");else output.videoUrl="";
+    return output;
+  }
+  function renderLive(round, open=false) {
+    if(!round)return;
+    const q=publicQuestion(round);const key=JSON.stringify(q);
+    if(key!==lastRenderedQuestion){renderLiveQuestion(liveContent,q);lastRenderedQuestion=key;}
+    liveLayer.dataset.ready="true";
+    if(open){ closeConsole(); window.dispatchEvent(new Event("rg:show-trivia-stage")); }
+  }
+  function refreshLive(round) {
+    if(!round)return;
+    renderTriviaResponses(liveAnswers,round);
+    const fresh=round.id!==lastLiveId;lastLiveId=round.id;
+    if(fresh||lastRenderedQuestion)renderLive(round,fresh);
+  }
+  subscribeLiveTrivia(refreshLive);
+  renderTriviaResponses(liveAnswers,readLiveTrivia());
+  window.addEventListener("rg:show-latest-trivia",()=>{const r=readLiveTrivia();if(r){if(activeRoomRound()?.id!==r.id)updateTrivia(current=>({...current,cardStamp:cardStamp(readCardGames())})).then(next=>renderLive(next,true)).catch(()=>{});else renderLive(r,true);}else {const e=effectiveNow();if(hasAuthoredTriviaContent(e.content))publishSelectedTrivia().catch(()=>{});}});
+  liveLayer.addEventListener("contextmenu",e=>{e.preventDefault();window.dispatchEvent(new CustomEvent("rg:open-host-panel",{detail:{tab:"trivia"}}));});
+  $("#rg-live-trivia-back").addEventListener("click",()=>window.dispatchEvent(new Event("rg:hide-trivia-stage")));
+  $("#rg-live-host-close").addEventListener("click",()=>updateTrivia(r=>r?{...r,phase:"closed"}:null).catch(e=>{saveState.textContent=e.message;}));
+  async function publishSelectedTrivia(request=null) {
+    if(request){currentRound=request.round;currentDifficulty=request.difficulty;roundSelect.value=currentRound;difficultySelect.value=String(currentDifficulty);render();}
+    const {format,content}=effectiveNow();
+    const selectedRound=currentRound,selectedDifficulty=currentDifficulty;
+    if(!/^\d{2}$/.test(selectedRound)||Number(selectedRound)<1||Number(selectedRound)>36)throw Error("Select an authored round 1–36.");
+    const portable=await portableQuestion(content,format);
+    await withRoomSubmissionLock(()=>{
+      if(document.documentElement.hasAttribute("data-rg-host-locked"))throw Error("Unlock the display first.");
+      if(request){const current=JSON.parse(localStorage.getItem(TRIVIA_REQUEST_KEY)||"null"),reply=JSON.parse(localStorage.getItem(TRIVIA_REPLY_KEY)||"null");if(current?.id!==request.id||(reply?.id===request.id&&reply.ok))return;}
+      const round=createLiveTrivia({round:selectedRound,difficulty:selectedDifficulty,format,content:portable,cards:readCardGames()});
+      if(!writeLiveTrivia(round))throw Error("Live question could not be saved. Reduce media size or check browser storage.");
+      if(request)localStorage.setItem(TRIVIA_REPLY_KEY,JSON.stringify({id:request.id,ok:true,message:`Trivia ${selectedRound} / ${selectedDifficulty} presented.`}));
+    });
+  }
+  window.addEventListener("storage",async e=>{
+    if(e.key!==TRIVIA_REQUEST_KEY||!e.newValue)return;
+    let request;try{request=JSON.parse(e.newValue);}catch{return;}
+    if(!request||typeof request.id!=="string"||!ROUND_IDS.includes(request.round)||!Number.isInteger(request.difficulty)||request.difficulty<1||request.difficulty>5||Date.now()-request.at>30000)return;
+    if(document.documentElement.hasAttribute("data-rg-host-locked"))return;
+    try{await publishSelectedTrivia(request);}catch(error){try{const current=JSON.parse(localStorage.getItem(TRIVIA_REQUEST_KEY)||"null"),reply=JSON.parse(localStorage.getItem(TRIVIA_REPLY_KEY)||"null");if(current?.id===request.id&&reply?.id!==request.id)localStorage.setItem(TRIVIA_REPLY_KEY,JSON.stringify({id:request.id,ok:false,message:error.message}));}catch{}}
+  });
+  subscribeCardGames(()=>{const r=readLiveTrivia();if(r&&activeRoomRound()?.id!==r.id)window.dispatchEvent(new Event("rg:hide-trivia-stage"));});
 })();
