@@ -85,7 +85,7 @@ body.ramble-page *::after {
   height: 1024px;
   padding: 0;
   border: 0;
-  opacity: 1;
+  opacity: 0.8;
   background: #030303;
   filter: none;
   mix-blend-mode: normal;
@@ -417,7 +417,7 @@ body.ramble-page *::after {
 .rg-dice-liquid {
   z-index: 0;
   background: #030303;
-  opacity: 1;
+  opacity: 0.5;
   pointer-events: none;
 }
 

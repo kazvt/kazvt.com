@@ -221,6 +221,8 @@ test("live source becomes a depth-tested video texture; resizes and teardown rel
   const material = f.surface.material;
   const texture = material.map;
   assert.equal(texture.video, video);
+  assert.equal(material.transparent, true);
+  assert.equal(material.opacity, 0.8);
   assert.equal(texture.colorSpace, "srgb");
   assert.equal(material.depthTest, true);
   assert.equal(material.depthWrite, true);
@@ -288,8 +290,8 @@ test("scene wiring preloads one plane, updates it before every room render, and 
   assert.match(js, /liquidPortal\?\.dispose\(\)/);
   assert.match(css, /#rg-canvas \{[^}]*z-index: 1;/);
   assert.match(css, /\.rg-liquid-portal-layer \{[^}]*z-index: 0;[^}]*pointer-events: none;/);
-  assert.match(readFileSync(new URL("./host-access.mjs", import.meta.url), "utf8"), /ramblegamble\.js\?v=roulette-closeup-20261126-v1/);
-  assert.match(html, /ramblegamble\.css\?v=vip-black-liquid-20261126-v1/);
+  assert.match(readFileSync(new URL("./host-access.mjs", import.meta.url), "utf8"), /ramblegamble\.js\?v=vip-opacity-20261126-v1/);
+  assert.match(html, /ramblegamble\.css\?v=vip-opacity-20261126-v1/);
 });
 
 
@@ -336,16 +338,19 @@ test("both VIP surfaces share one neutral black preset with all supplied motion 
   assert.doesNotMatch(dice, /liquid\.src\s*=\s*["']\/liquid/);
 });
 
-test("both VIP surfaces have neutral fallback colors and Dice does not blend with the purple room", () => {
+test("VIP doorway has 80% opacity and Dice liquid has 50% opacity over a neutral background", () => {
   const css = readFileSync(new URL("./ramblegamble.css", import.meta.url), "utf8");
   assert.match(css, /\.rg-liquid-portal-frame \{[^}]*background: #030303;/);
   assert.match(css, /\.rg-dice-dialog \{[^}]*background: #030303;/);
-  assert.match(css, /\.rg-dice-liquid \{[^}]*background: #030303;[^}]*opacity: 1;/);
+  assert.match(css, /\.rg-dice-liquid \{[^}]*background: #030303;[^}]*opacity: 0\.5;/);
   const f = fixture();
   assert.equal(f.surface.material.color, 0x030303);
+  assert.equal(f.surface.material.opacity, 0.8);
+  assert.equal(f.surface.material.transparent, true);
+  assert.match(css, /\.rg-liquid-portal-frame \{[^}]*opacity: 0\.8;/);
   f.dispose();
   const gate = readFileSync(new URL("./host-access.mjs", import.meta.url), "utf8");
   const html = readFileSync(new URL("../rg/index.html", import.meta.url), "utf8");
   assert.match(gate, /dice-mode\.js\?v=expanded-foley-20261126-v1/);
-  assert.match(html, /host-access\.mjs\?v=roulette-closeup-20261126-v1/);
+  assert.match(html, /host-access\.mjs\?v=vip-opacity-20261126-v1/);
 });
