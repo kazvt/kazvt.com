@@ -17,7 +17,9 @@ import urllib.request
 import zipfile
 
 DEST = Path(__file__).resolve().parent / "foley"
-KENNEY = "https://kenney.nl/media/pages/assets/casino-audio/2472606a04-1721639069/kenney_casino-audio.zip"
+KENNEY_PAGE = "https://kenney.nl/assets/casino-audio"
+KENNEY_DOWNLOAD_ID = "assets/casino-audio".encode("utf-8").hex()
+KENNEY_DOWNLOAD_LINK = f"https://kenney.nl/download-link/{KENNEY_DOWNLOAD_ID}"
 # destination : exact normalized basename from the CC0 pack
 PACK = {
     **{f"card-place-{n}.ogg": f"cardplace{n}.ogg" for n in (1, 2)},
@@ -38,8 +40,11 @@ RECORDINGS = {
 }
 LIMIT = 20 * 1024 * 1024
 
-def get(url):
-    request = urllib.request.Request(url, headers={"User-Agent": "RambleGamble-foley-installer/1.0"})
+def get(url, referer=None):
+    headers = {"User-Agent": "RambleGamble-foley-installer/1.0"}
+    if referer:
+        headers["Referer"] = referer
+    request = urllib.request.Request(url, headers=headers)
     with urllib.request.urlopen(request, timeout=25) as response:
         data = response.read(LIMIT + 1)
     if len(data) > LIMIT:
@@ -82,6 +87,14 @@ def pack_files(data):
                     raise ValueError("oversized pack entry")
                 write(name, z.read(entry))
 
+def download_kenney_pack():
+    metadata = json.loads(get(KENNEY_DOWNLOAD_LINK, referer=KENNEY_PAGE))
+    url = metadata.get("url")
+    parsed = urllib.parse.urlparse(url or "")
+    if parsed.scheme != "https" or parsed.hostname != "kenney.nl" or not parsed.path.startswith("/download/"):
+        raise ValueError("Kenney did not return its expected HTTPS download link")
+    return get(url, referer=KENNEY_PAGE)
+
 def preview(user, sound_id, license_suffix):
     token = os.environ.get("FREESOUND_API_TOKEN")
     if token:
@@ -114,7 +127,7 @@ def main():
     args = parser.parse_args()
     if not all(has(name) for name in PACK):
         try:
-            pack_files(args.kenney_zip.read_bytes() if args.kenney_zip else get(KENNEY))
+            pack_files(args.kenney_zip.read_bytes() if args.kenney_zip else download_kenney_pack())
         except Exception as error:
             print(f"Kenney pack: {error}", file=sys.stderr)
     for name, (user, sound_id, license_suffix) in RECORDINGS.items():
