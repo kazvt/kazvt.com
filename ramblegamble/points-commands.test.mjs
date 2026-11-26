@@ -29,3 +29,9 @@ test("the console starts and resets Smeemo; card reveals remain manual on the ro
   assert.equal(parsePointsCommand("smeemo draw").action, "error");
   assert.equal(parsePointsCommand("smeemo cheat").action, "error");
 });
+
+test('point removal defaults to one and rejects negative, zero, malformed and unsafe amounts',()=>{
+  assert.deepEqual(parsePointsCommand('points remove KAZ'),{action:'remove',name:'kaz',amount:1});
+  assert.deepEqual(parsePointsCommand('points REMOVE @Erin 10'),{action:'remove',name:'erin',amount:10});
+  for(const command of ['points remove','points remove kaz 0','points remove kaz -1','points remove kaz 1.5','points remove kaz 9007199254740992','points remove unknown 2','points remove kaz 3 4']) assert.equal(parsePointsCommand(command).action,'error');
+});

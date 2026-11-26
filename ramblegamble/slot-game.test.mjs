@@ -255,3 +255,18 @@ test("exhaustively test every star placement subset on each authored mask for ev
     }
   }
 });
+
+test('manual placement changes exactly one selected cell including replacing a star',async()=>{
+  const {placeSlotSymbolAtCell}=await import('./slot-game.mjs');
+  const symbols=['faroeberry','erinberry','kazberry','star'];
+  for (const prior of [null,...symbols]) for (const selected of symbols) for(let index=0;index<15;index++){
+    const grid=Array(15).fill('star');grid[index]=prior;
+    const result=placeSlotSymbolAtCell(grid,selected,index);
+    assert.equal(result.placedIndex,selected===prior?-1:index);
+    assert.equal(result.grid[index],selected);
+    assert.equal(grid[index],prior);
+    for(let j=0;j<15;j++)if(j!==index)assert.equal(result.grid[j],'star');
+  }
+  for(const index of [-1,15,NaN,null,'1',1.5])assert.equal(placeSlotSymbolAtCell([], 'star',index).placedIndex,-1);
+  assert.equal(placeSlotSymbolAtCell([], 'unknown',0).placedIndex,-1);
+});

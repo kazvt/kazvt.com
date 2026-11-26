@@ -35,7 +35,7 @@ import { readFileSync } from 'node:fs';
 import * as games from './card-games.mjs';
 import { applyCardShowAction } from './card-show-actions.mjs';
 class FakeElement {
-  constructor() { this.children=[]; this.dataset={}; this.hidden=false; this.value=''; this.events={}; this.attributes={}; const classes=new Set(); this.classList={add:(...items)=>items.forEach(v=>classes.add(v)),remove:(...items)=>items.forEach(v=>classes.delete(v)),contains:v=>classes.has(v),toggle:(v,force= !classes.has(v))=>{if(force)classes.add(v);else classes.delete(v);}}; }
+  constructor() { this.children=[]; this.dataset={}; this.hidden=false; this.value=''; this.events={}; this.attributes={}; this.style={setProperty(){},removeProperty(){}}; const classes=new Set(); this.classList={add:(...items)=>items.forEach(v=>classes.add(v)),remove:(...items)=>items.forEach(v=>classes.delete(v)),contains:v=>classes.has(v),toggle:(v,force= !classes.has(v))=>{if(force)classes.add(v);else classes.delete(v);}}; }
   append(...children){ this.children.push(...children); children.forEach(child=>child.parentElement=this); }
   before(){}
   replaceChildren(...children){this.children=[];this.append(...children);}
@@ -94,10 +94,10 @@ test('actual menu left click starts a show round, right click opens staff only',
   const content=ui.get('#rg-card-games-content'),grid=content.children[0];
   assert.equal(grid.children.length,3);
   for(const [i,mode] of ['red-handed','quiplash','shop'].entries()){
-    const choice=grid.children[i], card=choice.children[0];assert.equal(choice.children.length,2);
+    const choice=grid.children[i], card=choice.children[0].children[0].children[0];assert.equal(choice.children.length,2);
     assert.equal(choice.children[1].textContent,["Red-Handed","BerryBlast","Shop"][i]);
-    assert.ok(choice.attributes['aria-label']);assert.equal(card.children.length,2);
-    assert.ok(card.children[0].src.endsWith(`menu-${mode}-face.png`));assert.ok(card.children[1].src.endsWith('menu-card-back.png'));
+    assert.ok(choice.attributes['aria-label']);assert.equal(card.children.length,6);
+    assert.ok(card.children[3].src.endsWith(`menu-${mode}-face.png`));assert.ok(card.children[4].src.endsWith('menu-card-back.png'));
   }
   assert.ok(ui.get('#rg-card-games-title').classList.contains("rg-visually-hidden"));
   grid.children[0].events.pointerenter({isTrusted:true,pointerType:"mouse"});
@@ -157,4 +157,16 @@ test('actual shop UI updates balances without replacing cards and commits purcha
   ui.blockPoints(false);ui.blockCards(true);await card.click();assert.equal(ui.balances.faroe,120);assert.equal(ui.state.round.cards[0].buyer,null);
   ui.blockCards(false);await card.click();assert.equal(ui.balances.faroe,95);assert.equal(ui.state.round.cards[0].buyer,'faroe');assert.ok(findText(content,'FAROE 95'));
   await card.click();assert.equal(ui.balances.faroe,95,'a stale second click does not charge twice');
+});
+
+test('shop animates only a committed new reveal and keeps the item name out of the DOM until purchase',async()=>{
+  const secret='Hidden prize unique 123';
+  const round=createShopRound({penalty:[{name:secret,price:0}],challenge:[{name:'C',price:0}],instant:[{name:'I',price:0}]});
+  const ui=mountUI({});ui.update({round});
+  const content=ui.get('#rg-card-games-content');
+  const findNew=node=>node.classList?.contains('is-newly-revealed')?node:(node.children||[]).map(findNew).find(Boolean);
+  assert.doesNotMatch(allText(content),/Hidden prize unique 123/);
+  const purchased=buyShopCard(round,round.cards.find(c=>c.name===secret).id,'faroe',{faroe:0}).round;
+  ui.update({round:purchased});assert.ok(findNew(content));assert.match(allText(content),/Hidden prize unique 123/);
+  ui.update({round:purchased});assert.equal(findNew(content),undefined);
 });

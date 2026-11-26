@@ -3,7 +3,7 @@ import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveT
 import { renderLiveQuestion, renderTriviaResponses } from "./trivia-live-view.mjs?v=room-recovery-20261127-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
 import { readCardGames, subscribeCardGames } from "./card-games-store.mjs?v=show-stage-20261126-v1";
-import { removeSlotSymbol } from "./slot-game.mjs?v=wildcard-shared-20261126-v1";
+import { removeSlotSymbol } from "./slot-game.mjs?v=host-cell-cards-20261127-v1";
 import { foley } from "./game-foley.mjs?v=settlement-hover-20261127-v1";
 import {
   MODE_NAMES,
@@ -951,6 +951,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     renderGrid();
     $("#rg-arcade-status").textContent = event.detail?.kind === "wildcard-place"
       ? "Star popping into place..."
+      : event.detail?.kind === "cell-place" ? "Berry popping into place..."
       : event.detail?.kind === "place-row" ? "Row spinning sideways..." : "Reels spinning...";
   });
   window.addEventListener("rg:slot-action-finish", (event) => {

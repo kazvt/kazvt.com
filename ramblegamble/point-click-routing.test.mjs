@@ -110,10 +110,10 @@ test("back returns to the starting overview view and never retreats past it", ()
   assert.equal(resolvePointClickBack(backToStart), null);
 });
 
- test("right-click deletion routes only real slot display cells in star mode", () => {
+ test("right-click deletion routes only real slot display cells in all symbol modes", () => {
   const base = {button:2, view:"slot", selected:"star", interaction:{machine:"slot",part:"slot-reel-display",cellIndex:0}};
-  for (let i=0; i<15; i++) assert.equal(resolveSlotContextCell({...base, interaction:{...base.interaction,cellIndex:i}}),i);
-  for (const overrides of [{button:0},{button:1},{view:"overview"},{selected:"kazberry"},{interaction:null},{interaction:{...base.interaction,part:"arm"}},{interaction:{...base.interaction,machine:"roulette"}}]) assert.equal(resolveSlotContextCell({...base,...overrides}),-1);
+  for (const selected of ["star","faroeberry","erinberry","kazberry"]) for (let i=0; i<15; i++) assert.equal(resolveSlotContextCell({...base, selected, interaction:{...base.interaction,cellIndex:i}}),i);
+  for (const overrides of [{button:0},{button:1},{view:"overview"},{selected:"invalid"},{interaction:null},{interaction:{...base.interaction,part:"arm"}},{interaction:{...base.interaction,machine:"roulette"}}]) assert.equal(resolveSlotContextCell({...base,...overrides}),-1);
   for (const i of [-1,15,NaN,null,1.5,"1"]) assert.equal(resolveSlotContextCell({...base,interaction:{...base.interaction,cellIndex:i}}),-1);
 });
 
@@ -148,4 +148,12 @@ test('real point-click handler selects the clicked contestant on the first click
  for(const id of ['faroe','erin','kaz']){interaction={machine:'contestant',contestantId:id};ctx.click(600,300);assert.equal(ctx.currentView.kind,'contestant');assert.equal(ctx.currentView.contestantId,id);const count=transitions.length;ctx.click(600,300);assert.equal(transitions.length,count);}
  interaction=null;ctx.click(600,660);assert.equal(ctx.currentView.kind,'contestants');interaction={machine:'contestant',contestantId:'erin'};ctx.click(600,300);assert.equal(ctx.currentView.contestantId,'erin');
  interaction={machine:'host'};ctx.click(600,300);assert.equal(ctx.currentView.kind,'host');
+});
+
+test('real focused slot click sends exact cell, never invokes random column placement',()=>{
+  const placed=[];let interaction;
+  const ctx={gameStarted:true,pauseMenuOpen:false,sceneReady:true,diceModeOpen:false,cameraTransition:null,camera:{},currentView:{kind:'slot'},preview:{getBoundingClientRect:()=>({left:0,top:0,width:1366,height:668})},getSceneInteractionAt:()=>interaction,resolveSceneNavigationZone,resolvePointClickAction,canGoBack:()=>true,placeSelectedSlotSymbolAtCell:i=>placed.push(i)};
+  runInNewContext(roomSection('  function pointClickAt(', '  const canOrbit =')+'\nthis.click=pointClickAt;',ctx);
+  for(let index=0;index<15;index++){interaction={machine:'slot',part:'slot-reel-display',cellIndex:index};ctx.click(600,300);}
+  assert.deepEqual(placed,Array.from({length:15},(_,i)=>i));
 });

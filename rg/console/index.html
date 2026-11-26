@@ -7,10 +7,10 @@
     <meta name="theme-color" content="#090b0a">
     <link rel="canonical" href="https://kazvt.com/rg/console/">
     <title>RG Console</title>
-    <link rel="stylesheet" href="/rg/console/console.css?v=submission-audit-20261126-v1">
+    <link rel="stylesheet" href="/rg/console/console.css?v=host-cell-cards-20261127-v1">
     <link rel="stylesheet" href="/ramblegamble/trivia-live.css?v=room-recovery-20261127-v1">
     <link rel="stylesheet" href="/ramblegamble/host-access.css?v=host-toggle-20261126-v1">
-    <script type="module" src="/ramblegamble/host-access.mjs?v=parked-reels-20261127-v1"></script>
+    <script type="module" src="/ramblegamble/host-access.mjs?v=host-cell-cards-20261127-v1"></script>
   </head>
   <body>
     <main class="terminal" aria-label="Ramble Gamble points console">
@@ -31,7 +31,13 @@
       <section class="terminal-output" id="terminal-output" role="log" aria-live="polite" aria-relevant="additions text"></section>
       <form class="terminal-form" id="terminal-form" autocomplete="off">
         <label for="terminal-input" aria-hidden="true">&gt;</label>
-        <input id="terminal-input" name="command" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" autofocus aria-label="Enter console command">
+        <div class="terminal-command-entry">
+          <div id="terminal-suggestions" class="terminal-suggestions" role="listbox" aria-label="Command suggestions" hidden></div>
+          <div class="terminal-input-wrap">
+          <div id="terminal-ghost" class="terminal-ghost" aria-hidden="true"></div>
+        <input role="combobox" aria-autocomplete="both" aria-controls="terminal-suggestions" aria-expanded="false" id="terminal-input" name="command" type="text" spellcheck="false" autocapitalize="off" autocomplete="off" autofocus aria-label="Enter console command">
+          </div>
+        </div>
       </form>
     </main>
     <section id="rg-host-gate" aria-label="Host access">

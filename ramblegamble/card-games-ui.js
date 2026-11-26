@@ -84,6 +84,8 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
   let menuTimer = 0;
   let menuSelection = "";
   let lastPresentation = { id: null, visible: [], phase: null };
+  let shopPresentation = { id: null, revealed: new Set() };
+  let smeemoPresentation = { id: null, revealed: new Set() };
 
   function element(tag, className = "", text = "") {
     const item = document.createElement(tag);
@@ -216,7 +218,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     }
     if (menuOpen) {
       // Do not rebuild or interrupt the flip when a background room update arrives.
-      if (!menuSelection) renderMenu();
+      if (!menuSelection && (!content.querySelector(".rg-card-menu-grid") || opened || ended)) renderMenu();
     } else if (dismissedActive || !active) layer.hidden = true;
     else if (activeSmeemo) renderSmeemo(state.smeemo);
     else renderRound(state.round);
@@ -274,6 +276,23 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "card-games" } }));
   }
 
+  // The stable outer button owns hit testing; only its visual carrier tilts.
+  function bindCardTilt(button) {
+    const reset = () => { button.style.removeProperty("--tilt-x"); button.style.removeProperty("--tilt-y"); };
+    button.addEventListener("pointermove", event => {
+      if (reducedMotion.matches || event.pointerType === "touch" || event.buttons || button.disabled) return reset();
+      const rect = button.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const x = Math.max(-1, Math.min(1, (event.clientX - rect.left) / rect.width * 2 - 1));
+      const y = Math.max(-1, Math.min(1, (event.clientY - rect.top) / rect.height * 2 - 1));
+      button.style.setProperty("--tilt-x", `${-y * 12}deg`);
+      button.style.setProperty("--tilt-y", `${x * 17}deg`);
+    });
+    button.addEventListener("pointerleave", reset);
+    button.addEventListener("pointercancel", reset);
+    button.addEventListener("blur", reset);
+  }
+
   function makeModeChoice(mode, imageName, label) {
     const choice = element("button", "rg-mode-choice");
     choice.type = "button";
@@ -287,8 +306,20 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       image.draggable = false;
       return image;
     };
-    card.append(face(imageName, "front"), face("menu-card-back.png", "back"));
-    choice.append(card, element("span", "rg-mode-label", label));
+    const stage = element("span", "rg-mode-stage");
+    const depth = element("span", "rg-mode-depth");
+    for (const z of [-2, 0, 2]) {
+      const edge = face(imageName, "edge");
+      edge.style.setProperty("--edge-z", `${z}px`);
+      card.append(edge);
+    }
+    const sheen = element("span", "rg-mode-sheen");
+    sheen.setAttribute("aria-hidden", "true");
+    sheen.style.setProperty("--face-mask", `url('/ramblegamble/assets/card-games/${imageName}')`);
+    card.append(face(imageName, "front"), face("menu-card-back.png", "back"), sheen);
+    depth.append(card); stage.append(depth);
+    choice.append(stage, element("span", "rg-mode-label", label));
+    bindCardTilt(choice);
     const hover = () => {
       if (!menuOpen || menuTimer || layer.hidden || document.documentElement?.hasAttribute("data-rg-host-locked")) return;
       // Short recorded card-slide, not a second selection/flip sound.
@@ -314,6 +345,8 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     setStageTitle("Choose a card game", "menu");
     liveStatus.textContent = "Choose a card game.";
     lastPresentation = { id: null, visible: [], phase: null };
+    shopPresentation = { id: null, revealed: new Set() };
+    smeemoPresentation = { id: null, revealed: new Set() };
     content.replaceChildren();
     const grid = element("div", "rg-card-menu-grid");
     grid.append(
@@ -374,7 +407,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
         const next = applyCardShowAction(latest, "start", { mode });
         menuOpen = false; dismissedActive = false; sync(next); closeHostPanel();
       }, error => { renderMenu(); content.append(element("p", "rg-show-notice", error.message)); });
-    }, reducedMotion.matches ? 20 : 760);
+    }, reducedMotion.matches ? 20 : 940);
   }
 
   function berryProgress(round) {
@@ -423,7 +456,9 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     content.replaceChildren();
     const shell = element("div", `rg-card-round rg-show-round${round.mode === "quiplash" ? " is-berryblast" : ""}`);
     const promptSide = element("div", "rg-card-prompt-side");
-    promptSide.append(promptCard(round.prompt, round.mode === "red-handed" ? "suspect" : "quiplash"), berryProgress(round));
+    const prompt = promptCard(round.prompt, round.mode === "red-handed" ? "suspect" : "quiplash");
+    if (!sameRound) prompt.classList.add("rg-prompt-deal");
+    promptSide.append(prompt, berryProgress(round));
     const submitted = CARD_GAME_PLAYERS.filter(player => round.submissions[player]).length;
     const answers = element("div", "rg-card-answer-grid rg-show-answer-grid");
     const right = element("div", "rg-show-answers");
@@ -436,6 +471,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
         const winner = round.phase === "results" && round.winnerIds.includes(response.id);
         const answer = element(canVote ? "button" : "article", `rg-card-answer${winner ? " is-winner" : ""}${fresh.has(response.id) ? " rg-show-reveal" : ""}${winner && resultsNow ? " rg-show-winner" : ""}`);
         if (canVote) { answer.type = "button"; answer.setAttribute("aria-label", `Vote for anonymous answer: ${response.text}`); answer.addEventListener("click", () => showAction("vote", round.id, response.id)); }
+        answer.style.setProperty("--reveal-delay", `${Math.min(i, 2) * 75}ms`);
         answer.append(element("span", "rg-card-answer-copy", response.text));
         if (round.phase !== "reveal") answer.append(element("span", "rg-card-vote-count", `${round.votes[response.id] || 0} VOTES`));
         answers.append(answer);
@@ -498,16 +534,29 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     }
     shell.append(balances);
     const grid = element("div", "rg-shop-card-grid");
-    for (const card of round.cards) {
+    const sameShop = shopPresentation.id === round.id;
+    const previouslyRevealed = shopPresentation.revealed;
+    shopPresentation = { id: round.id, revealed: new Set(round.cards.filter(card => card.revealed).map(card => card.id)) };
+    for (const [index, card] of round.cards.entries()) {
       const wrap = element("div", "rg-shop-card-wrap");
       const button = element("button", `rg-shop-card${card.revealed ? " is-revealed" : ""}`);
       button.type = "button";
       button.disabled = Boolean(card.buyer);
+      if (!sameShop) wrap.classList.add("rg-shop-deal");
+      wrap.style.setProperty("--deal-delay", `${Math.min(index, 8) * 60}ms`);
+      if (sameShop && card.revealed && !previouslyRevealed.has(card.id)) button.classList.add("is-newly-revealed");
+      bindCardTilt(button);
       button.setAttribute("aria-label", card.revealed ? `${card.category} card: ${card.name}, purchased by ${card.buyer}` : `${card.category} card, costs ${card.price} points`);
+      const inner = element("span", "rg-shop-card-inner");
+      const back = element("span", "rg-shop-card-back");
+      back.setAttribute("aria-hidden", "true");
+      const front = element("span", "rg-shop-card-front");
+      // Never put the hidden card name on an unrevealed face.
       if (card.revealed) {
-        button.append(element("span", "rg-shop-card-name", card.name));
-        button.append(element("span", "rg-shop-card-owner", `TAKEN BY ${playerNames[card.buyer]}`));
+        front.append(element("span", "rg-shop-card-name", card.name));
+        front.append(element("span", "rg-shop-card-owner", `TAKEN BY ${playerNames[card.buyer]}`));
       }
+      inner.append(back, front); button.append(inner);
       button.addEventListener("click", () => {
         const buyer = selectedBuyer;
         return runRoomMutation(() => withPointScoresLock(() => {
@@ -560,6 +609,8 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     const railViewport = element("div", "rg-smeemo-rail-viewport");
     const rail = element("div", "rg-smeemo-rail");
     const revealIds = new Set(game.draws.map(({ id }) => id));
+    const priorReveals = smeemoPresentation.id === game.id ? smeemoPresentation.revealed : revealIds;
+    smeemoPresentation = { id: game.id, revealed: revealIds };
     const order = ["preview", "stacking", "stacked"].includes(game.phase)
       ? game.previewOrder.map((id) => game.cards.find((card) => card.id === id)).filter(Boolean)
       : game.cards;
@@ -572,6 +623,8 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       const button = element("button", `rg-smeemo-card${showingFront ? " is-face-up" : " is-face-down"}${revealed ? " is-revealed" : ""}${isAvailable ? " is-available" : ""}${smeemoRevealed ? " is-smeemo" : ""}`);
       button.type = "button";
       button.disabled = game.phase !== "ready" || game.status !== "playing" || revealed;
+      if (revealed && !priorReveals.has(card.id)) button.classList.add("is-newly-revealed");
+      bindCardTilt(button);
       button.setAttribute("aria-label", showingFront
         ? `Card ${index + 1}: ${card.smeemo ? "Smeemoberry" : "blank"}`
         : `Reveal card ${index + 1}`);

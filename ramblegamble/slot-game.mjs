@@ -75,15 +75,20 @@ export function placeSlotBerry(grid, berry, { axis = "column", index, randomInde
   return { grid: next, placedIndex, eligibleIndexes };
 }
 
-export function placeSlotWildcard(grid, index) {
+// Explicit host placement may replace any symbol, including a star. Random
+// line placements still protect wildcards via getSlotEligibleIndexes.
+export function placeSlotSymbolAtCell(grid, symbol, index) {
   const current = normalizeSlotGrid(grid);
-  const placedIndex = Number(index);
-  if (!Number.isInteger(placedIndex) || placedIndex < 0 || placedIndex >= current.length || current[placedIndex] === SLOT_REEL_WILDCARD) {
+  if (![...SLOT_REEL_SYMBOLS, SLOT_REEL_WILDCARD].includes(symbol)
+      || !Number.isInteger(index) || index < 0 || index >= current.length || current[index] === symbol) {
     return { grid: current, placedIndex: -1 };
   }
-  const next = current.slice();
-  next[placedIndex] = SLOT_REEL_WILDCARD;
-  return { grid: next, placedIndex };
+  current[index] = symbol;
+  return { grid: current, placedIndex: index };
+}
+
+export function placeSlotWildcard(grid, index) {
+  return placeSlotSymbolAtCell(grid, SLOT_REEL_WILDCARD, index);
 }
 
 export function rotateSlotColumns(grid, columns, { randomIndex = secureRandomIndex } = {}) {

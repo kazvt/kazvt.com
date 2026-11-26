@@ -10,7 +10,7 @@ import {
   resolveArcadeShortcut,
   resolveSlotContextCell,
   resolveHostContextAction,
-} from "./point-click-routing.js?v=vip-focus-20261127-v1";
+} from "./point-click-routing.js?v=host-cell-cards-20261127-v1";
 import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
 import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-door-wall-target-20261120-v1";
 import { readPointScores, subscribePointScores, writePointScores, withPointScoresLock } from "./points-store.mjs?v=card-score-sync-20261127-v1";
@@ -30,7 +30,7 @@ import {
 } from "./slot-reels.mjs?v=parked-reels-20261127-v1";
 import { createSlotWinAnimation, isSlotWinFinished, paintSlotWin } from "./slot-win-animation.mjs?v=show-stage-20261126-v1";
 import { createSlotLinePainter } from "./slot-reel-render.mjs?v=parked-reels-20261127-v1";
-import { getSlotEligibleIndexes, placeSlotBerry, placeSlotWildcard, removeSlotSymbol, resolveSlotPayouts, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs?v=wildcard-shared-20261126-v1";
+import { getSlotEligibleIndexes, placeSlotBerry, placeSlotSymbolAtCell, removeSlotSymbol, resolveSlotPayouts, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs?v=host-cell-cards-20261127-v1";
 import {
   ROULETTE_BALL_COLOR,
   ROULETTE_BALL_LANDING_RADIUS,
@@ -140,7 +140,7 @@ import {
   let wheelMotion = null;
   let leverMotion = null;
   let slotReelMotion = null;
-  let slotWildcardPop = null;
+  let slotCellPop = null;
   let slotWinCelebration = null;
   let lastSlotTravelRows = Object.create(null);
   let lastSlotTravelColumns = Object.create(null);
@@ -391,11 +391,11 @@ import {
     context.clearRect(0, 0, slotReelCanvas.width, slotReelCanvas.height);
 
     const motionFrame = slotReelMotion ? slotMotionFrame(slotReelMotion, time, reducedMotion.matches) : null;
-    const fixedGrid = motionFrame?.grid || slotReelGrid;
+    const fixedGrid = motionFrame?.grid || slotCellPop?.motion.targetGrid || slotReelGrid;
     fixedGrid.forEach((symbol, index) => {
       const column = index % 5;
       const row = Math.floor(index / 5);
-      const pop = slotWildcardPop?.index === index ? slotWildcardPop : null;
+      const pop = slotCellPop?.index === index ? slotCellPop : null;
       if (!pop) {
         const shake = motionFrame?.parked.get(index);
         drawSlotSymbol(column, row, symbol, (shake?.x || 0) * cellWidth, (shake?.y || 0) * cellHeight);
@@ -452,12 +452,16 @@ import {
     }
     context.stroke();
     context.restore();
-    if (slotHoverCell >= 0 && !slotReelMotion && !slotWinCelebration && selectedSlotBerry === SLOT_REEL_WILDCARD && currentView.kind === "slot") {
+    if (slotHoverCell >= 0 && !slotReelMotion && !slotWinCelebration && !playing && currentView.kind === "slot") {
       const column = slotHoverCell % 5;
       const row = Math.floor(slotHoverCell / 5);
       context.fillStyle = "rgba(56, 242, 255, 0.23)";
       context.fillRect(column * cellWidth, row * cellHeight, cellWidth, cellHeight);
-      drawSlotSymbol(column, row, SLOT_REEL_WILDCARD, 0, 0, { alpha: 0.68, scale: 0.9, glow: 12 });
+      if (slotReelGrid[slotHoverCell] !== selectedSlotBerry) {
+        const occupied = Boolean(slotReelGrid[slotHoverCell]);
+        drawSlotSymbol(column, row, selectedSlotBerry, occupied ? cellWidth * .25 : 0, occupied ? cellHeight * .25 : 0,
+          { alpha: occupied ? .9 : .68, scale: occupied ? .42 : .9, glow: 12 });
+      }
     }
     slotReelTexture.needsUpdate = true;
   }
@@ -542,7 +546,7 @@ import {
       button.dataset.slotBerry = berry;
       button.dataset.foley = "off";
       button.setAttribute("aria-label", label);
-      button.title = berry === SLOT_REEL_WILDCARD ? "Star: left-click a cell to place; right-click to remove" : label;
+      button.title = `${label}: left-click a cell to place; right-click to remove`;
       const img = document.createElement("img");
       img.src = SLOT_SYMBOL_IMAGE_PATH + berry + ".png";
       img.alt = "";
@@ -699,24 +703,24 @@ import {
     return startSlotAction(placement.grid, axis, [lineIndex], { kind: "place-" + axis });
   }
 
-  function placeSlotWildcardAtCell(index) {
-    if (playing || slotReelMotion || slotWildcardPop || currentView.kind !== "slot") return false;
-    const placement = placeSlotWildcard(slotReelGrid, index);
+  function placeSelectedSlotSymbolAtCell(index) {
+    if (playing || slotReelMotion || slotCellPop || currentView.kind !== "slot" || document.documentElement.hasAttribute("data-rg-host-locked")) return false;
+    const placement = placeSlotSymbolAtCell(slotReelGrid, selectedSlotBerry, index);
     if (placement.placedIndex < 0) return false;
     const startedAt = performance.now();
-    slotWildcardPop = {
+    const kind = selectedSlotBerry === SLOT_REEL_WILDCARD ? "wildcard-place" : "cell-place";
+    slotCellPop = {
       index: placement.placedIndex,
       startedAt,
       duration: reducedMotion.matches ? 1 : 620,
-      motion: { targetGrid: placement.grid, action: "wildcard-place" },
+      motion: { targetGrid: placement.grid, action: kind, baseGrid: slotReelGrid.slice() },
     };
     playing = true;
     preview.classList.add("is-playing");
     hideResult();
     syncSlotPlacementControls();
-    saveSlotGrid(placement.grid);
-    foley.play("wildcard");
-    window.dispatchEvent(new CustomEvent("rg:slot-action-start", { detail: { kind: "wildcard-place" } }));
+    foley.play(selectedSlotBerry === SLOT_REEL_WILDCARD ? "wildcard" : "select");
+    window.dispatchEvent(new CustomEvent("rg:slot-action-start", { detail: { kind } }));
     drawSlotReelDisplay(startedAt);
     return true;
   }
@@ -795,9 +799,18 @@ import {
     foley.stop("slots");
     const outcome = resolveSlotPayouts(motion.targetGrid);
     const hasPayout = Object.values(outcome.totals).some(amount => amount > 0);
+    const checkManualBoard = () => {
+      if (!motion.baseGrid) return;
+      const latest = normalizeSlotGrid(localStorage.getItem(SLOT_GRID_STORAGE_KEY));
+      if (latest.some((symbol, index) => symbol !== motion.baseGrid[index])) {
+        slotReelGrid = latest;
+        throw Error("Slot board changed; placement cancelled. Try again.");
+      }
+    };
     try {
       if (hasPayout) {
         await withPointScoresLock(() => {
+          checkManualBoard();
           const prior = readPointScores({ strict: true });
           const scores = { ...prior };
           for (const [name, amount] of Object.entries(outcome.totals)) {
@@ -813,7 +826,10 @@ import {
             throw Error("Could not save slot board; points restored.", { cause: error });
           }
         });
-      } else saveSlotGrid(outcome.grid);
+      } else {
+        checkManualBoard();
+        saveSlotGrid(outcome.grid, { requirePersistence: Boolean(motion.baseGrid) });
+      }
     } catch (error) {
       playing = false;
       preview.classList.remove("is-playing");
@@ -2063,9 +2079,8 @@ import {
       && interaction.part === "slot-reel-display"
       ? interaction.cellIndex
       : -1;
-    const wildcardMode = selectedSlotBerry === SLOT_REEL_WILDCARD;
-    const nextHoverCell = wildcardMode ? hoveredCell : -1;
-    const hoveredLine = hoveredCell >= 0 && !wildcardMode ? { axis: "column", index: hoveredCell % 5 } : null;
+    const nextHoverCell = hoveredCell;
+    const hoveredLine = null;
     if (nextHoverCell !== slotHoverCell) {
       slotHoverCell = nextHoverCell;
       drawSlotReelDisplay();
@@ -2342,8 +2357,7 @@ import {
     else if (action.startsWith("spin-column-")) spinSlotColumn(Number(action.slice("spin-column-".length)));
     else if (action === "place-slot-berry") {
       if (Number.isInteger(interaction.cellIndex) && interaction.cellIndex >= 0) {
-        if (selectedSlotBerry === SLOT_REEL_WILDCARD) placeSlotWildcardAtCell(interaction.cellIndex);
-        else placeSlotBerryOnLine("column", interaction.cellIndex % 5);
+        placeSelectedSlotSymbolAtCell(interaction.cellIndex);
       }
     }
     else if (action === "open-slots") window.dispatchEvent(new CustomEvent("rg:open-host-panel", { detail: { tab: "slots" } }));
@@ -2370,7 +2384,7 @@ import {
     if (event.button === 0 && !focusDrag.consumeClick()) pointClickAt(event.clientX, event.clientY);
   });
   canvas.addEventListener("contextmenu", (event) => {
-    if (!gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen || cameraTransition) return;
+    if (!gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen || cameraTransition || document.documentElement.hasAttribute("data-rg-host-locked")) return;
     if(event.button!==2)return;
     const interaction=getSceneInteractionAt(event.clientX,event.clientY);
     const index = resolveSlotContextCell({
@@ -2387,10 +2401,11 @@ import {
     }
     // Do not open a browser menu over a slot cell, even if it is empty or busy.
     event.preventDefault();
-    if (playing || slotReelMotion || slotWildcardPop) return;
+    if (playing || slotReelMotion || slotCellPop) return;
     const removal = removeSlotSymbol(slotReelGrid, index);
     if (!removal.removed) return;
-    saveSlotGrid(removal.grid);
+    try { saveSlotGrid(removal.grid, { requirePersistence: true }); }
+    catch { result.textContent = "Could not save slot removal."; result.hidden = false; return; }
     hideResult();
     foley.play("remove");
     drawSlotReelDisplay();
@@ -2761,11 +2776,11 @@ import {
       }
     }
 
-    if (slotWildcardPop) {
+    if (slotCellPop) {
       drawSlotReelDisplay(time);
-      if (time - slotWildcardPop.startedAt >= slotWildcardPop.duration) {
-        const completedPop = slotWildcardPop;
-        slotWildcardPop = null;
+      if (time - slotCellPop.startedAt >= slotCellPop.duration) {
+        const completedPop = slotCellPop;
+        slotCellPop = null;
         finishSlotAction(completedPop.motion, time);
       }
     }

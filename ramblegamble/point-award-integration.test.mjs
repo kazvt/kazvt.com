@@ -64,3 +64,22 @@ test('real console code serializes rapid adds, sets, inspection and reset and re
   f.blocked.add(POINTS);await context.execute('points add kaz 10');assert.equal(lines.at(-1).style,'terminal-error');assert.equal(f.store.read().kaz,300);
   f.blocked.delete(POINTS);await context.execute('points reset');assert.deepEqual(f.store.read(),{faroe:0,erin:0,kaz:0});
 });
+
+test('real console remove handler clamps at zero, reports actual removal, and serializes with adds',async()=>{
+  const f=storageFixture(),lines=[];
+  const source=consoleJs.slice(consoleJs.indexOf('async function execute('),consoleJs.indexOf('\nform.addEventListener'));
+  const context={...f,RG_CONTESTANTS,parsePointsCommand,addLine:(text,style)=>lines.push({text,style}),formatScores:s=>JSON.stringify(s)};
+  runInNewContext(`${source}\nthis.execute=execute`,context);
+  await Promise.all([context.execute('points remove faroe 25'),context.execute('points add faroe 30'),context.execute('points remove faroe 10')]);
+  assert.equal(f.store.read().faroe,95);assert.equal(lines.at(-1).text,'faroe: 95 (-10)');
+  await context.execute('points remove erin 999');assert.equal(f.store.read().erin,0);assert.equal(lines.at(-1).text,'erin: 0 (-200)');
+  f.blocked.add(POINTS);await context.execute('points remove kaz 5');assert.equal(f.store.read().kaz,300);assert.equal(lines.at(-1).style,'terminal-error');
+});
+test('manual placement payout cancels stale board and preserves pre-placement board if point save fails',async()=>{
+  const f=slotFixture();f.blocked.add(POINTS);
+  await f.context.finish({targetGrid:f.target,baseGrid:f.original,action:'cell-place'},100);
+  assert.deepEqual(JSON.parse(f.storage.getItem(GRID)),f.original);assert.equal(f.store.read().faroe,100);
+  const g=slotFixture(),newer=g.original.slice();newer[2]='star';g.storage.setItem(GRID,JSON.stringify(newer));
+  await g.context.finish({targetGrid:g.target,baseGrid:g.original,action:'cell-place'},100);
+  assert.deepEqual(JSON.parse(g.storage.getItem(GRID)),newer);assert.equal(g.store.read().faroe,100);assert.match(g.context.result.textContent,/board changed/);
+});
