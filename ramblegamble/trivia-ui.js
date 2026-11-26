@@ -1,4 +1,4 @@
-import { removeSlotSymbol } from "./slot-game.mjs?v=slot-foley-20261126-v3";
+import { removeSlotSymbol } from "./slot-game.mjs?v=wildcard-shared-20261126-v1";
 import { foley } from "./game-foley.mjs?v=slot-foley-20261126-v3";
 import {
   MODE_NAMES,
@@ -934,6 +934,9 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
   });
   window.addEventListener("rg:turn-finish", (event) => {
     $("#rg-arcade-status").textContent = event.detail?.prompt || "No questions in the bank. Add some in the Trivia tab.";
+  });
+  window.addEventListener("rg:slot-symbol-removed", (event) => {
+    $("#rg-arcade-status").textContent = "Removed icon from cell " + (event.detail.index + 1) + ".";
   });
   window.addEventListener("rg:slot-action-start", (event) => {
     slotBoardBusy = true;

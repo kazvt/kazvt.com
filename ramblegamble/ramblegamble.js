@@ -5,7 +5,8 @@ import {
   resolvePointClickCursor,
   resolvePointClickZone,
   resolveArcadeShortcut,
-} from "./point-click-routing.js?v=slot-machine-live-game-20261126-v1";
+  resolveSlotContextCell,
+} from "./point-click-routing.js?v=wildcard-shared-20261126-v1";
 import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
 import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-door-wall-target-20261120-v1";
 import { readPointScores, subscribePointScores, writePointScores } from "./points-store.mjs?v=points-console-20261120-v1";
@@ -25,7 +26,7 @@ import {
   slotCellIndexAtUv,
   slotScreenPoint,
 } from "./slot-reels.mjs?v=slot-foley-20261126-v3";
-import { getSlotEligibleIndexes, placeSlotBerry, placeSlotWildcard, resolveSlotPayouts, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs?v=slot-foley-20261126-v3";
+import { getSlotEligibleIndexes, placeSlotBerry, placeSlotWildcard, removeSlotSymbol, resolveSlotPayouts, rotateSlotColumns, secureRandomIndex } from "./slot-game.mjs?v=wildcard-shared-20261126-v1";
 import {
   ROULETTE_BALL_COLOR,
   ROULETTE_BALL_LANDING_RADIUS,
@@ -607,7 +608,7 @@ import {
       button.className = "rg-slot-sprite-blank";
       button.dataset.slotBerry = berry;
       button.setAttribute("aria-label", label);
-      button.title = label;
+      button.title = berry === SLOT_REEL_WILDCARD ? "Star: left-click a cell to place; right-click to remove" : label;
       const img = document.createElement("img");
       img.src = SLOT_SYMBOL_IMAGE_PATH + berry + ".png";
       img.alt = "";
@@ -798,10 +799,10 @@ import {
       const lineName = control.axis === "column" ? "column " + (control.index + 1) : "row " + control.label;
       control.button.disabled = Boolean(playing || slotReelMotion || wildcardMode || available === 0);
       control.button.setAttribute("aria-label", wildcardMode
-        ? "Select a cell directly on the slot display to place the star wildcard"
+        ? "Left-click a slot cell to place a star; right-click to remove its icon"
         : "Place " + berryNames[selectedSlotBerry] + " in a random available cell in " + lineName + "; " + available + " available");
       control.button.title = wildcardMode
-        ? "Star selected - click a cell on the machine display"
+        ? "Star selected - left-click to place; right-click to remove"
         : "Place " + berryNames[selectedSlotBerry] + " in " + lineName + " (" + available + " available)";
       control.button.classList.toggle("is-unavailable", available === 0);
     }
@@ -2187,7 +2188,7 @@ import {
   }
 
   function activateCardGameMode(mode) {
-    if (!new Set(["red-handed", "quiplash", "shop", "smeemo"]).has(mode)) return;
+    if (!new Set(["red-handed", "quiplash", "shop", "smeemo", "menu"]).has(mode)) return;
     if (!sceneReady) {
       pendingCardGameMode = mode;
       return;
@@ -2203,11 +2204,12 @@ import {
       try { menuMarquee.currentTime = 0; } catch {}
     }
     result.hidden = true;
-    transitionToView({ kind: "card-table" });
+    if (currentView.kind !== "card-table") transitionToView({ kind: "card-table" });
   }
 
   window.addEventListener("rg:card-game-active", (event) => activateCardGameMode(event.detail?.mode));
   window.addEventListener("rg:close-card-games", () => {
+    pendingCardGameMode = "";
     if (currentView.kind === "card-table") transitionToView({ kind: "overview" });
   });
 
@@ -2321,7 +2323,29 @@ import {
   }
 
   canvas.addEventListener("pointermove", updatePointer);
-  canvas.addEventListener("click", (event) => pointClickAt(event.clientX, event.clientY));
+  canvas.addEventListener("click", (event) => {
+    if (event.button === 0) pointClickAt(event.clientX, event.clientY);
+  });
+  canvas.addEventListener("contextmenu", (event) => {
+    if (!gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen || cameraTransition) return;
+    if (currentView.kind !== "slot" || selectedSlotBerry !== SLOT_REEL_WILDCARD || event.button !== 2) return;
+    const index = resolveSlotContextCell({
+      button: event.button, view: currentView.kind, selected: selectedSlotBerry,
+      interaction: getSceneInteractionAt(event.clientX, event.clientY),
+    });
+    if (index < 0) return;
+    // Do not open a browser menu over a slot cell, even if it is empty or busy.
+    event.preventDefault();
+    if (playing || slotReelMotion || slotWildcardPop) return;
+    const removal = removeSlotSymbol(slotReelGrid, index);
+    if (!removal.removed) return;
+    saveSlotGrid(removal.grid);
+    hideResult();
+    foley.play("remove");
+    drawSlotReelDisplay();
+    syncSlotPlacementControls();
+    window.dispatchEvent(new CustomEvent("rg:slot-symbol-removed", { detail: { index } }));
+  });
   canvas.addEventListener("pointerleave", () => {
     slotHoverLine = null;
     slotHoverCell = -1;

@@ -289,7 +289,7 @@ export function createShopRound(shopLists, random = secureRandomUnit) {
     return { id: `shop-${category}`, category, name: card.name, price: card.price, buyer: null, revealed: false };
   });
   if (cards.some((card) => !card)) return null;
-  return { mode: "shop", phase: "shopping", prompt: "", submissions: {}, responses: [], votes: {}, winnerIds: [], cards };
+  return { id: newRoundId(), mode: "shop", phase: "shopping", prompt: "", submissions: {}, responses: [], votes: {}, winnerIds: [], cards };
 }
 
 export function buyShopCard(roundValue, cardId, buyer, scoresValue) {

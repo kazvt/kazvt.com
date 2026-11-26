@@ -5,15 +5,16 @@ import { SLOT_REEL_WILDCARD } from "./slot-reels.mjs";
 
 const blankBoard = () => Array(15).fill(null);
 
-test("the payout table preserves all 16 reference awards and mask sizes", () => {
-  assert.deepEqual(SLOT_PAYOUT_PATTERNS.map(({ points }) => points), [
-    4000, 8000, 10000, 8000, 5000, 20000, 25000, 30000,
-    6000, 25000, 20000, 50000, 5000, 75000, 60000, 50000,
-  ]);
-  assert.deepEqual(SLOT_PAYOUT_PATTERNS.map(({ cells }) => cells.length), [
-    3, 5, 5, 5, 3, 7, 7, 7, 3, 7, 7, 7, 3, 9, 9, 10,
-  ]);
-  assert.equal(new Set(SLOT_PAYOUT_PATTERNS.map(({ id }) => id)).size, 16);
+test("all 20 masks exactly match the uploaded payout reference", () => {
+  const reference = [
+    [4000,"Y..../Y..../Y...."],[8000,"YYYYY/...../....."],[10000,"...../YYYYY/....."],[8000,"...../...../YYYYY"],
+    [5000,".Y.../.Y.../.Y..."],[20000,"Y..../YYYYY/Y...."],[25000,".Y.../YYYYY/.Y..."],[30000,"..Y../YYYYY/..Y.."],
+    [6000,"..Y../..Y../..Y.."],[25000,"...Y./YYYYY/...Y."],[20000,"....Y/YYYYY/....Y"],[50000,"Y...Y/.Y.Y./YYYYY"],
+    [5000,"...Y./...Y./...Y."],[75000,".YYY./Y.Y.Y/.YYY."],[60000,"Y.Y.Y/.YYY./Y.Y.Y"],[50000,"YYYYY/.Y.Y./Y...Y"],
+    [4000,"....Y/....Y/....Y"],[10000,".Y.Y./..Y../.Y.Y."],[15000,"..Y../.YYY./..Y.."],[10000,"Y...Y/..Y../Y...Y"],
+  ];
+  assert.deepEqual(SLOT_PAYOUT_PATTERNS.map(({ points, cells }) => [points, Array.from({length:3}, (_,r) => Array.from({length:5}, (_,c) => cells.includes(r*5+c) ? "Y" : ".").join("")).join("/")]), reference);
+  assert.equal(new Set(SLOT_PAYOUT_PATTERNS.map(({ id }) => id)).size, 20);
 });
 
 test("placement chooses uniformly from the chosen line, replacing other berries but never its own", () => {
@@ -123,12 +124,17 @@ test("star substitutes for a missing berry and pays the owner of the real berrie
   assert.equal(result.totals.kaz, 4000);
 });
 
-test("all-star and mixed-berry patterns are not winning combinations", () => {
-  const grid = blankBoard();
-  [0, 5, 10].forEach((index) => { grid[index] = "star"; });
-  assert.deepEqual(findSlotPayouts(grid), []);
-  grid[0] = "kazberry";
-  grid[5] = "erinberry";
+test("all-star masks pay the full value to each player; mixed berries do not match", () => {
+  for (const pattern of SLOT_PAYOUT_PATTERNS) {
+    const grid = blankBoard();
+    pattern.cells.forEach(index => { grid[index] = "star"; });
+    const result = resolveSlotPayouts(grid);
+    assert.deepEqual(result.totals, { faroe: pattern.points, erin: pattern.points, kaz: pattern.points }, pattern.id);
+    assert.equal(result.payouts.length, 3);
+    assert.deepEqual(result.clearedCells, [...pattern.cells].sort((a,b)=>a-b));
+    assert.deepEqual(result.grid, blankBoard());
+  }
+  const grid = blankBoard(); grid[0] = "kazberry"; grid[5] = "erinberry"; grid[10] = "star";
   assert.deepEqual(findSlotPayouts(grid), []);
 });
 
@@ -175,15 +181,17 @@ test("every mask works with any number of stars as long as a real berry remains"
   }
 });
 
-test("wildcards shared across owners are consumed by the higher prize only", () => {
+test("intersecting wildcards pay both distinct owners and clear the union once", () => {
   const grid = blankBoard();
   [0, 1, 2, 3].forEach(i => { grid[i] = "kazberry"; });
   grid[4] = "star"; // top row
   grid[2] = "star"; grid[7] = "erinberry"; grid[12] = "erinberry";
   const result = resolveSlotPayouts(grid);
   assert.equal(result.totals.kaz, 8000);
-  assert.equal(result.totals.erin, 0);
-  assert.equal(result.grid[7], "erinberry");
+  assert.equal(result.totals.erin, 6000);
+  assert.equal(result.totals.faroe, 0);
+  assert.deepEqual(result.clearedCells, [0,1,2,3,4,7,12]);
+  assert.deepEqual(result.grid, blankBoard());
 });
 
 test("remove one berry or star without changing other cells or the source", () => {
@@ -205,4 +213,45 @@ test("secure random integer selection stays in range and uses crypto when availa
   assert.equal(calls, 1);
   assert.equal(secureRandomIndex(0), -1);
   assert.equal(secureRandomIndex(5, null, () => 0.99), 4);
+});
+
+
+test("three owners can share two intersecting stars; same-owner overlaps remain greedy", () => {
+  const grid = blankBoard();
+  [0,1,3].forEach(i => grid[i] = "kazberry");
+  [7,12].forEach(i => grid[i] = "erinberry");
+  [9,14].forEach(i => grid[i] = "faroeberry");
+  grid[2] = grid[4] = "star";
+  const result = resolveSlotPayouts(grid);
+  assert.deepEqual(result.totals, {faroe:4000, erin:6000, kaz:8000});
+  assert.equal(result.clearedCells.length, 9);
+  assert.deepEqual(result.grid, blankBoard());
+  const eye = SLOT_PAYOUT_PATTERNS.find(p => p.id === "diamond");
+  const same = blankBoard(); eye.cells.forEach(i => same[i] = "kazberry");
+  same[7] = "star";
+  assert.equal(resolveSlotPayouts(same).totals.kaz, 75000);
+});
+
+test("a lower all-star mask remains eligible for other owners when one has a higher overlapping win", () => {
+  const grid = blankBoard();
+  [0,1,3,4].forEach(i => grid[i] = "kazberry");
+  [2,7,12].forEach(i => grid[i] = "star");
+  const result = resolveSlotPayouts(grid);
+  assert.deepEqual(result.totals, {faroe:6000, erin:6000, kaz:8000});
+  assert.deepEqual(result.grid, blankBoard());
+});
+
+test("exhaustively test every star placement subset on each authored mask for every owner", () => {
+  for (const pattern of SLOT_PAYOUT_PATTERNS) for (const berry of ["faroeberry","erinberry","kazberry"]) {
+    const owner = berry.replace("berry", "");
+    for (let mask=0; mask<(1<<pattern.cells.length); mask++) {
+      const grid = blankBoard();
+      pattern.cells.forEach((i,b) => grid[i] = (mask & (1<<b)) ? "star" : berry);
+      const result = resolveSlotPayouts(grid);
+      assert.equal(result.totals[owner], pattern.points, `${pattern.id}/${berry}/${mask}`);
+      assert.ok(result.payouts.some(p => p.owner === owner && p.patternId === pattern.id));
+      assert.equal(new Set(result.clearedCells).size,result.clearedCells.length);
+      assert.deepEqual(result.grid,blankBoard());
+    }
+  }
 });

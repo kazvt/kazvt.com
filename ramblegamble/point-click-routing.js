@@ -62,3 +62,11 @@ export function resolvePointClickBack(view = {}) {
   if (kind === "contestant") return { kind: "contestants", look, retreat: 0 };
   return { kind: "overview", look, retreat: 0 };
 }
+
+// Right-click deletion is an explicit tool, never an alternate spin or place.
+export function resolveSlotContextCell({ button, view, selected, interaction } = {}) {
+  const index = interaction?.cellIndex;
+  return button === 2 && view === "slot" && selected === "star"
+    && interaction?.machine === "slot" && interaction.part === "slot-reel-display"
+    && Number.isInteger(index) && index >= 0 && index < 15 ? index : -1;
+}

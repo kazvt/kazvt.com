@@ -1,3 +1,4 @@
+import { activeCardStage, cardStageChange } from "./card-stage-state.mjs?v=wildcard-shared-20261126-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
 import { mountCardRoom } from "./card-room-host.mjs?v=reader-election-20261126-v1";
 import { foley } from "./game-foley.mjs?v=slot-foley-20261126-v3";
@@ -16,7 +17,7 @@ import {
   revealAudienceResults,
   submitRoundAnswer,
   buyShopCard,
-} from "./card-games.mjs?v=scene-table-20261126-v1";
+} from "./card-games.mjs?v=wildcard-shared-20261126-v1";
 import { readCardGames, writeCardGames, subscribeCardGames } from "./card-games-store.mjs?v=reader-election-20261126-v1";
 import { readPointScores, subscribePointScores, writePointScores } from "./points-store.mjs?v=points-console-20261120-v1";
 
@@ -76,10 +77,10 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
   let network = null;
   let pointScores = readPointScores();
   let menuOpen = false;
-  let dismissedActive = false;
+  // A restored round is not an instruction to open its interface.
+  let dismissedActive = Boolean(activeCardStage(state));
   let selectedBuyer = "faroe";
-  let lastActiveMode = null;
-  let lastSmeemoId = null;
+  let lastActiveStage = activeCardStage(state);
   let smeemoPhaseTimer = 0;
   let smeemoScheduledSignal = "";
   let menuTimer = 0;
@@ -179,38 +180,28 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     setAdminState(state);
     network?.publish();
 
-    const activeSmeemo = state.smeemo && ["playing", "complete"].includes(state.smeemo.status);
-    const newSmeemoGame = Boolean(activeSmeemo && state.smeemo.id && state.smeemo.id !== lastSmeemoId);
-    lastSmeemoId = activeSmeemo ? state.smeemo.id : null;
-    if (!activeSmeemo) {
+    const { active, opened, ended } = cardStageChange(lastActiveStage, state);
+    lastActiveStage = active;
+    const activeSmeemo = active?.mode === "smeemo";
+    if (!activeSmeemo || dismissedActive || menuOpen) {
       window.clearTimeout(smeemoPhaseTimer);
       smeemoPhaseTimer = 0;
       smeemoScheduledSignal = "";
     }
-    const nextMode = activeSmeemo ? "smeemo" : state.round?.mode || null;
-    if (nextMode && (nextMode !== lastActiveMode || newSmeemoGame)) {
-      lastActiveMode = nextMode;
+    if (opened) {
+      menuOpen = false;
       dismissedActive = false;
-      window.dispatchEvent(new CustomEvent("rg:card-game-active", { detail: { mode: nextMode } }));
-    } else if (!nextMode && lastActiveMode) {
-      lastActiveMode = null;
-      if (!menuOpen) {
-        layer.hidden = true;
-        content.replaceChildren();
-      }
+      window.clearTimeout(menuTimer);
+      window.dispatchEvent(new CustomEvent("rg:card-game-active", { detail: { mode: active.mode } }));
+    } else if (ended && !menuOpen && !dismissedActive) {
+      layer.hidden = true;
+      content.replaceChildren();
       window.dispatchEvent(new Event("rg:close-card-games"));
     }
-    if (menuOpen && !activeSmeemo) {
-      renderMenu();
-    } else if (dismissedActive) {
-      layer.hidden = true;
-    } else if (activeSmeemo) {
-      menuOpen = false;
-      renderSmeemo(state.smeemo);
-    } else if (state.round) {
-      menuOpen = false;
-      renderRound(state.round);
-    } else if (menuOpen) renderMenu();
+    if (menuOpen) renderMenu();
+    else if (dismissedActive || !active) layer.hidden = true;
+    else if (activeSmeemo) renderSmeemo(state.smeemo);
+    else renderRound(state.round);
   }
 
   function sync(next) {
@@ -291,6 +282,24 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       makeModeChoice("shop", "menu-shop.png", "The Shop"),
     );
     content.append(grid);
+    const active = activeCardStage(state);
+    if (active) {
+      const resume = element("button", "rg-card-room-button", `RESUME ${modeNames[active.mode] || "SMEEMO SCRAMBLE"}`);
+      resume.type = "button";
+      resume.addEventListener("click", resumeActiveStage);
+      content.append(resume);
+    }
+  }
+
+  function resumeActiveStage() {
+    const latest = readCardGames();
+    const active = activeCardStage(latest);
+    if (!active) return;
+    menuOpen = false;
+    dismissedActive = false;
+    window.clearTimeout(menuTimer);
+    updateFromState(latest);
+    window.dispatchEvent(new CustomEvent("rg:card-game-active", { detail: { mode: active.mode } }));
   }
 
   function chooseMode(mode, choice) {
@@ -571,7 +580,6 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     dismissedActive = false;
     foley.start("cards-motion", "deal");
     sync(next);
-    window.dispatchEvent(new CustomEvent("rg:card-game-active", { detail: { mode: round.mode } }));
     closeHostPanel();
   }
 
@@ -599,6 +607,7 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     menuOpen = true;
     dismissedActive = false;
     renderMenu();
+    window.dispatchEvent(new CustomEvent("rg:card-game-active", { detail: { mode: "menu" } }));
     closeHostPanel();
   }
 
@@ -632,14 +641,16 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     dismissedActive = false;
     foley.start("cards-motion", "deal");
     sync({ ...state, round });
-    window.dispatchEvent(new CustomEvent("rg:card-game-active", { detail: { mode: "shop" } }));
     closeHostPanel();
   });
   hostButton.addEventListener("click", () => openHostPanel());
   roomButton.addEventListener("click", () => {
     foley.stop("cards-motion");
     menuOpen = false;
-    dismissedActive = Boolean(state.round || state.smeemo);
+    dismissedActive = Boolean(activeCardStage(state));
+    window.clearTimeout(smeemoPhaseTimer);
+    smeemoPhaseTimer = 0;
+    smeemoScheduledSignal = "";
     window.clearTimeout(menuTimer);
     layer.hidden = true;
     window.dispatchEvent(new Event("rg:close-card-games"));
@@ -648,12 +659,6 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
     menuOpen = true;
     dismissedActive = false;
     renderMenu();
-  });
-  window.addEventListener("rg:card-game-active", (event) => {
-    if (event.detail?.mode) {
-      menuOpen = false;
-      dismissedActive = false;
-    }
   });
 
   network = mountCardRoom($("#rg-card-network"), { getRound: () => { const latest = readCardGames(); return latest.smeemo ? null : latest.round; }, commitRound: round => { const result = writeCardGames({ ...readCardGames(), round }, { requirePersistence: true }); if (result.persisted) { foley.play("place"); updateFromState(result.state); } return result.persisted; }, onStatus: message => { adminStatus.textContent = message; } });

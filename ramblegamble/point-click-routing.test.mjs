@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   resolveArcadeShortcut,
+  resolveSlotContextCell,
   resolvePointClick,
   resolvePointClickAction,
   resolvePointClickBack,
@@ -106,4 +107,11 @@ test("back returns to the starting overview view and never retreats past it", ()
   const backToStart = resolvePointClickBack(backToOverview);
   assert.deepEqual(backToStart, { kind: "overview", look: 0, retreat: 0 });
   assert.equal(resolvePointClickBack(backToStart), null);
+});
+
+ test("right-click deletion routes only real slot display cells in star mode", () => {
+  const base = {button:2, view:"slot", selected:"star", interaction:{machine:"slot",part:"slot-reel-display",cellIndex:0}};
+  for (let i=0; i<15; i++) assert.equal(resolveSlotContextCell({...base, interaction:{...base.interaction,cellIndex:i}}),i);
+  for (const overrides of [{button:0},{button:1},{view:"overview"},{selected:"kazberry"},{interaction:null},{interaction:{...base.interaction,part:"arm"}},{interaction:{...base.interaction,machine:"roulette"}}]) assert.equal(resolveSlotContextCell({...base,...overrides}),-1);
+  for (const i of [-1,15,NaN,null,1.5,"1"]) assert.equal(resolveSlotContextCell({...base,interaction:{...base.interaction,cellIndex:i}}),-1);
 });

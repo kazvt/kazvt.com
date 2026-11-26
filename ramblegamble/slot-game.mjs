@@ -11,7 +11,7 @@ const row = (rowIndex) => Array.from({ length: SLOT_REEL_COLUMNS }, (_, column) 
 const column = (columnIndex) => Array.from({ length: SLOT_REEL_ROWS }, (_, rowIndex) => cell(columnIndex, rowIndex));
 
 // Each mask is read directly from the supplied 5x3 payout reference. Dark cells
-// are wildcards; only the listed (yellow) cells must belong to the same berry.
+// are unconstrained; yellow cells must match one berry or star.
 export const SLOT_PAYOUT_PATTERNS = Object.freeze([
   { id: "left-column", points: 4000, cells: column(0) },
   { id: "top-row", points: 8000, cells: row(0) },
@@ -24,11 +24,15 @@ export const SLOT_PAYOUT_PATTERNS = Object.freeze([
   { id: "center-column", points: 6000, cells: column(2) },
   { id: "fourth-hook", points: 25000, cells: [...row(1), cell(3, 0), cell(3, 2)] },
   { id: "right-hook", points: 20000, cells: [...row(1), cell(4, 0), cell(4, 2)] },
-  { id: "corner-cross", points: 50000, cells: [cell(0, 0), cell(4, 0), cell(1, 1), cell(2, 1), cell(3, 1), cell(0, 2), cell(4, 2)] },
+  { id: "corner-cross", points: 50000, cells: [cell(0, 0), cell(4, 0), cell(1, 1), cell(3, 1), ...row(2)] },
   { id: "fourth-column", points: 5000, cells: column(3) },
   { id: "diamond", points: 75000, cells: [cell(1, 0), cell(2, 0), cell(3, 0), cell(0, 1), cell(2, 1), cell(4, 1), cell(1, 2), cell(2, 2), cell(3, 2)] },
   { id: "hourglass", points: 60000, cells: [cell(0, 0), cell(2, 0), cell(4, 0), cell(1, 1), cell(2, 1), cell(3, 1), cell(0, 2), cell(2, 2), cell(4, 2)] },
-  { id: "crown", points: 50000, cells: [0, 1, 2, 3, 4, cell(1, 1), cell(2, 1), cell(3, 1), cell(0, 2), cell(4, 2)] },
+  { id: "crown", points: 50000, cells: [0, 1, 2, 3, 4, cell(1, 1), cell(3, 1), cell(0, 2), cell(4, 2)] },
+  { id: "right-column", points: 4000, cells: column(4) },
+  { id: "small-eye", points: 10000, cells: [cell(1, 0), cell(3, 0), cell(2, 1), cell(1, 2), cell(3, 2)] },
+  { id: "small-cross", points: 15000, cells: [cell(2, 0), cell(1, 1), cell(2, 1), cell(3, 1), cell(2, 2)] },
+  { id: "five-corners", points: 10000, cells: [cell(0, 0), cell(4, 0), cell(2, 1), cell(0, 2), cell(4, 2)] },
 ].map((pattern) => Object.freeze({ ...pattern, cells: Object.freeze([...new Set(pattern.cells)]) })));
 
 export function secureRandomIndex(maximum, cryptoSource = globalThis.crypto, fallback = Math.random) {
@@ -102,21 +106,25 @@ export function rotateSlotColumns(grid, columns, { randomIndex = secureRandomInd
 export function findSlotPayouts(grid) {
   const board = normalizeSlotGrid(grid);
   const wins = [];
-  for (const berry of SLOT_REEL_SYMBOLS) {
-    for (const pattern of SLOT_PAYOUT_PATTERNS) {
-      const symbols = pattern.cells.map((index) => board[index]);
-      if (symbols.includes(berry) && symbols.every((symbol) => symbol === berry || symbol === SLOT_REEL_WILDCARD)) {
+  // Evaluate the same immutable board for every player. Stars can substitute
+  // independently for each owner, including when a mask contains only stars.
+  for (const pattern of SLOT_PAYOUT_PATTERNS) {
+    const symbols = pattern.cells.map((index) => board[index]);
+    for (const berry of SLOT_REEL_SYMBOLS) {
+      if (symbols.every((symbol) => symbol === berry || symbol === SLOT_REEL_WILDCARD)) {
         wins.push({ owner: OWNER_BY_BERRY[berry], berry, patternId: pattern.id, points: pattern.points, cells: [...pattern.cells] });
       }
     }
   }
-  // A cell (including a wildcard) can fund only one award in a resolution.
-  // Prefer the largest prize, then the larger mask; authored order breaks ties.
+  // Greedy overlap suppression is per owner, not global. An all-star mask is
+  // eligible for every owner; an owner with a higher overlapping win takes
+  // that win instead. Different owners can reuse a shared star, never a berry.
   wins.sort((a, b) => b.points - a.points || b.cells.length - a.cells.length
     || SLOT_PAYOUT_PATTERNS.findIndex(({ id }) => id === a.patternId)
       - SLOT_PAYOUT_PATTERNS.findIndex(({ id }) => id === b.patternId));
-  const used = new Set();
+  const usedByOwner = new Map(Object.values(OWNER_BY_BERRY).map((owner) => [owner, new Set()]));
   return wins.filter((win) => {
+    const used = usedByOwner.get(win.owner);
     if (win.cells.some((index) => used.has(index))) return false;
     for (const index of win.cells) used.add(index);
     return true;
