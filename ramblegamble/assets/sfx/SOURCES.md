@@ -10,6 +10,8 @@ From the repository root on your own Internet-connected computer, run:
 python3 ramblegamble/assets/sfx/install-foley.py
 ```
 
+The installer fetches Kenney's original CC0 ZIPs from their OpenGameArt mirrors because Kenney's older direct-media URLs now redirect to asset pages. Both OpenGameArt source pages list Kenney as creator and CC0 as the license: [Casino Audio](https://opengameart.org/content/54-casino-sound-effects-cards-dice-chips) and [Interface Sounds](https://opengameart.org/content/interface-sounds).
+
 Commit the resulting `ramblegamble/assets/sfx/foley/` directory to GitHub Pages. Do not commit a Freesound API token. Existing valid files are preserved. To check the inventory without downloading, use `--check`. Reload the deployed pages after committing new samples. The patch authoring environment could not download or audition new binary audio; the installer downloads the actual source files. The site uses same-origin audio only, never hotlinks the stock sites.
 
 If Freesound's public page does not expose the preview URL, use the free API token as `FREESOUND_API_TOKEN` in your shell environment. Alternatively download from the source pages below and put MP3 copies in a private staging directory with the listed names. Convert if necessary with `ffmpeg -i ORIGINAL.wav -c:a libmp3lame -q:a 2 OUTPUT.mp3` (conversion, not synthesis). You can also download both Kenney ZIPs manually and run:

@@ -17,8 +17,6 @@ import urllib.request
 import zipfile
 
 DEST = Path(__file__).resolve().parent / "foley"
-KENNEY = "https://kenney.nl/media/pages/assets/casino-audio/2472606a04-1721639069/kenney_casino-audio.zip"
-INTERFACE = "https://kenney.nl/media/pages/assets/interface-sounds/fa43c1dd4d-1677589452/kenney_interface-sounds.zip"
 # Kenney's old direct-media URLs redirect to its asset pages now. These are the
 # original Kenney CC0 ZIPs mirrored on OpenGameArt, whose source pages confirm
 # Kenney as creator and CC0 as the license.
