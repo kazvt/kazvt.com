@@ -27,7 +27,7 @@ PACK = {
     "card-shuffle.ogg": "cardshuffle.ogg",
     **{f"chips-handle-{n}.ogg": f"chipshandle{n}.ogg" for n in (1, 2)},
     **{f"chip-lay-{n}.ogg": f"chiplay{n}.ogg" for n in (1, 2)},
-    **{f"die-shuffle-{n}.ogg": f"dieshuffle{n}.ogg" for n in (1, 2)},
+    **{f"die-shuffle-{n}.ogg": f"diceshake{n}.ogg" for n in (1, 2)},
     **{f"die-throw-{n}.ogg": f"diethrow{n}.ogg" for n in (1, 2, 3)},
 }
 # title, creator, ID, expected license URL suffix. All described as physical sounds;
