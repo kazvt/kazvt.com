@@ -189,7 +189,6 @@
 .rg-control-group legend { margin-bottom: 8px; color: #486c2f; font-size: 13px; font-weight: 900; }
 .rg-berry-picker { display: grid; grid-template-columns: repeat(3, 60px); gap: 7px; }
 .rg-berry-choice { display: grid; width: 60px; min-width: 60px; min-height: 60px; place-items: center; padding: 5px; }
-.rg-berry-choice[aria-pressed="true"],
 .rg-berry-choice[aria-pressed="true"] { color: #fff; background: #8b2626; }
 .rg-berry-choice-image { display: block; width: 44px; height: 44px; object-fit: cover; image-rendering: pixelated; pointer-events: none; }
 .rg-secondary-button { padding: 7px 12px; font-size: 11px; letter-spacing: .04em; }

@@ -512,13 +512,13 @@ import {
         index,
         label: String(index + 1),
         x: left + (index + 0.5) * cellWidth,
-        y: top - cellHeight * 0.54,
+        y: top - cellHeight * 0.36,
       })),
       ...Array.from({ length: 3 }, (_, index) => ({
         axis: "row",
         index,
         label: String.fromCharCode(65 + index),
-        x: left - cellWidth * 0.54,
+        x: left - cellWidth * 0.36,
         y: top + (index + 0.5) * cellHeight,
       })),
     ];
