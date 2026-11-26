@@ -154,3 +154,11 @@
  @keyframes rg-spectator-placement{0%{filter:drop-shadow(0 0 9px #ffe567)}100%{filter:none}}
 }
 .rg-live-stage:has(.rg-spectator){row-gap:6px;}
+
+/* Icon matching: no filenames, no alt fallback; stable visual target even if unavailable. */
+.rg-match-icon{min-height:clamp(40px,9vh,100px);justify-content:center;}
+.rg-match-icon .rg-live-image{height:auto;width:auto;max-width:100%;max-height:clamp(55px,20vh,220px);object-fit:contain;}
+.rg-match-icon.rg-match-unavailable{min-height:clamp(40px,9vh,100px);}
+#trivia-player-content .rg-match-icon .rg-live-image{max-height:clamp(70px,22vh,200px);}
+.rg-spectator-guess-hero{flex-wrap:wrap;}
+.rg-spectator-guess-word{font-size:clamp(14px,2vw,24px);font-weight:900;letter-spacing:.08em;align-self:center;}

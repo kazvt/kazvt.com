@@ -84,3 +84,30 @@ test('draft-only notifications update host stage locally and from another tab wi
  const event=new Event('storage');Object.defineProperty(event,'key',{value:LIVE_TRIVIA_DRAFT_KEY});target.dispatchEvent(event);assert.equal(stage.length,3);assert.equal(network.length,1);
  const final=submit(readLiveTrivia(),'erin',{strokes:[[[9,10]]]}).round;assert.ok(writeLiveTrivia(final));assert.equal(stage.length,4);assert.equal(network.length,2);assert.equal(stage.at(-1).drafts.erin,undefined);
 });
+
+test('matching URL-in-label and explicit media fields produce icon-only projections, including saved legacy rounds',()=>{
+ const url='https://lillie.garden/quizz_pieces/answer_name.png';
+ const r=make('match-pairs',{pairs:[{left:url,right:'Answer A'},{left:'Private filename',leftImage:'https://example.test/other.webp',right:'Answer B'},{left:'Text item',right:'Answer C'}]});
+ const projected=publicTriviaRound(r,'kaz');
+ assert.deepEqual(projected.question.left,[{label:'',image:url,icon:true},{label:'',image:'https://example.test/other.webp',icon:true},{label:'Text item',image:''}]);
+ assert.ok(!JSON.stringify(projected).includes('Private filename'));assert.ok(!('secret' in projected));
+ const legacy={...r,question:{...r.question,left:[{label:url,image:''},...r.question.left.slice(1)]}};
+ assert.deepEqual(publicQuestion(legacy).left[0],{label:'',image:url,icon:true});
+ const a=submit(legacy,'kaz',{matches:[0,1,2]}).round;
+ assert.ok(!JSON.stringify(a.submissions).includes(url));
+ assert.throws(()=>make('match-pairs',{pairs:[{left:'javascript:alert(1)',right:'Never show'}]}),/matching pairs/);
+});
+
+test('numeric accepted-answer legacy target grades higher/lower/exact, and explicit zero stays zero',()=>{
+ for(const [target,contentOverride] of [[42,{numberValue:0,acceptedAnswers:['42']}],[-12.5,{numberValue:-12.5}],[0,{numberValue:0,numberTargetSet:true,acceptedAnswers:['99']}],[0,{numberValue:0,acceptedAnswers:[],numberCode:""}]] ){
+  for(const kind of ['number-stepper','memory-number']){
+   let r=make(kind,contentOverride);assert.equal(r.secret.numberValue,target);assert.ok(!('numberValue' in publicQuestion(r)));
+   for(const [i,[guess,result]] of [[String(target-1),'higher'],[String(target+1),'lower'],[String(target),'correct']].entries()){
+    const next=submit(r,'faroe',{guess,id:`try-${i}`});assert.equal(next.status,'accepted');r=next.round;assert.equal(r.attempts.faroe.at(-1).result,result);
+    assert.equal(publicTriviaRound(r,'faroe').attempts.at(-1).result,result);assert.deepEqual(publicTriviaRound(r,'erin').attempts,[]);
+   }
+   assert.ok(r.submissions.faroe);assert.equal(r.submissions.erin,null);
+  }
+ }
+ assert.throws(()=>make('number-stepper',{numberValue:null,acceptedAnswers:[]}),/target number/);
+});

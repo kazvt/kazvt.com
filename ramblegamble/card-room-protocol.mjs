@@ -1,5 +1,5 @@
 import { validRequestId } from "./card-room-delivery.mjs?v=submission-audit-20261126-v1";
-import { publicTriviaRound, acceptTriviaAnswer } from "./live-trivia.mjs?v=spectator-20261127-v1";
+import { publicTriviaRound, acceptTriviaAnswer } from "./live-trivia.mjs?v=match-number-20261127-v1";
 import { CARD_GAME_PLAYERS, submitRoundAnswer } from "./card-games.mjs?v=show-stage-20261126-v1";
 import { validPublicKey } from "./card-room-auth.mjs?v=host-security-20261126-v1";
 export const ROOM_VERSION = 2;

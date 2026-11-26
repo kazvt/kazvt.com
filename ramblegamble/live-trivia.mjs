@@ -2,7 +2,8 @@
 import { withRoomSubmissionLock } from './card-room-election.mjs';
 import { readCardGames } from './card-games-store.mjs?v=show-stage-20261126-v1';
 import { MODE_NAMES } from './trivia-data.js?v=compose-repeat-grid-20261124-v1';
-import { scoreFourDigitGuess, compareNumberGuess, normalizeGuessLimit } from './trivia-game.mjs?v=changeable-number-feedback-20261124-v1';
+import { normalizeMatchItem } from "./trivia-match-media.mjs?v=match-number-20261127-v1";
+import { scoreFourDigitGuess, compareNumberGuess, normalizeGuessLimit, resolveNumberTarget, parseTriviaNumber } from './trivia-game.mjs?v=match-number-20261127-v1';
 export const LIVE_TRIVIA_KEY = 'rg-live-trivia-v1';
 export const LIVE_TRIVIA_DRAFT_KEY = 'rg-live-trivia-drafts-v1';
 export const TRIVIA_REQUEST_KEY = 'rg-trivia-request-v1';
@@ -74,7 +75,7 @@ export function createLiveTrivia({round,difficulty,format,content,cards,id=newTr
     promptImage:media(content.promptImage),backgroundImage:media(content.backgroundImage),videoUrl:mode==='video'&&/^https?:/i.test(media(content.videoUrl))?media(content.videoUrl):'',
     options:CHOICE_MODES.includes(mode)?list(content.options).map((o,i,a)=>option(format.blankOption&&i===a.length-1&&!o?.label&&!o?.image?{label:"BLANK"}:o)):[],
     items:itemOrder.map(i=>items[i]),categories:mode==="categorize-images"?list(content.categories).map(v=>text(v,300)):[],
-    left:pairs.map(p=>({label:text(p.left,1000),image:media(p.leftImage)})),right:rightOrder.map(i=>text(pairs[i].right,1000)),
+    left:pairs.map(p=>normalizeMatchItem(p,media)),right:rightOrder.map(i=>text(pairs[i].right,1000)),
     multiple:format.selectionRule==='all',requiredCount:format.selectionRule==='all'?Math.max(0,Math.min(24,Number(format.requiredCorrectCount)||0)):0,
     reorder:mode==='timeline'&&Boolean(format.reorder),guessLimit:normalizeGuessLimit(content.guessLimit),imageVisible:content.imageVisible!==false,
     sequenceIndex:0,gridSize:Math.max(0,Math.min(128,Number(format.gridSize)||0)),imageAspect:text(format.imageAspect,30),columns:Math.max(0,Math.min(6,Number(format.columns)||0))};
@@ -85,7 +86,7 @@ export function createLiveTrivia({round,difficulty,format,content,cards,id=newTr
   if(mode==='match-pairs'&&(!q.left.length||q.right.some(v=>!v.trim())||q.left.some(v=>!v.label&&!v.image)))throw Error('Complete the matching pairs first.');
 
   if(!q.prompt&&!q.subtitle&&!q.promptImage&&!q.backgroundImage&&!q.videoUrl&&!list(content.options).some(o=>o?.label||o?.image)&&!q.items.some(o=>o.label||o.image)&&!q.left.length&&!(mode==="memory-number"&&media(content.promptImage))&&!(mode==="number-grid"&&/^\d{4}$/.test(text(content.numberCode,4))))throw Error('No authored question for that round/difficulty.');
-  const secret={correct:list(content.options).flatMap((o,i)=>o?.correct?[i]:[]),accepted:list(content.acceptedAnswers).map(v=>text(v)),numberCode:text(content.numberCode,4),numberValue:Number(content.numberValue),rightOrder,itemOrder,memoryImage:mode==="memory-number"?media(content.promptImage):""};
+  const secret={correct:list(content.options).flatMap((o,i)=>o?.correct?[i]:[]),accepted:list(content.acceptedAnswers).map(v=>text(v)),numberCode:text(content.numberCode,4),numberValue:resolveNumberTarget(content),rightOrder,itemOrder,memoryImage:mode==="memory-number"?media(content.promptImage):""};
   if(mode==='number-grid'&&!/^\d{4}$/.test(secret.numberCode))throw Error('Set the four-digit secret first.');
   if(['number-stepper','memory-number'].includes(mode)&&!Number.isFinite(secret.numberValue))throw Error('Set the target number first.');
   const result={id,mode:'trivia',phase:'submissions',prompt:q.prompt,question:q,secret,cardStamp:cardStamp(cards),submissions:Object.fromEntries(PLAYERS.map(p=>[p,null])),attempts:Object.fromEntries(PLAYERS.map(p=>[p,[]])),drafts:{},lastPlayer:null};
@@ -95,6 +96,7 @@ export function createLiveTrivia({round,difficulty,format,content,cards,id=newTr
 export function publicQuestion(round) {
   const q=round.question;
   if(["image-sequence","text-sequence"].includes(q.kind))return {...q,items:q.items.slice(q.sequenceIndex,q.sequenceIndex+1),sequenceIndex:0};
+  if(q.kind==='match-pairs')return {...q,left:q.left.map(item=>normalizeMatchItem(item,publicMedia))};
   return q;
 }
 export function publicTriviaRound(round,player) {
@@ -108,7 +110,7 @@ export function validTriviaAnswer(q,a) {
   const k=q.kind;
   if(CHOICE_MODES.includes(k))return unique(a.selected,q.options.length)&&a.selected.length>0&&(q.multiple?(q.requiredCount===0||a.selected.length===q.requiredCount):a.selected.length===1);
   if(k==='number-grid')return typeof a.guess==='string'&&/^\d{4}$/.test(a.guess)&&typeof a.id==='string'&&/^[a-z0-9-]{1,64}$/i.test(a.id);
-  if(k==='number-stepper'||k==='memory-number')return typeof a.guess==='string'&&/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(a.guess.trim())&&a.guess.length<=80&&Number.isFinite(Number(a.guess))&&typeof a.id==='string'&&/^[a-z0-9-]{1,64}$/i.test(a.id);
+  if(k==='number-stepper'||k==='memory-number')return typeof a.guess==='string'&&a.guess.length<=80&&parseTriviaNumber(a.guess)!==null&&typeof a.id==='string'&&/^[a-z0-9-]{1,64}$/i.test(a.id);
   if(k==='timeline'&&q.reorder)return unique(a.order,q.items.length)&&a.order.length===q.items.length&&q.items.length>0;
   if(k==='match-pairs')return unique(a.matches,q.right.length)&&a.matches.length===q.left.length&&q.left.length>0;
   if(k==='categorize-images')return Array.isArray(a.groups)&&a.groups.length===q.items.length&&a.groups.length>0&&a.groups.every(v=>index(v,q.categories.length));
@@ -168,7 +170,7 @@ export function answerSummary(round,player) {
   const labels=(values,items)=>values.map(i=>items[i]?.label||`#${i+1}`).join(', ');
   if(a.selected)return labels(a.selected,q.options);
   if(a.order)return labels(a.order,q.items);
-  if(a.matches)return a.matches.map((i,j)=>`${q.left[j]?.label||`#${j+1}`} → ${q.right[i]}`).join('; ');
+  if(a.matches)return a.matches.map((i,j)=>`${normalizeMatchItem(q.left[j],publicMedia).label||`#${j+1}`} → ${q.right[i]}`).join('; ');
   if(a.groups)return a.groups.map((i,j)=>`${q.items[j]?.label||`#${j+1}`} → ${q.categories[i]}`).join('; ');
   if(a.placements)return `${a.placements.length} placements`;
   if(a.strokes)return `${a.strokes.length} drawing strokes`;

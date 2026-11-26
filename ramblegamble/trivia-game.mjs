@@ -37,12 +37,34 @@ export function normalizeGuessLimit(value) {
   return Math.max(1, Math.min(4, Math.trunc(count)));
 }
 
+export function parseTriviaNumber(value) {
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (typeof value !== "string" || !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(value.trim())) return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+export function isNumericTargetMode(mode) { return mode === "number-stepper" || mode === "memory-number"; }
+
+// Older imports populated acceptedAnswers while defaulting numberValue to 0.
+// An explicitly authored nonzero target wins; a single legacy numeric answer
+// repairs an unset/default-zero target. Ambiguous legacy answers require review.
+export function resolveNumberTarget(content = {}) {
+  const target = parseTriviaNumber(content.numberValue);
+  if (content.numberTargetSet === true || (target !== null && target !== 0)) return target;
+  const answers = [...new Set((Array.isArray(content.acceptedAnswers) ? content.acceptedAnswers : []).map(parseTriviaNumber).filter(n => n !== null))];
+  if (answers.length === 1) return answers[0];
+  if (answers.length > 1) return null;
+  // Older generic "target number" imports were truncated into the Wordle code.
+  // Never guess the original signed/decimal/long number from that lossy field.
+  if (typeof content.numberCode === "string" && content.numberCode.trim()) return null;
+  return target;
+}
+
 export function compareNumberGuess(answer, guess) {
-  const rawGuess = String(guess ?? "").trim();
-  if (!rawGuess) return null;
-  const target = Number(answer);
-  const attempt = Number(rawGuess);
-  if (!Number.isFinite(target) || !Number.isFinite(attempt)) return null;
+  const target = parseTriviaNumber(answer);
+  const attempt = parseTriviaNumber(guess);
+  if (target === null || attempt === null) return null;
   if (attempt < target) return "higher";
   if (attempt > target) return "lower";
   return "correct";

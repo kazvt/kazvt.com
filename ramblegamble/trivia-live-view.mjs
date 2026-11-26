@@ -1,14 +1,26 @@
+import { normalizeMatchItem } from "./trivia-match-media.mjs?v=match-number-20261127-v1";
 import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { showBurst } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 // Console uses the private read-only renderer without installing audio listeners.
 const foley = globalThis.location?.pathname?.replace(/\/$/, '') === '/rg/console'
  ? {play(){}} : (await import('./game-foley.mjs?v=theatre-20261127-v1')).foley;
 import { snapComposePlacement } from './compose-placement.mjs';
-import { CHOICE_MODES, publicMedia, validTriviaAnswer, MAX_TRIVIA_ANSWER, answerSummary, NUMERIC_MODES, numericProgress } from './live-trivia.mjs?v=spectator-20261127-v1';
+import { CHOICE_MODES, publicMedia, validTriviaAnswer, MAX_TRIVIA_ANSWER, answerSummary, NUMERIC_MODES, numericProgress } from './live-trivia.mjs?v=match-number-20261127-v1';
 const node=(tag,cls='',text='')=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text)e.textContent=text;return e;};
 const button=(text,fn)=>{const b=node('button','rg-live-button',text);b.type='button';b.addEventListener('click',fn);return b;};
-function image(src,alt='') {const url=publicMedia(src);if(!url)return null;const e=node('img','rg-live-image');e.src=url;e.alt=alt;e.referrerPolicy='no-referrer';e.draggable=false;return e;}
+function image(src,alt='') {const url=publicMedia(src);if(!url)return null;const e=node('img','rg-live-image');e.alt=alt;e.referrerPolicy='no-referrer';e.draggable=false;e.src=url;return e;}
 function itemView(item,index) {const e=node('span','rg-live-item');const im=image(item?.image,item?.label||`Option ${index+1}`);if(im)e.append(im);if(item?.label||!im)e.append(node('span','',item?.label||`#${index+1}`));return e;}
+// An empty alt is intentional: the icon is the question, its name is the answer.
+// The control itself has an anonymous accessible identifier. Failed loads stay
+// visually blank with a neutral frame; no URL, label or broken-image text.
+export function matchItemView(item,index,resolveMedia=publicMedia) {
+ const safe=normalizeMatchItem(item,resolveMedia);
+ if(!safe.icon)return itemView(safe,index);
+ const e=node('span','rg-live-item rg-match-icon');e.setAttribute('role','img');e.setAttribute('aria-label',`Icon ${index+1}`);
+ const im=image(safe.image,'');
+ if(im){im.addEventListener('error',()=>{im.remove();e.classList.add('rg-match-unavailable');},{once:true});e.append(im);}else e.classList.add('rg-match-unavailable');
+ return e;
+}
 function artboard(parent,q,answer=null,interactive=false,showTypes=false,onChange=null) {
  const board=node('div','rg-live-artboard'); const bg=image(q.backgroundImage||q.promptImage,'Question image'); if(bg)board.append(bg);const canvas=node('canvas');canvas.width=600;canvas.height=q.imageAspect==='square'?600:q.imageAspect==='11 / 3'?164:400;const setRatio=(w,h)=>{board.style.aspectRatio=`${w}/${h}`;board.style.setProperty("--rg-art-ratio",String(w/h));};setRatio(canvas.width,canvas.height);canvas.setAttribute('aria-label',q.kind==='draw-over-image'?'Drawing area':'Placement area');board.append(canvas);parent.append(board);
  const ctx=canvas.getContext('2d');const validPoint=p=>Array.isArray(p)&&p.length===2&&p.every(n=>Number.isInteger(n)&&n>=0&&n<=1000);
@@ -53,7 +65,7 @@ export function renderLiveQuestion(root,q,{interactive=false,attempts=[],onSubmi
  if(CHOICE_MODES.includes(q.kind)){grid.dataset.count=String(q.options.length);grid.style.setProperty("--rg-columns",String(q.columns||((q.kind!=="choice-text")?(q.options.length>=10?5:3):q.options.length>10?3:2)));const picks=new Set((Array.isArray(initialAnswer?.selected)?initialAnswer.selected:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<q.options.length));q.options.forEach((o,i)=>{const b=interactive?button('',()=>{if(hostCheck)clearHostFeedback();if(q.multiple){if(picks.has(i))picks.delete(i);else if(!q.requiredCount||picks.size<q.requiredCount)picks.add(i);}else{picks.clear();picks.add(i);}Array.from(grid.children).forEach((el,j)=>el.setAttribute('aria-pressed',String(picks.has(j))));}):node('div','rg-live-tile');b.classList.add('rg-live-tile');if(interactive){b.setAttribute('aria-label',o.label||`Image option ${i+1}`);b.setAttribute('aria-pressed',String(picks.has(i)));} else if(picks.has(i))b.classList.add('rg-live-saved-choice');b.append(itemView(o,i));grid.append(b);});body.append(grid);read=()=>({selected:[...picks]});}
  else if(q.kind==='number-grid'){const rows=node('div','rg-live-number-grid');for(let i=0;i<q.guessLimit;i++){const attempt=attempts[i];for(let j=0;j<4;j++){const c=node('span','rg-live-digit',attempt?.guess?.[j]||'');if(attempt)c.dataset.result=attempt.result[j];rows.append(c);}}body.append(rows);addText(true);}
  else if(['number-stepper','memory-number'].includes(q.kind)){if(attempts.length){const last=attempts.at(-1);body.append(node('p','rg-live-feedback',`${last.guess} — ${last.result.toUpperCase()}`));}addText(true);}
- else if(q.kind==='match-pairs'||q.kind==='categorize-images'){const matching=q.kind==='match-pairs';const items=matching?q.left:q.items, choices=matching?q.right:q.categories;const fields=[];grid.style.setProperty("--rg-columns",String(items.length>8?4:3));body.append(grid);items.forEach((item,i)=>{const box=node('div','rg-live-tile');box.append(itemView(item,i));if(interactive){const select=node('select','rg-live-input');select.setAttribute('aria-label',item.label||`Item ${i+1}`);const blank=node('option','','Choose…');blank.value='';select.append(blank);choices.forEach((v,j)=>{const o=node('option','',v);o.value=String(j);select.append(o);});const draft=(matching?initialAnswer?.matches:initialAnswer?.groups)?.[i];if(Number.isInteger(draft)&&draft>=0&&draft<choices.length)select.value=String(draft);box.append(select);fields.push(select);}else if(initialAnswer){const pick=(matching?initialAnswer.matches:initialAnswer.groups)?.[i];if(Number.isInteger(pick)&&choices[pick]!==undefined)box.append(node('span','rg-live-saved-label',choices[pick]));}grid.append(box);});if(!interactive&&!initialAnswer){const right=node('div','rg-live-grid');right.style.setProperty('--rg-columns',String(choices.length>8?4:3));choices.forEach(v=>right.append(node('div','rg-live-tile',v)));body.append(right);}read=()=>({[matching?'matches':'groups']:fields.map(s=>s.value===''?-1:Number(s.value))});}
+ else if(q.kind==='match-pairs'||q.kind==='categorize-images'){const matching=q.kind==='match-pairs';const items=matching?q.left:q.items, choices=matching?q.right:q.categories;const fields=[];grid.style.setProperty("--rg-columns",String(items.length>8?4:3));body.append(grid);items.forEach((item,i)=>{const box=node('div','rg-live-tile');box.append(matching?matchItemView(item,i):itemView(item,i));if(interactive){const select=node('select','rg-live-input');select.setAttribute('aria-label',matching?`Match item ${i+1}`:item.label||`Item ${i+1}`);const blank=node('option','','Choose…');blank.value='';select.append(blank);choices.forEach((v,j)=>{const o=node('option','',v);o.value=String(j);select.append(o);});const draft=(matching?initialAnswer?.matches:initialAnswer?.groups)?.[i];if(Number.isInteger(draft)&&draft>=0&&draft<choices.length)select.value=String(draft);box.append(select);fields.push(select);}else if(initialAnswer){const pick=(matching?initialAnswer.matches:initialAnswer.groups)?.[i];if(Number.isInteger(pick)&&choices[pick]!==undefined)box.append(node('span','rg-live-saved-label',choices[pick]));}grid.append(box);});if(!interactive&&!initialAnswer){const right=node('div','rg-live-grid');right.style.setProperty('--rg-columns',String(choices.length>8?4:3));choices.forEach(v=>right.append(node('div','rg-live-tile',v)));body.append(right);}read=()=>({[matching?'matches':'groups']:fields.map(s=>s.value===''?-1:Number(s.value))});}
  else if(q.kind==='timeline'&&q.reorder){const order=Array.isArray(initialAnswer?.order)&&initialAnswer.order.length===q.items.length&&new Set(initialAnswer.order).size===q.items.length&&initialAnswer.order.every(i=>Number.isInteger(i)&&i>=0&&i<q.items.length)?[...initialAnswer.order]:q.items.map((_,i)=>i);body.append(grid);function draw(){grid.replaceChildren();order.forEach((i,pos)=>{const box=node('div','rg-live-tile');box.append(itemView(q.items[i],i));if(interactive){const up=button('↑',()=>{[order[pos-1],order[pos]]=[order[pos],order[pos-1]];draw();}),down=button('↓',()=>{[order[pos+1],order[pos]]=[order[pos],order[pos+1]];draw();});up.disabled=pos===0;down.disabled=pos===order.length-1;up.setAttribute('aria-label','Move up');down.setAttribute('aria-label','Move down');box.append(up,down);}grid.append(box);});}draw();read=()=>({order});}
  else if(art){read=artboard(body,q,initialAnswer,interactive,true,onDraft);}
  else if(['image-sequence','text-sequence','timeline'].includes(q.kind)){const items=q.kind==='timeline'?q.items:q.items.slice(q.sequenceIndex,q.sequenceIndex+1);items.forEach((item,i)=>grid.append(itemView(item,i)));body.append(grid);addText();}
@@ -100,8 +112,8 @@ export function renderTriviaResponses(root,round){
     const items=a.selected?q.options:a.matches?q.left:q.items;
     const ids=a.selected||a.order||items.map((_,i)=>i);
     // Text summaries already cover all-text answers; show actual selected or mapped images too.
-    if(ids.some(i=>items[i]?.image)){
-     ids.forEach(i=>{const item=node('div','rg-live-tile');item.append(itemView(items[i],i));if(a.groups)item.append(node('span','',q.categories[a.groups[i]]));if(a.matches)item.append(node('span','',q.right[a.matches[i]]));grid.append(item);});row.append(grid);
+    if(ids.some(i=>a.matches?normalizeMatchItem(items[i],publicMedia).icon:items[i]?.image)){
+     ids.forEach(i=>{const item=node('div','rg-live-tile');item.append(a.matches?matchItemView(items[i],i):itemView(items[i],i));if(a.groups)item.append(node('span','',q.categories[a.groups[i]]));if(a.matches)item.append(node('span','',q.right[a.matches[i]]));grid.append(item);});row.append(grid);
     }
    }
   }catch{}}
@@ -168,7 +180,8 @@ export function createTriviaSpectator(root,q,{seat="faroe",manualChoice=false}={
   }else if(numeric){
    hero.replaceChildren();hero.dataset.result=last?.result||'';
    hero.append(node('span','rg-spectator-guess-value',last?.guess||'—'),node('span','rg-spectator-guess-direction',last?.result==='higher'?'↑':last?.result==='lower'?'↓':last?.result==='correct'?'✓':''));
-   history.replaceChildren();for(const a of attempts.slice(-8,-1)){const token=node('span','rg-spectator-guess-token',`${a.guess} ${a.result==='higher'?'↑':a.result==='lower'?'↓':'✓'}`);token.dataset.result=a.result;history.append(token);}
+   if(last&&['higher','lower','correct'].includes(last.result))hero.append(node('span','rg-spectator-guess-word',last.result.toUpperCase()));
+   history.replaceChildren();for(const a of attempts.slice(-8,-1)){const token=node('span','rg-spectator-guess-token',`${a.guess} ${a.result==='higher'?'↑':a.result==='lower'?'↓':a.result==='correct'?'✓':''}`);token.dataset.result=a.result;history.append(token);}
    if(newGuess||switched)pulse(hero,'rg-spectator-tile-pop');
   }else if(art){drawArt.setAnswer(answer);if(!switched&&q.kind==='compose-image'&&(answer?.placements?.length||0)>(lastAnswer?.placements?.length||0))pulse(content,'rg-spectator-placement-pop');}
   else if(groups.length){tiles.forEach((tile,i)=>{const idx=answer?.groups?.[i];const target=groups[Number.isInteger(idx)&&idx>=0&&idx<q.categories.length?idx:groups.length-1];if(tile.parentNode!==target){target.append(tile);pulse(tile,'rg-spectator-object-pop');}});}

@@ -1,5 +1,5 @@
 import { MODE_NAMES, isChoiceMode, resolveRoundFormat, resolveComposeTypeCount } from "./trivia-data.js?v=compose-object-types-20261127-v1";
-import { normalizeGuessLimit } from "./trivia-game.mjs?v=number-grid-guess-limit-20261121-v1";
+import { normalizeGuessLimit, parseTriviaNumber, resolveNumberTarget, isNumericTargetMode } from "./trivia-game.mjs?v=match-number-20261127-v1";
 import { normalizeComposePlacements } from "./compose-placement.mjs";
 
 export const TRIVIA_EXPORT_FORMAT = "kazvt-ramble-gamble-trivia";
@@ -14,7 +14,7 @@ export function decodeTriviaBytes(buffer) {
 
 const ROUND_FIELDS = new Set([
   "question", "subtitle", "promptImage", "promptAsset", "mode", "optionCount", "acceptedAnswers",
-  "options", "items", "pairs", "categories", "videoUrl", "numberValue", "numberVisible",
+  "options", "items", "pairs", "categories", "videoUrl", "numberValue", "numberTargetSet", "numberVisible",
   "imageVisible", "backgroundImage", "drawing", "assignments", "placements", "selectionRule", "requiredCorrectCount", "numberCode", "guessLimit",
 ]);
 
@@ -30,7 +30,7 @@ const MODE_ALIASES = new Map([
   ["match pairs", "match-pairs"], ["pair matching", "match-pairs"], ["image sequence", "image-sequence"],
   ["text sequence", "text-sequence"], ["categorize images", "categorize-images"], ["categorise images", "categorize-images"],
   ["sort images", "categorize-images"], ["draw over image", "draw-over-image"], ["drawing", "draw-over-image"],
-  ["compose image", "compose-image"], ["place images on the picture", "compose-image"], ["place images on picture", "compose-image"], ["replace images on picture", "compose-image"], ["number stepper", "number-stepper"], ["memory number", "memory-number"],
+  ["compose image", "compose-image"], ["place images on the picture", "compose-image"], ["place images on picture", "compose-image"], ["replace images on picture", "compose-image"], ["higher lower", "number-stepper"], ["higher or lower", "number-stepper"], ["match icons with labels", "match-pairs"], ["number stepper", "number-stepper"], ["memory number", "memory-number"],
   ["video", "video"], ["video prompt", "video"],
 ]);
 
@@ -114,10 +114,10 @@ function sanitizeRoundDrafts(value) {
           }));
         } else if (field === "assignments" && Array.isArray(item)) {
           draft.assignments = item.map((assignment) => Number.isInteger(assignment) && assignment >= 0 && assignment < 3 ? assignment : null);
-        } else if (["numberVisible", "imageVisible"].includes(field)) {
+        } else if (["numberVisible", "imageVisible", "numberTargetSet"].includes(field)) {
           draft[field] = item === true;
         } else if (field === "numberValue") {
-          draft.numberValue = finiteOr(item, 0);
+          draft.numberValue = parseTriviaNumber(item);
         } else if (field === "selectionRule") {
           const rule = normalizeSelectionRule(item);
           if (rule) draft.selectionRule = rule;
@@ -237,7 +237,8 @@ function parseQuestionObjects(questions) {
     const answerValue = item.answer ?? item.back ?? item.definition;
     const acceptedAnswers = normalizeAnswerObjects(explicitAccepted ?? (options.length ? null : answerValue));
     const hasObjectTypes = Array.isArray(item.objectTypes ?? item.object_types) || (resolveRoundFormat(round, 1).mode === "compose-image" && Array.isArray(item.items));
-    const mode = normalizeMode(item.mode ?? item.type ?? item.format) || (hasObjectTypes ? "compose-image" : options.length > 1 ? "choice-text" : "short-answer");
+    const templateMode=resolveRoundFormat(round,1).mode;
+    const mode = normalizeMode(item.mode ?? item.type ?? item.format) || (hasObjectTypes ? "compose-image" : options.length > 1 ? "choice-text" : isNumericTargetMode(templateMode)?templateMode:"short-answer");
     const rawCorrect = item.correctAnswers ?? item.correct_answers ?? item.correctAnswer ?? item.correct_answer ?? item.answerKey ?? item.answer_key ?? item.correctOption ?? item.correct_option ?? item.correct ?? (options.length ? answerValue : null);
     const correct = typeof rawCorrect === "boolean" ? null : rawCorrect;
     const hasDifficulty = item.difficulty != null || item.level != null || item.tier != null;
@@ -261,7 +262,7 @@ function parseQuestionObjects(questions) {
       question,
       subtitle: safeString(item.subtitle ?? item.description ?? item.hint),
       mode,
-      explicitMode: Boolean(item.mode ?? item.type ?? item.format) || hasObjectTypes,
+      explicitMode: Boolean(item.mode ?? item.type ?? item.format) || hasObjectTypes || isNumericTargetMode(mode),
       options: choiceOptions,
       optionsPresent: rawOptions != null,
       acceptedAnswers,
@@ -273,7 +274,7 @@ function parseQuestionObjects(questions) {
       promptAsset: safeString(item.promptAsset ?? item.prompt_asset),
       videoUrl: safeString(item.videoUrl ?? item.video_url),
       backgroundImage: safeString(item.backgroundImage ?? item.background_image),
-      numberValue: item.numberValue ?? item.number_value,
+      numberValue: item.numberValue ?? item.number_value ?? (isNumericTargetMode(mode) ? item.targetNumber ?? item.target_number ?? item.secretNumber ?? item.secret_number : undefined),
       numberVisible: item.numberVisible ?? item.number_visible,
       imageVisible: item.imageVisible ?? item.image_visible,
       drawing: item.drawing,
@@ -285,7 +286,7 @@ function parseQuestionObjects(questions) {
       optionCount: item.optionCount ?? item.option_count,
       selectionRule: normalizeSelectionRule(item.selectionRule ?? item.selection_rule ?? item.selectionMode ?? item.selection_mode ?? item.answerSelection ?? item.answer_selection ?? item.correctSelection ?? item.correct_selection),
       requiredCorrectCount: item.requiredCorrectCount ?? item.required_correct_count ?? item.requiredSelections ?? item.required_selections ?? item.correctCount ?? item.correct_count,
-      numberCode: item.numberCode ?? item.number_code ?? item.secretNumber ?? item.secret_number ?? item.targetNumber ?? item.target_number,
+      numberCode: item.numberCode ?? item.number_code ?? (!isNumericTargetMode(mode) ? item.secretNumber ?? item.secret_number ?? item.targetNumber ?? item.target_number : undefined),
       guessLimit: item.guessLimit ?? item.guess_limit ?? item.maxGuesses ?? item.max_guesses ?? item.numberOfGuesses ?? item.number_of_guesses ?? item.attempts,
     };
     if (!grouped.has(round)) grouped.set(round, { base: null, levels: new Map() });
@@ -304,7 +305,7 @@ function parseQuestionObjects(questions) {
     const state = {
       question: "", subtitle: "", mode: initial.mode, optionCount: initial.optionCount,
       acceptedAnswers: [], options: [], promptImage: "", promptAsset: "", items: [], placements: [], pairs: [],
-      categories: ["Group 1", "Group 2", "Group 3"], videoUrl: "", numberValue: 0,
+      categories: ["Group 1", "Group 2", "Group 3"], videoUrl: "", numberValue: null,
       numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
       selectionRule: "any", requiredCorrectCount: 0, numberCode: "", guessLimit: 4,
     };
@@ -345,21 +346,25 @@ function parseQuestionObjects(questions) {
         if (record.correctValues.length) {
           if (state.options.length && isChoiceMode(state.mode)) applyCorrectValues(state.options, record.correctValues);
           else {
-            if (!record.explicitMode) state.mode = "short-answer";
+            if (!record.explicitMode && !isNumericTargetMode(state.mode)) state.mode = "short-answer";
             state.acceptedAnswers = [...new Set([...state.acceptedAnswers, ...record.correctValues])];
           }
+        }
+        if (isNumericTargetMode(state.mode)) {
+          if (record.numberValue != null) { state.numberValue = parseTriviaNumber(record.numberValue); state.numberTargetSet = true; }
+          else if (record.acceptedPresent || record.correctValues.length) { state.numberValue = resolveNumberTarget({acceptedAnswers:state.acceptedAnswers}); state.numberTargetSet = true; }
         }
       }
       if (!isChoiceMode(state.mode)) { state.options = []; state.optionCount = state.mode === "compose-image" ? Math.max(resolveComposeTypeCount(state.optionCount, state.items), Math.min(24, state.items.length)) : 0; }
       else if (state.options.length) state.optionCount = state.options.length;
-      rounds[round][level] = clone(state);
+      rounds[round][level] = clone({...state,numberValue:isNumericTargetMode(state.mode)?resolveNumberTarget(state):state.numberValue});
     }
   }
   return { rounds, questionBank: [], media: {}, warnings, errors: Object.keys(rounds).length ? [] : ["No usable question records were found."] };
 }
 
 function normalizeAnswerObjects(value) {
-  if (Array.isArray(value)) return value.map((entry) => typeof entry === "string" ? entry.trim() : Number.isInteger(entry) ? String(entry) : safeString(entry?.text ?? entry?.label ?? entry?.answer).trim()).filter(Boolean);
+  if (Array.isArray(value)) return value.map((entry) => typeof entry === "string" ? entry.trim() : typeof entry === "number" && Number.isFinite(entry) ? String(entry) : safeString(entry?.text ?? entry?.label ?? entry?.answer).trim()).filter(Boolean);
   if (typeof value === "string") return splitLooseList(value);
   return value == null ? [] : [safeString(value).trim()].filter(Boolean);
 }
@@ -422,10 +427,13 @@ function parseDelimited(text) {
       : isAcceptedColumn ? [] : rawAnswers;
     const accepted = isAcceptedColumn ? rawAnswers : splitLooseList(getColumn(row, dataIndexes, ["accepted answers", "accepted answer"]));
     const correctValues = splitLooseList(getColumn(row, dataIndexes, ["correct", "correct answer", "answer key", "correct answers", "correct option", "correct choice"]));
-    const mode = normalizeMode(getColumn(row, dataIndexes, ["mode", "type", "template"])) || (options.length > 1 ? "choice-text" : "short-answer");
+    const templateMode=resolveRoundFormat(round,difficulty).mode;
+    const mode = normalizeMode(getColumn(row, dataIndexes, ["mode", "type", "template"])) || (options.length > 1 ? "choice-text" : isNumericTargetMode(templateMode)?templateMode:"short-answer");
     const selectionRule = normalizeSelectionRule(getColumn(row, dataIndexes, ["selection rule", "answer selection", "answer selection rule", "selection mode", "correct selection", "answer rule", "multi select"]));
     const requiredCorrectCount = Number(getColumn(row, dataIndexes, ["required correct count", "required selections", "correct count", "select count"]));
-    const numberCode = getColumn(row, dataIndexes, ["number code", "secret number", "target number", "wordle code"]).replace(/\D/g, "").slice(0, 4);
+    const numberCode = getColumn(row, dataIndexes, isNumericTargetMode(mode) ? ["number code", "wordle code"] : ["number code", "secret number", "target number", "wordle code"]).replace(/\D/g, "").slice(0, 4);
+    const rawTarget = isNumericTargetMode(mode) ? getColumn(row,dataIndexes,["number value","target number","secret number","starting number"]) : "";
+    const numberValue = parseTriviaNumber(rawTarget);
     const rawGuessLimit = getColumn(row, dataIndexes, ["guess limit", "maximum guesses", "max guesses", "number of guesses", "attempts"]);
     const optionObjects = options.map((label) => ({ label, image: "", asset: "", correct: false }));
     applyCorrectValues(optionObjects, correctValues);
@@ -440,7 +448,7 @@ function parseDelimited(text) {
       noMultipleChoice: /^(?:1|true|yes|on|no|none)$/i.test(getColumn(row, dataIndexes, ["no multiple choice", "no mc", "no mcq"])),
       selectionRule,
       requiredCorrectCount: Number.isFinite(requiredCorrectCount) ? Math.max(0, Math.min(24, Math.trunc(requiredCorrectCount))) : undefined,
-      numberCode,
+      numberCode, numberValue, hasNumberTarget:Boolean(rawTarget.trim()),
       guessLimit: rawGuessLimit.trim() ? normalizeGuessLimit(rawGuessLimit) : undefined,
     };
     if (!grouped.has(round)) grouped.set(round, new Map());
@@ -455,7 +463,7 @@ function parseDelimited(text) {
     const state = {
       question: "", subtitle: "", mode: initial.mode, optionCount: initial.optionCount,
       options: [], acceptedAnswers: [], promptImage: "", promptAsset: "", items: [], placements: [], pairs: [],
-      categories: ["Group 1", "Group 2", "Group 3"], videoUrl: "", numberValue: 0,
+      categories: ["Group 1", "Group 2", "Group 3"], videoUrl: "", numberValue: null,
       numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
       selectionRule: "any", requiredCorrectCount: 0, numberCode: "", guessLimit: 4,
     };
@@ -467,6 +475,7 @@ function parseDelimited(text) {
         if (record.selectionRule) state.selectionRule = record.selectionRule;
         if (record.requiredCorrectCount != null) state.requiredCorrectCount = record.requiredCorrectCount;
         if (record.numberCode) state.numberCode = record.numberCode;
+        if (record.numberValue != null) state.numberValue = record.numberValue;
         if (record.guessLimit != null) state.guessLimit = normalizeGuessLimit(record.guessLimit);
         if (record.noMultipleChoice) {
           state.mode = "short-answer";
@@ -480,11 +489,16 @@ function parseDelimited(text) {
           }
           if (record.accepted.length) state.acceptedAnswers = record.additive ? [...state.acceptedAnswers, ...record.accepted] : [...record.accepted];
           if (record.correctValues.length && state.options.length) applyCorrectValues(state.options, record.correctValues);
+          else if (isNumericTargetMode(state.mode) && record.correctValues.length) state.acceptedAnswers = [...new Set([...state.acceptedAnswers,...record.correctValues])];
+          if (isNumericTargetMode(state.mode)) {
+            if(record.hasNumberTarget){state.numberValue=record.numberValue;state.numberTargetSet=true;}
+            else if(record.accepted.length||record.correctValues.length){state.numberValue=resolveNumberTarget({acceptedAnswers:state.acceptedAnswers});state.numberTargetSet=true;}
+          }
         }
       }
       if (isChoiceMode(state.mode)) state.optionCount = state.options.length || state.optionCount;
       else { state.options = []; state.optionCount = state.mode === "compose-image" ? resolveComposeTypeCount(state.optionCount, state.items) : 0; }
-      rounds[roundId][level] = clone(state);
+      rounds[roundId][level] = clone({...state,numberValue:isNumericTargetMode(state.mode)?resolveNumberTarget(state):state.numberValue});
     }
   }
   return { rounds, questionBank: [], media: {}, warnings, errors: Object.keys(rounds).length ? [] : ["No usable question rows were found."] };
@@ -613,7 +627,7 @@ function parseHumanText(input) {
       promptImage: base.promptImage || "", promptAsset: "", mode: base.mode || defaults.mode,
       optionCount: Number.isFinite(Number(base.optionCount)) ? Number(base.optionCount) : defaults.optionCount,
       acceptedAnswers: [], options: [], items: [], placements: [], pairs: [], categories: ["Group 1", "Group 2", "Group 3"],
-      videoUrl: "", numberValue: 0, numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
+      videoUrl: "", numberValue: null, numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [],
       selectionRule: "any", requiredCorrectCount: 0, numberCode: "", guessLimit: 4,
     };
     if (Array.isArray(base.acceptedAnswers)) state.acceptedAnswers = [...base.acceptedAnswers];
@@ -626,7 +640,7 @@ function parseHumanText(input) {
           if (field === "acceptedAnswers") state.acceptedAnswers = [...value];
           else if (field === "options" && Array.isArray(value)) state.options = clone(value);
           else if (field === "items" || field === "placements" || field === "pairs" || field === "categories" || field === "assignments") state[field] = clone(value);
-          else state[field] = value;
+          else if (field !== "targetNumber") state[field] = value;
         }
         if (block.noMultipleChoice) {
           state.mode = "short-answer";
@@ -648,7 +662,7 @@ function parseHumanText(input) {
           }
         }
         if (block.acceptedPresent) {
-          if (!block.optionsPresent && !block.fields.mode) {
+          if (!block.optionsPresent && !block.fields.mode && !isNumericTargetMode(state.mode)) {
             state.mode = "short-answer";
             state.options = [];
             state.optionCount = 0;
@@ -658,7 +672,7 @@ function parseHumanText(input) {
         if (block.correct.length) {
           if (state.options.length) applyCorrectValues(state.options, block.correct);
           else {
-            if (!block.fields.mode) state.mode = "short-answer";
+            if (!block.fields.mode && !isNumericTargetMode(state.mode)) state.mode = "short-answer";
             state.acceptedAnswers = [...new Set([...state.acceptedAnswers, ...block.correct])];
           }
         }
@@ -668,6 +682,11 @@ function parseHumanText(input) {
           state.options = [];
         }
       }
+      if (block && isNumericTargetMode(state.mode)) {
+        if(Object.hasOwn(block.fields,"numberValue")||Object.hasOwn(block.fields,"targetNumber")) {
+          state.numberValue=parseTriviaNumber(Object.hasOwn(block.fields,"numberValue")?block.fields.numberValue:block.fields.targetNumber);state.numberTargetSet=true;
+        }else if(block.acceptedPresent||block.correct.length){state.numberValue=resolveNumberTarget({acceptedAnswers:state.acceptedAnswers});state.numberTargetSet=true;}
+      }else if(block&&Object.hasOwn(block.fields,"targetNumber")) state.numberCode=String(block.fields.targetNumber).replace(/\D/g,"").slice(0,4);
       if (!state.question && sharedQuestion) state.question = sharedQuestion;
       if (isChoiceMode(state.mode)) {
         if (state.options.length) state.optionCount = state.options.length;
@@ -680,7 +699,7 @@ function parseHumanText(input) {
         question: state.question, subtitle: state.subtitle, promptImage: state.promptImage, promptAsset: state.promptAsset,
         mode: state.mode, optionCount: state.optionCount, acceptedAnswers: [...state.acceptedAnswers],
         options: clone(state.options), items: clone(state.items), placements: clone(state.placements), pairs: clone(state.pairs), categories: clone(state.categories),
-        videoUrl: state.videoUrl, numberValue: state.numberValue, numberVisible: state.numberVisible,
+        videoUrl: state.videoUrl, numberValue: isNumericTargetMode(state.mode) ? resolveNumberTarget(state) : state.numberValue, ...(state.numberTargetSet===true?{numberTargetSet:true}:{}), numberVisible: state.numberVisible,
         imageVisible: state.imageVisible, backgroundImage: state.backgroundImage, drawing: state.drawing,
         assignments: clone(state.assignments), selectionRule: state.selectionRule,
         requiredCorrectCount: state.requiredCorrectCount, numberCode: state.numberCode, guessLimit: state.guessLimit,
@@ -812,7 +831,7 @@ function parseHumanText(input) {
         ensureLevel(currentLevel).fields[key] = value;
         pendingList = "";
       } else if (name === "number") {
-        if (current) ensureLevel(currentLevel).fields.numberValue = finiteOr(value, 0);
+        if (current) ensureLevel(currentLevel).fields.numberValue = parseTriviaNumber(value);
         pendingList = "";
       } else if (name === "selectionrule") {
         if (current) {
@@ -824,6 +843,9 @@ function parseHumanText(input) {
       } else if (name === "requiredcorrectcount") {
         const count = Number(value);
         if (current && Number.isFinite(count)) ensureLevel(currentLevel).fields.requiredCorrectCount = Math.max(0, Math.min(24, Math.trunc(count)));
+        pendingList = "";
+      } else if (name === "targetnumber") {
+        if (current) ensureLevel(currentLevel).fields.targetNumber = value;
         pendingList = "";
       } else if (name === "numbercode") {
         if (current) ensureLevel(currentLevel).fields.numberCode = value.replace(/\D/g, "").slice(0, 4);
@@ -984,7 +1006,7 @@ function parseField(line) {
     ["number", "number"], ["starting number", "number"], ["value", "number"],
     ["selection", "selectionrule"], ["selection rule", "selectionrule"], ["answer selection", "selectionrule"], ["answer selection rule", "selectionrule"], ["answer rule", "selectionrule"], ["correct selection", "selectionrule"], ["correct answer rule", "selectionrule"], ["select mode", "selectionrule"], ["select any or all", "selectionrule"], ["multi select", "selectionrule"],
     ["required correct count", "requiredcorrectcount"], ["required selections", "requiredcorrectcount"], ["number to select", "requiredcorrectcount"], ["correct count", "requiredcorrectcount"],
-    ["number code", "numbercode"], ["secret number", "numbercode"], ["target number", "numbercode"], ["wordle code", "numbercode"],
+    ["number code", "numbercode"], ["secret number", "targetnumber"], ["target number", "targetnumber"], ["wordle code", "numbercode"],
     ["guess limit", "guesslimit"], ["maximum guesses", "guesslimit"], ["max guesses", "guesslimit"], ["number of guesses", "guesslimit"], ["attempts", "guesslimit"],
     ["add", "additive"], ["add these", "additive"], ["add to previous", "additive"], ["additive", "additive"], ["append", "additive"], ["plus", "additive"],
     ["no multiple choice", "nomultiplechoice"], ["without multiple choice", "nomultiplechoice"], ["no mc", "nomultiplechoice"], ["no mcq", "nomultiplechoice"],

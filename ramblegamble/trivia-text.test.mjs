@@ -292,3 +292,24 @@ test("empty or unrelated files return a visible diagnostic instead of an empty s
   assert.match(parseTriviaText("\n ").errors[0], /empty/i);
   assert.match(parseTriviaText("some random notes without question structure").errors[0], /No questions were recognized/i);
 });
+
+test('higher/lower targets survive text, CSV, JSON and inherited difficulty imports without becoming Wordle codes',()=>{
+ const cases=[
+ ['31: Guess it\nType: Higher / Lower\nAnswer: 42',42],
+ ['31: Guess it\nAnswer: 42',42],
+ ['31: Guess it\nTarget number: -12.5\nType: Higher / Lower',-12.5],
+ ['31: Guess it\nType: Higher / Lower\nTarget number: 0\nAnswer: 42',0],
+ ['round,question,type,target number\n31,Guess it,higher / lower,-12.5',-12.5],
+ ['round,question,type,answer\n31,Guess it,higher / lower,42',42],
+ [JSON.stringify({questions:[{round:31,question:'Guess it',type:'higher / lower',targetNumber:0,answer:42}]}),0],
+ [JSON.stringify({questions:[{round:31,question:'Guess it',answer:42}]}),42],
+ ];
+ for(const [text,target] of cases){
+  const result=parseTriviaText(text);assert.deepEqual(result.errors,[]);
+  const d=result.rounds['31'][1];assert.equal(d.mode,'number-stepper');assert.equal(d.numberValue,target);assert.equal(d.numberTargetSet,true);assert.equal(d.numberCode,'');
+  const roundtrip=parseTriviaText(exportTriviaText({rounds:result.rounds,questionBank:[],media:{}}));assert.equal(roundtrip.rounds['31'][1].numberValue,target);assert.equal(roundtrip.rounds['31'][1].numberTargetSet,true);
+ }
+ const higher=parseTriviaText('31: Guess it\nType: Higher / Lower\nTarget number: 42\n2:\nAnswer: 63').rounds['31'];assert.equal(higher[1].numberValue,42);assert.equal(higher[2].numberValue,63);
+ const invalid=parseTriviaText('round,question,type,target number,answer\n31,Guess it,higher / lower,invalid,42').rounds['31'][1];assert.equal(invalid.numberTargetSet,true);assert.equal(invalid.numberValue,null);
+ const code=parseTriviaText('10: Guess it\nType: number grid\nTarget number: 0042').rounds['10'][1];assert.equal(code.numberCode,'0042');assert.equal(code.numberValue,null);
+});

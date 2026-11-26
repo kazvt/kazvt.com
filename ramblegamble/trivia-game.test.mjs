@@ -62,3 +62,20 @@ test("all-correct selection requires exactly the marked options", () => {
   assert.equal(matchesCorrectSelection([1, 1], [1]), false);
   assert.equal(matchesCorrectSelection([1], []), false);
 });
+
+test('numeric target recovery distinguishes legacy default zero, explicit zero and missing target', async () => {
+  const {resolveNumberTarget,parseTriviaNumber}=await import('./trivia-game.mjs');
+  assert.equal(resolveNumberTarget({numberValue:0,acceptedAnswers:['42']}),42);
+  assert.equal(resolveNumberTarget({numberValue:0,numberTargetSet:true,acceptedAnswers:['42']}),0);
+  assert.equal(resolveNumberTarget({numberValue:-12.5,acceptedAnswers:['42']}),-12.5);
+  assert.equal(resolveNumberTarget({numberValue:null,acceptedAnswers:['12','13']}),null);
+  assert.equal(resolveNumberTarget({numberValue:null}),null);
+  assert.equal(resolveNumberTarget({numberValue:0,numberCode:"1234"}),null);
+  assert.equal(resolveNumberTarget({numberValue:0,numberTargetSet:true,numberCode:"1234"}),0);
+  for(const n of [null,undefined,'','  ',true,'0x10','Infinity','not a number',NaN,Infinity])assert.equal(parseTriviaNumber(n),null);
+  assert.equal(compareNumberGuess(null,'0'),null);
+  assert.equal(compareNumberGuess('', '0'),null);
+  assert.equal(compareNumberGuess(0,'-1'),'higher');
+  assert.equal(compareNumberGuess(0,'0'),'correct');
+  assert.equal(compareNumberGuess(0,'1'),'lower');
+});

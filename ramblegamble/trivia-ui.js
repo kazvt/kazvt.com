@@ -1,7 +1,8 @@
+import { matchMediaSource, normalizeMatchItem } from "./trivia-match-media.mjs?v=match-number-20261127-v1";
 import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { gradeSimpleAnswer, isSimpleGradeMode } from "./trivia-simple-grade.mjs?v=room-recovery-20261127-v1";
-import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, newTriviaId, updateTrivia, activeRoomRound, publicMedia } from "./live-trivia.mjs?v=spectator-20261127-v1";
-import { renderLiveQuestion, renderTriviaResponses, createTriviaSpectator, SPECTATOR_MODES } from "./trivia-live-view.mjs?v=spectator-20261127-v1";
+import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, newTriviaId, updateTrivia, activeRoomRound, publicMedia } from "./live-trivia.mjs?v=match-number-20261127-v1";
+import { renderLiveQuestion, renderTriviaResponses, createTriviaSpectator, SPECTATOR_MODES, matchItemView } from "./trivia-live-view.mjs?v=match-number-20261127-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
 import { readCardGames, subscribeCardGames } from "./card-games-store.mjs?v=show-stage-20261126-v1";
 import { removeSlotSymbol } from "./slot-game.mjs?v=host-cell-cards-20261127-v1";
@@ -26,8 +27,8 @@ import {
   decodeTriviaBytes,
   exportTriviaText,
   parseTriviaText,
-} from "./trivia-text.mjs?v=compose-object-types-20261127-v1";
-import { compareNumberGuess, hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, normalizeGuessLimit, scoreFourDigitGuess } from "./trivia-game.mjs?v=compose-object-types-20261127-v1";
+} from "./trivia-text.mjs?v=match-number-20261127-v1";
+import { compareNumberGuess, parseTriviaNumber, resolveNumberTarget, isNumericTargetMode, hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, normalizeGuessLimit, scoreFourDigitGuess } from "./trivia-game.mjs?v=match-number-20261127-v1";
 import { migrateLegacyComposePlacements, normalizeComposePlacements, snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-place-20261124-v1";
 import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, validateClientSubmission } from "./trivia-client.mjs?v=player-handoff-20261125-v1";
 
@@ -672,7 +673,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     const content = {
       question: "", subtitle: "", promptImage: "", promptAsset: "", mode: "",
       options: [], acceptedAnswers: [], items: [], pairs: [], categories: ["Group 1", "Group 2", "Group 3"],
-      videoUrl: "", numberValue: 0, numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [], placements: [],
+      videoUrl: "", numberValue: null, numberVisible: false, imageVisible: true, backgroundImage: "", drawing: "", assignments: [], placements: [],
       selectionRule: format.selectionRule || "any", requiredCorrectCount: format.requiredCorrectCount || 0, numberCode: "", guessLimit: 4,
     };
     let hasExplicitPlacements = false;
@@ -704,7 +705,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
       if (rule.replaceOptions) content.options = [];
       if (rule.replaceItems) { content.items = []; content.placements = []; hasExplicitPlacements = true; }
       if (rule.mode === "match-pairs" && ROUND_RULES[number]?.[level - 1]?.mode !== "match-pairs") content.pairs = [];
-      for (const field of ["question", "subtitle", "promptImage", "promptAsset", "optionCount", "acceptedAnswers", "options", "items", "pairs", "categories", "videoUrl", "numberValue", "numberVisible", "imageVisible", "backgroundImage", "drawing", "assignments", "placements", "selectionRule", "requiredCorrectCount", "numberCode", "guessLimit"]) {
+      for (const field of ["question", "subtitle", "promptImage", "promptAsset", "optionCount", "acceptedAnswers", "options", "items", "pairs", "categories", "videoUrl", "numberValue", "numberTargetSet", "numberVisible", "imageVisible", "backgroundImage", "drawing", "assignments", "placements", "selectionRule", "requiredCorrectCount", "numberCode", "guessLimit"]) {
         if (Object.hasOwn(draft, field)) {
           content[field] = copy(draft[field]);
           if (field === "placements") hasExplicitPlacements = true;
@@ -726,7 +727,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     content.assignments = Array.isArray(content.assignments) ? content.assignments.map((index) => Number.isInteger(index) && index >= 0 && index < 3 ? index : null) : [];
     content.videoUrl = String(content.videoUrl || "");
     content.backgroundImage = String(content.backgroundImage || "");
-    content.numberValue = Number.isFinite(Number(content.numberValue)) ? Number(content.numberValue) : 0;
+    content.numberValue = isNumericTargetMode(content.mode) ? resolveNumberTarget(content) : parseTriviaNumber(content.numberValue);
     content.numberVisible = content.numberVisible === true;
     content.imageVisible = content.imageVisible !== false;
     content.drawing = typeof content.drawing === "string" ? content.drawing : "";
@@ -749,6 +750,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
       content.options = content.options.slice(0, format.optionCount);
     }
     if (content.mode === "match-pairs") {
+      format.pairCount = Math.max(1, Math.min(24, format.pairCount || content.pairs.length || 6));
       while (content.pairs.length < format.pairCount) content.pairs.push({ left: "", leftImage: "", right: "" });
       content.pairs = content.pairs.slice(0, format.pairCount);
     }
@@ -1233,7 +1235,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     html += '<p class="rg-editor-hint">Enter the matching left and right items. Images can be entered as URLs on the left.</p>';
     content.pairs.forEach((pair, index) => {
       html += '<div class="rg-item-row" data-pair-row="' + index + '">';
-      html += '<input type="text" data-pair-left placeholder="Left item ' + (index + 1) + ' / image URL" value="' + esc(pair.left || "") + '" aria-label="Pair ' + (index + 1) + ' left item">';
+      html += '<input type="text" data-pair-left placeholder="Left item ' + (index + 1) + ' / image URL" value="' + esc(pair.leftImage || pair.left || "") + '" aria-label="Pair ' + (index + 1) + ' left item">';
       html += '<input type="text" data-pair-right placeholder="Matching text ' + (index + 1) + '" value="' + esc(pair.right || "") + '" aria-label="Pair ' + (index + 1) + ' right item">';
       html += '<span aria-hidden="true">' + String(index + 1).padStart(2, "0") + '</span></div>';
     });
@@ -1270,7 +1272,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
       }
     }
     if (format.mode === "number-stepper" || format.mode === "memory-number") {
-      html += '<label class="rg-field-label" for="rg-edit-number">Starting number<input id="rg-edit-number" type="number" data-number-value value="' + Number(content.numberValue || 0) + '"></label>';
+      html += '<label class="rg-field-label" for="rg-edit-number">Target number<input id="rg-edit-number" type="number" step="any" data-number-value value="' + esc(content.numberValue ?? "") + '"></label>';
     }
     if (format.mode === "video") {
       html += '<label class="rg-field-label" for="rg-edit-video">Video URL<input id="rg-edit-video" type="url" data-video-url value="' + esc(content.videoUrl || "") + '" placeholder="https://…"></label>';
@@ -1291,6 +1293,10 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     $("#rg-edit-prompt-image").value = content.promptImage || "";
     $("#rg-edit-prompt-file").dataset.assetId = content.promptAsset || "";
     $("#rg-edit-answers").value = Array.isArray(content.acceptedAnswers) ? content.acceptedAnswers.join("\n") : "";
+    // Numeric rounds have exactly one authoritative target, not two answer fields.
+    const numericTarget = isNumericTargetMode(format.mode);
+    $("#rg-edit-answers").hidden = numericTarget;
+    $('label[for="rg-edit-answers"]').hidden = numericTarget;
     $("#rg-edit-mode").value = format.mode;
     $("#rg-special-fields").innerHTML = renderSpecialFields(format, content);
     $("#rg-options-editor").innerHTML = optionRowsHTML(format, content);
@@ -1330,14 +1336,15 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
         x: Number.isFinite(Number(row.dataset.itemX)) ? Number(row.dataset.itemX) : effectiveNow().content.items[index]?.x ?? 8 + (index % 5) * 18,
         y: Number.isFinite(Number(row.dataset.itemY)) ? Number(row.dataset.itemY) : effectiveNow().content.items[index]?.y ?? 8 + (Math.floor(index / 5) % 4) * 18,
       })),
-      pairs: $$("[data-pair-row]", $("#rg-items-editor")).map((row) => ({
-        left: $("[data-pair-left]", row).value,
-        leftImage: "",
-        right: $("[data-pair-right]", row).value,
-      })),
+      pairs: $$("[data-pair-row]", $("#rg-items-editor")).map((row) => {
+        const left = $("[data-pair-left]", row).value;
+        const source = matchMediaSource({left});
+        return {left:source?"":left,leftImage:source,right:$("[data-pair-right]",row).value};
+      }),
       categories: $$("[data-category-index]", $("#rg-special-fields")).map((input) => input.value),
       videoUrl: $("[data-video-url]", $("#rg-special-fields"))?.value.trim() || "",
-      numberValue: Number($("[data-number-value]", $("#rg-special-fields"))?.value || 0),
+      numberValue: parseTriviaNumber($("[data-number-value]", $("#rg-special-fields"))?.value ?? effectiveNow().content.numberValue),
+      numberTargetSet: effectiveNow().content.numberTargetSet === true,
       backgroundImage: $("[data-background-image]", $("#rg-special-fields"))?.value.trim() || "",
       imageVisible: effectiveNow().content.imageVisible,
       numberVisible: effectiveNow().content.numberVisible,
@@ -1345,6 +1352,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
       assignments: effectiveNow().content.assignments || [],
       placements: effectiveNow().content.placements || [],
     };
+    if (isNumericTargetMode(content.mode) && $("[data-number-value]", $("#rg-special-fields"))) { content.acceptedAnswers = []; content.numberTargetSet = true; }
     if (content.promptImage) content.promptAsset = "";
     delete content.optionCount;
     levelDraft()["question"] = content.question;
@@ -1862,11 +1870,11 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
       const button = document.createElement("button");
       button.type = "button";
       button.className = "rg-pair-card";
-      const leftImage = safeUrl(pair.leftImage) || safeUrl(pair.left);
-      if (leftImage) {
+      const matchItem = normalizeMatchItem(pair, value => publicMedia(value) || publicMedia(safeUrl(value)));
+      if (matchItem.icon) {
         button.setAttribute("aria-label", "Left image " + (index + 1));
-        addImageToNode(button, leftImage, "", "rg-stage-media");
-      } else button.textContent = pair.left || "LEFT " + String(index + 1).padStart(2, "0");
+        button.append(matchItemView(matchItem,index));
+      } else button.textContent = matchItem.label || "LEFT " + String(index + 1).padStart(2, "0");
       button.dataset.pairLeft = String(index);
       button.addEventListener("click", () => {
         selectedPairLeft = index;
@@ -2397,9 +2405,9 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
   // Presentation is transient; persisted questions never auto-open on reload.
   const liveLayer=$("#rg-live-trivia"), liveContent=$("#rg-live-trivia-content"), liveAnswers=$("#rg-live-host-answers");
   let lastLiveId=readLiveTrivia()?.id||"", lastRenderedQuestion="", spectator=null, spectatorRoundId="", lastPrivateKey="";
-  async function portableImage(url,asset,max=220000) {
-    if(asset){
-      const blob=await readMediaBlob(asset); let data=await blobToDataUrl(blob);
+  async function portableImage(url,asset,max=220000,providedBlob=null) {
+    if(asset||providedBlob){
+      const blob=providedBlob||await readMediaBlob(asset); let data=await blobToDataUrl(blob);
       if(data.length>max&&blob.type!=="image/gif"&&typeof createImageBitmap==="function"){
         const bitmap=await createImageBitmap(blob);
         try{const canvas=document.createElement("canvas");for(const limit of [1000,720,480,320,200]){const scale=Math.min(1,limit/Math.max(bitmap.width,bitmap.height));canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));canvas.getContext("2d").drawImage(bitmap,0,0,canvas.width,canvas.height);data=canvas.toDataURL("image/webp",.8);if(data.length<=max)break;}}finally{bitmap.close();}
@@ -2414,7 +2422,29 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     output.backgroundImage=await portableImage(content.backgroundImage,"");
     if(["choice-text","choice-image","choice-image-wide","image-grid"].includes(format.mode)) output.options=await Promise.all(content.options.map(async o=>({...o,image:await portableImage(o.image,o.asset,45000)})));else output.options=[];
     if(["categorize-images","compose-image","timeline","image-sequence","text-sequence"].includes(format.mode)) output.items=await Promise.all(content.items.filter(i=>i.label||i.image||i.asset).map(async i=>({...i,image:await portableImage(i.image,i.asset,45000)})));else output.items=[];
-    if(format.mode==="match-pairs")output.pairs=await Promise.all(content.pairs.map(async p=>({...p,leftImage:await portableImage(p.leftImage,"")})));else output.pairs=[];
+    if(format.mode==="match-pairs")output.pairs=await Promise.all(content.pairs.map(async p=>{
+      const source=matchMediaSource(p);
+      if(!source)return {...p,leftImage:""};
+      let media=await portableImage(source,"");
+      // Prefer anonymous bytes: no source filename in the public round when CORS permits.
+      // Direct img loading is still valid on non-CORS image hosts; never display its URL as text.
+      if(/^https?:/i.test(media)){
+        const abort=new AbortController();const timer=setTimeout(()=>abort.abort(),3500);
+        try{
+          const response=await fetch(media,{mode:"cors",credentials:"omit",referrerPolicy:"no-referrer",signal:abort.signal});
+          if(response.ok&&/^image\/(?:png|jpe?g|webp|gif|avif|bmp)(?:;|$)/i.test(response.headers.get("content-type")||"")&&Number(response.headers.get("content-length")||0)<=2000000){
+            const reader=response.body?.getReader();
+            if(reader){
+              const chunks=[];let size=0;let done=false;
+              try{while(!done){const next=await reader.read();done=next.done;if(next.value){size+=next.value.byteLength;if(size>2000000)break;chunks.push(next.value);}}}
+              finally{if(!done)await reader.cancel().catch(()=>{});reader.releaseLock();}
+              if(done&&size){const blob=new Blob(chunks,{type:(response.headers.get("content-type")||"").split(";")[0].trim()});const data=await portableImage("","",45000,blob);if(data.length<=45000)media=data;}
+            }
+          }
+        }catch{}finally{clearTimeout(timer);}
+      }
+      return {left:"",leftImage:media,right:p.right};
+    }));else output.pairs=[];
     if(format.mode==="video")output.videoUrl=await portableImage(content.videoUrl,"");else output.videoUrl="";
     return output;
   }
@@ -2454,13 +2484,16 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
   liveLayer.addEventListener("contextmenu",e=>{e.preventDefault();window.dispatchEvent(new CustomEvent("rg:open-host-panel",{detail:{tab:"trivia"}}));});
   $("#rg-live-trivia-back").addEventListener("click",()=>window.dispatchEvent(new Event("rg:hide-trivia-stage")));
   $("#rg-live-host-close").addEventListener("click",()=>updateTrivia(r=>r?{...r,phase:"closed"}:null).catch(e=>{saveState.textContent=e.message;}));
+  let publishSequence=0;
   async function publishSelectedTrivia(request=null) {
+    const generation=++publishSequence;
     if(request){currentRound=request.round;currentDifficulty=request.difficulty;roundSelect.value=currentRound;difficultySelect.value=String(currentDifficulty);render();}
     const {format,content}=effectiveNow();
     const selectedRound=currentRound,selectedDifficulty=currentDifficulty;
     if(!/^\d{2}$/.test(selectedRound)||Number(selectedRound)<1||Number(selectedRound)>36)throw Error("Select an authored round 1–36.");
     const portable=await portableQuestion(content,format);
     await withRoomSubmissionLock(()=>{
+      if(generation!==publishSequence||currentRound!==selectedRound||currentDifficulty!==selectedDifficulty)throw Error("Question selection changed; present again.");
       if(document.documentElement.hasAttribute("data-rg-host-locked"))throw Error("Unlock the display first.");
       if(request){const current=JSON.parse(localStorage.getItem(TRIVIA_REQUEST_KEY)||"null"),reply=JSON.parse(localStorage.getItem(TRIVIA_REPLY_KEY)||"null");if(current?.id!==request.id||(reply?.id===request.id&&reply.ok))return;}
       const round=createLiveTrivia({round:selectedRound,difficulty:selectedDifficulty,format,content:portable,cards:readCardGames()});

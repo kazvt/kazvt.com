@@ -3,14 +3,14 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import * as data from './trivia-data.js';
-import { normalizeGuessLimit } from './trivia-game.mjs';
+import { normalizeGuessLimit, isNumericTargetMode, resolveNumberTarget, parseTriviaNumber } from './trivia-game.mjs';
 import { normalizeComposePlacements, migrateLegacyComposePlacements } from './compose-placement.mjs';
 import { parseTriviaText, exportTriviaText } from './trivia-text.mjs';
 import { createLiveTrivia, publicTriviaRound, validTriviaAnswer } from './live-trivia.mjs';
 const source=readFileSync(new URL('./trivia-ui.js',import.meta.url),'utf8');
 const effectiveSource=source.slice(source.indexOf('  function getEffectiveContent('),source.indexOf('  function setTab('));
 function effective(round,difficulty,draft){
- const context={...data,modeNames:data.MODE_NAMES, drafts:{rounds:{[round]:draft}}, copy:v=>JSON.parse(JSON.stringify(v)), normalizeGuessLimit,normalizeComposePlacements,migrateLegacyComposePlacements};
+ const context={...data,modeNames:data.MODE_NAMES, drafts:{rounds:{[round]:draft}}, copy:v=>JSON.parse(JSON.stringify(v)), normalizeGuessLimit,isNumericTargetMode,resolveNumberTarget,parseTriviaNumber,normalizeComposePlacements,migrateLegacyComposePlacements};
  return JSON.parse(JSON.stringify(runInNewContext(`${effectiveSource}\ngetEffectiveContent(${JSON.stringify(round)},${difficulty})`,context)));
 }
 const items=Array.from({length:8},(_,i)=>({label:`Object ${i+1}`,image:`https://example.com/${i}.png`,asset:'',x:8+(i%5)*18,y:8+Math.floor(i/5)*18}));
@@ -51,4 +51,14 @@ test('exported legacy zero count is recovered without rewriting saved media refe
 test('text import retains placement mode and positive default slots, without adding multiple-choice options',()=>{
  const p=parseTriviaText('Round 28: Place the objects\nMode: Place images on the picture\nBackground image: https://example.com/board.png');
  assert.equal(p.rounds['28'][1].mode,'compose-image');assert.equal(p.rounds['28'][1].optionCount,6);assert.deepEqual(p.rounds['28'][1].options,[]);
+});
+
+test('matching and numeric editor resolver retains old image fields and repairs a legacy target',()=>{
+ const pair={left:'answer name',leftImage:'https://example.test/answer_name.png',right:'Answer'};
+ const matching=effective('21',1,{1:{mode:'match-pairs',pairs:[pair]}});assert.deepEqual(matching.content.pairs[0],pair);assert.equal(matching.format.pairCount,12);
+ const custom=effective('01',1,{1:{mode:'match-pairs',pairs:[pair]}});assert.equal(custom.format.pairCount,1);assert.deepEqual(custom.content.pairs[0],pair);
+ const legacy=effective('31',1,{1:{mode:'number-stepper',numberValue:0,acceptedAnswers:['42']}});assert.equal(legacy.content.numberValue,42);
+ const zero=effective('31',1,{1:{mode:'number-stepper',numberValue:0,numberTargetSet:true,acceptedAnswers:['42']}});assert.equal(zero.content.numberValue,0);
+ assert.equal(effective('31',1,{1:{mode:'number-stepper'}}).content.numberValue,null);
+ assert.equal(effective('31',1,{1:{mode:'number-stepper',numberValue:0,numberCode:'1234'}}).content.numberValue,null);
 });

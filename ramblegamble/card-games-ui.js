@@ -2,10 +2,10 @@ import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { showBurst, voteFlight, purchaseFlight } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createSmeemoImpact, smeemoImpactTransition } from "./smeemo-impact.mjs?v=room-audio-20261127-v1";
 import { applyCardShowAction } from "./card-show-actions.mjs?v=card-polish-20261127-v1";
-import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia, writeLiveTriviaDraft } from "./live-trivia.mjs?v=spectator-20261127-v1";
+import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia, writeLiveTriviaDraft } from "./live-trivia.mjs?v=match-number-20261127-v1";
 import { activeCardStage, cardStageChange } from "./card-stage-state.mjs?v=wildcard-shared-20261126-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
-import { mountCardRoom } from "./card-room-host.mjs?v=spectator-20261127-v1";
+import { mountCardRoom } from "./card-room-host.mjs?v=match-number-20261127-v1";
 import { foley } from "./game-foley.mjs?v=theatre-20261127-v1";
 import {
   CARD_GAME_CATEGORIES,

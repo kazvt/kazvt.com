@@ -1,3 +1,4 @@
+import { createLiveTrivia } from "./live-trivia.mjs";
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { EventEmitter } from 'node:events';
@@ -169,5 +170,21 @@ test('authenticated draft messages are private, rate-limited, recover across rea
  a.room.dispose();await until(()=>h.peers.length===2);h.peers[1].emit('open');await flush();const k2=await join(h.peers[1],invites.kaz),f2=await join(h.peers[1],invites.faroe);assert.deepEqual(latest(k2).savedDraft,one);assert.deepEqual(latest(f2).savedDraft,two);
  await send(k2,packet('clear',{strokes:[]}),'accepted');assert.deepEqual(h.round.drafts.kaz,{strokes:[]});await new Promise(r=>setTimeout(r,110));await send(k2,packet('stale',one,'old'),'stale-round');
  const final={strokes:[[[1,2],[3,4]]]};k2.emit('data',{...packet('final',final),type:'submit'});await until(()=>k2.sent.some(m=>m.type==='ack'&&m.requestId==='final'&&m.status==='accepted'));assert.deepEqual(JSON.parse(h.round.submissions.kaz),final);await new Promise(r=>setTimeout(r,110));await send(k2,packet('late',one),'closed');assert.equal(h.round.drafts.kaz,undefined);assert.equal(latest(f2).savedAnswer,null);
+ }finally{h.dispose();await flush();}
+});
+
+test('authenticated higher/lower uses repaired imported target and broadcasts all three correct result types',async()=>{
+ const h=harness();try{
+  const t=h.tab('/rg/');await t.room.ready;t.click('start');await flush();h.peers[0].emit('open');await flush();
+  h.round=createLiveTrivia({round:'31',difficulty:1,format:{mode:'number-stepper'},content:{question:'Guess the number',numberValue:0,acceptedAnswers:['42']},cards:{}});
+  const invites=t.invites(),faroe=await join(h.peers[0],invites.faroe),erin=await join(h.peers[0],invites.erin);
+  for(const [i,[guess,result]] of [['41','higher'],['43','lower'],['42','correct']].entries()){
+   faroe.emit('data',{...invites.faroe,type:'submit',roundId:h.round.id,answer:JSON.stringify({guess,id:`guess-${i}`})});
+   await until(()=>h.round.attempts.faroe.length===i+1);await flush();
+   assert.equal(h.round.attempts.faroe.at(-1).result,result);
+   const last=faroe.sent.filter(m=>m.type==='round').at(-1).round;assert.equal(last.attempts.at(-1).result,result);assert.ok(!('secret' in last));
+   assert.deepEqual(erin.sent.filter(m=>m.type==='round').at(-1).round.attempts,[]);
+  }
+  assert.ok(h.round.submissions.faroe);
  }finally{h.dispose();await flush();}
 });
