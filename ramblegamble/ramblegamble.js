@@ -395,7 +395,6 @@ import {
       context.moveTo(0, row * cellHeight);
       context.lineTo(slotReelCanvas.width, row * cellHeight);
     }
-    context.stroke();
     if (slotHoverCellIndex >= 0 && !slotReelMotion && currentView.kind === "slot") {
       const hoverColumn = slotHoverCellIndex % 5;
       const hoverRow = Math.floor(slotHoverCellIndex / 5);
@@ -403,6 +402,7 @@ import {
       if (slotPlacementAxis === "row") context.fillRect(0, hoverRow * cellHeight, slotReelCanvas.width, cellHeight);
       else context.fillRect(hoverColumn * cellWidth, 0, cellWidth, slotReelCanvas.height);
     }
+    context.stroke();
     context.restore();
     slotReelTexture.needsUpdate = true;
   }
