@@ -42,6 +42,8 @@ test("line availability matches placement eligibility for each row and column", 
   assert.deepEqual(getSlotEligibleIndexes(grid, "kazberry", { axis: "column", index: 1 }), [1, 6, 11]);
   assert.deepEqual(getSlotEligibleIndexes(grid, "kazberry", { axis: "row", index: 0 }), [1, 2, 3, 4]);
   assert.deepEqual(getSlotEligibleIndexes(grid, "kazberry", { axis: "row", index: 9 }), []);
+  assert.deepEqual(getSlotEligibleIndexes(grid, "mysteryberry", { axis: "row", index: 0 }), []);
+  assert.deepEqual(getSlotEligibleIndexes(grid, "kazberry", { axis: "diagonal", index: 0 }), []);
 });
 
 test("placement is a no-op when a selected line is already entirely the active player's berry", () => {
