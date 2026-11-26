@@ -79,7 +79,6 @@
 .rg-icon-button,
 .rg-console-tab,
 .rg-secondary-button,
-.rg-placement-choice,
 .rg-berry-choice,
 .rg-answer-option,
 .rg-stage-button,
@@ -96,7 +95,6 @@
 .rg-icon-button { width: 44px; font-size: 17px; }
 .rg-icon-button:hover,
 .rg-secondary-button:hover,
-.rg-placement-choice:hover,
 .rg-berry-choice:hover,
 .rg-answer-option:hover,
 .rg-stage-button:hover,
@@ -145,7 +143,6 @@
 
 .rg-panel-copy,
 .rg-storage-note,
-.rg-slot-help,
 .rg-editor-note {
   color: #3b3019;
   font-size: 13px;
@@ -193,11 +190,8 @@
 .rg-berry-picker { display: grid; grid-template-columns: repeat(3, 60px); gap: 7px; }
 .rg-berry-choice { display: grid; width: 60px; min-width: 60px; min-height: 60px; place-items: center; padding: 5px; }
 .rg-berry-choice[aria-pressed="true"],
-.rg-placement-choice[aria-pressed="true"] { color: #fff; background: #8b2626; }
+.rg-berry-choice[aria-pressed="true"] { color: #fff; background: #8b2626; }
 .rg-berry-choice-image { display: block; width: 44px; height: 44px; object-fit: cover; image-rendering: pixelated; pointer-events: none; }
-.rg-placement-picker { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
-.rg-placement-choice { padding: 6px; font-size: 11px; }
-.rg-slot-help { min-height: 3em; margin: 4px 0 12px; }
 .rg-secondary-button { padding: 7px 12px; font-size: 11px; letter-spacing: .04em; }
 .rg-slot-board-wrap { min-width: 0; padding: 12px; border: 3px ridge #8b2626; background: #e9d98b; }
 .rg-slot-board-label { margin-bottom: 10px; }

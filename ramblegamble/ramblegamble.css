@@ -111,6 +111,73 @@ body.ramble-page *::after {
   opacity: 0;
 }
 
+.rg-slot-control-layer {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.rg-slot-control-layer[hidden],
+.rg-preview.is-menu .rg-slot-control-layer,
+.rg-preview.is-dice-mode .rg-slot-control-layer { display: none; }
+
+.rg-slot-placement-marker {
+  position: absolute;
+  display: grid;
+  min-width: 28px;
+  min-height: 28px;
+  place-items: center;
+  padding: 3px;
+  border: 2px solid var(--ink);
+  color: var(--paper);
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  box-shadow: 3px 3px 0 var(--pink), inset 0 0 0 1px var(--paper);
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color 100ms ease, box-shadow 100ms ease, transform 100ms ease;
+}
+
+.rg-slot-placement-marker img {
+  display: block;
+  width: 72%;
+  height: 72%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.rg-slot-placement-index {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  display: grid;
+  min-width: 15px;
+  height: 15px;
+  place-items: center;
+  padding: 0 2px;
+  border: 1px solid var(--ink);
+  color: var(--paper);
+  background: var(--blue);
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 1px 1px 0 var(--ink);
+}
+
+.rg-slot-placement-marker:hover:not(:disabled) {
+  background: var(--pink);
+  box-shadow: 3px 3px 0 var(--ink), inset 0 0 0 1px var(--paper);
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.rg-slot-placement-marker:active:not(:disabled) { transform: translate(-50%, -50%) scale(.94); }
+.rg-slot-placement-marker:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
+.rg-slot-placement-marker:disabled { opacity: .48; filter: grayscale(.75); cursor: not-allowed; }
+
 .rg-points-hud {
   position: absolute;
   z-index: 4;
@@ -647,6 +714,7 @@ body.ramble-page *::after {
 
 @media (prefers-reduced-motion: reduce) {
   .rg-billboard-layer,
+  .rg-slot-placement-marker,
   .rg-dice-dialog {
     transition-duration: .01ms;
   }
