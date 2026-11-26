@@ -1,10 +1,10 @@
-import { createSmeemoImpact, smeemoImpactTransition } from "./smeemo-impact.mjs?v=smeemo-quake-20261127-v1";
+import { createSmeemoImpact, smeemoImpactTransition } from "./smeemo-impact.mjs?v=room-audio-20261127-v1";
 import { applyCardShowAction } from "./card-show-actions.mjs?v=card-polish-20261127-v1";
 import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia } from "./live-trivia.mjs?v=show-stage-20261126-v1";
 import { activeCardStage, cardStageChange } from "./card-stage-state.mjs?v=wildcard-shared-20261126-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
 import { mountCardRoom } from "./card-room-host.mjs?v=room-recovery-20261127-v1";
-import { foley } from "./game-foley.mjs?v=smeemo-quake-20261127-v1";
+import { foley } from "./game-foley.mjs?v=room-audio-20261127-v1";
 import {
   CARD_GAME_CATEGORIES,
   CARD_GAME_PLAYERS,
@@ -107,8 +107,10 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     clear: () => preview.classList.remove("is-smeemo-impact"),
     sound: (event, spec) => {
       foley.start("smeemo-rumble", "smeemoRumble", { volume: .75 + spec.strength * .25 });
-      foley.start("smeemo-hit", "smeemoHit", { rate: spec.rate, endRate: spec.rate * 1.12, volume: .8 + spec.strength * .2 });
-      if (event.kind === "win") foley.start("smeemo-win", "smeemoWin", { maxDelay: 350 });
+      if (event.kind === "win") {
+        foley.stop("smeemo-hit");
+        foley.start("smeemo-win", "smeemoWin", { maxDelay: 350 });
+      } else foley.start("smeemo-hit", "smeemoHit", { rate: spec.rate, endRate: spec.rate * 1.12, volume: .8 + spec.strength * .2 });
     },
     stopSound: () => { for (const channel of ["smeemo-rumble", "smeemo-hit", "smeemo-win"]) foley.stop(channel); },
   });

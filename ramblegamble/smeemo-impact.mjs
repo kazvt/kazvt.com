@@ -48,7 +48,7 @@ export function createSmeemoImpact({ requestFrame, cancelFrame, now, canRun, isV
   function begin(event, time) {
     const spec = smeemoImpactSpec(event.kind, event.count);
     live = true;
-    audioUntil = time + (event.kind === "win" ? 3400 : 1500);
+    audioUntil = time + (event.kind === "win" ? 4700 : 1500);
     sound(event, spec);
     if (!reduced()) pulses.push({ ...spec, at: time });
     // The visual tail is bounded even during a burst of clicks.

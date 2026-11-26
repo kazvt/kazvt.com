@@ -1,10 +1,10 @@
 import { gradeSimpleAnswer, isSimpleGradeMode } from "./trivia-simple-grade.mjs?v=room-recovery-20261127-v1";
 import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, newTriviaId, updateTrivia, activeRoomRound, publicMedia } from "./live-trivia.mjs?v=show-stage-20261126-v1";
-import { renderLiveQuestion, renderTriviaResponses } from "./trivia-live-view.mjs?v=compose-object-types-20261127-v1";
+import { renderLiveQuestion, renderTriviaResponses } from "./trivia-live-view.mjs?v=room-audio-20261127-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
 import { readCardGames, subscribeCardGames } from "./card-games-store.mjs?v=show-stage-20261126-v1";
 import { removeSlotSymbol } from "./slot-game.mjs?v=host-cell-cards-20261127-v1";
-import { foley } from "./game-foley.mjs?v=smeemo-quake-20261127-v1";
+import { foley } from "./game-foley.mjs?v=room-audio-20261127-v1";
 import {
   MODE_NAMES,
   ROUND_IDS,

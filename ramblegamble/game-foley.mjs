@@ -1,5 +1,6 @@
 // Recorded samples only. This module never generates an oscillator/noise signal.
 // All assets are same-origin, installed by assets/sfx/install-foley.py.
+import { createRoomAmbience } from "./room-ambience.mjs?v=room-audio-20261127-v1";
 const ROOT = new URL("./assets/sfx/foley/", import.meta.url);
 export const FOLEY_CUES = Object.freeze({
   switch: { files: ["switch.mp3"], fallback: ["click-1.ogg"], volume: .44 },
@@ -34,7 +35,7 @@ export const FOLEY_CUES = Object.freeze({
   diceFace: { files: ["die-grab-1.ogg", "die-grab-2.ogg"], fallback: ["card-place-1.ogg"], volume: .30 },
   smeemoHit: { files: ["smeemo-hit.ogg"], fallback: ["chip-lay-1.ogg"], volume: .64, maxDuration: 1.1 },
   smeemoRumble: { files: ["smeemo-rumble.ogg"], fallback: ["die-throw-1.ogg"], volume: .32, maxDuration: 1.1 },
-  smeemoWin: { files: ["jackpot.mp3"], fallback: ["settlement-cheer.ogg"], volume: .48, maxDuration: 3 },
+  smeemoWin: { files: ["smeemo-horror.mp3"], volume: .76, maxDuration: 4.2 },
   settlement: { files: ["settlement-cheer.ogg"], fallback: ["confirmation-2.ogg", "confirmation-1.ogg", "cheer.ogg"], volume: .67, maxDuration: 1.6 },
   portal: { files: ["maximize-1.ogg"], fallback: ["card-slide-1.ogg"], volume: .36 },
   portalExit: { files: ["minimize-1.ogg"], fallback: ["card-slide-2.ogg"], volume: .32 },
@@ -45,6 +46,7 @@ export const FOLEY_CUES = Object.freeze({
   pocket: { files: ["chips-collide-3.ogg", "chips-collide-4.ogg"], fallback: ["chip-lay-1.ogg"], volume: .25 },
 });
 const STORAGE_KEY = "ramblegamble.foley.muted.v1";
+const AMBIENCE_KEY = "ramblegamble.ambience.enabled.v1";
 
 export function createFoley({
   AudioContext = globalThis.AudioContext || globalThis.webkitAudioContext,
@@ -52,11 +54,24 @@ export function createFoley({
   now = () => globalThis.performance.now(),
   random = Math.random,
   storage = undefined,
+  createMedia = undefined,
   isHidden = () => Boolean(globalThis.document?.hidden || globalThis.document?.documentElement?.hasAttribute?.("data-rg-host-locked")),
 } = {}) {
   let context = null, master = null, muted = false, epoch = 0, requestCount = 0;
   const buffers = new Map(), channels = new Map(), voices = new Set(), previous = new Map();
-  try { muted = storage?.getItem(STORAGE_KEY) === "1"; } catch {}
+  let ambienceEnabled = true, roomActive = false, roomLevel = 1;
+  const room = createRoomAmbience({ createMedia, random });
+  try { muted = storage?.getItem(STORAGE_KEY) === "1"; ambienceEnabled = storage?.getItem(AMBIENCE_KEY) !== "0"; } catch {}
+  function syncRoom(retry = false) {
+    room.sync({ active: roomActive && ambienceEnabled && !muted && !isHidden(), context, master,
+      level: roomLevel * (channels.get("smeemo-win")?.voice ? .22 : 1), retry });
+  }
+  function setRoomAmbience(active, level = 1) { roomActive = Boolean(active); roomLevel = level; syncRoom(); }
+  function setAmbienceEnabled(value) {
+    ambienceEnabled = Boolean(value);
+    try { storage?.setItem(AMBIENCE_KEY, ambienceEnabled ? "1" : "0"); } catch {}
+    syncRoom(true);
+  }
   function unlock() {
     if (!AudioContext || !fetchFile || muted || isHidden()) return;
     try {
@@ -71,7 +86,8 @@ export function createFoley({
         master.connect(limiter);
         limiter.connect(context.destination);
       }
-      if (context.state !== "running") Promise.resolve(context.resume()).catch(() => {});
+      if (context.state !== "running") Promise.resolve(context.resume()).then(() => syncRoom(true)).catch(() => {});
+      syncRoom(true);
       for (const file of new Set(Object.values(FOLEY_CUES).flatMap(cue => [...cue.files, ...(cue.fallback || [])]))) load(file);
     } catch { context = null; master = null; }
   }
@@ -109,6 +125,7 @@ export function createFoley({
   }
   function stopAll() {
     epoch++;
+    room.stop();
     for (const channel of [...channels.keys()]) stop(channel);
     for (const voice of [...voices]) stopVoice(voice);
   }
@@ -184,7 +201,7 @@ export function createFoley({
       if (channel && channels.get(channel) === entry && !entry.voice) channels.delete(channel);
     });
   }
-  return { unlock, play, start: (channel, name, options = {}) => play(name, { ...options, channel }), stop, stopAll, setMuted, get muted() { return muted; }, get requestCount() { return requestCount; } };
+  return { unlock, play, setRoomAmbience, setAmbienceEnabled, get ambienceEnabled() { return ambienceEnabled; }, start: (channel, name, options = {}) => play(name, { ...options, channel }), stop, stopAll, setMuted, get muted() { return muted; }, get requestCount() { return requestCount; } };
 }
 
 let browserStorage;
@@ -196,6 +213,11 @@ if (typeof document !== "undefined" && typeof document.addEventListener === "fun
     control.checked = !foley.muted;
     control.addEventListener("change", () => foley.setMuted(!control.checked));
   }
+  const ambienceControl = document.getElementById("rg-ambience-enabled");
+  if (ambienceControl) {
+    ambienceControl.checked = foley.ambienceEnabled;
+    ambienceControl.addEventListener("change", () => foley.setAmbienceEnabled(ambienceControl.checked));
+  }
   // Preload on the first trusted interaction; later actions resume after a browser suspension.
   for (const type of ["pointerdown", "keydown", "click"]) document.addEventListener(type, event => {
     if (event.isTrusted) foley.unlock();
@@ -206,6 +228,10 @@ if (typeof document !== "undefined" && typeof document.addEventListener === "fun
   }
   globalThis.addEventListener?.("pagehide", foley.stopAll);
   globalThis.addEventListener?.("storage", event => {
+    if (event.key === AMBIENCE_KEY && foley.ambienceEnabled !== (event.newValue !== "0")) {
+      foley.setAmbienceEnabled(event.newValue !== "0");
+      if (ambienceControl) ambienceControl.checked = foley.ambienceEnabled;
+    }
     if (event.key === STORAGE_KEY && foley.muted !== (event.newValue === "1")) {
       foley.setMuted(event.newValue === "1");
       const control = document.getElementById("rg-foley-enabled");
@@ -230,7 +256,7 @@ export function installControlFoley(root, mixer, defer = fn => setTimeout(fn, 0)
     });
   }, { capture: true });
   root.addEventListener("change", event => {
-    if (!event.isTrusted || event.target?.disabled || event.target?.id === 'rg-foley-enabled') return;
+    if (!event.isTrusted || event.target?.disabled || ['rg-foley-enabled', 'rg-ambience-enabled'].includes(event.target?.id)) return;
     if (event.target?.matches?.('select, input[type="radio"], input[type="checkbox"]') && event.target.dataset?.foley !== "off") mixer.play(event.target.type === 'checkbox' ? 'toggle' : 'select');
   });
 }

@@ -1,6 +1,6 @@
 // Console uses the private read-only renderer without installing audio listeners.
 const foley = globalThis.location?.pathname?.replace(/\/$/, '') === '/rg/console'
- ? {play(){}} : (await import('./game-foley.mjs?v=smeemo-quake-20261127-v1')).foley;
+ ? {play(){}} : (await import('./game-foley.mjs?v=room-audio-20261127-v1')).foley;
 import { snapComposePlacement } from './compose-placement.mjs';
 import { CHOICE_MODES, publicMedia, validTriviaAnswer, MAX_TRIVIA_ANSWER, answerSummary } from './live-trivia.mjs?v=show-stage-20261126-v1';
 const node=(tag,cls='',text='')=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text)e.textContent=text;return e;};
