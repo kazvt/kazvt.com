@@ -1,3 +1,4 @@
+import { createExteriorMist } from "./exterior-mist.mjs?v=exterior-mist-20261126-v1";
 import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS } from "./arcade-framing.mjs?v=bottom-column-arrows-20261126-v1";
 import { foley } from "./game-foley.mjs?v=expanded-foley-20261126-v1";
 import {
@@ -124,6 +125,7 @@ import {
   let slotRig;
   let cardTableModel;
   let skyRoot;
+  let exteriorMist;
   let skyStars;
   let skyStarsMesh;
   let skyShootingStarsMesh;
@@ -2042,7 +2044,7 @@ import {
   updateMarqueeMotionPreference();
 
   function setMenuSceneVisibility(visible) {
-    for (const object of [stageModel, rouletteRig, slotRig]) {
+    for (const object of [stageModel, rouletteRig, slotRig, exteriorMist?.group]) {
       if (object) object.visible = visible;
     }
     billboardLayer.classList.toggle("rg-billboards-fading", !visible);
@@ -2289,7 +2291,7 @@ import {
     }
     updateLiquidPortal();
     if (open) {
-      diceModeVisibility = [stageModel, rouletteRig, slotRig]
+      diceModeVisibility = [stageModel, rouletteRig, slotRig, exteriorMist?.group]
         .filter(Boolean)
         .map((object) => [object, object.visible]);
       for (const [object] of diceModeVisibility) object.visible = false;
@@ -2519,6 +2521,7 @@ import {
     preview.classList.toggle("is-trivia",currentView.kind === "trivia");
     if (triviaLayer) triviaLayer.hidden = !(gameStarted && !pauseMenuOpen && !diceModeOpen && sceneReady && !cameraTransition && currentView.kind === "trivia" && triviaLayer.dataset.ready === "true");
     updateCardTableProjection();
+    exteriorMist?.update(time, reducedMotion.matches);
     updateSkyAnimations(time);
     updateLiquidPortal(time);
     if (diceModeOpen) {
@@ -2652,6 +2655,7 @@ import {
         // Load once during room boot, not on entry to the door close-up.
         liquidPortal.preload();
       }
+      exteriorMist = createExteriorMist({ THREE, scene, stage: stageModel, horizonColor: SKY_CONFIG.horizonColor });
 
       rouletteModel = rouletteGltf.scene;
       prepareModel(rouletteModel);
@@ -2708,6 +2712,7 @@ import {
     cancelAnimationFrame(animationFrame);
     resizeObserver?.disconnect();
     liquidPortal?.dispose();
+    exteriorMist?.dispose();
     renderer?.dispose();
   }, { once: true });
 })();
