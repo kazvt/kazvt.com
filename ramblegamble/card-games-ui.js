@@ -431,7 +431,9 @@ import { readPointScores, subscribePointScores, writePointScores } from "./point
       grid.append(wrap);
     }
     shell.append(grid, element("p", "rg-card-round-status", "Choose a berry, then a card."));
-    content.append(shell);
+    // Buyer selection, purchases, and balance updates all rerender this view.
+    // Replace the stage atomically so those refreshes cannot stack shop rows.
+    content.replaceChildren(shell);
     liveStatus.textContent = "Shop is open. Choose a berry, then a card.";
   }
 
