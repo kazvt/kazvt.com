@@ -15,7 +15,7 @@ import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { createExteriorMist, EXTERIOR_FLOOR } from "./exterior-mist.mjs?v=crowd-mist-20261127-v1";
 import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=standing-characters-20261127-v1";
-import { foley } from "./game-foley.mjs?v=smeemo-storm-20261127-v1";
+import { foley } from "./game-foley.mjs?v=vip-water-gain-20261127-v3";
 import {
   resolvePointClickAction,
   resolvePointClickBack,

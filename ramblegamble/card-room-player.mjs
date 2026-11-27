@@ -1,7 +1,7 @@
 import { createDraftDelivery } from "./trivia-draft-delivery.mjs?v=match-number-20261127-v1";
 import { LIVE_DRAFT_MODES, validTriviaDraft, MAX_TRIVIA_ANSWER } from "./live-trivia.mjs?v=match-number-20261127-v1";
 import { ACK_TIMEOUT_MS, matchesAck, pendingReceipt, validRequestId } from "./card-room-delivery.mjs?v=submission-audit-20261126-v1";
-import { foley } from "./game-foley.mjs?v=smeemo-storm-20261127-v1";
+import { foley } from "./game-foley.mjs?v=vip-water-gain-20261127-v3";
 import { renderLiveQuestion } from "./trivia-live-view.mjs?v=smeemo-storm-20261127-v1";
 import { nonce, validNonce, validPublicKey, channelBinding, transcript, verifyHost, proveSeat } from "./card-room-auth.mjs?v=room-recovery-20261127-v1";
 import { ROOM_VERSION, isPlayer, decodePacket, encodePacket } from "./card-room-protocol.mjs?v=match-number-20261127-v1";

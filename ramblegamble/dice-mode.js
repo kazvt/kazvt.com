@@ -2,7 +2,7 @@ import { createFocusArrow, projectedArrowTarget } from "./focus-arrow.mjs?v=haze
 import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { VIP_LIQUID_SOURCE } from "./vip-liquid-preset.mjs?v=vip-black-liquid-20261126-v1";
-import { foley } from "./game-foley.mjs?v=smeemo-storm-20261127-v1";
+import { foley } from "./game-foley.mjs?v=vip-water-gain-20261127-v3";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import {
