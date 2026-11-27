@@ -32,8 +32,9 @@ export function createSmeemoStinger({root,video,caption,muted=()=>false,onFinish
 
 // Table ambience belongs only to a newly opened, explicitly selected Smeemo
 // round. Merely returning to the card table, opening its menu, or restoring a
-// stale round must never arm it. Camera navigation does not cancel a live round;
-// an explicit mode change, dismissal, reset or completion does.
+// stale round must never arm it. A winning reveal completes gameplay but not
+// the presentation: keep the same session through the results board. Camera
+// navigation gates playback; explicit mode change, dismissal or reset cancels.
 export function createSmeemoTableSession(){
  let roundId=null,status=null,selected=false,armed=false;
  const cancelledIds=new Set();
@@ -44,14 +45,14 @@ export function createSmeemoTableSession(){
    const state=next.status??null;
    const mode=next.mode??null;
    if(id!==roundId){if(roundId)cancelledIds.add(roundId);selected=false;armed=false;}
-   if(!id||mode!=='smeemo'||state!=='playing'){
+   if(!id||mode!=='smeemo'||!['playing','complete'].includes(state)){
     if(id)cancelledIds.add(id);
     selected=false;armed=false;
-   }else if(next.opened===true&&!cancelledIds.has(id))armed=true;
+   }else if(state==='playing'&&next.opened===true&&!cancelledIds.has(id))armed=true;
    roundId=id;status=state;
   },
   choose(mode){if(mode==='smeemo')selected=true;else cancel();},
   cancel,
-  get active(){return selected&&armed&&status==='playing';},
+  get active(){return selected&&armed&&['playing','complete'].includes(status);},
  };
 }

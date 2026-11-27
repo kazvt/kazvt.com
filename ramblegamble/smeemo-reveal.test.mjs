@@ -52,7 +52,7 @@ test('production hook checks scene occlusion, uses projected tag and arrow, pres
  assert.match(src,/if \(document.hidden\) \{\s*floatingSky\?\.suspend\(\);\s*resetEncounter\(\)/);
 });
 
-test('table session requires an explicitly opened Smeemo round and survives camera navigation only while that round remains active',()=>{
+test('table session requires an explicitly opened Smeemo round and survives winning results until explicit exit or cancellation',()=>{
  const e=createSmeemoTableSession();assert.equal(e.active,false);
  e.observe({id:'restored',status:'playing',mode:'smeemo',opened:false});e.choose('smeemo');assert.equal(e.active,false,'restored/dismissed rounds do not arm ambience');
  e.observe({id:'new-a',status:'playing',mode:'smeemo',opened:true});assert.equal(e.active,false,'round opening is not enough until the Smeemo mode owns the table');
@@ -61,7 +61,8 @@ test('table session requires an explicitly opened Smeemo round and survives came
  e.choose('menu');assert.equal(e.active,false,'opening the table menu cancels the Smeemo audio session');
  e.choose('smeemo');assert.equal(e.active,false,'reselecting Smeemo cannot revive a cancelled round with the same ID');
  e.observe({id:'new-b',status:'playing',mode:'smeemo',opened:true});e.choose('smeemo');assert.equal(e.active,true);
- e.observe({id:'new-b',status:'complete',mode:'smeemo',opened:false});assert.equal(e.active,false);
+ e.observe({id:'new-b',status:'complete',mode:'smeemo',opened:false});assert.equal(e.active,true,'a winning reveal is not a scene exit');
+ e.observe({id:'new-b',status:'complete',mode:'smeemo',opened:false});assert.equal(e.active,true,'duplicate result updates keep the same session');
  e.observe({id:null,status:null,mode:null,opened:false});assert.equal(e.active,false);
 });
 
@@ -97,4 +98,15 @@ test('native alpha WebM is selected, both overlay and video have transparent CSS
  const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
  assert.match(src,/hideCrowd:encounter\.hideCrowd/);assert.match(src,/if\(encounter\.quiet\)silenceCrowd\(\);\s*encounter\.reset/);
  assert.match(src,/function reactCrowd\(emotion\)\{if\(!encounter\.quiet\)/);
+});
+
+test('completed snapshots cannot arm or revive a stale or replaced Smeemo session',()=>{
+ const e=createSmeemoTableSession();
+ const result={id:'old',status:'complete',mode:'smeemo',opened:true};
+ e.observe(result);e.choose('smeemo');assert.equal(e.active,false);
+ e.observe({id:'fresh',status:'playing',mode:'smeemo',opened:true});e.choose('smeemo');assert.equal(e.active,true);
+ e.observe({id:'fresh',status:'complete',mode:'smeemo',opened:false});assert.equal(e.active,true);
+ e.cancel();e.observe({id:'fresh',status:'complete',mode:'smeemo',opened:true});e.choose('smeemo');assert.equal(e.active,false);
+ e.observe({id:'new',status:'playing',mode:'smeemo',opened:true});e.choose('smeemo');assert.equal(e.active,true);
+ e.observe(result);e.choose('smeemo');assert.equal(e.active,false,'different completed ID cannot inherit a live session');
 });

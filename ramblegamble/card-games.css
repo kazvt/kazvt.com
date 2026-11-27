@@ -740,15 +740,15 @@ html[data-rg-host-locked] .rg-smeemo-lightning {display:none!important;}
    when the next reveal arrives before the last wave finishes. */
 .rg-smeemo-board[data-pulse="odd"] .rg-smeemo-motion {animation:rg-smeemo-wave-a 590ms cubic-bezier(.18,.7,.26,1) var(--impact-delay,0ms) both;}
 .rg-smeemo-board[data-pulse="even"] .rg-smeemo-motion {animation:rg-smeemo-wave-b 590ms cubic-bezier(.18,.7,.26,1) var(--impact-delay,0ms) both;}
-@keyframes rg-smeemo-arrive {0.00000000%{animation-timing-function:steps(4,end);transform:translate3d(0,-22%,0) rotateZ(-12deg) scale(.65);} 66.66666667%{animation-timing-function:steps(2,end);transform:translateY(4%) rotateZ(3deg) scale(1.03,.96);} 100.00000000%{transform:rotateZ(var(--home-rotation));} }
-@keyframes rg-smeemo-stack {0.00000000%{animation-timing-function:steps(3,end);transform:rotateZ(var(--home-rotation));} 42.85714286%{animation-timing-function:steps(4,end);transform:translate3d(calc(var(--stack-x)*.45),calc(var(--stack-y)*.45 - 22%),0) rotateZ(190deg) scale(.91);} 100.00000000%{transform:translate3d(calc(var(--stack-x) + var(--stack-layer-x)),calc(var(--stack-y) + var(--stack-layer-y)),0) rotateZ(calc(360deg + var(--stack-rotation))) scale(.84);} }
-@keyframes rg-smeemo-stack-settle {0.00000000%{animation-timing-function:steps(2,end);scale:1;} 50.00000000%{animation-timing-function:steps(2,end);scale:1.04 .94;} 100.00000000%{scale:1;} }
-@keyframes rg-smeemo-deal {0.00000000%{animation-timing-function:steps(2,end);transform:translate3d(calc(var(--stack-x) + var(--stack-layer-x)),calc(var(--stack-y) + var(--stack-layer-y)),0) rotateZ(var(--stack-rotation)) scale(.84);} 28.57142857%{animation-timing-function:steps(3,end);transform:translate3d(calc(var(--stack-x)*.7),calc(var(--stack-y)*.7 - 15%),0) rotateZ(10deg) scale(.94);} 71.42857143%{animation-timing-function:steps(2,end);transform:translateY(4%) rotateZ(-3deg) scale(1.035,.96);} 100.00000000%{transform:rotateZ(var(--home-rotation));} }
-@keyframes rg-smeemo-flip-down {0.00000000%{animation-timing-function:steps(3,end);transform:rotateY(0);} 60.00000000%{animation-timing-function:steps(2,end);transform:rotateY(192deg);} 100.00000000%{transform:rotateX(4deg) rotateY(180deg);} }
-@keyframes rg-smeemo-turn {0.00000000%{animation-timing-function:steps(1,end);transform:rotateY(180deg);} 12.50000000%{animation-timing-function:steps(3,end);transform:translateY(4%) rotateY(164deg) scale(1.06,.93);} 50.00000000%{animation-timing-function:steps(2,end);transform:translate3d(0,-12%,26px) rotateY(64deg) rotateZ(7deg) scale(1.045);} 75.00000000%{animation-timing-function:steps(1,end);transform:translateY(-3%) rotateY(-15deg) rotateZ(-4deg);} 87.50000000%{animation-timing-function:steps(1,end);transform:translateY(2%) rotateY(5deg) scale(1.035,.97);} 100.00000000%{transform:rotateX(4deg);} }
-@keyframes rg-smeemo-win-turn {0.00000000%{animation-timing-function:steps(2,end);transform:rotateY(180deg);} 20.00000000%{animation-timing-function:steps(2,end);transform:translateY(4%) rotateY(150deg) scale(1.04,.92);} 40.00000000%{animation-timing-function:steps(3,end);transform:translate3d(0,-16%,28px) rotateY(38deg) rotateZ(-9deg) scale(1.1);} 70.00000000%{animation-timing-function:steps(1,end);transform:translateY(-7%) rotateY(-18deg) rotateZ(7deg) scale(1.08);} 80.00000000%{animation-timing-function:steps(2,end);transform:translateY(2%) rotateY(6deg) scale(1.04,.96);} 100.00000000%{transform:rotateX(4deg);} }
-@keyframes rg-smeemo-wave-a {0.00000000%{animation-timing-function:steps(1,end);transform:rotateZ(var(--home-rotation));} 16.66666667%{animation-timing-function:steps(2,end);transform:translate3d(calc(var(--impact-direction)*3%),-7%,0) rotateZ(calc(var(--impact-direction)*5deg)) scale(.98,1.03);} 50.00000000%{animation-timing-function:steps(1,end);transform:translateY(3%) rotateZ(calc(var(--impact-direction)*-3deg)) scale(1.035,.96);} 66.66666667%{animation-timing-function:steps(2,end);transform:translateY(-2%) rotateZ(1deg);} 100.00000000%{transform:rotateZ(var(--home-rotation));} }
-@keyframes rg-smeemo-wave-b {0.00000000%{animation-timing-function:steps(1,end);transform:rotateZ(var(--home-rotation));} 16.66666667%{animation-timing-function:steps(2,end);transform:translate3d(calc(var(--impact-direction)*3%),-7%,0) rotateZ(calc(var(--impact-direction)*5deg)) scale(.98,1.03);} 50.00000000%{animation-timing-function:steps(1,end);transform:translateY(3%) rotateZ(calc(var(--impact-direction)*-3deg)) scale(1.035,.96);} 66.66666667%{animation-timing-function:steps(2,end);transform:translateY(-2%) rotateZ(1deg);} 100.00000000%{transform:rotateZ(var(--home-rotation));} }
+@keyframes rg-smeemo-arrive {0.00000000%{transform:translate3d(0,-22%,0) rotateZ(-12deg) scale(.65);} 66.66666667%{transform:translateY(4%) rotateZ(3deg) scale(1.03,.96);} 100.00000000%{transform:rotateZ(var(--home-rotation));} }
+@keyframes rg-smeemo-stack {0.00000000%{transform:rotateZ(var(--home-rotation));} 42.85714286%{transform:translate3d(calc(var(--stack-x)*.45),calc(var(--stack-y)*.45 - 22%),0) rotateZ(190deg) scale(.91);} 100.00000000%{transform:translate3d(calc(var(--stack-x) + var(--stack-layer-x)),calc(var(--stack-y) + var(--stack-layer-y)),0) rotateZ(calc(360deg + var(--stack-rotation))) scale(.84);} }
+@keyframes rg-smeemo-stack-settle {0.00000000%{scale:1;} 50.00000000%{scale:1.04 .94;} 100.00000000%{scale:1;} }
+@keyframes rg-smeemo-deal {0.00000000%{transform:translate3d(calc(var(--stack-x) + var(--stack-layer-x)),calc(var(--stack-y) + var(--stack-layer-y)),0) rotateZ(var(--stack-rotation)) scale(.84);} 28.57142857%{transform:translate3d(calc(var(--stack-x)*.7),calc(var(--stack-y)*.7 - 15%),0) rotateZ(10deg) scale(.94);} 71.42857143%{transform:translateY(4%) rotateZ(-3deg) scale(1.035,.96);} 100.00000000%{transform:rotateZ(var(--home-rotation));} }
+@keyframes rg-smeemo-flip-down {0.00000000%{transform:rotateY(0);} 60.00000000%{transform:rotateY(192deg);} 100.00000000%{transform:rotateX(4deg) rotateY(180deg);} }
+@keyframes rg-smeemo-turn {0.00000000%{transform:rotateY(180deg);} 12.50000000%{transform:translateY(4%) rotateY(164deg) scale(1.06,.93);} 50.00000000%{transform:translate3d(0,-12%,26px) rotateY(64deg) rotateZ(7deg) scale(1.045);} 75.00000000%{transform:translateY(-3%) rotateY(-15deg) rotateZ(-4deg);} 87.50000000%{transform:translateY(2%) rotateY(5deg) scale(1.035,.97);} 100.00000000%{transform:rotateX(4deg);} }
+@keyframes rg-smeemo-win-turn {0.00000000%{transform:rotateY(180deg);} 20.00000000%{transform:translateY(4%) rotateY(150deg) scale(1.04,.92);} 40.00000000%{transform:translate3d(0,-16%,28px) rotateY(38deg) rotateZ(-9deg) scale(1.1);} 70.00000000%{transform:translateY(-7%) rotateY(-18deg) rotateZ(7deg) scale(1.08);} 80.00000000%{transform:translateY(2%) rotateY(6deg) scale(1.04,.96);} 100.00000000%{transform:rotateX(4deg);} }
+@keyframes rg-smeemo-wave-a {0.00000000%{transform:rotateZ(var(--home-rotation));} 16.66666667%{transform:translate3d(calc(var(--impact-direction)*3%),-7%,0) rotateZ(calc(var(--impact-direction)*5deg)) scale(.98,1.03);} 50.00000000%{transform:translateY(3%) rotateZ(calc(var(--impact-direction)*-3deg)) scale(1.035,.96);} 66.66666667%{transform:translateY(-2%) rotateZ(1deg);} 100.00000000%{transform:rotateZ(var(--home-rotation));} }
+@keyframes rg-smeemo-wave-b {0.00000000%{transform:rotateZ(var(--home-rotation));} 16.66666667%{transform:translate3d(calc(var(--impact-direction)*3%),-7%,0) rotateZ(calc(var(--impact-direction)*5deg)) scale(.98,1.03);} 50.00000000%{transform:translateY(3%) rotateZ(calc(var(--impact-direction)*-3deg)) scale(1.035,.96);} 66.66666667%{transform:translateY(-2%) rotateZ(1deg);} 100.00000000%{transform:rotateZ(var(--home-rotation));} }
 .rg-smeemo-status {position:relative;margin:clamp(14px,3vh,32px) auto 0;min-height:clamp(24px,3.5vw,48px);color:#fff5da;font-size:clamp(12px,1.7vw,24px);font-weight:1000;letter-spacing:.07em;line-height:1.2;text-align:center;text-shadow:2px 2px #26143b, -1px -1px #26143b, 0 0 9px #26143b;}
 .rg-smeemo-status.rg-smeemo-winner {color:#ffdf91;font-size:clamp(12px,2.7vw,36px);text-shadow:3px 3px #8b2626,5px 5px #26143b;}
 .rg-smeemo-winner.is-newly-won {animation:rg-smeemo-winner-pop 520ms cubic-bezier(.18,.8,.25,1) both;}
@@ -835,19 +835,18 @@ html[data-rg-host-locked] .rg-smeemo-lightning {display:none!important;}
 .rg-smeemo-progress-tick.is-winning {background:#ffe0b9;border-color:#ffe9cf;}
 .rg-smeemo-card.is-newly-revealed::before,.rg-smeemo-card.is-newly-revealed::after {border-color:#be3036;}
 .rg-smeemo-card.is-newly-revealed.is-smeemo::before,.rg-smeemo-card.is-newly-revealed.is-smeemo::after {border-color:#f8907c;}
-/* Each pose interval is a whole multiple of 100ms, including staggered
-   delays. Per-segment steps hold a pose for a full tenth of a second. */
-.rg-smeemo-board.is-preview .rg-smeemo-motion {animation-duration:600ms;animation-timing-function:steps(1,end);}
-.rg-smeemo-board.is-stacking .rg-smeemo-motion {animation-duration:700ms;animation-timing-function:steps(1,end);}
-.rg-smeemo-board.is-stacked .rg-smeemo-motion {animation-duration:400ms;animation-timing-function:steps(1,end);}
-.rg-smeemo-board.is-dealing .rg-smeemo-motion {animation-duration:700ms;animation-timing-function:steps(1,end);}
-.rg-smeemo-board.is-dealing .rg-smeemo-card-inner {animation-duration:500ms;animation-timing-function:steps(1,end);}
-.rg-smeemo-card.is-newly-revealed .rg-smeemo-card-inner {animation-duration:800ms;animation-timing-function:steps(1,end);}
+/* Keep the cinematic choreography and duration, but interpolate card poses
+   continuously. Only the ambient horror effects use sampled motion. */
+.rg-smeemo-board.is-preview .rg-smeemo-motion {animation-duration:600ms;}
+.rg-smeemo-board.is-stacking .rg-smeemo-motion {animation-duration:700ms;}
+.rg-smeemo-board.is-stacked .rg-smeemo-motion {animation-duration:400ms;}
+.rg-smeemo-board.is-dealing .rg-smeemo-motion {animation-duration:700ms;}
+.rg-smeemo-board.is-dealing .rg-smeemo-card-inner {animation-duration:500ms;}
+.rg-smeemo-card.is-newly-revealed .rg-smeemo-card-inner {animation-duration:800ms;}
 .rg-smeemo-card.is-smeemo.is-newly-revealed .rg-smeemo-card-inner {animation-duration:1000ms;}
-.rg-smeemo-board[data-pulse] .rg-smeemo-motion {animation-duration:600ms;animation-timing-function:steps(1,end);}
-.rg-smeemo-card-inner {transition-duration:200ms;transition-timing-function:steps(2,end);}
-.rg-smeemo-card.is-available:active .rg-smeemo-card-inner {transition-duration:100ms;transition-timing-function:steps(1,end);}
-.rg-smeemo-card.is-newly-revealed::before,.rg-smeemo-card.is-newly-revealed::after,.rg-smeemo-winner.is-newly-won {animation-timing-function:steps(2,end);}
+.rg-smeemo-board[data-pulse] .rg-smeemo-motion {animation-duration:600ms;}
+.rg-smeemo-card-inner {transition-duration:200ms;}
+.rg-smeemo-card.is-available:active .rg-smeemo-card-inner {transition-duration:100ms;}
 @media(prefers-reduced-motion:reduce) {
  .rg-smeemo-apparitions {display:none;}
  .rg-smeemo-fog::before {animation:none;}

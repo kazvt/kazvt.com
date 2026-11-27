@@ -340,14 +340,10 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
   }
 
   // The stable outer button owns hit testing; only its visual carrier tilts.
-  function bindCardTilt(button, frameMs = 0) {
-    let lastTilt = -Infinity;
-    const reset = () => { lastTilt=-Infinity; button.style.removeProperty("--tilt-x"); button.style.removeProperty("--tilt-y"); };
+  function bindCardTilt(button) {
+    const reset = () => { button.style.removeProperty("--tilt-x"); button.style.removeProperty("--tilt-y"); };
     button.addEventListener("pointermove", event => {
       if (reducedMotion.matches || event.pointerType === "touch" || event.buttons || button.disabled) return reset();
-      const now = performance.now();
-      if (now-lastTilt<frameMs) return;
-      lastTilt=now;
       const rect = button.getBoundingClientRect();
       if (!rect.width || !rect.height) return;
       const x = Math.max(-1, Math.min(1, (event.clientX - rect.left) / rect.width * 2 - 1));
@@ -745,12 +741,12 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
         const button = element("button", "rg-smeemo-card");
         button.type = "button";
         button.dataset.foley = "off";
-        bindCardTilt(button,100);
+        bindCardTilt(button);
         button.style.setProperty("--blood-stain",stainUrl(stains.get(card.id)));
         button.style.setProperty("--card-index", String(index));
-        button.style.setProperty("--stack-delay", `${Math.round(index * .38)*100}ms`);
-        button.style.setProperty("--deal-delay", `${Math.round(index * .54)*100}ms`);
-        button.style.setProperty("--flip-delay", `${Math.round(index * .48+.9)*100}ms`);
+        button.style.setProperty("--stack-delay", `${index * 38}ms`);
+        button.style.setProperty("--deal-delay", `${index * 54}ms`);
+        button.style.setProperty("--flip-delay", `${index * 48 + 90}ms`);
         button.style.setProperty("--home-rotation", `${((index % 3) - 1) * 1.4}deg`);
         button.style.setProperty("--stack-column", String(4-index));
         button.style.setProperty("--stack-grid-column", String(1-index%3));
@@ -833,7 +829,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       }
       const origin = view.cards.get(fresh.at(-1).id)?.index ?? 4;
       for (const {button,index} of view.cards.values()) {
-        button.style.setProperty("--impact-delay", `${Math.round(Math.abs(index-origin)*.24)*100}ms`);
+        button.style.setProperty("--impact-delay", `${Math.abs(index-origin)*24}ms`);
         button.style.setProperty("--impact-direction", index < origin ? "-1" : "1");
       }
       view.pulse++;

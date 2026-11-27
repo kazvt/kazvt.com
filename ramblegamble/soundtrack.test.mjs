@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import { createSoundtrack, soundtrackFor, SOUNDTRACK_FILES } from './soundtrack.mjs';
+import { createSmeemoTableSession } from './smeemo-reveal.mjs';
+import { createSmeemoGame, advanceSmeemoPhase, drawSmeemoCard } from './card-games.mjs';
 
 const mode = (view, cardMode, extra={}) => soundtrackFor({active:true,muted:false,dice:false,view,cardMode,...extra});
 const flush = async () => { await Promise.resolve(); await Promise.resolve(); };
@@ -193,4 +195,22 @@ test('spatial fade smoothing is time-based and effectively identical at 30 and 6
   }
   const thirty=await run(30),sixty=await run(60);
   assert.ok(Math.abs(thirty-sixty)<1e-9,`${thirty} vs ${sixty}`);
+});
+
+test('real winning draw keeps the same looping horror source and playhead until room exit',async()=>{
+ const f=fixture(),session=createSmeemoTableSession(),handlers={},tracks=[];
+ const c={encounter:{phase:'hidden'},smeemoTable:session,soundtrack:f.mixer,cardMusicMode:'',currentView:{kind:'card-table'},cameraDetached:false,sceneReady:true,diceModeOpen:false,gameStarted:true,pauseMenuOpen:false,result:{hidden:true},window:{addEventListener:(name,fn)=>handlers[name]=fn,dispatchEvent(){}},Event,resetEncounter(){},syncMusic(){const t=mode(c.currentView.kind,c.cardMusicMode,{smeemoTable:session.active,detached:c.cameraDetached});tracks.push(t);f.mixer.sync(t);},transitionToView(view){c.currentView=view;c.syncMusic();}};
+ runInNewContext(section('  function activateCardGameMode(mode) {','  goButton.addEventListener'),c);
+ let g=createSmeemoGame(()=>.23);
+ const observe=opened=>handlers['rg:smeemo-round-state']({detail:{id:g.id,status:g.status,mode:'smeemo',opened}});
+ observe(true);handlers['rg:card-game-active']({detail:{mode:'smeemo'}});await flush();f.advance(300);c.syncMusic();
+ for(const phase of ['preview','stacking','stacked','dealing']){g=advanceSmeemoPhase(g,phase);observe(false);}
+ g=drawSmeemoCard(g,g.cards.find(x=>!x.smeemo).id).game;observe(false);
+ f.media.currentTime=25.75;const before=f.log.length;
+ g=drawSmeemoCard(g,g.cards.find(x=>x.smeemo).id).game;assert.equal(g.status,'complete');observe(false);
+ for(let i=0;i<120;i++)c.syncMusic();assert.equal(session.active,true);assert.equal(f.media.currentTime,25.75);assert.equal(f.log.length,before,'no pause, reload, or replay at the winning reveal');assert.equal(tracks.at(-1),'smeemo');
+ c.cameraDetached=true;c.syncMusic();assert.equal(tracks.at(-1),'general');c.cameraDetached=false;c.syncMusic();assert.equal(tracks.at(-1),'smeemo');assert.equal(f.media.currentTime,25.75);
+ handlers['rg:close-card-games']();assert.equal(tracks.at(-1),'general');assert.equal(session.active,false);
+ observe(false);assert.equal(session.active,false);assert.equal(tracks.at(-1),'general');
+ c.currentView={kind:'card-table'};c.syncMusic();assert.equal(tracks.at(-1),'cards');
 });

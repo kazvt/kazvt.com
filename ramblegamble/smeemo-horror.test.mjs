@@ -31,10 +31,17 @@ test('production lightning palette stays red and quantized painting cannot excee
  c.trigger({kind:'win',count:5});for(time=10;time<1300;time+=10){const fn=callback;callback=null;fn?.(time);}
  assert.ok(paints.length>=10);assert.ok(paints.every((v,i)=>i===0||Math.floor(v/100)>Math.floor(paints[i-1]/100)));c.stop();
 });
-test('card motion durations and stagger are on the tenth-second grid',()=>{
+test('card poses and hover interpolate normally while ambient effects stay sampled',()=>{
  const css=readFileSync(new URL('./card-games.css',import.meta.url),'utf8');const ui=readFileSync(new URL('./card-games-ui.js',import.meta.url),'utf8');
- for(const name of ['arrive','stack','deal','flip-down','turn','win-turn','wave-a','wave-b'])assert.match(css,new RegExp('@keyframes rg-smeemo-'+name+' \\{[^\\n]*animation-timing-function:steps'));
- assert.match(ui,/bindCardTilt\(button,100\)/);assert.match(ui,/cardStains\(game.id, game.cards.map\(c=>c.id\)\)/);
+ for(const name of ['arrive','stack','stack-settle','deal','flip-down','turn','win-turn','wave-a','wave-b']){
+  const rule=css.split(`@keyframes rg-smeemo-${name} {`)[1]?.split('\n')[0];assert.ok(rule,name);assert.doesNotMatch(rule,/steps\(/,name);
+ }
+ for(const rule of css.matchAll(/([^{}]+)\{([^{}]+)\}/g))if(/rg-smeemo-(?:motion|card-inner|winner|card\.is-newly-revealed)/.test(rule[1]))assert.doesNotMatch(rule[2],/steps\(/);
+ assert.match(ui,/bindCardTilt\(button\)/);assert.doesNotMatch(ui,/bindCardTilt\(button,|now-lastTilt/);
+ assert.match(ui,/cardStains\(game.id, game.cards.map\(c=>c.id\)\)/);
+ assert.match(css,/\.rg-smeemo-fog::before[^}]*steps\(/);assert.match(ui,/frameMs:100/);
+ // The maximum last-card animation still fits before the next phase unlocks.
+ assert.ok(600+8*38<1650);assert.ok(700+8*38<1100);assert.ok(400<780);assert.ok(700+8*54<1230);assert.ok(500+8*48+90<1230);assert.ok(600+8*24<850);
 });
 
 test('Scramble resolution budget scales only WebGL pixels and restores normal DPR on exit',()=>{
