@@ -122,5 +122,5 @@ export function createStageShow(THREE,scene,{slotRig,slotsModel,roots,foley,onEm
   }
   function dispose(){reset(false);scene.remove(group);const geometries=new Set(),materials=new Set();group.traverse(o=>{if(o.geometry)geometries.add(o.geometry);if(o.material)materials.add(o.material);if(o.isInstancedMesh)o.dispose?.();});for(const g of geometries)g.dispose();for(const m of materials)m.dispose();texture.dispose();}
   reset(false);
-  return {group,curtains:curtains.map(c=>c.mesh),slot,toggle,dismiss,silent,reset,update,dispose,brightnessAt,get busy(){return state.busy;},get silentActive(){return state.owner==='silent';},get manual(){return state.owner==='manual';},get target(){return lightTarget;}};
+  return {group,curtains:curtains.map(c=>c.mesh),slot,toggle,dismiss,silent,reset,update,dispose,brightnessAt,get travel(){return lastTravel;},get busy(){return state.busy;},get silentActive(){return state.owner==='silent';},get manual(){return state.owner==='manual';},get target(){return lightTarget;}};
 }

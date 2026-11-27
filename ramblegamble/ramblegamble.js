@@ -1,3 +1,4 @@
+import { createSlotMarquee } from "./slot-marquee.mjs?v=slot-marquee-20261128-v1";
 import { createSmeemoEncounter, createSmeemoStinger, createSmeemoTableSession, SMEEMO_RETURN_MS } from "./smeemo-reveal.mjs?v=music-sync-20261127-v1";
 import { createFloatingSky } from "./floating-sky.mjs?v=sky-variety-20261127-v1";
 import { createStageDance, createDanceClock, dancePose } from "./stage-dance.mjs?v=music-sync-20261127-v1";
@@ -8,7 +9,7 @@ import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcon
 import { createSignGlow } from "./sign-glow.mjs?v=neon-focus-20261127-v1";
 import { selectedCharacterId, characterRenderPose, createCharacterSelection } from "./character-selection.mjs?v=stage-dance-20261127-v1";
 import { sampleVipAmbience } from "./vip-atmosphere.mjs?v=sky-soot-20261127-v1";
-import { createStageShow } from "./stage-show.mjs?v=smeemo-reveal-20261127-v1";
+import { createStageShow } from "./stage-show.mjs?v=slot-marquee-20261128-v1";
 import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state.mjs?v=all-curtain-20261127-v1";
 import { createCharacterOcclusion } from "./character-occlusion.mjs?v=stage-dance-20261127-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
@@ -134,7 +135,7 @@ import {
     label: "Lillie - Host",
     source: "https://reactive.fugi.tech/basic/185073584211755008",
   };
-  let audience, showFX, stageShow, signGlow, characterSelection, stageDance;
+  let audience, showFX, stageShow, signGlow, characterSelection, stageDance, slotMarquee;
   const danceClock=createDanceClock();
   let danceTime=NaN;
   let characterSelectedAt=-Infinity;
@@ -297,7 +298,7 @@ import {
   window.addEventListener("storage", event => {
     if (event.key === "ramblegamble.foley.muted.v1" || event.key === null) syncMusic();
   });
-  new MutationObserver(() => { syncMusic(); if (document.documentElement.hasAttribute("data-rg-host-locked")) { resetEncounter(); floatingSky?.suspend(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-rg-host-locked"] });
+  new MutationObserver(() => { syncMusic(); if (document.documentElement.hasAttribute("data-rg-host-locked")) { resetEncounter(); floatingSky?.suspend(); slotMarquee?.suspend(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-rg-host-locked"] });
   const triviaLayer = document.getElementById("rg-live-trivia");
   let skyRandomState = 0x4b415a56;
 
@@ -2265,6 +2266,7 @@ import {
 
   function setMenuSceneVisibility(visible) {
     if (!visible) floatingSky?.suspend();
+    if (!visible) slotMarquee?.suspend();
     for (const object of [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group, stageShow?.group, characterSelection?.group]) {
       if (object) object.visible = visible;
     }
@@ -2601,6 +2603,7 @@ import {
     updateLiquidPortal();
     if (open) {
       floatingSky?.suspend();
+      slotMarquee?.suspend();
       rouletteCabinetFX?.reset();
       focusDrag.clearHover(); lastScenePointer = null; stopRouletteSettlement();
       diceModeVisibility = [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group, stageShow?.group, characterSelection?.group]
@@ -2942,6 +2945,7 @@ import {
 
     const roomVisible=gameStarted&&sceneReady&&!pauseMenuOpen&&!document.hidden&&!document.documentElement.hasAttribute("data-rg-host-locked");
     stageShow?.update(time,roomVisible&&!diceModeOpen,currentView.kind==="slot");
+    slotMarquee?.update(time,roomVisible&&!diceModeOpen&&Boolean(slotsModel?.visible),currentView.kind==="slot"&&(stageShow?.travel??1)>.02);
     if(roomVisible){if(crowdLastFrame!==null)crowdClock+=Math.max(0,Math.min(250,time-crowdLastFrame));crowdLastFrame=time;}else crowdLastFrame=null;
     const emotion=encounter.quiet?"idle":crowdState.step(crowdClock); updateCrowdStatus();
     if(audience)audience.group.visible=roomVisible&&!diceModeOpen;
@@ -3146,6 +3150,8 @@ import {
       createSlotPlacementControls();
       setupPicking();
       captureSlotFocusPoints();
+      try { slotMarquee=createSlotMarquee(THREE,slotsModel); }
+      catch(error){console.warn("Slot marquee unavailable",error); }
       try { audience=createAudienceRenderer(THREE,scene); audience.group.visible=!pauseMenuOpen; }
       catch(error){scene.getObjectByName("rg-audience")?.removeFromParent(); console.warn("Audience presentation unavailable",error);}
       try { rouletteCabinetFX=createRouletteCabinetFX(THREE,rouletteRig,rouletteModel,{foley}); }
@@ -3189,6 +3195,7 @@ import {
     if (document.hidden) {
       floatingSky?.suspend();
       resetEncounter();
+      slotMarquee?.suspend();
       characterSelection?.hide();
       slotCabinetFX?.reset();
       rouletteCabinetFX?.reset();
@@ -3226,6 +3233,7 @@ import {
       soundtrack.sync(null);
       menuPresentation.setPageSuspended(true);
       floatingSky?.suspend();
+      slotMarquee?.suspend();
       liquidPortal?.setActive(false);
       slotCabinetFX?.reset();
       rouletteCabinetFX?.reset();
@@ -3237,6 +3245,7 @@ import {
     liquidPortal?.dispose();
     exteriorMist?.dispose();
     floatingSky?.dispose();
+    slotMarquee?.dispose();
     menuPresentation.dispose();
     soundtrack.dispose();
     stageDance?.dispose();
