@@ -43,14 +43,36 @@ export function paintMenuSign(out,elapsed){
 }
 
 // One lifecycle for the opening clip, CSS fallback and live neon idle. This is
-// independent of WebGL readiness, and never loops the recorded intro audio.
-export function createMenuMarquee({menu,video,plate,glow,controls,doc=document,win=window}){
+// independent of WebGL readiness. The recorded intro plays once, then the
+// separate menu theme loops until the menu closes.
+export function createMenuMarquee({menu,video,theme,plate,glow,controls,doc=document,win=window}){
   let phase='closed', elapsed=0,last=null,frame=0,active=false,unavailable=Boolean(video.error)||video.networkState===3,attempt=0,disposed=false,painted=false,pageSuspended=false;
   glow.width=W;glow.height=H;
   let ctx=null,image=null;
   try{ctx=glow.getContext('2d');image=ctx?.createImageData(W,H);}catch{}
   const clear=()=>{if(painted){ctx?.clearRect(0,0,W,H);painted=false;}};
   const allowed=()=>!pageSuspended&&!menu.hidden&&!doc.hidden&&!doc.documentElement.hasAttribute('data-rg-host-locked')&&!controls.open;
+  // One menu music voice, never audible alongside the opening video. A play
+  // rejection is retried only on a trusted gesture or a fresh activation.
+  let themeRequested=false,themeBlocked=false,themeFailed=Boolean(theme.error),themeEpoch=0;
+  theme.loop=true;theme.volume=.20;
+  function stopTheme(reset=false){
+    ++themeEpoch;themeRequested=false;themeBlocked=false;theme.pause();
+    if(reset)try{theme.currentTime=0;}catch{}
+  }
+  function themeError(){themeFailed=true;stopTheme();}
+  function syncTheme(retry=false){
+    if(disposed||!active||!allowed()||!['handoff','settled'].includes(phase)||themeFailed)return;
+    if(retry){themeBlocked=false;if(themeRequested&&theme.paused)themeRequested=false;}
+    if(themeRequested||themeBlocked)return;
+    themeRequested=true;const ticket=++themeEpoch;
+    const rejected=error=>{
+      if(ticket!==themeEpoch||disposed)return;
+      themeRequested=false;themeBlocked=true;
+      if(error?.name==='NotSupportedError')themeFailed=true;
+    };
+    try{Promise.resolve(theme.play()).catch(rejected);}catch(error){rejected(error);}
+  }
   const resetVideo=()=>{++attempt;video.pause();try{video.currentTime=0;}catch{}};
   function setPhase(next){
     phase=next;elapsed=0;last=null;clear();menu.dataset.marqueePhase=next;
@@ -59,8 +81,8 @@ export function createMenuMarquee({menu,video,plate,glow,controls,doc=document,w
     plate.style.opacity=next==='handoff'?'0':'';
     glow.style.opacity=next==='settled'?'0':'1';
   }
-  function settle(){++attempt;video.pause();setPhase('settled');}
-  function handoff(){++attempt;video.pause();setPhase('handoff');}
+  function settle(){++attempt;video.pause();setPhase('settled');syncTheme();}
+  function handoff(){++attempt;video.pause();setPhase('handoff');syncTheme();}
   function fallback(){++attempt;video.pause();setPhase('fallback');}
   function failed(){unavailable=true;if(phase==='video')fallback();else if(phase==='handoff')settle();}
   function play(){
@@ -95,18 +117,18 @@ export function createMenuMarquee({menu,video,plate,glow,controls,doc=document,w
   function sync(){
     if(disposed)return;
     video.preload='auto';
-    if(menu.hidden){if(phase!=='closed'){resetVideo();setPhase('closed');}}
+    if(menu.hidden){if(phase!=='closed'){stopTheme(true);resetVideo();setPhase('closed');}}
     const wasActive=active;active=allowed();menu.dataset.menuActive=String(active);
     if(!active){
       if(frame)win.cancelAnimationFrame(frame);frame=0;last=null;clear();
-      if(wasActive){++attempt;video.pause();}
+      if(wasActive){++attempt;video.pause();stopTheme();}
       return;
     }
     if(phase==='closed'){
       if(unavailable)fallback();
       else{resetVideo();setPhase('video');play();}
     }else if(active&&!wasActive&&phase==='video'){if(video.ended)handoff();else play();}
-    schedule();
+    syncTheme();schedule();
   }
   function ended(){if(phase==='video'&&video.ended){handoff();schedule();}}
   function matte(){
@@ -119,8 +141,9 @@ export function createMenuMarquee({menu,video,plate,glow,controls,doc=document,w
   observer.observe(doc.documentElement,{attributes:true,attributeFilter:['data-rg-host-locked']});
   observer.observe(controls,{attributes:true,attributeFilter:['open']});
   video.addEventListener('ended',ended);video.addEventListener('error',failed);video.addEventListener('loadeddata',matte);
+  theme.addEventListener('error',themeError);
   doc.addEventListener('visibilitychange',sync);
   video.volume=Math.max(0,Math.min(1,video.volume*.2));
   setPhase('closed');sync();
-  return {sync,setPageSuspended(value){pageSuspended=Boolean(value);sync();},dispose(){disposed=true;observer.disconnect();if(frame)win.cancelAnimationFrame(frame);resetVideo();setPhase('closed');video.removeEventListener('ended',ended);video.removeEventListener('error',failed);video.removeEventListener('loadeddata',matte);doc.removeEventListener('visibilitychange',sync);}};
+  return {sync,retryTheme(){syncTheme(true);},setPageSuspended(value){pageSuspended=Boolean(value);sync();},dispose(){disposed=true;observer.disconnect();if(frame)win.cancelAnimationFrame(frame);stopTheme(true);theme.removeEventListener('error',themeError);resetVideo();setPhase('closed');video.removeEventListener('ended',ended);video.removeEventListener('error',failed);video.removeEventListener('loadeddata',matte);doc.removeEventListener('visibilitychange',sync);}};
 }

@@ -20,14 +20,15 @@ test('menu uses the stage mask and same letter and bulb envelopes with a genuine
  assert.equal(paintMenuSign(out,5000),false);assert.ok(out.every(x=>x===0));
  for(const t of [75,450,1950,3100,4400,7000]){paintMenuSign(out,t);const copy=out.slice();paintMenuSign(out,t+10000);assert.deepEqual(out,copy);}
 });
-function fixture({videoError=false,playResult=()=>Promise.resolve()}={}){
+function fixture({videoError=false,playResult=()=>Promise.resolve(),themeResult=()=>Promise.resolve()}={}){
  class El extends EventTarget{hidden=false;dataset={};attributes={};style={};setAttribute(k,v){this.attributes[k]=v;}}
  const menu=new El();menu.hidden=true;const video=new El();Object.assign(video,{volume:1,currentTime:0,ended:false,readyState:0,networkState:videoError?3:1,paused:true,plays:0,play(){this.plays++;this.paused=false;return playResult();},pause(){this.paused=true;}});
+ const theme=new El();Object.assign(theme,{volume:1,currentTime:0,paused:true,plays:0,play(){this.plays++;this.paused=false;return themeResult();},pause(){this.paused=true;}});
  const plate=new El(),glow=new El(),controls=new El(),doc=new El();doc.documentElement={hasAttribute:()=>doc.locked};
  let paints=0,clears=0;glow.getContext=()=>({createImageData:()=>({data:bytes()}),putImageData(){paints++;},clearRect(){clears++;}});
  let cb=new Map(),counter=0,time=0;const win={MutationObserver:class{observe(){}disconnect(){}},requestAnimationFrame(fn){cb.set(++counter,fn);return counter;},cancelAnimationFrame(id){cb.delete(id);}};
- const fx=createMenuMarquee({menu,video,plate,glow,controls,doc,win});
- return {menu,video,plate,glow,controls,doc,fx,get pending(){return cb.size;},get paints(){return paints;},get clears(){return clears;},get phase(){return menu.dataset.marqueePhase;},open(){menu.hidden=false;fx.sync();},close(){menu.hidden=true;fx.sync();},end(){video.ended=true;video.dispatchEvent(new Event('ended'));},step(ms){for(let t=0;t<ms;t+=50){time+=Math.min(50,ms-t);const callbacks=[...cb.values()];cb.clear();for(const fn of callbacks)fn(time);}}};
+ const fx=createMenuMarquee({menu,video,theme,plate,glow,controls,doc,win});
+ return {menu,video,theme,plate,glow,controls,doc,fx,get pending(){return cb.size;},get paints(){return paints;},get clears(){return clears;},get phase(){return menu.dataset.marqueePhase;},open(){menu.hidden=false;fx.sync();},close(){menu.hidden=true;fx.sync();},end(){video.ended=true;video.dispatchEvent(new Event('ended'));},step(ms){for(let t=0;t<ms;t+=50){time+=Math.min(50,ms-t);const callbacks=[...cb.values()];cb.clear();for(const fn of callbacks)fn(time);}}};
 }
 test('intro plays once, then live light repeats without replaying the video; close and reopen resets',()=>{
  const f=fixture();assert.equal(f.phase,'closed');assert.equal(f.video.volume,.2);f.open();assert.equal(f.phase,'video');assert.equal(f.video.plays,1);assert.equal(f.plate.hidden,true);
@@ -92,4 +93,41 @@ test('persisted page suspension pauses both frames and media, then resumes the s
  f.fx.setPageSuspended(true);assert.equal(f.video.paused,true);assert.equal(f.pending,0);assert.equal(f.phase,'video');
  f.step(5000);f.fx.sync();assert.equal(f.pending,0);f.fx.setPageSuspended(false);
  assert.equal(f.video.currentTime,.4);assert.equal(f.video.paused,false);assert.equal(f.pending,1);assert.equal(f.video.plays,2);f.fx.dispose();
+});
+
+test('menu theme waits for full intro, loops throughout idle, and stops and rewinds on Play',()=>{
+ const f=fixture();assert.equal(f.theme.plays,0);assert.equal(f.theme.loop,true);assert.equal(f.theme.volume,.2);
+ f.open();f.step(4000);assert.equal(f.theme.plays,0);f.fx.retryTheme();assert.equal(f.theme.plays,0);
+ f.end();assert.equal(f.video.paused,true);assert.equal(f.theme.paused,false);assert.equal(f.theme.plays,1);
+ f.step(12000);f.fx.sync();assert.equal(f.theme.plays,1);f.theme.currentTime=42;
+ f.close();assert.equal(f.theme.paused,true);assert.equal(f.theme.currentTime,0);
+ f.video.ended=false;f.open();assert.equal(f.theme.plays,1);f.end();assert.equal(f.theme.plays,2);
+ f.fx.dispose();assert.equal(f.theme.paused,true);assert.equal(f.theme.currentTime,0);
+});
+test('theme suspends and resumes at same position for lock, tab, controls and page cache',()=>{
+ const f=fixture();f.open();f.end();f.theme.currentTime=23;
+ for(const [obj,key] of [[f.doc,'hidden'],[f.doc,'locked'],[f.controls,'open']]){
+  obj[key]=true;f.fx.sync();assert.equal(f.theme.paused,true);f.fx.retryTheme();assert.equal(f.theme.paused,true);
+  obj[key]=false;f.fx.sync();assert.equal(f.theme.paused,false);assert.equal(f.theme.currentTime,23);
+ }
+ f.fx.setPageSuspended(true);assert.equal(f.theme.paused,true);f.fx.setPageSuspended(false);assert.equal(f.theme.paused,false);assert.equal(f.theme.currentTime,23);f.fx.dispose();
+});
+test('fallback sign starts theme once, missing theme does not affect the menu',()=>{
+ const f=fixture({videoError:true});f.open();assert.equal(f.theme.plays,0);f.step(2300);assert.equal(f.phase,'settled');assert.equal(f.theme.plays,1);
+ f.theme.dispatchEvent(new Event('error'));assert.equal(f.theme.paused,true);f.fx.retryTheme();f.step(3000);assert.equal(f.theme.plays,1);assert.ok(f.paints>0);f.fx.dispose();
+});
+test('blocked theme can retry and stale rejection cannot stop a fresh menu',async()=>{
+ let reject,count=0;const f=fixture({themeResult:()=>{count++;if(count===1)return Promise.reject(Error('autoplay'));if(count===2)return new Promise((_,r)=>reject=r);return Promise.resolve();}});
+ f.open();f.end();await Promise.resolve();f.fx.sync();assert.equal(f.theme.plays,1);f.theme.paused=true;f.fx.retryTheme();assert.equal(f.theme.plays,2);
+ f.close();f.video.ended=false;f.open();f.end();reject(Error('old play'));await Promise.resolve();f.fx.sync();assert.equal(f.theme.plays,3);assert.equal(f.theme.paused,false);f.fx.dispose();
+});
+test('late intro end while closed or hidden never starts the menu theme early',()=>{
+ const f=fixture();f.open();f.close();f.end();assert.equal(f.theme.plays,0);f.video.ended=false;f.open();f.doc.hidden=true;f.fx.sync();f.end();assert.equal(f.theme.plays,0);f.doc.hidden=false;f.fx.sync();assert.equal(f.theme.plays,1);f.fx.dispose();
+});
+test('actual theme asset and mute / synchronous Play handoff are wired',()=>{
+ const html=readFileSync(new URL('../rg/index.html',import.meta.url),'utf8'),js=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
+ assert.match(html,/<audio id="rg-menu-theme" src="\/ramblegamble\/assets\/music\/ramble-gamble-theme\.mp3[^"]*" preload="auto" loop hidden>/);
+ assert.ok(readFileSync(new URL('./assets/music/ramble-gamble-theme.mp3',import.meta.url)).length>1000000);
+ assert.match(js,/theme:menuTheme/);assert.match(js,/menuTheme\.muted = foley\.muted/);assert.match(js,/if \(retry\) menuPresentation\.retryTheme\(\)/);
+ assert.match(js,/function startGame\(\) \{[\s\S]*?pauseMenu\.hidden = true;[\s\S]*?menuPresentation\.sync\(\);\s*syncMusic\(true\);/);
 });
