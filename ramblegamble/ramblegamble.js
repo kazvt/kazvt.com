@@ -1,17 +1,19 @@
+import { createSignGlow } from "./sign-glow.mjs?v=neon-focus-20261127-v1";
+import { selectedCharacterId, characterRenderPose, createCharacterSelection } from "./character-selection.mjs?v=neon-focus-20261127-v1";
 import { sampleVipAmbience } from "./vip-atmosphere.mjs?v=vip-atmosphere-20261127-v1";
 import { createStageShow } from "./stage-show.mjs?v=all-curtain-20261127-v1";
 import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state.mjs?v=all-curtain-20261127-v1";
-import { createCharacterOcclusion } from "./character-occlusion.mjs?v=fugi-stable-20261127-v1";
+import { createCharacterOcclusion } from "./character-occlusion.mjs?v=neon-focus-20261127-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { createAudienceRenderer } from "./audience-render.mjs?v=crowd-left-20261127-v1";
-import { createShowFX } from "./show-fx.mjs?v=vip-atmosphere-20261127-v1";
+import { createShowFX } from "./show-fx.mjs?v=neon-focus-20261127-v1";
 import { CHARACTER_SOURCE_SIZE, CHARACTER_YAW_LIMIT, characterYaw, standingCharacterPose, projectCharacterQuad, pointInCharacterQuad } from "./character-billboards.mjs?v=fugi-stable-20261127-v1";
 import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { createExteriorMist, EXTERIOR_FLOOR } from "./exterior-mist.mjs?v=crowd-mist-20261127-v1";
 import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=standing-characters-20261127-v1";
-import { foley } from "./game-foley.mjs?v=vip-atmosphere-20261127-v1";
+import { foley } from "./game-foley.mjs?v=neon-focus-20261127-v1";
 import {
   resolvePointClickAction,
   resolvePointClickBack,
@@ -123,7 +125,8 @@ import {
     label: "Lillie - Host",
     source: "https://reactive.fugi.tech/basic/185073584211755008",
   };
-  let audience, showFX, stageShow;
+  let audience, showFX, stageShow, signGlow, characterSelection;
+  let characterSelectedAt=-Infinity;
   let crowdClock=0,crowdLastFrame=null;
   const crowdState=createAudienceState(crowdClock,readAudienceMode());
   const audienceControls=document.getElementById("rg-audience-controls");
@@ -1446,6 +1449,8 @@ import {
     if (nextView.kind !== "roulette") {stopRouletteSettlement(); showFX?.clearRoulette();}
     const viewChanged=currentView.kind!==nextView.kind||currentView.contestantId!==nextView.contestantId;
     if(stageShow?.busy&&!viewChanged&&nextView.kind==="slot"&&!immediate)return;
+    if (selectedCharacterId(nextView) && (viewChanged || cameraDetached) && !immediate) characterSelectedAt=performance.now();
+    else if (!selectedCharacterId(nextView) || immediate) characterSelectedAt=-Infinity;
     cameraDetached = false;
     preview.classList.remove("is-freecam-detached");
     const openingSlot=currentView.kind!=="slot"&&nextView.kind==="slot";
@@ -2162,9 +2167,10 @@ import {
   updateMarqueeMotionPreference();
 
   function setMenuSceneVisibility(visible) {
-    for (const object of [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group, stageShow?.group]) {
+    for (const object of [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group, stageShow?.group, characterSelection?.group]) {
       if (object) object.visible = visible;
     }
+    characterSelection?.hide();
     billboardLayer.classList.toggle("rg-billboards-fading", !visible);
   }
 
@@ -2308,14 +2314,14 @@ import {
     }
 
     if (interaction.machine === "contestant") {
-      const focused = currentView.kind === "contestant" && currentView.contestantId === interaction.contestantId;
+      const focused = !cameraDetached && currentView.kind === "contestant" && currentView.contestantId === interaction.contestantId;
       const action = resolvePointClickAction({ machine: "contestant", focused });
       if (action === "focus-contestant") transitionToView({kind:"contestant", contestantId:interaction.contestantId});
       return;
     }
 
     if (interaction.machine === "host") {
-      const action = resolvePointClickAction({ machine: "host", focused: currentView.kind === "host" });
+      const action = resolvePointClickAction({ machine: "host", focused: !cameraDetached && currentView.kind === "host" });
       if (action === "focus-host") transitionToView({ kind: "host" });
       return;
     }
@@ -2473,7 +2479,7 @@ import {
     updateLiquidPortal();
     if (open) {
       focusDrag.clearHover(); lastScenePointer = null; stopRouletteSettlement();
-      diceModeVisibility = [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group, stageShow?.group]
+      diceModeVisibility = [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group, stageShow?.group, characterSelection?.group]
         .filter(Boolean)
         .map((object) => [object, object.visible]);
       for (const [object] of diceModeVisibility) object.visible = false;
@@ -2582,7 +2588,7 @@ import {
     }
   }
 
-  function updateBillboardProjection() {
+  function updateBillboardProjection(time) {
     if (!camera || !billboardLayer || preview.clientWidth < 1 || preview.clientHeight < 1) return;
     camera.updateMatrixWorld(true);
     const viewport = {width: preview.clientWidth, height: preview.clientHeight};
@@ -2593,8 +2599,10 @@ import {
       const ndc = v.project(camera);
       return {x:ndc.x,y:ndc.y,z:ndc.z,depth};
     };
+    const selectionId = !cameraDetached && !freecam?.active ? selectedCharacterId(currentView) : null;
     for (const billboard of billboards) {
-      const quad = projectCharacterQuad(billboard,camera.position,project,viewport,camera.near);
+      billboard.renderPose=characterRenderPose(billboard,billboard.id===selectionId?time-characterSelectedAt:Infinity,reducedMotion.matches);
+      const quad = projectCharacterQuad(billboard.renderPose,camera.position,project,viewport,camera.near);
       const transform = quad && createCssProjectiveQuad(CHARACTER_SOURCE_SIZE,CHARACTER_SOURCE_SIZE,quad.corners);
       billboard.projectedQuad = transform ? quad : null;
       if (!transform) {
@@ -2618,9 +2626,11 @@ import {
       if (!characterOcclusion) throw new Error("Character depth pass unavailable");
       scene.updateMatrixWorld(true);
       characterOcclusion.update(visible,viewport,camera);
+      characterSelection?.update(visible.find(entry=>entry.id===selectionId),time,time-characterSelectedAt,reducedMotion.matches,viewport,characterOcclusion);
     } catch(error) {
       // Fail closed instead of letting a character show through walls.
       for(const entry of visible)entry.panel.style.visibility="hidden";
+      characterSelection?.hide();
       characterOcclusion?.invalidate();
       if(!warnedOcclusion){warnedOcclusion=true;console.warn("Character occlusion unavailable",error);}
     }
@@ -2720,6 +2730,8 @@ import {
     if(roomVisible){if(crowdLastFrame!==null)crowdClock+=Math.max(0,Math.min(250,time-crowdLastFrame));crowdLastFrame=time;}else crowdLastFrame=null;
     const emotion=crowdState.step(crowdClock); updateCrowdStatus();
     if(audience){audience.group.visible=roomVisible&&!diceModeOpen;audience.update(crowdClock,emotion,reducedMotion.matches);}
+    signGlow?.update(time,roomVisible&&!diceModeOpen,reducedMotion.matches);
+    if(!roomVisible||diceModeOpen)characterSelection?.hide();
     if(diceModeOpen)showFX?.update(time,{active:false});
     freecam.step(time);
     if (!freecam.active) updateCameraTransition(time);
@@ -2842,7 +2854,7 @@ import {
     }
 
     showFX?.update(time,{active:roomVisible,spinning:Boolean(wheelMotion),view:currentView,reduced:reducedMotion.matches});
-    if (sceneReady && roomVisible) updateBillboardProjection();
+    if (sceneReady && roomVisible) updateBillboardProjection(time);
     renderer.render(scene, camera);
   }
 
@@ -2867,6 +2879,7 @@ import {
 
       stageModel = stageGltf.scene;
       prepareModel(stageModel);
+      try {signGlow=createSignGlow(THREE,stageModel);} catch(error){console.warn("Sign animation unavailable",error);}
       stageModel.visible = !pauseMenuOpen;
       scene.add(stageModel);
       carveDiceDoorway(stageModel);
@@ -2911,6 +2924,7 @@ import {
       overviewCameraBounds = getArcadeBounds();
       try { stageShow=createStageShow(THREE,scene,{slotRig,slotsModel,roots:[stageModel,rouletteModel,slotsModel,audience?.group],foley,onEmotion:emotion=>crowdState.react(emotion,crowdClock),reduced:()=>reducedMotion.matches});stageShow.group.visible=!pauseMenuOpen; }
       catch(error){scene.getObjectByName("rg-stage-theatre")?.removeFromParent();slotsModel.visible=true;console.warn("Stage theatre unavailable",error);}
+      characterSelection=createCharacterSelection(THREE,scene,billboardLayer);
       try {characterOcclusion=createCharacterOcclusion(THREE,renderer,[stageModel,rouletteModel,slotsModel,stageShow?.group],billboards);}
       catch(error){console.warn("Character depth pass unavailable",error);}
       fitCamera();
@@ -2955,7 +2969,7 @@ import {
     resizeObserver?.disconnect();
     liquidPortal?.dispose();
     exteriorMist?.dispose();
-    characterOcclusion?.dispose(); audience?.dispose(); showFX?.dispose(); stageShow?.dispose();
+    characterOcclusion?.dispose(); characterSelection?.dispose(); signGlow?.dispose(); audience?.dispose(); showFX?.dispose(); stageShow?.dispose();
     renderer?.dispose();
   }, { once: true });
 })();

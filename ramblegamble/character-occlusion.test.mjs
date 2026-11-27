@@ -66,3 +66,11 @@ test('unobstructed moving panels do not churn clip styles or create mask resourc
  for(let i=0;i<25;i++){const left=i%8,top=i%5;actor.projectedQuad.corners=[{x:left,y:top},{x:left+10,y:top},{x:left+10,y:top+9},{x:left,y:top+9}];camera.matrixWorld.elements[12]=i;mask.update([actor],view,camera);assert.equal(actor.panel.style.visibility,'visible');}
  assert.equal(renderer.reads,25);assert.equal(writes,1);assert.equal(clip,'none');mask.dispose();
 });
+
+test('a selection bounce updates the depth plane even with an unchanged camera and immutable base pose',()=>{
+ const {renderer,entries,root,camera,view}=makeFixture(),actor=entries[0];const mask=createCharacterOcclusion(THREE,renderer,[root],[actor]);
+ mask.update([actor],view,camera);const mesh=renderer.rendered.children.at(-1);assert.equal(mesh.scale.y,1);assert.equal(mesh.position.y,1);
+ actor.renderPose={anchor:{x:0,y:1.1,z:0},worldHeight:1.2,worldWidth:1/1.2};mask.update([actor],view,camera);
+ assert.equal(renderer.reads,2);assert.equal(mesh.scale.y,1.2);assert.equal(mesh.position.y,1.1);assert.equal(actor.anchor.y,1);assert.equal(actor.worldHeight,1);
+ mask.update([actor],view,camera);assert.equal(renderer.reads,2);delete actor.renderPose;mask.update([actor],view,camera);assert.equal(renderer.reads,3);assert.equal(mesh.scale.y,1);mask.dispose();
+});

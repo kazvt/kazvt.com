@@ -65,23 +65,14 @@ test('all three crowd panels blend at 70 percent opacity without writing transpa
   }finally{if(old===undefined)delete globalThis.document;else globalThis.document=old;}
 });
 
-test('portal squares stay at half opacity across views and chase animation',()=>{
-  const fx=createShowFX(THREE,new Group(),{wheel:{},slot:{},contestants:[],door:{wallX:1,minY:0,maxY:2,minZ:0,maxZ:1}});
-  const portal=fx.group.children.find(m=>m instanceof InstancedMesh&&m.count===36);
-  assert.ok(portal);
-  // Decorative light instances other than the VIP oval must not return.
-  assert.equal(fx.group.children.filter(m=>m instanceof InstancedMesh&&m!==portal&&m.visible).length,0);
-  const initial=portal.colors.slice();
-  for(const kind of ['overview','dice-door','slot'])for(const reduced of [false,true])for(const time of [0,250,1000]){
-    fx.update(time,{view:{kind},reduced});
-    assert.equal(portal.material.opacity,.5);
-    assert.equal(portal.material.transparent,true);
-    assert.equal(portal.material.depthWrite,false);
-    assert.equal(portal.material.side,THREE.FrontSide);
+test('VIP oval squares removed while portal embers and roulette effects remain',()=>{
+  const fx=createShowFX(THREE,new Group(),{wheel:{},door:{wallX:1,minY:0,maxY:2,minZ:0,maxZ:1}});
+  for(const kind of ['overview','dice-door','slot'])for(const reduced of [false,true]){
+    fx.update(250,{view:{kind},reduced});
+    assert.equal(fx.group.children.some(m=>m instanceof InstancedMesh&&m.count===36),false);
+    assert.equal(fx.group.children.find(m=>m.name==='rg-vip-embers').visible,!reduced);
   }
-  assert.notDeepEqual(portal.colors,initial);
 });
-
 
 test('roulette launch, actual-pocket impact, delayed two-wave confetti and cleanup',()=>{
  const pivot={position:new Vector(0,.4,0)},ballPos=new Vector(.8,.3,-.5),ball={getWorldPosition(v){return v.copy(ballPos);}};

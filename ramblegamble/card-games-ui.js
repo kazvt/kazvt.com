@@ -6,7 +6,7 @@ import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia, writeLiveTriviaD
 import { activeCardStage, cardStageChange } from "./card-stage-state.mjs?v=wildcard-shared-20261126-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
 import { mountCardRoom } from "./card-room-host.mjs?v=match-number-20261127-v1";
-import { foley } from "./game-foley.mjs?v=vip-atmosphere-20261127-v1";
+import { foley } from "./game-foley.mjs?v=neon-focus-20261127-v1";
 import {
   CARD_GAME_CATEGORIES,
   CARD_GAME_PLAYERS,

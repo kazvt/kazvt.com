@@ -38,7 +38,7 @@ export const FOLEY_CUES = Object.freeze({
   smeemoHit: { files: ["smeemo-hit.ogg"], fallback: ["chip-lay-1.ogg"], volume: .64, maxDuration: 1.1 },
   smeemoRumble: { files: ["smeemo-rumble.ogg"], fallback: ["die-throw-1.ogg"], volume: .32, maxDuration: 1.1 },
   smeemoWin: { files: ["smeemo-horror.mp3"], volume: .76, maxDuration: 4.2 },
-  settlement: { files: ["settlement-cheer.ogg"], fallback: ["confirmation-2.ogg", "confirmation-1.ogg", "cheer.ogg"], volume: .67, maxDuration: 1.6 },
+  settlement: { files: ["settlement-cheer-long.ogg"], fallback: ["cheer.ogg"], volume: .67, maxDuration: 7.5 },
   portal: { files: ["maximize-1.ogg"], fallback: ["card-slide-1.ogg"], volume: .36 },
   portalExit: { files: ["minimize-1.ogg"], fallback: ["card-slide-2.ogg"], volume: .32 },
   draw: { files: ["scratch-1.ogg", "scratch-2.ogg"], fallback: ["card-slide-1.ogg"], volume: .17 },

@@ -1015,3 +1015,8 @@ body.ramble-page *::after {
 .rg-character-visibility {position:absolute;inset:0;pointer-events:none;image-rendering:auto;}
 .rg-preview.is-freecam-detached :is(#rg-card-games-layer,#rg-live-trivia,#rg-slot-control-layer,#rg-result),
 .rg-preview.is-freecam-detached :is(#rg-card-games-layer,#rg-live-trivia,#rg-slot-control-layer) * {visibility:hidden!important;pointer-events:none!important;}
+
+/* Selection nameplate is a screen-space game HUD, not part of the live iframe. */
+.rg-character-tag {position:absolute;z-index:10;pointer-events:none;white-space:nowrap;transform-origin:center bottom;color:#fff5da;background:#302451;border:2px solid var(--character-accent,#ffe567);box-shadow:3px 3px 0 #211844;text-shadow:2px 2px 0 #211844;padding:3px 9px;font:900 clamp(14px,1.6vw,22px)/1.1 monospace;letter-spacing:.08em;}
+.rg-character-tag[hidden] {display:none;}
+.rg-character-tag::after {content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--character-accent,#ffe567);}

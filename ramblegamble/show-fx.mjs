@@ -28,26 +28,11 @@ export function createShowFX(THREE,scene,{wheel, wheelPivot,ball,door}) {
   let spinAt=-Infinity,wasSpinning=false;
   const sparkGeometry=new THREE.BoxGeometry(.035,.035,.035),sparkMaterial=basic(0xffe8a0);
   const sparks=new THREE.InstancedMesh(sparkGeometry,sparkMaterial,24);sparks.frustumCulled=false;group.add(sparks);sparks.visible=false;
-  const matrix=new THREE.Object3D();const lightMatrix=new THREE.Object3D();const trailCount=30;
+  const matrix=new THREE.Object3D();const trailCount=30;
   const trail=new THREE.InstancedMesh(new THREE.BoxGeometry(.038,.038,1),basic(0xffe98c,.78),trailCount);trail.frustumCulled=false;group.add(trail);trail.visible=false;
   const trailPoints=[];const direction=new THREE.Vector3(),axis=new THREE.Vector3(0,0,1);let lastTrail=-Infinity,impactAt=-Infinity,settleAt=-Infinity;const impactPos=new THREE.Vector3(),settlePos=new THREE.Vector3(),temp=new THREE.Vector3();
   // Draw a gold/pink pocket burst at the actual ball, not the computed winner index.
   function impact(time,settled=false){if(!ball)return;ball.getWorldPosition(temp);impactPos.copy(temp);impactAt=time;if(settled){settleAt=time;settlePos.copy(temp);trailPoints.length=0;}}
-  // Each set is one instanced draw call with independent chase colors, instead of a mesh per bulb.
-  function lights(geometry,positions,colors,opacity){
-    const mesh=new THREE.InstancedMesh(geometry,basic(0xffffff,opacity),positions.length);const color=new THREE.Color();
-    for(let i=0;i<positions.length;i++){lightMatrix.position.set(...positions[i]);lightMatrix.updateMatrix();mesh.setMatrixAt(i,lightMatrix.matrix);mesh.setColorAt(i,color.setHex(colors[i%colors.length]));}
-    mesh.instanceMatrix.needsUpdate=true;mesh.instanceColor.needsUpdate=true;mesh.frustumCulled=false;group.add(mesh);
-    return {mesh,colors,color,count:positions.length};
-  }
-  function chase(batch,time,reduced,rate=.004,base=.45){
-    const {mesh,colors,color,count}=batch;
-    for(let i=0;i<count;i++){const intensity=reduced?.72:base+(1-base)*(.5+.5*Math.sin(time*rate-i*.56));mesh.setColorAt(i,color.setHex(colors[i%colors.length]).multiplyScalar(intensity));}
-    mesh.instanceColor.needsUpdate=true;
-  }
-  const portal=lights(new THREE.BoxGeometry(.035,.075,.075),Array.from({length:36},(_,i)=>{const a=i/36*Math.PI*2;return [door.wallX-.07,(door.minY+door.maxY)/2+Math.sin(a)*(door.maxY-door.minY)*.48,(door.minZ+door.maxZ)/2+Math.cos(a)*(door.maxZ-door.minZ)*.49];}),[0xffffff,0xcda8ff],.5);
-  // Closed cubes should blend once, rather than layering their back faces.
-  portal.mesh.material.side=THREE.FrontSide;
   const portalParticles=createPortalParticles(THREE,group,door);
   function clearRoulette(){if(wheelPivot)wheelPivot.position.y=wheelRestY;trailPoints.length=0;trail.visible=pocket.visible=wave.visible=sparks.visible=halo.visible=outer.visible=beam.visible=winnerEcho.visible=launchWave.visible=orbit.visible=confetti.visible=false;for(const r of victoryWaves)r.visible=false;impactAt=settleAt=spinAt=-Infinity;wasSpinning=false;lastTrail=-Infinity;}
   function update(time,{active=true,spinning=false,view={},reduced=false}={}){
@@ -89,8 +74,6 @@ export function createShowFX(THREE,scene,{wheel, wheelPivot,ball,door}) {
         matrix.rotation.set(i*.47+flight*(3+i%4),a+flight*4,i*.29+flight*5);matrix.scale.setScalar(t>0&&y>floor?Math.min(1,t*13,(3300-since)/500):0);matrix.updateMatrix();confetti.setMatrixAt(i,matrix.matrix);
       }confetti.instanceMatrix.needsUpdate=true;}
     }
-    // Only the VIP oval remains as decorative scene lighting.
-    chase(portal,time,reduced,.005,view.kind==='dice-door'?.35:.72);
   }
   function dispose(){clearRoulette();const geometry=new Set(),materials=new Set();group.traverse(m=>{if(m.isInstancedMesh)m.dispose?.();if(m.geometry)geometry.add(m.geometry);if(m.material)materials.add(m.material);});for(const g of geometry)g.dispose();for(const m of materials)m.dispose();scene.remove(group);}
   return {group,impact,clearRoulette,update,dispose};
