@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Install a looped VIP cave-water recording from Wikimedia Commons.
+"""Install a looped cave-drip ambience recording from OpenGameArt.
 
-Downloads and verifies the exact CC BY-SA 3.0 source recording. Requires
-FFmpeg and FFprobe. An optional positional argument may supply the unchanged
-original FLAC file when network access is unavailable.
+Downloads and verifies the exact CC0 FLAC source. Requires FFmpeg and FFprobe.
+An optional positional argument may supply the unchanged original FLAC file
+when network access is unavailable.
 """
 import argparse
 import hashlib
@@ -15,13 +15,10 @@ import tempfile
 import urllib.request
 
 
-SOURCE_URL = (
-    'https://upload.wikimedia.org/wikipedia/commons/d/d8/'
-    'Water_drips_in_Treak_Cliff_Cavern%2C_Derbyshire.flac'
-)
-SOURCE_SHA1 = 'fbc3d8ebc3c295a6852992c3be53a20887d1af9d'
-SOURCE_DURATION = 83.6029
-MAX_SOURCE_BYTES = 12 * 1024 * 1024
+SOURCE_URL = 'https://opengameart.org/sites/default/files/atmosbasement.mp3_.flac'
+SOURCE_SHA1 = '77e17163b4bcc4c2199eeecaaa1c46ed7fa627409'
+SOURCE_DURATION = 20.063107
+MAX_SOURCE_BYTES = 4 * 1024 * 1024
 DEST = Path(__file__).resolve().parent / 'foley' / 'vip-water-drips.ogg'
 
 
@@ -47,7 +44,7 @@ def verify_source(path):
     if (len(audio) != 1 or len(info['streams']) != 1
             or audio[0]['codec_name'] != 'flac'
             or abs(length - SOURCE_DURATION) > 0.1):
-        raise ValueError('Source does not match the verified Treak Cliff Cavern FLAC')
+            raise ValueError('Source does not match the verified OpenGameArt cave-drip FLAC')
     return length
 
 
@@ -78,7 +75,7 @@ def main():
         work = Path(folder)
         source = args.source
         if source is None:
-            source = work / 'treak-cliff-water-drips.flac'
+            source = work / 'atmosbasement.mp3_.flac'
             request = urllib.request.Request(
                 SOURCE_URL,
                 headers={'User-Agent': 'RambleGambleAudioInstaller/1.0 (local game assets)'}
