@@ -1,4 +1,4 @@
-import { createFloatingSky } from "./floating-sky.mjs?v=ambient-tuning-20261127-v1";
+import { createFloatingSky } from "./floating-sky.mjs?v=sky-inertia-20261127-v1";
 import { createStageDance, createDanceClock, dancePose } from "./stage-dance.mjs?v=ambient-tuning-20261127-v1";
 import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=corrective-review-20261127-v1";
 import { createMenuMarquee } from "./menu-marquee.mjs?v=corrective-review-20261127-v1";

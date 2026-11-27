@@ -2,13 +2,14 @@
 """Offline deterministic sky bake. Requires Python, numpy, scipy, Pillow, opencv, trimesh and FFmpeg.
 No runtime models, network access or audio. Optional locally licensed GLB overrides and eye photo.
 """
-import argparse, base64, io, json, math, subprocess, tempfile
+import argparse, base64, io, json, math, subprocess, tempfile, multiprocessing as mp, os
 from pathlib import Path
 import cv2
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from scipy.spatial.transform import Rotation
 import trimesh
+from sky_physics import Body, Hull, box, compound, simulate, text_rotation
 
 HERE=Path(__file__).resolve().parent
 N=1024; FPS=20; SECONDS=20; TAU=math.tau
@@ -127,7 +128,7 @@ vein=cv2.GaussianBlur(vein,(3,3),.45)/255
 
 def eye_sprite(frame,phase,photo=None):
  # Discrete 5fps eyelid movement, not a 5Hz luminance flash.
- q=math.floor(frame/FPS*5); blink=(q+phase)%25;opening={17:.54,18:.10,19:.05,20:.56}.get(blink,1.0);irisx=.12*math.sin(TAU*(q//5)/20*3+phase);irisy=.025*math.cos(TAU*(q//5)/20*2+phase)
+ q=math.floor(frame/FPS*5); blink=(q+phase)%25;opening={17:.54,18:.10,19:.05,20:.56}.get(blink,1.0);irisx=0.;irisy=0.
  shape=np.maximum(0,1-(xx/.80)**2);center=.055*xx+.04;half=(.31*shape**.7)*opening;aperture=np.abs(yy-center)<half;rim_mask=(np.abs(yy-center)<half+.043*shape)&(np.abs(xx)<.83)
  out=orb.astype(float).copy();out[rim_mask]=np.stack([56+12*cloud,21+9*cloud,37+10*cloud],-1)[rim_mask]
  sx=(xx-irisx);sy=yy-center-irisy;ir=np.hypot(sx,sy);theta=np.arctan2(sy,sx);radius=.215;limb=np.clip((radius-ir)/.027,0,1);fibre=(np.sin(theta*83+ir*97+8*cloud)+np.sin(theta*127+ir*45)+np.sin(theta*39-20*ir))/3;inner=np.exp(-((ir-.095)/.043)**2);shade=np.clip(1-.43*(np.abs(yy-center)/(half+.001))**3,.4,1);scl=np.stack([214+12*cloud,183+17*cloud,177+18*cloud],-1)*shade[:,:,None];scl+=vein[:,:,None]*[25,-115,-100];iris=np.stack([62+39*fibre+49*inner,81+42*fibre+18*inner,83+35*fibre-15*inner],-1)*(.48+.52*limb[:,:,None]);scl[ir<radius]=iris[ir<radius];scl[ir<.083]=[7,5,9];highlight=np.exp(-((sx+.065)**2+(sy+.083)**2)/.0007)*180;scl+=highlight[:,:,None]
@@ -141,24 +142,33 @@ def text_sprite():
  for k in range(17,0,-1):d.text((13+k*.55,12+k), 'ILY LILLIE',font=font,fill=(92+k*3,53+k*2,116+k*3),stroke_width=1,stroke_fill=(62,35,91))
  d.text((13,12),'ILY LILLIE',font=font,fill='#ffe0ac',stroke_width=1,stroke_fill='#f7b4d9');return im.crop(im.getbbox())
 
-# Offline equal-mass disk collision solve in the image plane. Radius reflects
-# the maximum projected mesh bound; collisions exchange impulses, never at runtime.
-def simulate(radii,positions,velocities):
- p=np.array(positions,float);v=np.array(velocities,float);hist=[];contacts=0;dt=1/100;R=np.array(radii);low=45;high=N-45
- for step in range(1001):
-  hist.append(p.copy());p+=v*dt
-  for _ in range(2):
-   for i in range(len(p)):
-    for j in range(i):
-     diff=p[i]-p[j];dist=np.linalg.norm(diff);sep=R[i]+R[j]+3
-     if dist<sep:
-      n=diff/max(dist,.00001);p[i]+=n*(sep-dist)/2;p[j]-=n*(sep-dist)/2;rel=np.dot(v[i]-v[j],n)
-      if rel<0:v[i]-=rel*n;v[j]+=rel*n;contacts+=1
-   for i in range(len(p)):
-    for a in range(2):
-     if p[i,a]<low+R[i]:p[i,a]=low+R[i];v[i,a]=abs(v[i,a])
-     if p[i,a]>high-R[i]:p[i,a]=high-R[i];v[i,a]=-abs(v[i,a])
- return np.array(hist),contacts
+# Spin the shell texture in 3D, while the eye aperture faces the viewer below.
+def orb_frame(rot,eye):
+ local=np.stack([xx,-yy,zz],-1)@rot
+ x,y,z=np.moveaxis(local,-1,0)
+ marble2=np.sin(20*x+13*y+8*z+7*np.sin(4*x+3*z)*np.cos(5*y-2*z))
+ veins=np.exp(-((np.sin(11*x-7*y+4*z+2*np.sin(z*8)))/.15)**2)*5
+ shell=np.clip(orb.astype(float)+(marble2-marble)[:,:,None]*[5,4,9]+veins[:,:,None]*[.6,.35,1.2],0,255)
+ shape=np.maximum(0,1-(xx/.83)**2);center=.055*xx+.04
+ mask=np.clip((.31*shape**.7+.065-np.abs(yy-center))*55,0,1)*np.clip((.85-np.abs(xx))*55,0,1)
+ out=np.asarray(eye);shell=shell*(1-mask[:,:,None])+out[:,:,:3]*mask[:,:,None]
+ return np.dstack([np.uint8(shell),out[:,:,3]])
+
+def sprite_depth(canvas,depth,sprite,x,y,r,z):
+ im=cv2.resize(sprite,(2*r,2*r),interpolation=cv2.INTER_AREA);d=cv2.resize(zz,(2*r,2*r),interpolation=cv2.INTER_LINEAR)*r+z
+ left=round(x-r);top=round(y-r);a=max(0,left);b=max(0,top);c=min(N,left+2*r);e=min(N,top+2*r)
+ if a>=c or b>=e:return
+ im=im[b-top:e-top,a-left:c-left];d=d[b-top:e-top,a-left:c-left];ds=depth[b:e,a:c];m=(im[:,:,3]>0)&(d>ds);canvas[b:e,a:c][m]=im[m];ds[m]=d[m]
+
+def text_mesh(im):
+ h=im.height/im.width;v=np.array([[-1,-h,.025],[1,-h,.025],[1,h,.025],[-1,h,.025]])
+ ix=np.array([[0,1,2],[0,2,3]]);uv=np.array([[0,1],[1-1e-6,1],[1-1e-6,0],[0,0]],float);uv[:,1]=np.minimum(uv[:,1],1-1e-6)
+ return [(v[ix],np.ones((2,3))*255,uv[ix],np.asarray(im))]
+
+def crossfade(a,b,t):
+ aa=a[:,:,3:4].astype(np.float32)/255;ba=b[:,:,3:4].astype(np.float32)/255;alpha=aa*(1-t)+ba*t
+ color=(a[:,:,:3]*aa*(1-t)+b[:,:,:3]*ba*t)/np.maximum(alpha,1e-6)
+ return np.uint8(np.clip(np.concatenate([color,alpha*255],-1)+.5,0,255))
 
 def raster_triangle(canvas,depth,points,z,color,uv,tex,shade):
  lo=np.maximum(0,np.floor(points.min(0)).astype(int));hi=np.minimum(N,np.ceil(points.max(0)).astype(int)+1);w,h=hi-lo
@@ -174,12 +184,16 @@ def raster_triangle(canvas,depth,points,z,color,uv,tex,shade):
  else:
   iy,ix=np.nonzero(mask);weights=np.stack([t[mask],u[mask],v[mask]],axis=-1);q=weights@uv;tx=np.floor((q[:,0]%1)*tex.shape[1]).astype(int);ty=np.floor((q[:,1]%1)*tex.shape[0]).astype(int);pixels=tex[ty,tx];opaque=pixels[:,3]>25;iy=iy[opaque];ix=ix[opaque];pixels=pixels[opaque];sub[iy,ix,:3]=np.uint8(np.clip(pixels[:,:3]*shade,0,255));sub[iy,ix,3]=pixels[:,3];ds[iy,ix]=zz[iy,ix]
 
-def render_mesh(canvas,depth,parts,center,radius,rot):
+def render_mesh(canvas,depth,parts,center,radius,rot,zoffset=0):
  for verts,colors,uv,tex in parts:
   vv=verts@rot.T;normal=np.cross(vv[:,1]-vv[:,0],vv[:,2]-vv[:,0]);norm=np.linalg.norm(normal,axis=1);normal/=np.maximum(1e-9,norm[:,None]);lights=.66+.35*np.maximum(0,normal@np.array([-.38,.55,.74]));p=vv[:,:,:2]*[radius,-radius]+center
   # Back-face culling is essential for authored cards whose front and back
   # share coplanar vertices. A depth buffer removes interpenetration artefacts.
-  for i in np.flatnonzero(normal[:,2]>1e-7):raster_triangle(canvas,depth,p[i],vv[i,:,2]*radius,colors[i],None if uv is None else uv[i],tex,lights[i])
+  for i in np.flatnonzero(normal[:,2]>1e-7):raster_triangle(canvas,depth,p[i],vv[i,:,2]*radius+zoffset,colors[i],None if uv is None else uv[i],tex,lights[i])
+
+_worker_frame=None
+def bake_one(f):
+ return f,_worker_frame(f)
 
 def main():
  parser=argparse.ArgumentParser();parser.add_argument('--models',type=Path);parser.add_argument('--eye',type=Path);parser.add_argument('--output',type=Path,default=HERE);parser.add_argument('--preview-only',action='store_true');args=parser.parse_args();args.output.mkdir(parents=True,exist_ok=True)
@@ -194,36 +208,55 @@ def main():
  radii=[60,51,73,59,50,49,55,67,39,95,64,43,48,48,45,50,49]
  pos=[(180,180),(350,140),(580,220),(810,145),(210,365),(398,363),(760,370),(155,650),(410,595),(560,450),(830,650),(610,720),(330,820),(190,835),(830,855),(565,870),(102,490)]
  vel=rng.uniform(-34,34,(len(names),2));vel[0]=[27,13];vel[1]=[-27,14];vel[6]=[24,25];vel[10]=[-26,-24]
- history,contacts=simulate(radii,pos,vel);print('offline collision contacts:',contacts,flush=True)
- phases=rng.uniform(0,TAU,(len(names),3));text=text_sprite();eye_cache={}
+ text=text_sprite();assets['text']=text_mesh(text)
+ bodies=[];phases=rng.uniform(0,TAU,(len(names),3))
+ for i,(name,r) in enumerate(zip(names,radii)):
+  ang=phases[i];rot=Rotation.from_euler('xyz',[(1.12 if name.startswith('book') else -.18)+.35*math.sin(ang[0]),.55*math.sin(ang[1])+.28+(math.pi if name=='card2' else 0),.32*math.sin(ang[2])]);w=rng.uniform(-.8,.8,3)
+  if name=='orb':
+   sphere=trimesh.creation.icosphere(subdivisions=2);hulls=[Hull(sphere.vertices*r)]
+  elif name=='text':
+   alpha=np.asarray(text)[:,:,3];occupied=np.any(alpha>64,axis=0);edges=np.flatnonzero(np.diff(np.r_[False,occupied,False]));hulls=[]
+   for a,b in edges.reshape(-1,2):
+    ys=np.nonzero(alpha[:,a:b]>64)[0];scale=2*r/text.width;cx=(a+b-text.width)*scale/2;cy=(text.height-ys.min()-ys.max()-1)*scale/2
+    hulls.append(Hull(box(((b-a)*scale,(ys.max()-ys.min()+1)*scale,5),(cx,cy,0))))
+   rot=text_rotation(0);w=np.zeros(3)
+  else:hulls=compound(assets[name],r)
+  bodies.append(Body(hulls,[pos[i][0],-pos[i][1]+N,rng.uniform(-18,18)],[vel[i][0],-vel[i][1],rng.uniform(-9,9)],rot,w,r,text=name=='text'))
+ blend=FPS*2;history=simulate(bodies,SECONDS+blend/FPS,FPS);eye_cache={}
  def frame(f):
-  # Cosine time remap closes loop without a positional pop. Motion reverses smoothly.
-  t=(1-math.cos(TAU*f/(FPS*SECONDS)))*.5;idx=t*(len(history)-1);n=min(int(idx),len(history)-2);p=history[n]*(1-(idx-n))+history[n+1]*(idx-n);canvas=np.zeros((N,N,4),np.uint8)
+  p,rotations=history[f];canvas=np.zeros((N,N,4),np.uint8);depth=np.full((N,N),-np.inf,np.float32)
   for i,(name,r) in enumerate(zip(names,radii)):
-   x,y=p[i];ang=phases[i];a=TAU*f/(FPS*SECONDS);rot=Rotation.from_euler('xyz',[(1.12 if name.startswith('book') else -.18)+.35*math.sin(a+ang[0]),.55*math.sin(a+ang[1])+.28+(math.pi if name=='card2' else 0),.32*math.sin(a+ang[2])]).as_matrix()
+   if name!='orb':continue
+   x,y,z=p[i];y=N-y
+   for j in range(17):
+    u=(f/(FPS*SECONDS)*(4+j%3)+j*.618+i*.27)%1;angle=j*2.399+u*.8;d=r*(1+.52*u);px=x+math.cos(angle)*d;py=y+math.sin(angle)*d-u*r*.16;size=max(1,round(3.4*(1-u)));cv2.rectangle(canvas,(round(px)-size,round(py)-size),(round(px)+size,round(py)+size),(140+int(j%3)*25,72+int(j%3)*17,175+int(j%3)*20,int(150*math.sin(math.pi*u))),-1)
+  for i,(name,r) in enumerate(zip(names,radii)):
+   x,y,z=p[i];y=N-y;rot=rotations[i]
    if name=='orb':
-    for j in range(17):
-     u=(f/(FPS*SECONDS)*(4+j%3)+j*.618+i*.27)%1;angle=j*2.399+u*.8;d=r*(1+.52*u);px=x+math.cos(angle)*d;py=y+math.sin(angle)*d-u*r*.16;s=max(1,round(3.4*(1-u)));cv2.rectangle(canvas,(round(px)-s,round(py)-s),(round(px)+s,round(py)+s),(140+int(j%3)*25,72+int(j%3)*17,175+int(j%3)*20,int(150*math.sin(math.pi*u))),-1)
     q=int(f/FPS*5);key=(q,i)
-    if key not in eye_cache:eye_cache[key]=eye_sprite(f,i,photo).resize((2*r,2*r),Image.Resampling.LANCZOS)
-    im=Image.fromarray(canvas);im.alpha_composite(eye_cache[key],(round(x-r),round(y-r)));canvas=np.array(im)
-   elif name=='text':
-    # 3D-like extruded lettering remains readable, without flipping backwards.
-    scale=(2*r)/text.width;im=text.resize((round(text.width*scale),round(text.height*scale)),Image.Resampling.LANCZOS).rotate(9*math.sin(a+ang[0]),Image.Resampling.BICUBIC,expand=True);out=Image.fromarray(canvas);out.alpha_composite(im,(round(x-im.width/2),round(y-im.height/2)));canvas=np.array(out)
-   else:render_mesh(canvas,np.full((N,N),-np.inf,np.float32),assets[name],p[i],r,rot)
-  # Very faint film/pixel grain over opaque surfaces.
-  mask=canvas[:,:,3]==255; noise2=((np.indices((N,N))[0]*13+np.indices((N,N))[1]*17)%11-5)*.45; canvas[mask,:3]=np.uint8(np.clip(canvas[mask,:3].astype(float)+noise2[mask,None],0,255))
+    if key not in eye_cache:eye_cache[key]=eye_sprite(f,i,photo)
+    sprite_depth(canvas,depth,orb_frame(rot,eye_cache[key]),x,y,r,z)
+   else:render_mesh(canvas,depth,assets[name],np.array([x,y]),r,rot,z)
+  mask=canvas[:,:,3]==255;noise2=((np.indices((N,N))[0]*13+np.indices((N,N))[1]*17)%11-5)*.45;canvas[mask,:3]=np.uint8(np.clip(canvas[mask,:3].astype(float)+noise2[mask,None],0,255))
   return canvas
+ def loop_frame(f):
+  if f<FPS*SECONDS-blend:return frame(f+blend)
+  i=f-(FPS*SECONDS-blend);t=i/blend;t=t*t*(3-2*t)
+  return crossfade(frame(f+blend),frame(i),t)
  with tempfile.TemporaryDirectory() as tmp:
   d=Path(tmp);count=1 if args.preview_only else FPS*SECONDS
-  for f in range(count):
-   a=frame(f)
+  global _worker_frame
+  _worker_frame=loop_frame
+  pool=mp.get_context("fork").Pool(min(4,os.cpu_count() or 1)) if not args.preview_only and "fork" in mp.get_all_start_methods() else None
+  results=pool.imap(bake_one,range(count),chunksize=2) if pool else map(bake_one,range(count))
+  for f,a in results:
    if f==0:Image.fromarray(a).save(args.output/'sky-preview.png')
    if args.preview_only:break
    # Extend edge RGB by 2 pixels so subsampled chroma doesn't create black halos.
    color=a[:,:,:3].copy();mask=a[:,:,3]>0;dil=cv2.dilate(color,np.ones((5,5),np.uint8));color[~mask]=dil[~mask];a[:,:,:3]=color
    Image.fromarray(a).save(d/f'{f:04d}.png',compress_level=1)
    if f%50==0:print('frame',f,'/',count,flush=True)
+  if pool:pool.close();pool.join()
   if not args.preview_only:
    common=['ffmpeg','-hide_banner','-loglevel','error','-y','-threads','4','-framerate',str(FPS),'-i',str(d/'%04d.png')]
    # Packed matte is cross-browser; one texture, no browser-dependent native alpha.
