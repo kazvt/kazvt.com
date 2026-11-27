@@ -9,7 +9,7 @@ import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcon
 import { createSignGlow } from "./sign-glow.mjs?v=neon-focus-20261127-v1";
 import { selectedCharacterId, characterRenderPose, createCharacterSelection } from "./character-selection.mjs?v=stage-dance-20261127-v1";
 import { sampleVipAmbience } from "./vip-atmosphere.mjs?v=sky-soot-20261127-v1";
-import { createStageShow } from "./stage-show.mjs?v=slot-marquee-20261128-v1";
+import { createStageShow } from "./stage-show.mjs?v=smeemo-return-blackout-20261128-v1";
 import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state.mjs?v=all-curtain-20261127-v1";
 import { createCharacterOcclusion } from "./character-occlusion.mjs?v=stage-dance-20261127-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
@@ -1562,7 +1562,9 @@ import {
     if(nextView.kind==="smeemo-crowd"&&encounter.phase==="hidden"){
       encounter.focus();smeemoCount.textContent="0/5";preview.dataset.smeemoStep="0";stageShow?.silent(crowdCatAnchor(),performance.now());
     }
-    if(encounterReturn)stageShow?.dismiss(performance.now());
+    // Keep the whole Smeemo-to-table camera journey unlit; the table spotlight
+    // is deliberately re-armed only after updateSmeemoEncounter sees arrival.
+    if(encounterReturn)stageShow?.clearLight();
     if (nextView.kind !== "roulette") {foley.stop("roulette-rattle"); stopRouletteSettlement(); rouletteCabinetFX?.reset(); showFX?.clearRoulette();}
     const viewChanged=currentView.kind!==nextView.kind||currentView.contestantId!==nextView.contestantId;
     if(stageShow?.busy&&!viewChanged&&nextView.kind==="slot"&&!immediate)return;

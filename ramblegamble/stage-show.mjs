@@ -114,6 +114,9 @@ export function createStageShow(THREE,scene,{slotRig,slotsModel,roots,foley,onEm
   function reset(open){state.reset(open);foley.stop('stage-hit');foley.stop('stage-cheer');burst=null;confetti.visible=false;lightTarget=null;restoreLighting();for(const b of beams)b.visible=false;const s=state.step(lastTime);updateCurtains(s.curtain,s.travel,lastTime);lastPose=s.curtain;lastTravel=s.travel;}
   function toggle(point,time){lastTime=time;lightTarget=new THREE.Vector3(point.x,point.y,point.z);return state.toggle(point,time,reduced());}
   function dismiss(time){lastTime=time;return state.dismiss(time);}
+  // Hard blackout for camera travel: unlike dismiss(), this does not leave a
+  // 1.2 s spotlight tail visible while the Smeemo return teleport is underway.
+  function clearLight(){state.clearLight();lightTarget=null;burst=null;confetti.visible=false;uniforms.rgShow.value=0;for(const b of beams)b.visible=false;}
   function silent(point,time){lastTime=time;burst=null;confetti.visible=false;for(const key of ['stage-roll','stage-hit','stage-cheer'])foley.stop(key);lightTarget=new THREE.Vector3(point.x,point.y,point.z);return state.begin(point,time,'silent',reduced());}
   function brightnessAt(point){
     const strength=uniforms.rgShow.value;if(!strength)return 1;let lit=0;
@@ -122,5 +125,5 @@ export function createStageShow(THREE,scene,{slotRig,slotsModel,roots,foley,onEm
   }
   function dispose(){reset(false);scene.remove(group);const geometries=new Set(),materials=new Set();group.traverse(o=>{if(o.geometry)geometries.add(o.geometry);if(o.material)materials.add(o.material);if(o.isInstancedMesh)o.dispose?.();});for(const g of geometries)g.dispose();for(const m of materials)m.dispose();texture.dispose();}
   reset(false);
-  return {group,curtains:curtains.map(c=>c.mesh),slot,toggle,dismiss,silent,reset,update,dispose,brightnessAt,get travel(){return lastTravel;},get busy(){return state.busy;},get silentActive(){return state.owner==='silent';},get manual(){return state.owner==='manual';},get target(){return lightTarget;}};
+  return {group,curtains:curtains.map(c=>c.mesh),slot,toggle,dismiss,clearLight,silent,reset,update,dispose,brightnessAt,get travel(){return lastTravel;},get busy(){return state.busy;},get silentActive(){return state.owner==='silent';},get manual(){return state.owner==='manual';},get target(){return lightTarget;}};
 }

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { cabinetPose, createStageShowState, REVEAL_MS, RETRACT_MS, LIGHT_RELEASE_MS } from './stage-show-state.mjs';
 const point={x:10,y:1,z:-4};
+const SMEEMO_RETURN_MS_FOR_TEST=4400;
 function setup(){const events=[];return {events,s:createStageShowState({cue:x=>events.push(x)})};}
 test('curtains start first, fully open and restore exact cabinet position on reveal and hide',()=>{
  const {s,events}=setup();assert.deepEqual(cabinetPose(0),{curtain:0,travel:0});assert.deepEqual(cabinetPose(1),{curtain:1,travel:1});
@@ -24,4 +25,11 @@ test('retarget cancels old roll, keeps darkness continuous, reveals new target o
 });
 test('instant reduced motion and visibility reset do not emit late cues or leave lighting on',()=>{
  const {s,events}=setup();assert.equal(s.cabinet(true,0,true),false);assert.equal(s.step(0).travel,1);assert.equal(s.toggle(point,1,true),false);s.cabinet(false,2);s.hide(point,2);s.reset(false);const f=s.step(99999);assert.equal(f.travel,0);assert.equal(f.phase,'off');assert.equal(f.busy,false);assert.equal(events.filter(x=>x==='reveal').length,0);
+});
+
+
+test('clearLight hard-cuts a silent spotlight to full darkness with no transition tail',()=>{
+ const {s,events}=setup();s.begin(point,0,'silent');const lit=s.step(REVEAL_MS);assert.equal(lit.strength,1);assert.equal(lit.owner,'silent');
+ s.clearLight();const dark=s.step(REVEAL_MS+1);assert.equal(dark.strength,0);assert.equal(dark.phase,'off');assert.equal(dark.target,null);assert.equal(dark.owner,null);
+ const later=s.step(REVEAL_MS+SMEEMO_RETURN_MS_FOR_TEST);assert.equal(later.strength,0);assert.equal(later.phase,'off');assert.equal(events.includes('reveal'),false);
 });
