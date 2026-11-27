@@ -7,7 +7,7 @@ import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia, writeLiveTriviaD
 import { activeCardStage, cardStageChange } from "./card-stage-state.mjs?v=wildcard-shared-20261126-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
 import { mountCardRoom } from "./card-room-host.mjs?v=match-number-20261127-v1";
-import { foley } from "./game-foley.mjs?v=vip-water-gain-20261127-v3";
+import { foley } from "./game-foley.mjs?v=smeemo-storm-20261127-v1";
 import {
   CARD_GAME_CATEGORIES,
   CARD_GAME_PLAYERS,
@@ -102,10 +102,11 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     isVisible: () => !layer.classList.contains("is-off-table"),
     reduced: () => reducedMotion.matches,
     size: () => ({ width: preview.clientWidth, height: preview.clientHeight }),
-    anchor: () => {
+    anchor: event => {
       const base = preview.getBoundingClientRect();
       const board = content.querySelector(".rg-smeemo-board");
-      const card = [...content.querySelectorAll(".rg-smeemo-card.is-newly-revealed")].at(-1);
+      const draw = state.smeemo?.draws[event.count - 1];
+      const card = smeemoPresentation.cards?.get(draw?.id)?.button;
       const rect = (board || content).getBoundingClientRect();
       const focus = card?.getBoundingClientRect() || rect;
       return {x:(focus.left+focus.width/2-base.left)/Math.max(1,base.width),
@@ -700,90 +701,147 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     liveStatus.textContent = "Shop is open. Choose a berry, then a card.";
   }
 
+  // Keep the nine input targets mounted through every reveal, including the
+  // winning reveal. Only the visual carriers move; unrelated updates cannot
+  // interrupt a flip or replay an already committed card.
   function renderSmeemo(game) {
     layer.hidden = false;
     setStageTitle("SMEEMO SCRAMBLE", "smeemo");
-    content.replaceChildren();
-    const board = element("div", `rg-smeemo-board is-${game.phase}`);
-    const railViewport = element("div", "rg-smeemo-rail-viewport");
-    const rail = element("div", "rg-smeemo-rail");
+    const prior = smeemoPresentation;
     const revealIds = new Set(game.draws.map(({ id }) => id));
-    const priorReveals = smeemoPresentation.id === game.id ? smeemoPresentation.revealed : revealIds;
-    smeemoPresentation = { id: game.id, revealed: revealIds };
+    const sameRound = prior.id === game.id;
+    const fresh = sameRound && prior.draws?.every((id, i) => id === game.draws[i]?.id)
+      ? game.draws.slice(prior.draws.length) : [];
     const order = ["preview", "stacking", "stacked"].includes(game.phase)
-      ? game.previewOrder.map((id) => game.cards.find((card) => card.id === id)).filter(Boolean)
+      ? game.previewOrder.map(id => game.cards.find(card => card.id === id)).filter(Boolean)
       : game.cards;
-
-    for (const [index, card] of order.entries()) {
-      const revealed = revealIds.has(card.id);
-      const showingFront = revealed;
-      const smeemoRevealed = revealed && card.smeemo;
-      const isAvailable = game.phase === "ready" && game.status === "playing" && !revealed;
-      const button = element("button", `rg-smeemo-card${showingFront ? " is-face-up" : " is-face-down"}${revealed ? " is-revealed" : ""}${isAvailable ? " is-available" : ""}${smeemoRevealed ? " is-smeemo" : ""}`);
-      button.type = "button";
-      button.dataset.foley = "off"; // Only committed reveal emits the impact.
-      button.disabled = game.phase !== "ready" || game.status !== "playing" || revealed;
-      if (revealed && !priorReveals.has(card.id)) button.classList.add("is-newly-revealed");
-      bindCardTilt(button);
-      button.setAttribute("aria-label", showingFront
-        ? `Card ${index + 1}: ${card.smeemo ? "Smeemoberry" : "blank"}`
-        : `Reveal card ${index + 1}`);
-      button.style.setProperty("--card-index", String(index));
-      button.style.setProperty("--stack-delay", `${index * 38}ms`);
-      button.style.setProperty("--deal-delay", `${index * 54}ms`);
-      button.style.setProperty("--flip-delay", `${index * 48 + 90}ms`);
-      button.style.setProperty("--home-rotation", `${((index % 3) - 1) * 1.4}deg`);
-      const inner = element("span", "rg-smeemo-card-inner");
-      const front = element("span", `rg-smeemo-card-front${smeemoRevealed ? " is-berry" : ""}`);
-      if (smeemoRevealed) {
-        const berryMark = element("img", "rg-smeemo-berry-mark");
-        berryMark.src = "/ramblegamble/assets/berries/smeemo-card-mark.png";
-        berryMark.alt = "";
-        berryMark.setAttribute("aria-hidden", "true");
-        front.append(berryMark);
+    const reuse = sameRound && prior.board === content.children[0]
+      && prior.order?.every((id, i) => id === order[i]?.id);
+    let view = prior;
+    if (!reuse) {
+      content.replaceChildren();
+      const board = element("div", "rg-smeemo-board");
+      const railViewport = element("div", "rg-smeemo-rail-viewport");
+      const rail = element("div", "rg-smeemo-rail");
+      const status = element("p", "rg-card-round-status rg-smeemo-status");
+      const progress = element("div", "rg-smeemo-progress");
+      progress.setAttribute("aria-hidden", "true");
+      const ticks = Array.from({length:9}, () => element("span", "rg-smeemo-progress-tick"));
+      progress.append(...ticks);
+      view = { id: game.id, board, rail, status, ticks, cards: new Map(), order: order.map(c => c.id), pulse: 0 };
+      for (const [index, card] of order.entries()) {
+        const button = element("button", "rg-smeemo-card");
+        button.type = "button";
+        button.dataset.foley = "off";
+        bindCardTilt(button);
+        button.style.setProperty("--card-index", String(index));
+        button.style.setProperty("--stack-delay", `${index * 38}ms`);
+        button.style.setProperty("--deal-delay", `${index * 54}ms`);
+        button.style.setProperty("--flip-delay", `${index * 48 + 90}ms`);
+        button.style.setProperty("--home-rotation", `${((index % 3) - 1) * 1.4}deg`);
+        button.style.setProperty("--stack-column", String(4-index));
+        button.style.setProperty("--stack-grid-column", String(1-index%3));
+        button.style.setProperty("--stack-grid-row", String(1-Math.floor(index/3)));
+        button.style.setProperty("--stack-layer-x", `${(index - 4) * 1.25}px`);
+        button.style.setProperty("--stack-layer-y", `${(4 - index) * 1.25}px`);
+        button.style.setProperty("--stack-rotation", `${(index - 4) * 3}deg`);
+        const motion = element("span", "rg-smeemo-motion");
+        const inner = element("span", "rg-smeemo-card-inner");
+        const front = element("span", "rg-smeemo-card-front");
+        const back = element("span", "rg-smeemo-card-back");
+        back.append(element("span", "rg-smeemo-card-number", String(index+1).padStart(2,"0")));
+        for (const edge of ["left", "right", "top", "bottom"]) inner.append(element("span", `rg-smeemo-edge is-${edge}`));
+        inner.append(front, back);
+        motion.setAttribute("aria-hidden", "true");
+        motion.append(inner);
+        button.append(motion);
+        button.addEventListener("click", event => runRoomMutation(() => {
+          const latest = readCardGames(), current = latest.smeemo;
+          if (dismissedActive || menuOpen || document.hidden || layer.hidden || layer.classList.contains("is-off-table")
+            || ["is-menu", "is-dice-mode", "is-freecam", "is-freecam-detached"].some(c => preview.classList.contains(c))
+            || !current || current.id !== game.id) return;
+          const result = drawSmeemoCard(current, card.id);
+          if (result.error) return;
+          const keyboard = event.detail === 0 && document.activeElement === button;
+          sync({ ...latest, smeemo: result.game });
+          if (keyboard) window.queueMicrotask(() => {
+            if (layer.hidden || smeemoPresentation.id !== game.id) return;
+            const available = [...smeemoPresentation.cards.values()].map(entry => entry.button).filter(b => !b.disabled);
+            (available.find(b => Number(b.dataset.position) > index) || available[0] || roomButton).focus({ preventScroll: true });
+          });
+        }, error => {
+          const message = error.message || "Could not reveal card. Try again.";
+          adminStatus.textContent = liveStatus.textContent = message;
+          if (smeemoPresentation.id === game.id && !layer.hidden) smeemoPresentation.status.textContent = message;
+        }));
+        button.dataset.position = String(index);
+        rail.append(button);
+        view.cards.set(card.id, {button, front, index, revealed: null});
       }
-      if (revealed) front.append(element("span", "rg-smeemo-face-label", smeemoRevealed ? "SMEEMO!" : "BLANK"));
-      const back = element("span", "rg-smeemo-card-back");
-      back.setAttribute("aria-hidden", "true");
-      inner.append(front, back);
-      button.append(inner);
-      button.addEventListener("click", () => runRoomMutation(() => {
-        const latest = readCardGames(), current = latest.smeemo;
-        if (dismissedActive || menuOpen || layer.hidden || layer.classList.contains("is-off-table") || !current || current.id !== game.id) return;
-        const result = drawSmeemoCard(current, card.id);
-        if (result.error) return;
-        sync({ ...latest, smeemo: result.game });
-        window.queueMicrotask(() => content.querySelector(".rg-smeemo-card.is-available")?.focus({ preventScroll: true }));
-      }));
-      rail.append(button);
+      railViewport.append(rail); board.append(railViewport);
+      content.append(board, status, progress);
     }
-
-    railViewport.append(rail);
-    board.append(railViewport);
-    content.append(board);
-    if (["stacking", "stacked", "dealing"].includes(game.phase)) {
-      const railRect = railViewport.getBoundingClientRect();
-      const stackCenter = railRect.left + railRect.width / 2;
-      for (const [index, card] of [...rail.children].entries()) {
-        const rect = card.getBoundingClientRect();
-        const dx = stackCenter - (rect.left + rect.width / 2);
-        card.style.setProperty("--stack-x", `${dx}px`);
-        card.style.setProperty("--mid-x", `${dx * 0.42}px`);
-        card.style.setProperty("--stack-layer-x", `${(index - 4) * 1.25}px`);
-        card.style.setProperty("--stack-layer-y", `${(4 - index) * 1.25}px`);
-        card.style.setProperty("--stack-rotation", `${(index - 4) * 3}deg`);
+    if (view.phase !== game.phase) {
+      if (view.phase) view.board.classList.remove(`is-${view.phase}`);
+      view.board.classList.add(`is-${game.phase}`);
+      view.phase = game.phase;
+    }
+    view.draws = game.draws.map(d => d.id);
+    view.revealed = revealIds;
+    smeemoPresentation = view;
+    for (const card of order) {
+      const entry = view.cards.get(card.id), {button, front, index} = entry;
+      const revealed = revealIds.has(card.id), won = revealed && card.smeemo;
+      const available = game.phase === "ready" && game.status === "playing" && !revealed;
+      button.disabled = !available;
+      for (const [name, on] of Object.entries({"face-up":revealed,"face-down":!revealed,revealed,available,smeemo:won})) button.classList.toggle(`is-${name}`,on);
+      button.setAttribute("aria-label", revealed ? `Card ${index+1}: ${won ? "Smeemoberry" : "blank"}` : `Reveal card ${index+1}`);
+      if (entry.revealed !== revealed || entry.won !== won) {
+        entry.revealed = revealed;
+        entry.won = won;
+        front.classList.toggle("is-berry", won);
+        front.replaceChildren();
+        if (won) {
+          const mark = element("img", "rg-smeemo-berry-mark");
+          mark.src = "/ramblegamble/assets/berries/smeemo-card-mark.png";
+          mark.alt = ""; front.append(mark);
+        }
+        if (revealed && !won) front.append(element("span", "rg-smeemo-blank-mark"));
+        if (revealed) front.append(element("span", "rg-smeemo-face-label", won ? "SMEEMO!" : "BLANK"));
+        if (!revealed) button.classList.remove("is-newly-revealed");
       }
     }
-
+    if (fresh.length) {
+      for (const draw of fresh) {
+        const entry = view.cards.get(draw.id);
+        if (!entry) continue;
+        entry.button.classList.add("is-newly-revealed");
+        window.setTimeout(() => entry.button.classList.remove("is-newly-revealed"), 1000);
+      }
+      const origin = view.cards.get(fresh.at(-1).id)?.index ?? 4;
+      for (const {button,index} of view.cards.values()) {
+        button.style.setProperty("--impact-delay", `${Math.abs(index-origin)*24}ms`);
+        button.style.setProperty("--impact-direction", index < origin ? "-1" : "1");
+      }
+      view.pulse++;
+      const pulse = view.pulse;
+      view.board.dataset.pulse = pulse % 2 ? "odd" : "even";
+      window.setTimeout(() => { if (view.pulse === pulse) delete view.board.dataset.pulse; }, 850);
+    }
     let statusText = `${game.draws.length} / 9 REVEALED`;
     if (game.phase === "preview") statusText = "FIND THE SMEEMOBERRY";
     else if (["stacking", "stacked", "dealing"].includes(game.phase)) statusText = "SHUFFLING...";
     else if (game.phase === "ready" && game.status === "playing") statusText += " - CHOOSE A CARD";
     else if (game.status === "complete") statusText = "SMEEMOBERRY FOUND!";
-    if (game.status === "complete") {
-      const newlyWon = game.draws.some(draw => draw.smeemo && !priorReveals.has(draw.id));
-      content.append(element("p", `rg-smeemo-winner${newlyWon ? " is-newly-won" : ""}`, statusText));
-    } else content.append(element("p", "rg-card-round-status rg-smeemo-status", statusText));
+    view.status.classList.toggle("rg-smeemo-winner", game.status === "complete");
+    const newlyWon = fresh.some(d => d.smeemo);
+    view.status.classList.toggle("is-newly-won", newlyWon);
+    if (newlyWon) window.setTimeout(() => view.status.classList.remove("is-newly-won"), 600);
+    view.status.textContent = statusText;
+    view.ticks.forEach((tick, i) => {
+      tick.classList.toggle("is-filled", i < game.draws.length);
+      tick.classList.toggle("is-winning", i === game.draws.length-1 && game.status === "complete");
+    });
     liveStatus.textContent = statusText;
     scheduleSmeemoAdvance(game);
   }

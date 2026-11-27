@@ -285,3 +285,31 @@ test('actual Smeemo UI routes every event to recorded thunder, preserves discove
  assert.deepEqual(ui.sounds,['smeemoThunder','smeemoRumble','smeemoHit','smeemoThunder','smeemoRumble','smeemoHit','smeemoThunder','smeemoRumble','smeemoWin']);
  ui.stoppedSounds.length=0;ui.impactOptions.stopSound();assert.deepEqual(ui.stoppedSounds,['smeemo-thunder','smeemo-rumble','smeemo-hit','smeemo-win']);
 });
+
+test('Smeemo keeps nine native card nodes and independent flips across rapid commits and victory', async()=>{
+ let game=createSmeemoGame();for(const phase of ['preview','stacking','stacked','dealing'])game=games.advanceSmeemoPhase(game,phase);
+ const ui=mountUI({});ui.update({smeemo:game});
+ const content=ui.get('#rg-card-games-content'),board=content.children[0],rail=board.children[0].children[0],cards=[...rail.children];
+ const blanks=game.cards.map((c,i)=>c.smeemo?-1:i).filter(i=>i>=0),win=game.cards.findIndex(c=>c.smeemo);
+ assert.equal(cards.length,9);assert.ok(cards.every(c=>!c.disabled));
+ assert.equal(findClass(content,'rg-smeemo-berry-mark'),undefined);
+ await cards[blanks[0]].click();assert.equal(board.dataset.pulse,'odd');assert.ok(cards[blanks[0]].classList.contains('is-newly-revealed'));
+ await cards[blanks[1]].click();assert.equal(board.dataset.pulse,'even');
+ assert.equal(content.children[0],board);assert.deepEqual(rail.children,cards);
+ assert.ok(blanks.slice(0,2).every(i=>cards[i].classList.contains('is-newly-revealed')));
+ ui.update(ui.state);assert.equal(board.dataset.pulse,'even');
+ assert.equal(content.children[2].children.filter(t=>t.classList.contains('is-filled')).length,2);
+ await cards[win].click();assert.deepEqual(rail.children,cards);assert.ok(cards.every(c=>c.disabled));
+ assert.ok(cards[win].classList.contains('is-smeemo'));assert.ok(content.children[2].children[2].classList.contains('is-winning'));
+ ui.flushTimers();assert.ok(cards.every(c=>!c.classList.contains('is-newly-revealed')));assert.equal(board.dataset.pulse,undefined);
+});
+
+test('Smeemo presentation does not animate a failed write or remote rollback, and refuses clicks during freecam',async()=>{
+ let game=createSmeemoGame();for(const phase of ['preview','stacking','stacked','dealing'])game=games.advanceSmeemoPhase(game,phase);
+ const ui=mountUI({});ui.update({smeemo:game});const board=ui.get('#rg-card-games-content').children[0],cards=board.children[0].children[0].children;
+ const index=game.cards.findIndex(c=>!c.smeemo);const button=cards[index];
+ ui.blockCards(true);await button.click();assert.equal(board.dataset.pulse,undefined);assert.equal(button.disabled,false);
+ ui.blockCards(false);ui.get('.rg-preview').classList.add('is-freecam');await button.click();assert.equal(ui.state.smeemo.draws.length,0);
+ ui.get('.rg-preview').classList.remove('is-freecam');await button.click();assert.equal(ui.state.smeemo.draws.length,1);
+ ui.flushTimers();ui.update({smeemo:game});assert.equal(board.dataset.pulse,undefined);assert.equal(button.disabled,false);assert.equal(button.classList.contains('is-newly-revealed'),false);
+});

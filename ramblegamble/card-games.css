@@ -268,82 +268,6 @@
 .rg-shop-card-owner { max-width: 18ch; font-size: 12px; font-weight: 900; text-align: center; }
 .rg-shop-balance { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 8px 0 14px; font-size: 12px; font-weight: 900; }
 
-.rg-smeemo-board {
-  position: relative;
-  width: 100%;
-  padding: clamp(14px, 2.4vw, 28px) clamp(8px, 1.6vw, 18px);
-  border: 3px ridge #8b2626;
-  background: linear-gradient(135deg, rgb(255 255 255 / 78%), rgb(183 123 235 / 25%)), #f2f2da;
-  box-shadow: inset 0 0 0 4px #ffdf00, 0 8px 0 #1e0b01, 0 0 30px rgb(183 123 235 / 70%);
-}
-.rg-smeemo-rail-viewport { width: 100%; padding: 62px 9px 12px; overflow-x: auto; overflow-y: hidden; scrollbar-color: #8b2626 #eadc8c; scrollbar-width: thin; }
-.rg-smeemo-rail {
-  display: grid;
-  grid-template-columns: repeat(9, minmax(62px, 1fr));
-  gap: clamp(5px, 1vw, 12px);
-  width: 100%;
-  min-width: 650px;
-  margin: 0 auto;
-  perspective: 1500px;
-}
-.rg-smeemo-card {
-  position: relative;
-  display: block;
-  width: 100%;
-  min-width: 0;
-  aspect-ratio: 415 / 618;
-  padding: 0;
-  border: 0;
-  color: #1e0b01;
-  background: transparent;
-  box-shadow: none;
-  cursor: default;
-  transform-style: preserve-3d;
-  will-change: transform;
-}
-.rg-smeemo-card-inner,
-.rg-smeemo-card-front,
-.rg-smeemo-card-back { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 10px; }
-.rg-smeemo-card-inner { transform-style: preserve-3d; transition: transform 560ms cubic-bezier(.2,.8,.2,1); }
-.rg-smeemo-card.is-face-down .rg-smeemo-card-inner { transform: rotateY(180deg); }
-.rg-smeemo-card-front,
-.rg-smeemo-card-back { overflow: hidden; border: 3px ridge #8b2626; backface-visibility: hidden; box-shadow: 3px 4px 0 #1e0b01, 0 0 12px rgb(151 110 255 / 55%); }
-.rg-smeemo-card-front { align-content: center; gap: 7%; padding: 9%; background: linear-gradient(145deg, #fffbe1 0 48%, #f2f2da 48% 100%); }
-.rg-smeemo-card-front::before,
-.rg-smeemo-card-front::after { position: absolute; width: 20%; height: 8%; content: ""; background: #b20000; }
-.rg-smeemo-card-front::before { top: 0; left: 0; clip-path: polygon(0 0,100% 0,0 100%); }
-.rg-smeemo-card-front::after { right: 0; bottom: 0; clip-path: polygon(100% 0,100% 100%,0 100%); }
-.rg-smeemo-card-front.is-berry { color: #fff5c7; background: linear-gradient(145deg, #b20000 0 48%, #8b2626 48% 100%); box-shadow: inset 0 0 0 4px #ffdf00, 0 0 24px #ffdf00, 3px 4px 0 #1e0b01; }
-.rg-smeemo-berry-mark { position: relative; display: block; width: 70%; max-width: 100%; height: auto; min-width: 0; aspect-ratio: 1; object-fit: contain; object-position: center; justify-self: center; image-rendering: pixelated; filter: drop-shadow(2px 3px 0 #1e0b01); }
-.rg-smeemo-face-label { position: relative; z-index: 1; color: #8b2626; font-size: clamp(8px, 1vw, 14px); font-weight: 1000; letter-spacing: .04em; line-height: 1; text-align: center; text-shadow: 1px 1px #ffdf00; white-space: nowrap; }
-.rg-smeemo-card-front.is-berry .rg-smeemo-face-label { color: #fff5c7; font-size: clamp(9px, 1.1vw, 16px); text-shadow: 2px 2px #1e0b01; }
-.rg-smeemo-card-back { transform: rotateY(180deg); background: #9a88ff url("/ramblegamble/assets/card-games/menu-card-back.png") center / 100% 100% no-repeat; image-rendering: pixelated; }
-.rg-smeemo-card-back::after { position: absolute; inset: 9%; content: ""; border: 2px dashed #fff6ac; box-shadow: inset 0 0 0 2px #493080; }
-.rg-smeemo-card:focus-visible { z-index: 2; outline: 4px solid #ffdf00; outline-offset: 5px; }
-.rg-smeemo-card.is-available { cursor: pointer; transition: filter 180ms ease, transform 180ms ease; }
-.rg-smeemo-card.is-available:hover { z-index: 2; filter: drop-shadow(0 0 13px #ffdf00); transform: translateY(-9px) rotate(var(--home-rotation)); }
-.rg-smeemo-card.is-revealed { cursor: default; }
-.rg-smeemo-board.is-stacking .rg-smeemo-card { animation: rg-smeemo-stack 760ms cubic-bezier(.2,.76,.22,1) both; animation-delay: var(--stack-delay); }
-.rg-smeemo-board.is-stacked .rg-smeemo-card { transform: translate3d(calc(var(--stack-x) + var(--stack-layer-x)), var(--stack-layer-y), 0) rotate(var(--stack-rotation)) scale(.84); animation: rg-smeemo-stack-settle 220ms ease-out both; }
-.rg-smeemo-board.is-dealing .rg-smeemo-card { animation: rg-smeemo-deal 760ms cubic-bezier(.16,.82,.2,1) both; animation-delay: var(--deal-delay); }
-.rg-smeemo-board.is-dealing .rg-smeemo-card-inner { animation: rg-smeemo-flip-down 500ms cubic-bezier(.2,.8,.2,1) both; animation-delay: var(--flip-delay); }
-.rg-smeemo-status { margin-top: clamp(17px, 2.5vw, 28px); color: #8b2626; font-size: clamp(12px, 1.8vw, 19px); letter-spacing: .08em; text-shadow: 1px 1px #ffdf00; }
-.rg-smeemo-status.is-complete { color: #b20000; }
-.rg-smeemo-winner { margin: 14px 0 0; color: #8b2626; font-size: clamp(22px, 4vw, 46px); font-weight: 1000; text-align: center; text-shadow: 3px 3px 0 #ffdf00, 5px 5px 0 #b77beb; animation: rg-berry-pop 580ms cubic-bezier(.18,.9,.3,1.4); }
-@keyframes rg-smeemo-stack {
-  0% { transform: translate3d(0,0,0) rotate(0deg) scale(1); }
-  42% { transform: translate3d(var(--mid-x),-62px,0) rotate(190deg) scale(1.1); }
-  72% { transform: translate3d(var(--stack-x),8px,0) rotate(370deg) scale(.91); }
-  100% { transform: translate3d(calc(var(--stack-x) + var(--stack-layer-x)),var(--stack-layer-y),0) rotate(var(--stack-rotation)) scale(.84); }
-}
-@keyframes rg-smeemo-stack-settle { 0% { filter: brightness(1.7); } 100% { filter: brightness(1); } }
-@keyframes rg-smeemo-flip-down { 0% { transform: rotateY(0); } 100% { transform: rotateY(180deg); } }
-@keyframes rg-smeemo-deal {
-  0% { opacity: .95; transform: translate3d(calc(var(--stack-x) + var(--stack-layer-x)),var(--stack-layer-y),0) rotate(var(--stack-rotation)) scale(.84); }
-  22% { opacity: 1; transform: translate3d(var(--stack-x),-42px,0) rotate(12deg) scale(1.12); }
-  100% { opacity: 1; transform: translate3d(0,0,0) rotate(var(--home-rotation)) scale(1); }
-}
-
 .rg-card-admin { --card-ink: #1e0b01; }
 .rg-card-admin-toolbar { display: flex; align-items: end; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 .rg-card-admin-toolbar label,
@@ -410,18 +334,8 @@
   .rg-shop-card-type { padding: 3px; font-size: 9px; }
   .rg-shop-card-name { font-size: 13px; }
   .rg-shop-card-price { font-size: 12px; }
-  .rg-smeemo-board { padding: 12px 7px; }
-  .rg-smeemo-rail-viewport { padding: 56px 5px 9px; }
-  .rg-smeemo-rail { grid-template-columns: repeat(9, minmax(58px, 1fr)); min-width: 540px; gap: 5px; }
-  .rg-smeemo-card-front, .rg-smeemo-card-back { border-width: 2px; border-radius: 7px; }
 }
 @media (max-width: 640px) {
-  .rg-smeemo-rail-viewport { padding: 52px 2px 8px; overflow-x: hidden; }
-  .rg-smeemo-rail { grid-template-columns: repeat(9, minmax(0, 1fr)); min-width: 0; gap: clamp(2px, .55vw, 4px); }
-  .rg-smeemo-card-front, .rg-smeemo-card-back { border-width: 1px; border-radius: 4px; box-shadow: 1px 2px 0 #1e0b01; }
-  .rg-smeemo-card-front { gap: 6%; padding: 2%; }
-  .rg-smeemo-face-label { font-size: clamp(4px, 1.35vw, 8px); letter-spacing: 0; text-shadow: 1px 1px #ffdf00; }
-  .rg-smeemo-card-back::after { inset: 7%; border-width: 1px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .rg-mode-choice, .rg-mode-card, .rg-mode-card img, .rg-card-answer, .rg-shop-card, .rg-smeemo-card, .rg-smeemo-card-inner { transition: none; animation: none !important; }
@@ -572,15 +486,10 @@
 .rg-shop-card.is-newly-revealed .rg-shop-card-inner { animation:rg-shop-turn 780ms cubic-bezier(.18,.78,.22,1) both; }
 .rg-shop-deal { animation:rg-prompt-flight 540ms cubic-bezier(.18,.8,.25,1) both;animation-delay:var(--deal-delay,0ms); }
 @keyframes rg-shop-turn { 0% { transform:rotateY(0); } 48% { transform:translate3d(0,-15px,34px) rotateY(100deg) rotateZ(-7deg); } 78% {transform:translate3d(0,-5px,10px) rotateY(193deg);} 100% {transform:rotateY(180deg);} }
-.rg-smeemo-card.is-available:hover { transform:none;filter:none; }
-.rg-smeemo-card.is-available:is(:hover,:focus-visible) .rg-smeemo-card-inner { transform:translate3d(0,-7px,15px) rotateX(var(--tilt-x,-5deg)) rotateY(calc(180deg + var(--tilt-y,7deg))); }
-.rg-smeemo-card.is-newly-revealed .rg-smeemo-card-inner { animation:rg-smeemo-turn 650ms cubic-bezier(.18,.8,.25,1) both; }
-@keyframes rg-smeemo-turn { 0% { transform:rotateY(180deg); } 50% {transform:translate3d(0,-14px,20px) rotateY(75deg) rotateZ(6deg);} 82% {transform:rotateY(-10deg);} 100% {transform:none;} }
 @media(prefers-reduced-motion:reduce) {
   .rg-mode-stage,.rg-mode-depth,.rg-mode-card,.rg-mode-sheen,.rg-prompt-deal,.rg-show-reveal,.rg-shop-deal,.rg-shop-card-inner,.rg-smeemo-card-inner {animation:none!important;transition:none!important;}
   .rg-card-menu-grid:not(.is-choosing) .rg-mode-choice:is(:hover,:focus-visible) .rg-mode-depth,.rg-card-menu-grid:not(.is-choosing) .rg-mode-choice:is(:hover,:focus-visible) .rg-mode-card {transform:none;translate:none;scale:none;}
   .rg-shop-card:is(:hover,:focus-visible):not(:disabled) .rg-shop-card-inner {transform:none;}
-  .rg-smeemo-card.is-available:is(:hover,:focus-visible) .rg-smeemo-card-inner {transform:rotateY(180deg);}
 }
 /* A brief weightless settling flourish and geometric halo, then rest. */
 .rg-mode-stage { animation:rg-card-fan-in 650ms cubic-bezier(.16,.8,.2,1) var(--deal-delay) both,rg-card-air-settle 2000ms ease-in-out calc(650ms + var(--deal-delay)) forwards; }
@@ -625,10 +534,6 @@
 .rg-show-round.is-red-handed .rg-card-answer-copy { font-size:clamp(13px,1.5vw,20px); line-height:1.28; }
 .rg-show-round.is-red-handed .rg-card-vote-count { max-width:100%; text-align:center; font-size:clamp(9px,1vw,12px); padding:3px 5px; overflow-wrap:anywhere; }
 /* Prevent intrinsic image sizing or label width from shifting the berry's grid track. */
-.rg-smeemo-card-front { grid-template-columns:minmax(0,1fr); grid-template-rows:minmax(0,1fr); align-content:stretch; }
-.rg-smeemo-card-front.is-berry { grid-template-rows:minmax(0,1fr) auto; gap:5%; }
-.rg-smeemo-card-front.is-berry .rg-smeemo-berry-mark { width:70%; height:100%; max-height:100%; min-height:0; aspect-ratio:auto; object-fit:contain; }
-.rg-smeemo-card-front.is-berry .rg-smeemo-face-label { max-width:100%; font-size:clamp(7px,1vw,14px); line-height:1.15; }
 @media(max-width:680px) {
   .rg-card-games-shell:has(.rg-show-round.is-red-handed) { width:96vw; }
   .rg-show-round.is-red-handed { grid-template-columns:minmax(0,1fr); }
@@ -639,15 +544,7 @@
   .rg-show-round.is-red-handed .rg-show-answer-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .rg-show-round.is-red-handed .rg-show-answer-grid > :nth-child(3):last-child { grid-column:1 / -1; }
   .rg-show-round.is-red-handed .rg-card-answer,.rg-show-round.is-red-handed .rg-show-answer-back { width:min(100%,175px,45dvh); }
-  .rg-smeemo-card-front.is-berry .rg-smeemo-face-label { font-size:clamp(4px,1.35vw,8px); letter-spacing:0; }
 }
-
-/* Keep the winning announcement inside the shell instead of rotating it out
-   of the clipping viewport. The card itself retains its 3D reveal. */
-.rg-smeemo-winner { margin:14px 0 8px; padding:4px 8px; color:#fff5da; font-size:clamp(18px,3.2vw,42px); line-height:1.15; text-shadow:2px 3px #1e0b01,4px 4px #8b2626; overflow-wrap:anywhere; animation:none; }
-.rg-smeemo-winner.is-newly-won { animation:rg-smeemo-winner-pop 420ms cubic-bezier(.18,.8,.25,1) both; }
-@keyframes rg-smeemo-winner-pop { 0% { opacity:.4; transform:scale(.95); } 65% { opacity:1; transform:scale(1.025); } 100% { opacity:1; transform:none; } }
-@media(prefers-reduced-motion:reduce) { .rg-smeemo-winner.is-newly-won { animation:none; } }
 
 /* Smeemo earthquake: independent room and board carriers. The shell, header,
    status, HUD, scroll rail and original card flip transforms remain intact. */
@@ -657,21 +554,14 @@
   will-change: transform;
 }
 .rg-preview.is-smeemo-impact .rg-smeemo-board {
-  /* <= 1.2% expansion + 1.5px displacement fits the shell's 8px padding. */
+  /* Small overscan fits the floating rail’s outer gutters. */
   transform: translate3d(var(--quake-ui-x,0px),var(--quake-ui-y,0px),0) scale(var(--quake-ui-scale,1));
   transform-origin: center;
   will-change: transform;
 }
-.rg-preview.is-smeemo-impact .rg-smeemo-board::after {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  border: 3px solid #ffe19a;
-  box-shadow: inset 0 0 18px #b77beb, inset 0 0 5px #fff5da;
-  opacity: calc(var(--quake-energy,0) * .48);
-}
 @media (prefers-reduced-motion: reduce) {
   .rg-preview.is-smeemo-impact > :is(#rg-canvas, #rg-liquid-portal-layer, #rg-billboard-layer),
   .rg-preview.is-smeemo-impact .rg-smeemo-board { transform: none; will-change: auto; }
-  .rg-preview.is-smeemo-impact .rg-smeemo-board::after { display: none; }
 }
 
 /* Shop showpiece: an independent deal carrier, idle carrier, and physical
@@ -771,3 +661,124 @@ html[data-rg-host-locked] .rg-smeemo-lightning {display:none!important;}
   .rg-smeemo-lightning {display:none!important;}
   .rg-preview.is-smeemo-impact .rg-billboard :is(iframe,.rg-billboard-placeholder) {filter:none;}
 }
+
+/* Smeemo: a transparent full-width show stage, not a modal or painted board.
+   Only the cards and ROOM button accept input. The layout reserves vertical
+   animation room, and the 415:618 artwork controls the automatic height. */
+.rg-card-games-shell:has(.rg-smeemo-board) {
+  box-sizing:border-box; width:calc(100% - clamp(24px,4vw,64px));
+  max-height:none; overflow:visible; padding:8px 0; pointer-events:none;
+  --smeemo-gap:clamp(5px,1.15vw,22px);
+}
+.rg-card-games-header[data-card-mode="smeemo"] { margin-bottom:clamp(12px,3vh,32px); }
+.rg-card-games-header[data-card-mode="smeemo"] h1 {
+  background:#8b2626; border:2px solid #ffdb91; box-shadow:4px 4px #25132e,0 0 18px #9a61d8;
+  font-size:clamp(15px,2.5vw,34px); letter-spacing:.06em; line-height:1.15;
+}
+.rg-smeemo-board { position:relative; width:100%; padding:0; border:0; background:none; box-shadow:none; }
+.rg-smeemo-rail-viewport { width:100%; overflow:visible; padding:0; }
+.rg-smeemo-rail {
+  display:grid; grid-template-columns:repeat(9,minmax(0,1fr)); gap:var(--smeemo-gap);
+  width:min(100%,calc(max(24px,100dvh - 205px) * 6.0437 + 8 * var(--smeemo-gap)));
+  margin-inline:auto; perspective:1200px;
+}
+.rg-smeemo-card {
+  position:relative; display:block; box-sizing:border-box; width:100%; min-width:0;
+  height:auto; aspect-ratio:415 / 618; padding:0; border:0; border-radius:8%;
+  background:transparent; box-shadow:none; color:#21122e; cursor:default;
+  perspective:650px; --depth:clamp(2px,.28vw,6px);
+  --stack-x:calc(var(--stack-column,0) * (100% + var(--smeemo-gap)));
+  --stack-y:0px;
+}
+/* The native button never moves. Independent carriers compose the shuffle,
+   travelling impact wave and flip without cancelling each other. */
+.rg-smeemo-motion,.rg-smeemo-card-inner { position:absolute; inset:0; display:block; transform-style:preserve-3d; pointer-events:none; }
+.rg-smeemo-motion { transform:rotateZ(var(--home-rotation,0deg)); }
+.rg-smeemo-card-inner { transform:rotateX(4deg) rotateY(0deg); transition:transform 240ms cubic-bezier(.18,.8,.25,1.15); }
+.rg-smeemo-card.is-face-down .rg-smeemo-card-inner { transform:rotateX(4deg) rotateY(180deg); }
+.rg-smeemo-card-front,.rg-smeemo-card-back {
+  position:absolute; inset:0; box-sizing:border-box; display:grid; place-items:center; border-radius:7%;
+  overflow:hidden; border:clamp(1px,.19vw,4px) solid #472451; backface-visibility:hidden;
+  box-shadow:inset 0 0 0 2px #e9bbfb,0 7px 0 -2px #241332,0 10px 16px #1e0b01a8;
+}
+.rg-smeemo-card-front { transform:translateZ(var(--depth)); background:linear-gradient(145deg,#fff8d9 0 48%,#dfc5ed 49% 100%); align-content:center; padding:8%; gap:5%; }
+.rg-smeemo-card-front::before,.rg-smeemo-card-front::after {content:"";position:absolute;width:18%;height:12%;background:#8b2626;clip-path:polygon(0 0,100% 0,0 100%);}
+.rg-smeemo-card-front::before {top:0;left:0;}
+.rg-smeemo-card-front::after {bottom:0;right:0;rotate:180deg;}
+.rg-smeemo-card-back {
+  transform:rotateY(180deg) translateZ(var(--depth));
+  background:#9a88ff url("/ramblegamble/assets/card-games/menu-card-back.png") center / 100% 100% no-repeat;
+  image-rendering:pixelated;
+}
+.rg-smeemo-card-back::after {content:"";position:absolute;inset:8%;border:1px dashed #fff5da;box-shadow:0 0 0 1px #583387,inset 0 0 0 1px #583387;pointer-events:none;}
+.rg-smeemo-card-number {position:absolute;bottom:10%;right:10%;padding:2px 4px; background:#493080;color:#fff5da;border:1px solid #eac5ff;font-size:clamp(8px,1vw,18px);font-weight:900;line-height:1;box-shadow:2px 2px #21122e;}
+.rg-smeemo-edge {position:absolute;display:block;background:repeating-linear-gradient(90deg,#583887 0 2px,#d4a9ee 2px 3px,#8963c0 3px 5px);pointer-events:none;}
+.rg-smeemo-edge.is-left,.rg-smeemo-edge.is-right {width:calc(2 * var(--depth));top:4%;bottom:4%;transform:rotateY(90deg);}
+.rg-smeemo-edge.is-left {left:calc(-1 * var(--depth));}
+.rg-smeemo-edge.is-right {right:calc(-1 * var(--depth));}
+.rg-smeemo-edge.is-top,.rg-smeemo-edge.is-bottom {height:calc(2 * var(--depth));left:4%;right:4%;transform:rotateX(90deg);}
+.rg-smeemo-edge.is-top {top:calc(-1 * var(--depth));}
+.rg-smeemo-edge.is-bottom {bottom:calc(-1 * var(--depth));}
+.rg-smeemo-card-front.is-berry {color:#fff5da;background:radial-gradient(ellipse at 50% 40%,#c54573,#8b2626 70%);box-shadow:inset 0 0 0 3px #ffdf00,0 0 22px #f5b9ff,0 8px 0 -2px #30132d;grid-template-rows:minmax(0,1fr) auto;}
+.rg-smeemo-berry-mark {display:block;width:85%;height:100%;min-height:0;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(2px 3px #1e0b01);}
+.rg-smeemo-face-label {color:#642644;font-size:clamp(7px,1.05vw,20px);font-weight:1000;letter-spacing:.025em;line-height:1.12;text-align:center;max-width:100%;overflow-wrap:anywhere;}
+.rg-smeemo-card-front.is-berry .rg-smeemo-face-label {color:#fff5da;text-shadow:2px 2px #351a3b;}
+.rg-smeemo-card.is-available {cursor:pointer;}
+.rg-smeemo-card.is-available:is(:hover,:focus-visible),.rg-smeemo-card.is-newly-revealed,.rg-smeemo-card.is-smeemo {z-index:2;}
+.rg-card-games-layer .rg-smeemo-card:focus-visible {outline:3px solid #fff4b5;outline-offset:4px;}
+.rg-smeemo-card.is-available:is(:hover,:focus-visible) .rg-smeemo-card-inner {transform:translate3d(0,-7%,18px) rotateX(var(--tilt-x,-9deg)) rotateY(calc(180deg + var(--tilt-y,7deg))) rotateZ(-2deg) scale(1.035);}
+.rg-smeemo-card.is-available:is(:hover,:focus-visible) .rg-smeemo-card-back {border-color:#ffdf91;box-shadow:inset 0 0 0 2px #fff0ce,0 0 22px #bd8aff,0 9px 14px #26143b;}
+.rg-smeemo-card.is-available:active .rg-smeemo-card-inner {transform:translate3d(0,3%,0) rotateY(180deg) scale(.94,1.025);transition-duration:70ms;}
+.rg-smeemo-board.is-preview .rg-smeemo-motion {animation:rg-smeemo-arrive 640ms cubic-bezier(.2,.78,.22,1) var(--stack-delay) both;}
+.rg-smeemo-board.is-stacking .rg-smeemo-motion {animation:rg-smeemo-stack 760ms cubic-bezier(.2,.76,.22,1) var(--stack-delay) both;}
+.rg-smeemo-board.is-stacked .rg-smeemo-motion {transform:translate3d(calc(var(--stack-x) + var(--stack-layer-x)),calc(var(--stack-y) + var(--stack-layer-y)),0) rotateZ(var(--stack-rotation)) scale(.84);animation:rg-smeemo-stack-settle 420ms ease-out both;}
+.rg-smeemo-board.is-dealing .rg-smeemo-motion {animation:rg-smeemo-deal 760ms cubic-bezier(.16,.82,.2,1) var(--deal-delay) both;}
+.rg-smeemo-board.is-dealing .rg-smeemo-card-inner {animation:rg-smeemo-flip-down 500ms cubic-bezier(.2,.8,.2,1) var(--flip-delay) both;}
+.rg-smeemo-card.is-newly-revealed .rg-smeemo-card-inner {animation:rg-smeemo-turn 820ms cubic-bezier(.18,.8,.25,1) both;}
+.rg-smeemo-card.is-smeemo.is-newly-revealed .rg-smeemo-card-inner {animation-name:rg-smeemo-win-turn;animation-duration:980ms;}
+/* Two equivalent animation names let every commit restart the wave even
+   when the next reveal arrives before the last wave finishes. */
+.rg-smeemo-board[data-pulse="odd"] .rg-smeemo-motion {animation:rg-smeemo-wave-a 590ms cubic-bezier(.18,.7,.26,1) var(--impact-delay,0ms) both;}
+.rg-smeemo-board[data-pulse="even"] .rg-smeemo-motion {animation:rg-smeemo-wave-b 590ms cubic-bezier(.18,.7,.26,1) var(--impact-delay,0ms) both;}
+@keyframes rg-smeemo-arrive {0%{transform:translate3d(0,-22%,0) rotateZ(-12deg) scale(.65);} 66%{transform:translateY(4%) rotateZ(3deg) scale(1.03,.96);} 100%{transform:rotateZ(var(--home-rotation));}}
+@keyframes rg-smeemo-stack {0%{transform:rotateZ(var(--home-rotation));} 45%{transform:translate3d(calc(var(--stack-x)*.45),calc(var(--stack-y)*.45 - 22%),0) rotateZ(190deg) scale(.91);} 100%{transform:translate3d(calc(var(--stack-x) + var(--stack-layer-x)),calc(var(--stack-y) + var(--stack-layer-y)),0) rotateZ(calc(360deg + var(--stack-rotation))) scale(.84);}}
+@keyframes rg-smeemo-stack-settle {0%,100%{scale:1;} 38%{scale:1.04 .94;}}
+@keyframes rg-smeemo-deal {0%{transform:translate3d(calc(var(--stack-x) + var(--stack-layer-x)),calc(var(--stack-y) + var(--stack-layer-y)),0) rotateZ(var(--stack-rotation)) scale(.84);} 28%{transform:translate3d(calc(var(--stack-x)*.7),calc(var(--stack-y)*.7 - 15%),0) rotateZ(10deg) scale(.94);} 78%{transform:translateY(4%) rotateZ(-3deg) scale(1.035,.96);} 100%{transform:rotateZ(var(--home-rotation));}}
+@keyframes rg-smeemo-flip-down {0%{transform:rotateY(0);} 70%{transform:rotateY(192deg);} 100%{transform:rotateX(4deg) rotateY(180deg);}}
+@keyframes rg-smeemo-turn {0%{transform:rotateY(180deg);} 17%{transform:translateY(4%) rotateY(164deg) scale(1.06,.93);} 48%{transform:translate3d(0,-12%,26px) rotateY(64deg) rotateZ(7deg) scale(1.045);} 73%{transform:translateY(-3%) rotateY(-15deg) rotateZ(-4deg);} 90%{transform:translateY(2%) rotateY(5deg) scale(1.035,.97);} 100%{transform:rotateX(4deg);}}
+@keyframes rg-smeemo-win-turn {0%{transform:rotateY(180deg);} 15%{transform:translateY(4%) rotateY(150deg) scale(1.04,.92);} 44%{transform:translate3d(0,-16%,28px) rotateY(38deg) rotateZ(-9deg) scale(1.1);} 66%{transform:translateY(-7%) rotateY(-18deg) rotateZ(7deg) scale(1.08);} 84%{transform:translateY(2%) rotateY(6deg) scale(1.04,.96);} 100%{transform:rotateX(4deg);}}
+@keyframes rg-smeemo-wave-a {0%,100%{transform:rotateZ(var(--home-rotation));} 19%{transform:translate3d(calc(var(--impact-direction)*3%),-7%,0) rotateZ(calc(var(--impact-direction)*5deg)) scale(.98,1.03);} 45%{transform:translateY(3%) rotateZ(calc(var(--impact-direction)*-3deg)) scale(1.035,.96);} 72%{transform:translateY(-2%) rotateZ(1deg);}}
+@keyframes rg-smeemo-wave-b {0%,100%{transform:rotateZ(var(--home-rotation));} 19%{transform:translate3d(calc(var(--impact-direction)*3%),-7%,0) rotateZ(calc(var(--impact-direction)*5deg)) scale(.98,1.03);} 45%{transform:translateY(3%) rotateZ(calc(var(--impact-direction)*-3deg)) scale(1.035,.96);} 72%{transform:translateY(-2%) rotateZ(1deg);}}
+.rg-smeemo-status {position:relative;margin:clamp(14px,3vh,32px) auto 0;min-height:clamp(24px,3.5vw,48px);color:#fff5da;font-size:clamp(12px,1.7vw,24px);font-weight:1000;letter-spacing:.07em;line-height:1.2;text-align:center;text-shadow:2px 2px #26143b, -1px -1px #26143b, 0 0 9px #26143b;}
+.rg-smeemo-status.rg-smeemo-winner {color:#ffdf91;font-size:clamp(12px,2.7vw,36px);text-shadow:3px 3px #8b2626,5px 5px #26143b;}
+.rg-smeemo-winner.is-newly-won {animation:rg-smeemo-winner-pop 520ms cubic-bezier(.18,.8,.25,1) both;}
+@keyframes rg-smeemo-winner-pop {0%{transform:scale(.86);} 58%{transform:scale(1.08);} 100%{transform:none;}}
+.rg-smeemo-progress {display:flex;justify-content:center;gap:5px;margin:8px auto 0;pointer-events:none;}
+.rg-smeemo-progress-tick {width:clamp(12px,2.3vw,38px);height:clamp(5px,.7vw,9px);background:#30214e;border:1px solid #c39cf1;box-shadow:2px 2px #1e0b01;transform:skewX(-12deg);}
+.rg-smeemo-progress-tick.is-filled {background:#c4a1ff;border-color:#fff5da;}
+.rg-smeemo-progress-tick.is-winning {background:#ffdf91;border-color:#fff5da;}
+@media(max-aspect-ratio:4/5) and (min-height:440px) {
+  .rg-smeemo-rail {grid-template-columns:repeat(3,minmax(0,1fr));width:min(100%,calc(max(24px,100dvh - 210px - 2 * var(--smeemo-gap)) * .6715 + 2 * var(--smeemo-gap)));}
+  .rg-smeemo-card {--stack-x:calc(var(--stack-grid-column,0) * (100% + var(--smeemo-gap)));--stack-y:calc(var(--stack-grid-row,0) * (100% + var(--smeemo-gap)));}
+  .rg-smeemo-face-label {font-size:clamp(9px,2.9vw,15px);}
+  .rg-smeemo-card-number {font-size:clamp(9px,2.4vw,15px);}
+}
+@media(max-height:420px) {
+  .rg-card-games-header[data-card-mode="smeemo"] {margin-bottom:8px;}
+  .rg-smeemo-status {margin-top:12px;min-height:24px;}
+  .rg-smeemo-progress {margin-top:5px;}
+  .rg-smeemo-rail {width:min(100%,calc(max(24px,100dvh - 145px) * 6.0437 + 8 * var(--smeemo-gap)));}
+}
+@media(prefers-reduced-motion:reduce) {
+  .rg-smeemo-board .rg-smeemo-motion,.rg-smeemo-board .rg-smeemo-card-inner,.rg-smeemo-status {animation:none!important;transition:none!important;}
+  .rg-smeemo-card.is-available:is(:hover,:focus-visible,:active) .rg-smeemo-card-inner {transform:rotateX(4deg) rotateY(180deg);}
+}
+
+/* Local reveal punctuation: two non-interactive layers, no additional
+   full-screen flash. The winning card gets a warm gold outline. */
+.rg-smeemo-blank-mark {display:block;width:28%;aspect-ratio:1;border:clamp(1px,.22vw,4px) solid #8f638e;transform:rotate(45deg);box-shadow:inset 0 0 0 3px #fff5da,2px 2px #d7a4c4;margin:8% 0;}
+.rg-smeemo-card.is-newly-revealed::before,.rg-smeemo-card.is-newly-revealed::after {content:"";position:absolute;inset:-5%;pointer-events:none;border:2px solid #caa2ff;border-radius:12%;z-index:-1;opacity:0;animation:rg-smeemo-local-halo 520ms ease-out 200ms both;}
+.rg-smeemo-card.is-newly-revealed::after {inset:-12%;border-style:dashed;border-width:1px;animation-delay:270ms;}
+.rg-smeemo-card.is-newly-revealed.is-smeemo::before,.rg-smeemo-card.is-newly-revealed.is-smeemo::after {border-color:#ffdf91;animation-duration:620ms;}
+@keyframes rg-smeemo-local-halo {0%{opacity:0;transform:scale(.85);} 35%{opacity:.7;} 100%{opacity:0;transform:scale(1.22);}}
+@media(prefers-reduced-motion:reduce) {.rg-smeemo-card.is-newly-revealed::before,.rg-smeemo-card.is-newly-revealed::after{animation:none!important;}}
