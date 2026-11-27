@@ -10,7 +10,7 @@ import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state
 import { createCharacterOcclusion } from "./character-occlusion.mjs?v=hazel-balcony-20261127-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
-import { createAudienceRenderer } from "./audience-render.mjs?v=crowd-left-20261127-v1";
+import { createAudienceRenderer } from "./audience-render.mjs?v=hidden-spectator-20261127-v1";
 import { createShowFX } from "./show-fx.mjs?v=compact-score-20261127-v1";
 import { CHARACTER_SOURCE_SIZE, CHARACTER_YAW_LIMIT, characterYaw, standingCharacterPose, projectCharacterQuad, pointInCharacterQuad } from "./character-billboards.mjs?v=fugi-stable-20261127-v1";
 import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
@@ -2807,7 +2807,7 @@ import {
     stageShow?.update(time,roomVisible&&!diceModeOpen,currentView.kind==="slot");
     if(roomVisible){if(crowdLastFrame!==null)crowdClock+=Math.max(0,Math.min(250,time-crowdLastFrame));crowdLastFrame=time;}else crowdLastFrame=null;
     const emotion=crowdState.step(crowdClock); updateCrowdStatus();
-    if(audience){audience.group.visible=roomVisible&&!diceModeOpen;audience.update(crowdClock,emotion,reducedMotion.matches);}
+    if(audience)audience.group.visible=roomVisible&&!diceModeOpen;
     signGlow?.update(time,roomVisible&&!diceModeOpen,reducedMotion.matches);
     if(!roomVisible||diceModeOpen){characterSelection?.hide();focusArrow.hide();}
     if(diceModeOpen)showFX?.update(time,{active:false});
@@ -2822,6 +2822,7 @@ import {
       // Re-pick under a stationary cursor as the damped camera moves, including its final frame.
       if ((changed || moving) && lastScenePointer && !lastScenePointer.buttons) updatePointer(lastScenePointer);
     }
+    audience?.update(crowdClock,emotion,reducedMotion.matches,camera.position);
     syncVipAmbience(roomVisible,emotion);
     syncMusic();
     preview.classList.toggle("is-trivia",!cameraDetached && currentView.kind === "trivia");

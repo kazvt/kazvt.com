@@ -121,6 +121,57 @@ export function paintCrowd(ctx,width,height,people,frame,emotion) {
   // A solid shadow at the base anchors the silhouettes to the stands.
   ctx.fillStyle='#21192f';ctx.fillRect(0,height-13,width,13);
 }
+// A single quiet Easter egg behind the right-hand audience panel. The
+// original photograph stays untouched; the derived cutout is a 15x38 pixel
+// plum-palette version with no bright eyes, outline or emissive material.
+export const CROWD_CAT_YAW_LIMIT=32*Math.PI/180;
+export const CROWD_CAT_YAW_WEIGHT=.65;
+export const CROWD_CAT=Object.freeze({
+  section:2, u:107/305, centerPixelY:51, height:38*4.3/180,
+  width:15*4.3/180, setback:.19,
+});
+export function crowdCatAnchor(section=CROWD_SECTIONS[CROWD_CAT.section]) {
+  const x=(CROWD_CAT.u-.5)*section.width;
+  return {x:section.x+Math.cos(section.yaw)*x-Math.sin(section.yaw)*CROWD_CAT.setback,
+    y:1.525+(.5-CROWD_CAT.centerPixelY/180)*4.3,
+    z:section.z-Math.sin(section.yaw)*x-Math.cos(section.yaw)*CROWD_CAT.setback};
+}
+// Cylindrical billboarding: authored inward-facing normal plus a capped
+// fraction of the eye bearing. Never copy camera pitch, roll or quaternion.
+export function crowdCatFacing(eye,anchor,section=CROWD_SECTIONS[CROWD_CAT.section]) {
+  if(!eye||![eye.x,eye.z].every(Number.isFinite))return null;
+  const sin=Math.sin(section.yaw),cos=Math.cos(section.yaw);
+  // The original panel is front-sided. Don't expose the cat from outside it.
+  const inward=(eye.x-section.x)*sin+(eye.z-section.z)*cos;
+  if(inward<=.025)return null;
+  const dx=eye.x-anchor.x,dz=eye.z-anchor.z;
+  const bearing=Math.atan2(dx*cos-dz*sin,dx*sin+dz*cos);
+  const yaw=section.yaw+Math.max(-CROWD_CAT_YAW_LIMIT,Math.min(CROWD_CAT_YAW_LIMIT,bearing*CROWD_CAT_YAW_WEIGHT));
+  if(dx*Math.sin(yaw)+dz*Math.cos(yaw)<=.025*Math.hypot(dx,dz))return null;
+  return yaw;
+}
+export function createCrowdCat(THREE,group) {
+  const section=CROWD_SECTIONS[CROWD_CAT.section],anchor=crowdCatAnchor(section);
+  let ready=false,disposed=false;
+  const tex=new THREE.TextureLoader().load(new URL('./assets/berries/smeemo-crowd.png',import.meta.url).href,
+    ()=>{if(!disposed)ready=true;},undefined,()=>{ready=false;});
+  tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestFilter;tex.generateMipmaps=false;tex.colorSpace=THREE.SRGBColorSpace;
+  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(CROWD_CAT.width,CROWD_CAT.height),new THREE.MeshBasicMaterial({map:tex,transparent:true,opacity:.7,alphaTest:.001,depthTest:true,depthWrite:false,side:THREE.FrontSide,toneMapped:false,fog:false}));
+  mesh.name='rg-audience-spectator';mesh.position.set(anchor.x,anchor.y,anchor.z);mesh.rotation.y=section.yaw;mesh.visible=false;
+  // Draw behind the translucent silhouettes regardless of object-center sort.
+  // The setback clears the panel at every allowed yaw; opaque scenery still
+  // occludes it through the normal depth test. No picking or HUD registration.
+  mesh.renderOrder=-1;group.add(mesh);
+  return {mesh,update(frame,emotion,reduced,eye){
+    if(disposed)return;
+    const yaw=crowdCatFacing(eye,anchor,section);
+    mesh.visible=ready&&yaw!==null;
+    if(!mesh.visible)return;
+    mesh.rotation.y=yaw;
+    const beat=frame/CROWD_FPS*2.1+1.7;
+    mesh.position.y=anchor.y+(reduced?0:emotion==='cheer'?Math.max(0,Math.sin(beat))* .055:Math.sin(beat)*.018);
+  },dispose(){if(disposed)return;disposed=true;mesh.visible=false;group.remove(mesh);tex.dispose();mesh.geometry.dispose();mesh.material.dispose();}};
+}
 export function createAudienceRenderer(THREE,scene) {
   const group=new THREE.Group();group.name='rg-audience';scene.add(group);
   const panels=CROWD_SECTIONS.map(section=>{
@@ -132,6 +183,17 @@ export function createAudienceRenderer(THREE,scene) {
     mesh.position.set(section.x,1.525,section.z);mesh.rotation.y=section.yaw;group.add(mesh);
     return {ctx,canvas,people,tex,mesh,mask};
   });
+  // A failed optional image load must never disable the procedural crowd.
+  let cat=null;
+  try { cat=createCrowdCat(THREE,group); } catch(error) { console.warn('Audience decoration unavailable',error); }
   let oldFrame=-1, oldEmotion='';
-  return {group,dispose(){scene.remove(group);for(const p of panels){p.tex.dispose();p.mesh.geometry.dispose();p.mesh.material.dispose();}},update(time,emotion,reduced=false){if(!group.visible)return;const frame=reduced?0:Math.floor(time*CROWD_FPS/1000);if(frame===oldFrame&&emotion===oldEmotion)return;oldFrame=frame;oldEmotion=emotion;for(const p of panels){paintCrowd(p.ctx,p.canvas.width,p.canvas.height,p.people,frame,emotion);applyCrowdEdgeMask(p.ctx,p.canvas.width,p.canvas.height,p.mask);p.tex.needsUpdate=true;}}};
+  return {group,dispose(){cat?.dispose();scene.remove(group);for(const p of panels){p.tex.dispose();p.mesh.geometry.dispose();p.mesh.material.dispose();}},update(time,emotion,reduced=false,eye){
+    if(!group.visible)return;
+    const frame=reduced?0:Math.floor(time*CROWD_FPS/1000);
+    // Orientation must follow every rendered camera frame, not the 6 FPS paint clock.
+    cat?.update(frame,emotion,reduced,eye);
+    if(frame===oldFrame&&emotion===oldEmotion)return;
+    oldFrame=frame;oldEmotion=emotion;
+    for(const p of panels){paintCrowd(p.ctx,p.canvas.width,p.canvas.height,p.people,frame,emotion);applyCrowdEdgeMask(p.ctx,p.canvas.width,p.canvas.height,p.mask);p.tex.needsUpdate=true;}
+  }};
 }
