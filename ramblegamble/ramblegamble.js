@@ -1,4 +1,4 @@
-import { createMenuMarquee } from "./menu-marquee.mjs?v=always-motion-20261127-v1";
+import { createMenuMarquee } from "./menu-marquee.mjs?v=marquee-crossfade-20261127-v1";
 import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=hazel-balcony-20261127-v1";
 import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcony.mjs?v=hazel-balcony-20261127-v1";
 import { createSignGlow } from "./sign-glow.mjs?v=neon-focus-20261127-v1";

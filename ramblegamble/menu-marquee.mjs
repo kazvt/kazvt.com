@@ -11,6 +11,9 @@ export function menuSignEnergy(id,phase){
   if(id>=32&&id<32+SIGN_BULB_COUNT){const p=phase.bulb-(id-32);return smooth(0,.5,p)*(1-smooth(1,3,p));}
   return 0;
 }
+// Keep the opening assembly intact; fade its decoded frames in, then retain
+// the completed frame beneath the exactly registered live plate during handoff.
+const INTRO_FADE_SECONDS=.32, HANDOFF_MS=700, GLOW_FADE_MS=360;
 const pad=3, W=MENU_SIGN_WIDTH+2*pad,H=MENU_SIGN_HEIGHT+2*pad;
 function maskAt(x,y){return x>=0&&x<128&&y>=0&&y<32?mask[(y*128+x)*4]:0;}
 // Precompute the two eight-tap neighborhoods used by the scene shader.
@@ -51,11 +54,15 @@ export function createMenuMarquee({menu,video,plate,glow,controls,doc=document,w
   const resetVideo=()=>{++attempt;video.pause();try{video.currentTime=0;}catch{}};
   function setPhase(next){
     phase=next;elapsed=0;last=null;clear();menu.dataset.marqueePhase=next;
-    video.hidden=next!=='video';plate.hidden=next==='video'||next==='closed';
+    video.hidden=next!=='video'&&next!=='handoff';plate.hidden=next==='video'||next==='closed';
+    video.style.opacity=next==='video'?'0':'1';
+    plate.style.opacity=next==='handoff'?'0':'';
+    glow.style.opacity=next==='settled'?'0':'1';
   }
   function settle(){++attempt;video.pause();setPhase('settled');}
+  function handoff(){++attempt;video.pause();setPhase('handoff');}
   function fallback(){++attempt;video.pause();setPhase('fallback');}
-  function failed(){unavailable=true;if(phase==='video')fallback();}
+  function failed(){unavailable=true;if(phase==='video')fallback();else if(phase==='handoff')settle();}
   function play(){
     const ticket=++attempt;
     try{Promise.resolve(video.play()).catch(()=>{if(ticket===attempt&&active&&phase==='video')failed();});}
@@ -65,8 +72,19 @@ export function createMenuMarquee({menu,video,plate,glow,controls,doc=document,w
     frame=0;if(!active||!allowed()){sync();return;}
     if(last!==null)elapsed+=Math.max(0,Math.min(250,time-last));last=time;
     if(phase==='video'&&elapsed>=9000)fallback(); // stalled media cannot strand a blank title
-    else if(phase==='fallback'&&elapsed>=2200)settle();
+    else if(phase==='video'){
+      // Media time, not menu time: a delayed decode cannot spend the fade offscreen.
+      video.style.opacity=String(smooth(0,INTRO_FADE_SECONDS,video.currentTime));
+    }else if(phase==='handoff'){
+      // Avoid a brightness dip: the live opaque sign becomes fully visible
+      // before the outgoing frame disappears, including its transparent margins.
+      const p=Math.min(1,elapsed/HANDOFF_MS);
+      plate.style.opacity=String(smooth(0,.8,p));
+      video.style.opacity=String(1-smooth(.72,1,p));
+      if(p>=1)settle();
+    }else if(phase==='fallback'&&elapsed>=2200)settle();
     else if(phase==='settled'&&image){
+      if(glow.style.opacity!=='1')glow.style.opacity=String(smooth(0,GLOW_FADE_MS,elapsed));
       elapsed%=SIGN_CYCLE_MS;
       if(elapsed<SIGN_ACTIVE_MS){paintMenuSign(image.data,elapsed);ctx.putImageData(image,0,0);painted=true;}
       else clear();
@@ -87,10 +105,10 @@ export function createMenuMarquee({menu,video,plate,glow,controls,doc=document,w
     if(phase==='closed'){
       if(unavailable)fallback();
       else{resetVideo();setPhase('video');play();}
-    }else if(active&&!wasActive&&phase==='video'){if(video.ended)settle();else play();}
+    }else if(active&&!wasActive&&phase==='video'){if(video.ended)handoff();else play();}
     schedule();
   }
-  function ended(){if(phase==='video'&&video.ended){settle();schedule();}}
+  function ended(){if(phase==='video'&&video.ended){handoff();schedule();}}
   function matte(){
     if(video.readyState<2)return;let alpha=false;
     try{const c=doc.createElement('canvas');c.width=c.height=1;const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(video,0,0,1,1);alpha=g.getImageData(0,0,1,1).data[3]<250;}catch{}
@@ -104,5 +122,5 @@ export function createMenuMarquee({menu,video,plate,glow,controls,doc=document,w
   doc.addEventListener('visibilitychange',sync);
   video.volume=Math.max(0,Math.min(1,video.volume*.2));
   setPhase('closed');sync();
-  return {sync,dispose(){disposed=true;observer.disconnect();if(frame)win.cancelAnimationFrame(frame);resetVideo();clear();video.removeEventListener('ended',ended);video.removeEventListener('error',failed);video.removeEventListener('loadeddata',matte);doc.removeEventListener('visibilitychange',sync);}};
+  return {sync,dispose(){disposed=true;observer.disconnect();if(frame)win.cancelAnimationFrame(frame);resetVideo();setPhase('closed');video.removeEventListener('ended',ended);video.removeEventListener('error',failed);video.removeEventListener('loadeddata',matte);doc.removeEventListener('visibilitychange',sync);}};
 }
