@@ -61,7 +61,7 @@ export function createMenuKaraoke({root,menu,theme,doc=document,win=window,cues}
   if(!lead||!back||!particles||!ball){root.hidden=true;return noop();}
   let index=-2,nodes=[],anchors=[],last=NaN,lastWord=-2,visible=false,dirty=true,wasReduced=false,disposed=false;
   const mot=win.matchMedia?.('(prefers-reduced-motion: reduce)');
-  const fx=Array.from({length:8},(_,i)=>{const n=doc.createElement('span');n.textContent=symbols[i%symbols.length];n.style.color=colors[i%colors.length];particles.append(n);return n;});
+  const fx=Array.from({length:2},(_,i)=>{const n=doc.createElement('span');n.textContent=symbols[i%symbols.length];n.style.color=colors[i%colors.length];particles.append(n);return n;});
   const clearFX=()=>{ball.hidden=true;for(const n of fx)n.style.opacity='0';};
   const invalidate=()=>{dirty=true;};
   // Only inner ink squashes; stable outer word boxes are measured on cue
@@ -79,7 +79,7 @@ export function createMenuKaraoke({root,menu,theme,doc=document,win=window,cues}
     lead.replaceChildren();back.replaceChildren();nodes=[];lastWord=-2;dirty=true;clearFX();
     root.dataset.section=cue.section;
     let response=false;
-    if(!cue.words.length){lead.textContent='♪ ♫ ♪';}
+    if(!cue.words.length){lead.textContent='♪ ♫';}
     for(const [word] of cue.words){
       if(word.startsWith('('))response=true;
       const n=doc.createElement('span'),ink=doc.createElement('span');n.className='rg-karaoke-word';n.dataset.word=word;
@@ -106,6 +106,10 @@ export function createMenuKaraoke({root,menu,theme,doc=document,win=window,cues}
         const w=cue.words[j],n=nodes[j];n.dataset.state=t>=w[2]?'done':j===state.word?'active':'waiting';
         n.style.setProperty('--sweep',t>=w[2]?'100%':'0%');n.style.setProperty('--sx','1');n.style.setProperty('--sy','1');
       }
+      if(state.word>=0)for(let j=0;j<fx.length;j++){
+        const variant=state.index+state.word+j;
+        fx[j].textContent=symbols[variant%symbols.length];fx[j].style.color=colors[variant%colors.length];
+      }
       lastWord=state.word;
     }
     if(state.word<0){clearFX();return;}
@@ -120,8 +124,11 @@ export function createMenuKaraoke({root,menu,theme,doc=document,win=window,cues}
     ball.hidden=false;ball.style.transform=`translate3d(${hop.x}px,${hop.y}px,0) translate(-50%,-100%) scale(${hop.sx},${hop.sy})`;
     // Bounded reusable music glyphs; phase follows actual media playback.
     const age=clamp((t-cue.words[state.word][1])/.5);
+    // Alternate one and two notes deterministically, even after seeks.
+    const count=1+(state.word%2);
     for(let j=0;j<fx.length;j++){
-      const side=j%2===0?-1:1,spread=13+(j%4)*9,x=a.x+side*(8+age*spread),y=Math.max(14,a.y-4-age*(6+(j%3)*5));
+      if(j>=count){fx[j].style.opacity='0';continue;}
+      const side=(j+(count===1?state.index:0))%2===0?-1:1,spread=13+(j%4)*9,x=a.x+side*(8+age*spread),y=Math.max(14,a.y-4-age*(6+(j%3)*5));
       fx[j].style.transform=`translate3d(${x}px,${y}px,0) translate(-50%,-100%) rotate(${side*(12+age*32)}deg) scale(${.7+.3*Math.sin(Math.PI*age)})`;
       fx[j].style.opacity=String(Math.sin(Math.PI*age)*.96);
     }

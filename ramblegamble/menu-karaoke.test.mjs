@@ -23,13 +23,14 @@ test('media-clock lookup selects every individual word and resets on seek, loop 
  const malformed=structuredClone(cues);malformed[1].words[0][2]=100;assert.throws(()=>validateKaraokeCues(malformed),/Invalid word/);
 });
 function fixture(){
- class El{constructor(){this.hidden=false;this.children=[];this.dataset={};this.textContent='';this.style={setProperty(k,v){this[k]=v;}};}get childElementCount(){return this.children.length;}append(n){this.children.push(n);}replaceChildren(){this.children=[];this.textContent='';}querySelector(sel){return this.map?.[sel];}}
+ const motion={matches:false};
+ class El{constructor(){this.hidden=false;this.children=[];this.dataset={};this.textContent='';this.style={setProperty(k,v){this[k]=v;}};}getBoundingClientRect(){return {left:10,top:20,width:50,height:20};}get childElementCount(){return this.children.length;}append(n){this.children.push(n);}replaceChildren(){this.children=[];this.textContent='';}querySelector(sel){return this.map?.[sel];}}
  const root=new El(),menu=new El();root.hidden=true;root.map=Object.fromEntries(['lead','response','particles','ball'].map(k=>['.rg-karaoke-'+k,new El()]));
- const theme={paused:true,ended:false,error:null,readyState:4,currentTime:0};const doc={createElement:()=>new El()},win={matchMedia:()=>({matches:false})};const fx=createMenuKaraoke({root,menu,theme,doc,win});return {root,menu,theme,fx,lead:root.map['.rg-karaoke-lead'],back:root.map['.rg-karaoke-response'],particles:root.map['.rg-karaoke-particles']};
+ const theme={paused:true,ended:false,error:null,readyState:4,currentTime:0};const doc={createElement:()=>new El()},win={matchMedia:()=>motion};const fx=createMenuKaraoke({root,menu,theme,doc,win});return {root,menu,theme,fx,motion,lead:root.map['.rg-karaoke-lead'],back:root.map['.rg-karaoke-response'],particles:root.map['.rg-karaoke-particles']};
 }
 test('karaoke remains hidden before actual theme playback; keeps exact progress when media time freezes; handles seeks and response grouping',()=>{
  const f=fixture();f.fx.update(true);assert.equal(f.root.hidden,true);f.theme.paused=false;f.theme.currentTime=13;f.fx.update(false);assert.equal(f.root.hidden,true);
- f.fx.update(true);assert.equal(f.root.hidden,false);assert.equal(f.menu.dataset.karaokeActive,'true');assert.equal(f.lead.children.length,7);assert.equal(f.back.children.length,2);assert.equal(f.particles.children.length,8);
+ f.fx.update(true);assert.equal(f.root.hidden,false);assert.equal(f.menu.dataset.karaokeActive,'true');assert.equal(f.lead.children.length,7);assert.equal(f.back.children.length,2);assert.equal(f.particles.children.length,2);
  const c=cues[3];f.theme.currentTime=(c.words[1][1]+c.words[1][2])/2;f.fx.update();assert.equal(f.lead.children[1].dataset.state,'active');assert.equal(f.lead.children[1].style['--sweep'],'50.0%');f.fx.update();assert.equal(f.lead.children[1].style['--sweep'],'50.0%');
  f.theme.currentTime=c.words[0][1];f.fx.update();assert.equal(f.lead.children[0].dataset.state,'active');assert.equal(f.lead.children[1].dataset.state,'waiting');
  f.theme.currentTime=100;f.fx.update();assert.equal(f.root.dataset.section,'instrumental');assert.equal(f.back.hidden,true);f.theme.currentTime=0;f.fx.update();assert.equal(f.root.dataset.section,'instrumental');
@@ -68,8 +69,25 @@ test('retro marker lands on the current word and advances monotonically on the s
 test('retro karaoke uses only lyric rows, notes and a single ball, no chrome',()=>{
  const html=readFileSync(new URL('../rg/index.html',import.meta.url),'utf8');
  assert.match(html,/class="rg-karaoke-ball"[^>]*hidden/);assert.doesNotMatch(html,/rg-karaoke-(ribbon|deck|label|next|track|progress)/);
- const f=fixture();f.theme.paused=false;f.theme.currentTime=13;f.fx.update();assert.deepEqual(f.particles.children.map(n=>n.textContent),['♪','♫','♩','♬','♪','♫','♩','♬']);
+ const f=fixture();f.theme.paused=false;f.theme.currentTime=13;f.fx.update();assert.equal(f.particles.children.length,2);
  const w=f.lead.children[0];assert.equal(w.children[0].className,'rg-karaoke-ink');assert.equal(w.children[0].textContent,'i');
+});
+
+test('music-note bursts alternate one and two and never exceed two across playback or seeks',()=>{
+ const f=fixture();f.theme.paused=false;
+ const visible=()=>f.particles.children.filter(n=>Number(n.style.opacity)>0).length;
+ for(const c of cues){
+  for(const [j,w] of c.words.entries()){
+   f.theme.currentTime=w[1]+Math.min(.15,(w[2]-w[1])/2);f.fx.update();
+   assert.equal(visible(),1+j%2);assert.equal(f.particles.children.length,2);
+  }
+ }
+ const words=cues[3].words;
+ for(const j of [1,0,1,0]){f.theme.currentTime=(words[j][1]+words[j][2])/2;f.fx.update();assert.equal(visible(),1+j%2);}
+ f.motion.matches=true;f.fx.update();assert.equal(visible(),0);
+ f.motion.matches=false;f.fx.update();assert.equal(visible(),1);
+ f.theme.currentTime=9;f.fx.update();assert.equal(visible(),0);assert.equal(f.lead.textContent,'♪ ♫');
+ f.fx.hide();assert.equal(visible(),0);
 });
 
 test('opening instrumental break clears lyrics and marker until the delayed first chorus',()=>{
