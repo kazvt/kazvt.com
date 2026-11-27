@@ -782,3 +782,22 @@ html[data-rg-host-locked] .rg-smeemo-lightning {display:none!important;}
 .rg-smeemo-card.is-newly-revealed.is-smeemo::before,.rg-smeemo-card.is-newly-revealed.is-smeemo::after {border-color:#ffdf91;animation-duration:620ms;}
 @keyframes rg-smeemo-local-halo {0%{opacity:0;transform:scale(.85);} 35%{opacity:.7;} 100%{opacity:0;transform:scale(1.22);}}
 @media(prefers-reduced-motion:reduce) {.rg-smeemo-card.is-newly-revealed::before,.rg-smeemo-card.is-newly-revealed::after{animation:none!important;}}
+
+/* Show-table choreography: no changes to anonymous response data or controls. */
+.rg-show-round .rg-card-player-progress{position:relative;border-radius:2px;background:linear-gradient(150deg,#5a438b66,#21184477);box-shadow:inset 0 1px #d0b6ff44,2px 3px #211844;}
+.rg-show-round .rg-card-player-progress.is-submitted{background:linear-gradient(150deg,#496a5f88,#21184477);}
+.rg-show-round .rg-card-vote-count{border:1px solid #ffe1a6;box-shadow:inset 0 1px #ffe1a655,2px 2px #302451;background:linear-gradient(#a53e50,#74243f);}
+.rg-show-round.is-berryblast .rg-card-answer{background:linear-gradient(135deg,#fff3dc,#e8dafa);box-shadow:inset 0 1px #fff,3px 4px #332053;}
+.rg-show-round.is-berryblast .rg-card-answer.is-winner{background:linear-gradient(135deg,#fff2bb,#f5e5d9);}
+.rg-show-round .rg-show-action{background:linear-gradient(#785cc8,#49317f);box-shadow:inset 0 1px #fff5da66,3px 3px #8b2626;}
+@media(prefers-reduced-motion:no-preference){
+ .rg-show-round .rg-show-submitted-now img{animation:rg-stage-submit .48s cubic-bezier(.18,.85,.3,1) both;}
+ .rg-show-submission-tick{animation:rg-stage-submit .45s cubic-bezier(.18,.85,.3,1);}
+ .rg-show-back-nudge{animation:rg-stage-back-nudge .45s ease-out var(--reveal-delay,0ms) both;}
+ .rg-show-round .rg-show-reveal{animation:rg-stage-card-arrive .65s cubic-bezier(.18,.8,.25,1) var(--reveal-delay,0ms) both;}
+ .rg-show-round .rg-show-winner{animation:rg-stage-card-crown .88s cubic-bezier(.18,.8,.25,1) both;}
+ @keyframes rg-stage-submit{0%{scale:.82;opacity:.65}42%{scale:1.17;opacity:1}75%{scale:.98}100%{scale:1;opacity:1}}
+ @keyframes rg-stage-back-nudge{0%,100%{translate:0 0;rotate:0deg}38%{translate:0 -5px;rotate:-3deg}68%{translate:0 2px;rotate:1deg}}
+ @keyframes rg-stage-card-arrive{0%{opacity:0;translate:0 20px;transform:perspective(600px) rotateY(-74deg) rotateZ(-5deg) scale(.85)}65%{opacity:1;translate:0 -5px;transform:perspective(600px) rotateY(8deg) scale(1.025)}100%{opacity:1;translate:0 0;transform:none}}
+ @keyframes rg-stage-card-crown{0%{scale:1;translate:0 0}38%{scale:1.045;translate:0 -5px;filter:brightness(1.12) drop-shadow(0 0 9px #ffe567)}100%{scale:1;translate:0 0}}
+}

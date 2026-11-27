@@ -1083,29 +1083,24 @@ body.ramble-page *::after {
 .rg-character-tag[hidden] {display:none;}
 .rg-character-tag::after {content:"";position:absolute;top:100%;left:var(--character-arrow-x,50%);transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--character-accent,#ffe567);}
 
-/* Character balance readouts use the actual chip and star art, plus text so
-   the two currencies are distinguishable without relying on icon color. */
-.rg-character-contestant-tag {box-sizing:border-box;max-width:calc(100% - 12px);padding:5px 7px 6px;white-space:normal;text-align:center;letter-spacing:0;container-type:inline-size;}
-.rg-character-name {letter-spacing:.08em;overflow-wrap:anywhere;}
-.rg-character-stats {display:grid;gap:4px;margin-top:5px;padding-top:5px;border-top:1px solid #756491;}
-.rg-character-stat {display:grid;grid-template-columns:24px minmax(0,1fr);column-gap:5px;align-items:center;text-align:left;line-height:1.1;}
-.rg-character-stat img {grid-column:1;grid-row:1 / span 2;display:block;width:24px;height:24px;object-fit:contain;}
-/* The provided chip is an opaque circular texture on black; clip only the
-   outside corners at display time, retaining the exact source PNG. */
-.rg-character-stat:first-child img {clip-path:circle(50%);}
-.rg-character-stat-label {grid-column:2;color:#e2d5f8;font:700 10px/1.1 monospace;text-transform:uppercase;}
-.rg-character-stat-value {grid-column:2;min-width:0;color:#fff5da;font:900 clamp(13px,1.45vw,17px)/1.1 monospace;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;}
+/* Compact arcade nameplates: stable projected outer shell, single-line exact balances. */
+.rg-character-contestant-tag {box-sizing:border-box;max-width:calc(100% - 12px);padding:4px 5px 5px;text-align:center;letter-spacing:0;white-space:nowrap;background:linear-gradient(145deg,#443366 0%,#302451 48%,#251a45 100%);box-shadow:inset 0 1px #ffffff30,inset 0 -2px #160e33,3px 4px #211844,0 0 8px color-mix(in srgb,var(--character-accent) 30%,transparent);}
+.rg-character-name {letter-spacing:.08em;white-space:nowrap;font-size:clamp(13px,1.6vw,22px);text-shadow:1px 1px #6f5992,2px 2px #211844,3px 3px #211844;}
+.rg-character-contestant-tag .rg-character-name {font-size:min(clamp(13px,1.6vw,22px),var(--balance-name,22px));}
+.rg-character-stats {display:flex;justify-content:center;align-items:center;gap:var(--balance-gap,4px);margin-top:3px;padding-top:3px;border-top:1px solid #756491;white-space:nowrap;}
+.rg-character-stat {position:relative;display:flex;align-items:center;gap:var(--balance-gap,4px);min-width:0;line-height:1.1;flex:0 0 auto;}
+.rg-character-stat + .rg-character-stat {padding-left:3px;border-left:1px solid #756491;}
+.rg-character-stat > img {display:block;flex:none;width:var(--balance-icon,19px);height:var(--balance-icon,19px);object-fit:contain;filter:drop-shadow(1px 2px 0 #160e33);image-rendering:pixelated;}
+.rg-character-stat:first-child > img,.rg-character-stat:first-child .rg-balance-token {clip-path:circle(50%);}
+.rg-character-stat-label {position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;}
+.rg-character-stat-value {color:#fff5da;font:900 var(--balance-font,16px)/1.1 monospace;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right;}
+.rg-balance-fx {position:absolute;inset:0;pointer-events:none;z-index:2;}
+.rg-balance-token {position:absolute;left:0;top:0;width:var(--balance-icon,19px);height:var(--balance-icon,19px);object-fit:contain;image-rendering:pixelated;filter:drop-shadow(1px 1px #211844);}
+.rg-balance-ring {position:absolute;inset:-4px;border:1px solid #ffe567;box-shadow:0 0 5px #ffe567;pointer-events:none;}
+.rg-balance-delta {position:absolute;left:50%;top:100%;font:900 min(12px,calc(var(--balance-font,16px) * .85))/1 monospace;text-shadow:1px 1px #211844,-1px -1px #211844;white-space:nowrap;}
 .rg-billboard-layer.rg-group-stats-visible ~ .rg-points-hud {visibility:hidden;}
+@media(prefers-reduced-motion:reduce){.rg-balance-fx{display:none!important;}}
 
-/* A wider tag can place the two counters side by side, giving the character
-   more vertical space. The stacked fallback fits narrow participant lanes. */
-@container (min-width: 132px) {
-  .rg-character-stats {grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;}
-  .rg-character-stat {grid-template-columns:20px minmax(0,1fr);column-gap:3px;row-gap:2px;}
-  .rg-character-stat img {grid-row:1;width:20px;height:20px;}
-  .rg-character-stat-label {grid-row:1;}
-  .rg-character-stat-value {grid-column:1 / -1;text-align:center;}
-}
 /* If depth clipping hides a seat, preserve the legacy all-player points HUD
    but move it away from the remaining top-anchored nameplates. */
 .rg-billboard-layer.rg-group-stats-partial ~ .rg-points-hud {top:auto;bottom:max(12px,env(safe-area-inset-bottom));}

@@ -30,3 +30,25 @@
 .rg-audience-controls{display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin-block:8px}.rg-audience-controls strong{font-size:12px}.rg-audience-controls button{font-size:12px;padding:5px 8px}.rg-audience-controls button[aria-pressed="true"]{background:#8b2626;color:#fff4da;outline:2px solid #8b2626;outline-offset:1px;}
 
 .rg-audience-controls small{font-size:10px;opacity:.8;white-space:nowrap;}
+
+/* Broadcast trivia: pixel-arcade faceplates, short mechanical arrival and
+   answer feedback. Only the public show layer, not private contestant input. */
+#rg-live-trivia .rg-live-question{text-shadow:1px 2px #7863b2,3px 4px #211844,0 0 9px #c6a0ff55;}
+#rg-live-trivia .rg-live-stage-content:not([data-kind="image-grid"]):not([data-kind="choice-image"]):not([data-kind="choice-image-wide"]) .rg-live-tile:not([aria-pressed=true]){background:linear-gradient(145deg,#c5bdfb,#a6a1fa 62%,#8d83e3);box-shadow:inset 0 1px #fff7, inset 0 -2px #5745aa99,2px 3px #261740;}
+#rg-live-trivia .rg-live-button[aria-pressed=true]{background:linear-gradient(#e3e9d8,#b4dfc8);}
+#rg-live-trivia .rg-live-digit{box-shadow:inset 0 2px #ffffff55,2px 3px #261740;}
+#rg-live-trivia .rg-live-feedback[data-state]{box-shadow:inset 0 1px #fff7,3px 3px #211844;}
+#rg-live-trivia .rg-spectator-seat[aria-pressed=true]{background:linear-gradient(150deg,#b59af033,#271a4c88);box-shadow:inset 0 1px #e0c7ff77,2px 3px #211844;}
+@media(prefers-reduced-motion:no-preference){
+ #rg-live-trivia .rg-question-dealt .rg-live-question{animation:rg-trivia-marquee-in .64s cubic-bezier(.16,.82,.22,1) both;}
+ #rg-live-trivia .rg-question-dealt .rg-live-grid>.rg-live-tile{animation:rg-trivia-tile-in .46s cubic-bezier(.18,.75,.24,1) both;animation-delay:var(--rg-entrance-delay,0ms);}
+ #rg-live-trivia .rg-live-correct .rg-live-question{animation:rg-question-win .8s cubic-bezier(.18,.8,.25,1);}
+ #rg-live-trivia .rg-live-button:not(:disabled):active{scale:.98;}
+ #rg-live-trivia .rg-live-feedback[data-state="correct"]{animation:rg-trivia-confirm .55s cubic-bezier(.16,.8,.22,1) both;}
+ #rg-live-trivia .rg-live-feedback[data-state="wrong"]{animation:rg-trivia-refuse .32s ease-out both;}
+ #rg-live-trivia .rg-spectator-panel-win .rg-spectator-panel-heading{animation:rg-trivia-confirm .7s ease-out both;}
+ @keyframes rg-trivia-marquee-in{0%{opacity:.15;transform:perspective(600px) rotateX(-30deg) translateY(-12px) scale(.97)}58%{opacity:1;transform:perspective(600px) rotateX(4deg) translateY(2px)}100%{opacity:1;transform:none}}
+ @keyframes rg-trivia-tile-in{0%{opacity:.2;transform:perspective(550px) rotateX(-22deg) translateY(7px) scale(.95)}70%{opacity:1;transform:translateY(-1px) scale(1.01)}100%{opacity:1;transform:none}}
+ @keyframes rg-trivia-confirm{0%{scale:.93;opacity:.65}42%{scale:1.045;opacity:1}100%{scale:1;opacity:1}}
+ @keyframes rg-trivia-refuse{0%,100%{translate:0 0}25%{translate:-3px 0}65%{translate:3px 0}}
+}

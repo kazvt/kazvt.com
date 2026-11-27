@@ -97,3 +97,13 @@ test('portal embers are bounded, depth-tested, animated, and disabled with the r
  fx.update(200,{active:false});assert.equal(ember.visible,false);fx.update(2000,{reduced:true});assert.equal(ember.visible,false);
  fx.update(2100,{});assert.equal(ember.visible,true);
 });
+
+import {createRoomLightTrim} from './room-light-trim.mjs';
+test('architecture trim uses one bounded depth-tested instance pool and honors reduced motion',()=>{
+ const group=new Group(),door={wallX:16.764,minY:0,maxY:2.032,minZ:-2.4384,maxZ:-1.4224};const {mesh,update}=createRoomLightTrim(THREE,group,door);
+ assert.equal(mesh.count,102);assert.equal(group.children.length,1);assert.equal(mesh.material.depthTest,true);assert.equal(mesh.material.depthWrite,false);assert.equal(mesh.visible,false);
+ update(0,true,false,{kind:'hazel'});const first=mesh.colors.slice();update(500,true,false,{kind:'hazel'});assert.notDeepEqual(mesh.colors,first);
+ update(800,true,true,{kind:'dice-door'});const still=mesh.colors.slice();update(12000,true,true,{kind:'dice-door'});assert.deepEqual(mesh.colors,still);
+ for(const {position:p} of mesh.matrices.slice(76))assert.ok(p.z+.026<door.minZ||p.z-.026>door.maxZ||p.y-.013>door.maxY);
+ update(13000,false,false,{});assert.equal(mesh.visible,false);
+});

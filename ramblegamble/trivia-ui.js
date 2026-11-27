@@ -2456,7 +2456,11 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
       const selection=spectatorRoundId===round.id?spectator?.selection():undefined;
       spectator=null;spectatorRoundId=round.id;liveContent.classList.remove('rg-spectator','rg-spectator-all');
       if(SPECTATOR_MODES.includes(q.kind))spectator=createTriviaSpectator(liveContent,q,selection);
-      else renderLiveQuestion(liveContent,q,{interactive:!!hostCheck,hostCheck});lastRenderedQuestion=key;
+      else renderLiveQuestion(liveContent,q,{interactive:!!hostCheck,hostCheck});
+      [...liveContent.querySelectorAll(".rg-live-grid > .rg-live-tile")].forEach((tile,i)=>tile.style.setProperty("--rg-entrance-delay",`${Math.min(i,8)*35}ms`));
+      lastRenderedQuestion=key;
+      // Do not replay the entrance on unrelated layout or response updates.
+      setTimeout(()=>{if(lastRenderedQuestion===key)liveContent.classList.remove("rg-question-dealt");},800);
     }
     spectator?.update(round);
     liveLayer.dataset.ready="true";

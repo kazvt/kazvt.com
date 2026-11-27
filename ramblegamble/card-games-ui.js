@@ -446,7 +446,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     }, reducedMotion.matches ? 20 : 940);
   }
 
-  function berryProgress(round) {
+  function berryProgress(round, previous=null) {
     const progress = element("div", "rg-card-progress");
     progress.setAttribute("aria-label", "Player submission status");
     for (const player of CARD_GAME_PLAYERS) {
@@ -456,6 +456,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
         image.src = berryImages[player];
         image.alt = `${playerNames[player]} ${round.submissions[player] ? "submitted" : "waiting"}`;
         item.append(image);
+        if(previous && round.submissions[player]&&!previous[player])item.classList.add("rg-show-submitted-now");
       }
       progress.append(item);
     }
@@ -488,20 +489,20 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     const sameRound = lastPresentation.id === round.id;
     const fresh = new Set(visible.filter(r => !sameRound || !lastPresentation.visible.includes(r.id)).map(r => r.id));
     const resultsNow = round.phase === "results" && (!sameRound || lastPresentation.phase !== "results");
-    const previousVotes=lastPresentation.votes||{};
-    lastPresentation = { id: round.id, visible: visible.map(r => r.id), phase: round.phase, votes:{...round.votes} };
+    const previousVotes=lastPresentation.votes||{},previousSubmissions=sameRound?lastPresentation.submissions:null;
+    lastPresentation = { id: round.id, visible: visible.map(r => r.id), phase: round.phase, votes:{...round.votes},submissions:{...round.submissions} };
     if(sameRound&&!layer.classList.contains("is-off-table")){if(resultsNow)audienceReact("cheer");else if(fresh.size)audienceReact("suspense");}
     content.replaceChildren();
     const shell = element("div", `rg-card-round rg-show-round${round.mode === "quiplash" ? " is-berryblast" : " is-red-handed"}`);
     const promptSide = element("div", "rg-card-prompt-side");
     const prompt = promptCard(round.prompt, round.mode === "red-handed" ? "suspect" : "quiplash");
     if (!sameRound) prompt.classList.add("rg-prompt-deal");
-    promptSide.append(prompt, berryProgress(round));
+    promptSide.append(prompt, berryProgress(round,previousSubmissions));
     const submitted = CARD_GAME_PLAYERS.filter(player => round.submissions[player]).length;
     const answers = element("div", "rg-card-answer-grid rg-show-answer-grid");
     const right = element("div", "rg-show-answers");
     if (round.phase === "submissions") {
-      right.append(element("p", "rg-show-status", `${submitted} / 3`));
+      right.append(element("p", `rg-show-status${previousSubmissions&&CARD_GAME_PLAYERS.some(p=>round.submissions[p]&&!previousSubmissions[p])?" rg-show-submission-tick":""}`, `${submitted} / 3`));
       liveStatus.textContent = `${submitted} of 3 submitted.`;
     } else {
       for (const [i, response] of visible.entries()) {
@@ -522,6 +523,8 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
         for (let i = visible.length; i < round.responses.length; i++) {
           const back = element("div", "rg-show-answer-back");
           back.setAttribute("aria-label", "Unrevealed answer");
+          if(sameRound&&lastPresentation.phase==="reveal"&&fresh.size&&i===visible.length)back.classList.add("rg-show-back-nudge");
+          back.style.setProperty("--reveal-delay",`${Math.min(i,2)*75}ms`);
           answers.append(back);
         }
         liveStatus.textContent = `${visible.length} of ${round.responses.length} answers revealed.`;

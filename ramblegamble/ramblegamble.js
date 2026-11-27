@@ -2,7 +2,7 @@ import { createMenuMarquee } from "./menu-marquee.mjs?v=menu-neon-20261127-v1";
 import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=hazel-balcony-20261127-v1";
 import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcony.mjs?v=hazel-balcony-20261127-v1";
 import { createSignGlow } from "./sign-glow.mjs?v=neon-focus-20261127-v1";
-import { selectedCharacterId, characterRenderPose, createCharacterSelection } from "./character-selection.mjs?v=hazel-balcony-20261127-v1";
+import { selectedCharacterId, characterRenderPose, createCharacterSelection } from "./character-selection.mjs?v=compact-score-20261127-v1";
 import { sampleVipAmbience } from "./vip-atmosphere.mjs?v=vip-atmosphere-20261127-v1";
 import { createStageShow } from "./stage-show.mjs?v=all-curtain-20261127-v1";
 import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state.mjs?v=all-curtain-20261127-v1";
@@ -10,7 +10,7 @@ import { createCharacterOcclusion } from "./character-occlusion.mjs?v=hazel-balc
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { createAudienceRenderer } from "./audience-render.mjs?v=crowd-left-20261127-v1";
-import { createShowFX } from "./show-fx.mjs?v=neon-focus-20261127-v1";
+import { createShowFX } from "./show-fx.mjs?v=compact-score-20261127-v1";
 import { CHARACTER_SOURCE_SIZE, CHARACTER_YAW_LIMIT, characterYaw, standingCharacterPose, projectCharacterQuad, pointInCharacterQuad } from "./character-billboards.mjs?v=fugi-stable-20261127-v1";
 import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
@@ -2589,7 +2589,7 @@ import {
     };
     const selectionId = !cameraDetached && !freecam?.active ? selectedCharacterId(currentView) : null;
     for (const billboard of billboards) {
-      billboard.renderPose=characterRenderPose(billboard,billboard.id===selectionId?time-characterSelectedAt:Infinity,reducedMotion.matches);
+      billboard.renderPose=characterRenderPose(billboard,billboard.id===selectionId?time-characterSelectedAt:Infinity,reducedMotion.matches,{time:!cameraDetached&&!freecam?.active&&!cameraTransition&&["contestants","contestant","host"].includes(currentView.kind)?time:undefined,...characterSelection?.reaction(billboard.id,time)});
       const quad = projectCharacterQuad(billboard.renderPose,camera.position,project,viewport,camera.near);
       const transform = quad && createCssProjectiveQuad(CHARACTER_SOURCE_SIZE,CHARACTER_SOURCE_SIZE,quad.corners);
       billboard.projectedQuad = transform ? quad : null;
@@ -3004,6 +3004,7 @@ import {
   }
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
+      characterSelection?.hide();
       slotCabinetFX?.reset();
       focusArrow.hide();
       stageShow?.reset(currentView.kind==="slot");

@@ -280,3 +280,11 @@ test('moving cabinet keeps actual controls and reel corners in the viewport acro
   }
  }
 });
+
+import {TRIM_PATHS} from './room-light-trim.mjs';
+test('architectural pixel trim is supported by authored stage ledges',()=>{
+ const m=model('rg_stage'),n=m.d.nodes[0],triangles=[];
+ for(const p of m.d.meshes[n.mesh].primitives){const points=m.values(p.attributes.POSITION).map(v=>add(rotateQuaternion(v,n.rotation),n.translation||[0,0,0]));const indices=m.values(p.indices).flat();for(let i=0;i<indices.length;i+=3)triangles.push(indices.slice(i,i+3).map(j=>points[j]));}
+ const contains=(p,t)=>{if(!t.every(v=>Math.abs(v[1]-p[1])<.0002))return false;const [a,b,c]=t.map(v=>[v[0],v[2]]),q=[p[0],p[2]],u=sub(b,a),v=sub(c,a),w=sub(q,a),det=u[0]*v[1]-u[1]*v[0];if(Math.abs(det)<1e-10)return false;const s=(w[0]*v[1]-w[1]*v[0])/det,r=(u[0]*w[1]-u[1]*w[0])/det;return s>=-.0001&&r>=-.0001&&s+r<=1.0001;};
+ for(const path of TRIM_PATHS)for(let i=0;i<path.count;i++){const p=add(path.a,mul(sub(path.b,path.a),(i+.5)/path.count));assert.ok(triangles.some(t=>contains(p,t)),`Unsupported trim at ${p}`);}
+});
