@@ -3,7 +3,7 @@ const tracks = [
   { file: 'room-bed.mp3', gain: .13 },
   { file: 'room-detail.mp3', gain: .042 },
   { file: 'audience-cheer.mp3', gain: .14, cheer: true },
-  { file: 'vip-water-drips.ogg', gain: .22, water: true },
+  { file: 'vip-water-drips.ogg?v=cc0-loop-1', gain: .22, water: true },
 ];
 const base = new URL('./assets/sfx/foley/', import.meta.url);
 export function createRoomAmbience({ createMedia = () => new Audio(), random = Math.random } = {}) {
