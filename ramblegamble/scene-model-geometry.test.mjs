@@ -346,3 +346,16 @@ test('hidden spectator close-up has a clear center ray through the actual opaque
   const blocked=tris.some(([v0,v1,v2])=>{const e1=sub(v1,v0),e2=sub(v2,v0),h=cross(d,e2),det=dot(e1,h);if(Math.abs(det)<1e-9)return false;const s=sub(eye,v0),u=dot(s,h)/det;if(u<0||u>1)return false;const q=cross(s,e1),v=dot(d,q)/det;if(v<0||u+v>1)return false;const t=dot(e2,q)/det;return t>.0001&&t<.9999;});assert.ok(!blocked,`opaque stage blocks cat center at aspect ${aspect}, ${yaw}/${pitch}`);
  }}
 });
+
+import {dancePose} from './stage-dance.mjs';
+import {characterRenderPose} from './character-selection.mjs';
+test('dancing standing Fugis remain within the viewport even during selection and currency reactions',()=>{
+ const m=model('rg_stage'),root=m.d.nodes.find(n=>n.name==='chair'&&n.children),entries=root.children.map(i=>m.d.nodes[i]).filter(n=>/^(chair|tall_chair)$/.test(n.name));
+ const world=p=>add(p,root.translation),host=entries.filter(n=>n.name==='chair').sort((a,b)=>box(nodePoints(m,b).map(world)).max[1]-box(nodePoints(m,a).map(world)).max[1])[0],chairs=[host,...entries.filter(n=>n.name==='tall_chair')];
+ const [maxYaw,maxPitch]=focusLimits('contestant'),xyz=([x,y,z])=>({x,y,z}),arr=({x,y,z})=>[x,y,z];
+ for(const n of chairs){const chair=box(nodePoints(m,n).map(world)),pose=standingCharacterPose({min:xyz(chair.min),max:xyz(chair.max)},n===host),anchor=arr(pose.anchor),relativeYaw=Math.max(...[-1,1].map(sign=>{const a=-.38+sign*maxYaw;return Math.abs(a-characterYaw(Math.sin(a),Math.cos(a)));}));
+  for(const [w,h] of [[320,640],[390,844],[768,1024],[1366,668],[1920,1080],[2560,1080],[844,390]]){const distance=fitCharacterCloseup({...pose,aspect:w/h,pitchCap:maxPitch,relativeYaw});
+   for(const yaw of [-.38-maxYaw,-.38,-.38+maxYaw])for(const pitch of [-maxPitch,0,maxPitch]){const b=basis(yaw,Math.sin(Math.asin(.12)+pitch));for(let t=0;t<2000;t+=100)for(const age of [0,90,180,Infinity]){const p=characterRenderPose(pose,age,false,{reactAge:age,delta:1,time:t}),d=dancePose(t,.9);p.worldWidth*=d.width;p.shear=d.shear;const corners=characterCorners(p.anchor,p.worldWidth,p.worldHeight,characterYaw(Math.sin(yaw),Math.cos(yaw)),p.shear).map(arr),points=project(relative(corners,anchor,b),{distance,shiftX:0,shiftY:0},w,h);assert.ok(points.every(q=>q[2]>.1&&Math.abs(q[0])<1&&Math.abs(q[1])<1),`${n.name} ${w}x${h}, ${t}, ${age}`);}}
+  }
+ }
+});

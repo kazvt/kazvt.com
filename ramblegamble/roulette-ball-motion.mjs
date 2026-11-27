@@ -1,5 +1,5 @@
 // Geometry values are in the supplied rg_roulette.gltf model's local units.
-export const ROULETTE_BALL_COLOR = 0x212068; // sampled from stage.png's dark floor checker
+export const ROULETTE_BALL_COLOR = 0x8260c4; // lighter violet, distinct from the dark checker and yellow pockets
 export const ROULETTE_BALL_TRACK_RADIUS = Math.hypot(13, 1); // authored ball offset (-13, 1)
 export const ROULETTE_BALL_LANDING_RADIUS = 11.25;
 export const ROULETTE_BALL_GEOMETRY_RADIUS = 0.84; // maximum vertex radius in the supplied ball mesh

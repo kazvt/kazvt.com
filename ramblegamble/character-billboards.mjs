@@ -21,18 +21,24 @@ export function standingCharacterPose(bounds, host = false) {
       z: bounds.max.z + (host ? .24 : .32) } };
 }
 
-export function characterCorners(anchor, width, height, yaw) {
+export function characterCorners(anchor, width, height, yaw, shear=0) {
   const x = Math.cos(yaw) * width / 2, z = -Math.sin(yaw) * width / 2, y = height / 2;
-  return [[-1,1],[1,1],[1,-1],[-1,-1]].map(([s,t]) => ({x:anchor.x+s*x,y:anchor.y+t*y,z:anchor.z+s*z}));
+  return [[-1,1],[1,1],[1,-1],[-1,-1]].map(([s,t]) => ({x:anchor.x+s*x+Math.cos(yaw)*shear*height*(t+1)/2,y:anchor.y+t*y,z:anchor.z+s*z-Math.sin(yaw)*shear*height*(t+1)/2}));
 }
 
-export function projectCharacterQuad({anchor, worldWidth, worldHeight}, eye, project, viewport, near) {
+// Row-major transform for the same unit plane used by the depth-mask mesh.
+export function characterPlaneMatrix({anchor:a,worldWidth:w,worldHeight:h,shear=0},yaw){
+  const c=Math.cos(yaw),s=Math.sin(yaw),k=shear*h;
+  return [c*w,c*k,s,a.x+c*k/2,0,h,0,a.y,-s*w,-s*k,c,a.z-s*k/2,0,0,0,1];
+}
+
+export function projectCharacterQuad({anchor, worldWidth, worldHeight, shear=0}, eye, project, viewport, near) {
   const dx = eye.x - anchor.x, dz = eye.z - anchor.z;
   const yaw = characterYaw(dx, dz);
   // Hide edge-on/rear-facing cutouts, not mirror the source or let a nearly
   // singular projection grow without bound when flying through a character.
   if (dx * Math.sin(yaw) + dz * Math.cos(yaw) <= .025 * Math.hypot(dx,dz)) return null;
-  const projected = characterCorners(anchor, worldWidth, worldHeight, yaw).map(project);
+  const projected = characterCorners(anchor, worldWidth, worldHeight, yaw, shear).map(project);
   if (projected.some(p => ![p.x,p.y,p.z,p.depth].every(Number.isFinite) || p.depth <= near || p.z < -1 || p.z > 1)) return null;
   const corners = projected.map(p => ({x:(p.x+1)*viewport.width/2,y:(1-p.y)*viewport.height/2}));
   if (corners.every(p=>p.x<0) || corners.every(p=>p.x>viewport.width) || corners.every(p=>p.y<0) || corners.every(p=>p.y>viewport.height)) return null;

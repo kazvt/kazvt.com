@@ -1,3 +1,4 @@
+import { createBallAtmosphere } from './roulette-ball-fx.mjs?v=stage-dance-20261127-v1';
 import { createRoomLightTrim } from "./room-light-trim.mjs?v=compact-score-20261127-v1";
 import { createPortalParticles } from "./vip-atmosphere.mjs?v=vip-atmosphere-20261127-v1";
 // Render-only world accents. No physics, point calculation, hit targets or camera pose changes.
@@ -32,15 +33,16 @@ export function createShowFX(THREE,scene,{wheel, wheelPivot,ball,door,wheelPoint
   const sparkGeometry=new THREE.BoxGeometry(.035,.035,.035),sparkMaterial=basic(0xffe8a0);
   const sparks=new THREE.InstancedMesh(sparkGeometry,sparkMaterial,24);sparks.frustumCulled=false;group.add(sparks);sparks.visible=false;
   const matrix=new THREE.Object3D();const trailCount=30;
-  const trail=new THREE.InstancedMesh(new THREE.BoxGeometry(.038,.038,1),basic(0xffe98c,.78),trailCount);trail.frustumCulled=false;group.add(trail);trail.visible=false;
+  const trail=new THREE.InstancedMesh(new THREE.BoxGeometry(.038,.038,1),basic(0xbca0ed,.45),trailCount);trail.frustumCulled=false;group.add(trail);trail.visible=false;
   const trailPoints=[];const direction=new THREE.Vector3(),axis=new THREE.Vector3(0,0,1);let lastTrail=-Infinity,impactAt=-Infinity,settleAt=-Infinity;const impactPos=new THREE.Vector3(),settlePos=new THREE.Vector3(),temp=new THREE.Vector3();
   // Draw a gold/pink pocket burst at the actual ball, not the computed winner index.
   function impact(time,settled=false){if(!ball)return;ball.getWorldPosition(temp);impactPos.copy(temp);impactAt=time;if(settled){settleAt=time;settlePos.copy(temp);trailPoints.length=0;}}
   const portalParticles=createPortalParticles(THREE,group,door);
+  const ballAtmosphere=createBallAtmosphere(THREE,group,ball);
   const trim=createRoomLightTrim(THREE,group,door);
   function clearRoulette(){if(wheelPivot)wheelPivot.position.y=wheelRestY;trailPoints.length=0;trail.visible=pocket.visible=wave.visible=sparks.visible=halo.visible=outer.visible=beam.visible=winnerEcho.visible=launchWave.visible=orbit.visible=confetti.visible=false;for(const r of victoryWaves)r.visible=false;impactAt=settleAt=spinAt=-Infinity;wasSpinning=false;lastTrail=-Infinity;}
   function update(time,{active=true,spinning=false,view={},reduced=false}={}){
-    group.visible=active;portalParticles.update(time,active,reduced);trim.update(time,active,reduced,view);if(!active){clearRoulette();return;}
+    group.visible=active;ballAtmosphere?.update(time,active&&!reduced,spinning);portalParticles.update(time,active,reduced);trim.update(time,active,reduced,view);if(!active){clearRoulette();return;}
     const roulette=view.kind==='roulette';
     if(!roulette||reduced){clearRoulette();}else{
       if(spinning&&!wasSpinning)spinAt=time;

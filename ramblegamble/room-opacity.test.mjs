@@ -167,7 +167,34 @@ test('local original and crowd sprite are separate PNGs, and the camera update f
  assert.deepEqual(dimensions(png('smeemo_scramble.png')),[236,601]);
  assert.deepEqual(dimensions(png('smeemo-crowd.png')),[15,38]);
  const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
- assert.match(src,/audience-render\.mjs\?v=hidden-spectator-20261127-v1/);
+ assert.match(src,/audience-render\.mjs\?v=stage-dance-20261127-v1/);
  const animate=src.slice(src.indexOf('function animate(time)'));
- assert.ok(animate.indexOf('audience?.update(crowdClock,emotion,reducedMotion.matches,camera.position)')>animate.indexOf('focusOrbit.step(time'));
+ assert.ok(animate.indexOf('audience?.update(crowdClock,emotion,reducedMotion.matches,camera.position,')>animate.indexOf('focusOrbit.step(time'));
+});
+
+import { createBallAtmosphere, ballEmissionRate, BALL_EMBER_CAP } from './roulette-ball-fx.mjs';
+test('roulette ball has fivefold moving emission, tiny idle wisps and bounded world-space particles',()=>{
+ const group=new Group(),position=new Vector(2,.5,1),ball={getWorldPosition:v=>v.copy(position)},fx=createBallAtmosphere(THREE,group,ball);
+ assert.equal(ballEmissionRate(false),ballEmissionRate(true)*.2);
+ let spinTotal=0,idleTotal=0;
+ for(let t=0;t<=5000;t+=10){position.x=2+Math.sin(t/250)*.7;fx.update(t,true,true);assert.ok(fx.mesh.count<=BALL_EMBER_CAP);assert.equal(fx.cloud.visible,false);if(t>2000)spinTotal+=fx.mesh.count;}
+ const stop=position.clone();
+ for(let t=5010;t<=10000;t+=10){fx.update(t,true,false);if(t>7000){idleTotal+=fx.mesh.count;assert.ok(fx.cloud.visible);for(const {position:p,scale:s} of fx.cloud.matrices){assert.ok(Math.hypot(p.x-stop.x,p.z-stop.z)+Math.max(s.x,s.z)/2<=.11);assert.ok(p.y>stop.y+.09&&p.y<stop.y+.26);}}}
+ assert.ok(idleTotal/spinTotal>.17&&idleTotal/spinTotal<.23,`${idleTotal/spinTotal}`);
+ assert.ok(fx.cloud.material.opacity<=.17);for(const m of [fx.cloud,fx.mesh]){assert.equal(m.material.depthTest,true);assert.equal(m.material.depthWrite,false);}
+ fx.update(10010,false,false);assert.equal(fx.mesh.count,0);assert.equal(fx.mesh.visible,false);assert.equal(fx.cloud.visible,false);
+ position.set(20,2,5);fx.update(20000,true,true);fx.update(20100,true,true);assert.ok(fx.mesh.matrices.slice(0,fx.mesh.count).every(m=>Math.abs(m.position.x-20)<.2));
+});
+
+test('crowd Smeemo only enters the anchored dance during focused close-up, retaining capped yaw',()=>{
+ const old=globalThis.document,ctx=new Proxy({}, {get:(o,k)=>k==='createLinearGradient'?()=>({addColorStop(){}}):()=>{}});
+ globalThis.document={createElement:()=>({getContext:()=>ctx})};
+ class Matrix{set(...a){this.a=a;return this;}multiply(m){this.a=m.a;return this;}}
+ const originalUpdate=Mesh.prototype.updateMatrix;Mesh.prototype.updateMatrix=function(){this.matrix=new Matrix();};
+ try{const scene=new Group(),audience=createAudienceRenderer({...THREE,Matrix4:Matrix},scene),cat=audience.group.children.find(m=>m.name==='rg-audience-spectator'),a=crowdCatAnchor(),eye={x:a.x-4,z:a.z};
+  audience.update(300,'idle',false,eye,{time:300,focused:false});assert.ok(cat.visible);assert.equal(cat.matrixAutoUpdate,true);
+  const yaw=cat.rotation.y;audience.update(300,'idle',false,eye,{time:300,focused:true});assert.equal(cat.matrixAutoUpdate,false);assert.equal(cat.position.y,a.y);assert.equal(cat.rotation.y,yaw);assert.ok(cat.matrix.a[0]<1);assert.ok(Math.abs(cat.matrix.a[1])<=.085);
+  audience.update(400,'idle',false,eye,{time:400,focused:false});assert.equal(cat.matrixAutoUpdate,true);
+  audience.update(400,'idle',true,eye,{time:400,focused:true});assert.equal(cat.matrixAutoUpdate,true);assert.equal(cat.position.y,a.y);audience.dispose();
+ }finally{if(originalUpdate)Mesh.prototype.updateMatrix=originalUpdate;else delete Mesh.prototype.updateMatrix;if(old===undefined)delete globalThis.document;else globalThis.document=old;}
 });

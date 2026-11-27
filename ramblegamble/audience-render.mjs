@@ -1,3 +1,4 @@
+import { dancePose } from './stage-dance.mjs?v=stage-dance-20261127-v1';
 // Original low-resolution silhouette art, three world-space cutout texture panels.
 // Only these canvases update at 6 fps; the rest of the scene renders normally.
 export const CROWD_FPS=6;
@@ -162,14 +163,19 @@ export function createCrowdCat(THREE,group) {
   // The setback clears the panel at every allowed yaw; opaque scenery still
   // occludes it through the normal depth test. No picking or HUD registration.
   mesh.renderOrder=-1;group.add(mesh);
-  return {mesh,update(frame,emotion,reduced,eye){
+  return {mesh,update(frame,emotion,reduced,eye,dance){
     if(disposed)return;
     const yaw=crowdCatFacing(eye,anchor,section);
     mesh.visible=ready&&yaw!==null;
     if(!mesh.visible)return;
     mesh.rotation.y=yaw;
     const beat=frame/CROWD_FPS*2.1+1.7;
-    mesh.position.y=anchor.y+(reduced?0:emotion==='cheer'?Math.max(0,Math.sin(beat))* .055:Math.sin(beat)*.018);
+    const focused=!!dance?.focused&&!reduced;
+    mesh.position.y=anchor.y+(focused||reduced?0:emotion==='cheer'?Math.max(0,Math.sin(beat))* .055:Math.sin(beat)*.018);
+    mesh.matrixAutoUpdate=true;
+    if(focused){const p=dancePose(dance.time,.78,.16),h=CROWD_CAT.height;
+      mesh.updateMatrix();mesh.matrix.multiply(new THREE.Matrix4().set(p.width,p.shear,0,p.shear*h/2,0,1,0,0,0,0,1,0,0,0,0,1));mesh.matrixAutoUpdate=false;mesh.matrixWorldNeedsUpdate=true;}
+
   },dispose(){if(disposed)return;disposed=true;mesh.visible=false;group.remove(mesh);tex.dispose();mesh.geometry.dispose();mesh.material.dispose();}};
 }
 export function createAudienceRenderer(THREE,scene) {
@@ -187,11 +193,11 @@ export function createAudienceRenderer(THREE,scene) {
   let cat=null;
   try { cat=createCrowdCat(THREE,group); } catch(error) { console.warn('Audience decoration unavailable',error); }
   let oldFrame=-1, oldEmotion='';
-  return {group,dispose(){cat?.dispose();scene.remove(group);for(const p of panels){p.tex.dispose();p.mesh.geometry.dispose();p.mesh.material.dispose();}},update(time,emotion,reduced=false,eye){
+  return {group,dispose(){cat?.dispose();scene.remove(group);for(const p of panels){p.tex.dispose();p.mesh.geometry.dispose();p.mesh.material.dispose();}},update(time,emotion,reduced=false,eye,dance){
     if(!group.visible)return;
     const frame=reduced?0:Math.floor(time*CROWD_FPS/1000);
     // Orientation must follow every rendered camera frame, not the 6 FPS paint clock.
-    cat?.update(frame,emotion,reduced,eye);
+    cat?.update(frame,emotion,reduced,eye,dance);
     if(frame===oldFrame&&emotion===oldEmotion)return;
     oldFrame=frame;oldEmotion=emotion;
     for(const p of panels){paintCrowd(p.ctx,p.canvas.width,p.canvas.height,p.people,frame,emotion);applyCrowdEdgeMask(p.ctx,p.canvas.width,p.canvas.height,p.mask);p.tex.needsUpdate=true;}

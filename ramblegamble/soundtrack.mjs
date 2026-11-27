@@ -66,5 +66,9 @@ export function createSoundtrack({ createMedia = () => new Audio(), now = () => 
     disposed = true; stop();
     if (media) { media.removeEventListener('error', onError); media.removeAttribute('src'); media.load(); }
   }
-  return { sync, dispose };
+  function playbackPosition(){
+    return !disposed&&wanted===track&&requested&&fadeAt!==null&&media&&!media.paused&&Number.isFinite(media.currentTime)
+      ? {track,seconds:media.currentTime}:null;
+  }
+  return { sync, dispose, playbackPosition };
 }

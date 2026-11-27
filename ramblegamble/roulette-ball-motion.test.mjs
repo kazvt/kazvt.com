@@ -36,8 +36,8 @@ test("a new spin smoothly returns a settled ball to the outer race and preserves
   assert.equal(sampleRouletteBallRadius(0.12, startRadius), ROULETTE_BALL_TRACK_RADIUS);
 });
 
-test("the ball uses the exact dark checker color from the floor texture", () => {
-  assert.equal(ROULETTE_BALL_COLOR, 0x212068);
+test("the ball uses the lighter violet presentation color", () => {
+  assert.equal(ROULETTE_BALL_COLOR, 0x8260c4);
 });
 
 test("invalid orbit positions and radii are rejected without producing non-finite coordinates", () => {

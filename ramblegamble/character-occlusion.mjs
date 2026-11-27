@@ -1,3 +1,4 @@
+import { characterPlaneMatrix } from './character-billboards.mjs?v=stage-dance-20261127-v1';
 // Fugi is a cross-origin iframe; the WebGL scene cannot sample its pixels.
 // Render a small visibility buffer instead, preserving the original opaque and
 // alpha-tested geometry, then apply a synchronous per-plane geometric clip to its DOM wrapper.
@@ -88,7 +89,12 @@ export function createCharacterOcclusion(THREE,renderer,roots,entries){
  function update(visible,view,camera){
   if(disposed)return;viewport=view;
   const active=new Set(visible);let count=0;const ratio=renderer.getPixelRatio?.()||1;const key=[view.width,view.height,ratio,...camera.matrixWorld.elements,...camera.projectionMatrix.elements];
-  for(const [entry,state] of states){const show=active.has(entry);state.mesh.visible=show;if(!show){hide(entry,state);key.push(0);continue;}count++;const pose=entry.renderPose||entry;state.mesh.position.copy(pose.anchor);state.mesh.rotation.y=entry.projectedQuad.yaw;state.mesh.scale.set(pose.worldWidth,pose.worldHeight,1);key.push(1,entry.projectedQuad.yaw,pose.anchor.x,pose.anchor.y,pose.anchor.z,pose.worldWidth,pose.worldHeight);}
+  for(const [entry,state] of states){const show=active.has(entry);state.mesh.visible=show;if(!show){hide(entry,state);key.push(0);continue;}count++;const pose=entry.renderPose||entry;state.mesh.position.copy(pose.anchor);state.mesh.rotation.y=entry.projectedQuad.yaw;state.mesh.scale.set(pose.worldWidth,pose.worldHeight,1);
+  // Same bottom-anchored affine plane as characterCorners; a CSS-only skew
+  // would otherwise desynchronize the depth mask and hit testing.
+  const shear=pose.shear||0;state.mesh.matrixAutoUpdate=!shear;
+  if(shear){state.mesh.matrix.set(...characterPlaneMatrix(pose,entry.projectedQuad.yaw));state.mesh.matrixWorldNeedsUpdate=true;}
+  key.push(1,entry.projectedQuad.yaw,pose.anchor.x,pose.anchor.y,pose.anchor.z,pose.worldWidth,pose.worldHeight,shear);}
   if(!count){lastKey='';region=null;return;}
   for(const {source,proxy,materials} of proxies){
    const show=worldVisible(source);proxy.visible=show&&materials.some(isDepthOccluder);key.push(Number(proxy.visible));if(!proxy.visible)continue;

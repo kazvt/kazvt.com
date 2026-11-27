@@ -1,20 +1,21 @@
-import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=balcony-music-20261127-v1";
+import { createStageDance, createDanceClock, dancePose } from "./stage-dance.mjs?v=stage-dance-20261127-v1";
+import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=stage-dance-20261127-v1";
 import { createMenuMarquee } from "./menu-marquee.mjs?v=marquee-crossfade-20261127-v1";
 import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=arrow-restored-20261127-v1";
 import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcony.mjs?v=hazel-balcony-20261127-v1";
 import { createSignGlow } from "./sign-glow.mjs?v=neon-focus-20261127-v1";
-import { selectedCharacterId, characterRenderPose, createCharacterSelection } from "./character-selection.mjs?v=compact-score-20261127-v1";
+import { selectedCharacterId, characterRenderPose, createCharacterSelection } from "./character-selection.mjs?v=stage-dance-20261127-v1";
 import { sampleVipAmbience } from "./vip-atmosphere.mjs?v=vip-atmosphere-20261127-v1";
 import { createStageShow } from "./stage-show.mjs?v=all-curtain-20261127-v1";
 import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state.mjs?v=all-curtain-20261127-v1";
-import { createCharacterOcclusion } from "./character-occlusion.mjs?v=hazel-balcony-20261127-v1";
+import { createCharacterOcclusion } from "./character-occlusion.mjs?v=stage-dance-20261127-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
-import { createAudienceRenderer, crowdCatAnchor } from "./audience-render.mjs?v=hidden-spectator-20261127-v1";
-import { createShowFX } from "./show-fx.mjs?v=cartoon-machines-20261127-v1";
+import { createAudienceRenderer, crowdCatAnchor } from "./audience-render.mjs?v=stage-dance-20261127-v1";
+import { createShowFX } from "./show-fx.mjs?v=stage-dance-20261127-v1";
 import { createRouletteCabinetFX } from "./roulette-cabinet-fx.mjs?v=cartoon-machines-20261127-v1";
 import { cameraTravelDuration, isSpookyView, suspenseEase, crowdCloseupPose } from "./spooky-camera.mjs?v=cartoon-machines-20261127-v1";
-import { CHARACTER_SOURCE_SIZE, CHARACTER_YAW_LIMIT, characterYaw, standingCharacterPose, projectCharacterQuad, pointInCharacterQuad } from "./character-billboards.mjs?v=fugi-stable-20261127-v1";
+import { CHARACTER_SOURCE_SIZE, CHARACTER_YAW_LIMIT, characterYaw, standingCharacterPose, projectCharacterQuad, pointInCharacterQuad } from "./character-billboards.mjs?v=stage-dance-20261127-v1";
 import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { createExteriorMist, EXTERIOR_FLOOR } from "./exterior-mist.mjs?v=crowd-mist-20261127-v1";
@@ -60,7 +61,7 @@ import {
   ROULETTE_BALL_TRACK_RADIUS,
   rouletteBallPositionAtRadius,
   sampleRouletteBallRadius,
-} from "./roulette-ball-motion.mjs?v=scene-table-20261126-v1";
+} from "./roulette-ball-motion.mjs?v=stage-dance-20261127-v1";
 
 (() => {
   "use strict";
@@ -131,7 +132,9 @@ import {
     label: "Lillie - Host",
     source: "https://reactive.fugi.tech/basic/185073584211755008",
   };
-  let audience, showFX, stageShow, signGlow, characterSelection;
+  let audience, showFX, stageShow, signGlow, characterSelection, stageDance;
+  const danceClock=createDanceClock();
+  let danceTime=0;
   let characterSelectedAt=-Infinity;
   let crowdClock=0,crowdLastFrame=null;
   const crowdState=createAudienceState(crowdClock,readAudienceMode());
@@ -2642,6 +2645,10 @@ import {
     const selectionId = !cameraDetached && !freecam?.active ? selectedCharacterId(currentView) : null;
     for (const billboard of billboards) {
       billboard.renderPose=characterRenderPose(billboard,billboard.id===selectionId?time-characterSelectedAt:Infinity,reducedMotion.matches,{time:!cameraDetached&&!freecam?.active&&!cameraTransition&&["contestants","contestant","host"].includes(currentView.kind)?time:undefined,...characterSelection?.reaction(billboard.id,time)});
+      const phase=({faroe:0,erin:.055,kaz:.11,"lillie-host":.08,hazel:.18})[billboard.id]??0;
+      const dance=dancePose(danceTime,reducedMotion.matches ? 0 : (billboard.seated ? .38 : .9),phase);
+      billboard.renderPose.worldWidth*=dance.width;
+      billboard.renderPose.shear=dance.shear;
       const quad = projectCharacterQuad(billboard.renderPose,camera.position,project,viewport,camera.near);
       const transform = quad && createCssProjectiveQuad(CHARACTER_SOURCE_SIZE,CHARACTER_SOURCE_SIZE,quad.corners);
       billboard.projectedQuad = transform ? quad : null;
@@ -2845,9 +2852,12 @@ import {
       // Re-pick under a stationary cursor as the damped camera moves, including its final frame.
       if ((changed || moving) && lastScenePointer && !lastScenePointer.buttons) updatePointer(lastScenePointer);
     }
-    audience?.update(crowdClock,emotion,reducedMotion.matches,camera.position);
     syncVipAmbience(roomVisible,emotion);
     syncMusic();
+    // Intentional 30 FPS pose cadence, shared by the stage and DOM depth pass.
+    danceTime=Math.floor(danceClock.step(time,roomVisible&&!diceModeOpen,soundtrack.playbackPosition())*30/1000)*1000/30;
+    stageDance?.update(danceTime,roomVisible&&!diceModeOpen&&!reducedMotion.matches);
+    audience?.update(crowdClock,emotion,reducedMotion.matches,camera.position,{time:danceTime,focused:currentView.kind==="smeemo-crowd"&&!cameraTransition&&!cameraDetached&&!freecam?.active});
     preview.classList.toggle("is-trivia",!cameraDetached && currentView.kind === "trivia");
     if (triviaLayer) triviaLayer.hidden = !(gameStarted && !pauseMenuOpen && !diceModeOpen && sceneReady && !cameraTransition && !cameraDetached && currentView.kind === "trivia" && triviaLayer.dataset.ready === "true");
     updateCardTableProjection();
@@ -2991,6 +3001,8 @@ import {
       try {signGlow=createSignGlow(THREE,stageModel);} catch(error){console.warn("Sign animation unavailable",error);}
       stageModel.visible = !pauseMenuOpen;
       scene.add(stageModel);
+      try { stageDance=createStageDance(THREE,stageModel,stageGltf.parser.associations); }
+      catch(error){console.warn("Stage dance unavailable",error);}
       carveDiceDoorway(stageModel);
       if (liquidPortalFrame && liquidPortalLayer) {
         liquidPortal = createLiquidPortal({
@@ -3089,6 +3101,7 @@ import {
     exteriorMist?.dispose();
     menuPresentation.dispose();
     soundtrack.dispose();
+    stageDance?.dispose();
     slotCabinetFX?.dispose();
     rouletteCabinetFX?.dispose();
     focusArrow.dispose(); characterOcclusion?.dispose(); characterSelection?.dispose(); signGlow?.dispose(); audience?.dispose(); showFX?.dispose(); stageShow?.dispose();
