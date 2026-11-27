@@ -20,7 +20,10 @@ export function createAudienceState(now=0, mode='auto') {
     if(next!==active && time-since>=AUDIENCE_MIN[active]) { active=next; since=time; }
     return active;
   }
-  return { step, setMode(mode,time) { if(validAudienceMode(mode)) manual=mode; return step(time); }, react(emotion,time) { if(Object.hasOwn(AUDIENCE_MIN,emotion))auto=emotion; return step(time); }, get mode(){return manual;}, get active(){return active;}, get pending(){return desired();} };
+  // Horror overrides minimum cheer dwell and discards stale cheer intent.
+  // An explicit later reaction can still request a fresh celebration.
+  function silence(time) { auto='idle'; if(manual==='cheer')manual='auto'; active='idle'; since=time; return active; }
+  return { step, silence, setMode(mode,time) { if(validAudienceMode(mode)) manual=mode; return step(time); }, react(emotion,time) { if(Object.hasOwn(AUDIENCE_MIN,emotion))auto=emotion; return step(time); }, get mode(){return manual;}, get active(){return active;}, get pending(){return desired();} };
 }
 export function audienceReact(emotion) {
   if(typeof window!=='undefined' && Object.hasOwn(AUDIENCE_MIN,emotion)) window.dispatchEvent(new CustomEvent('rg:audience-reaction',{detail:{emotion}}));

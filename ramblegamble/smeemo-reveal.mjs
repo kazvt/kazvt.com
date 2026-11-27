@@ -1,6 +1,6 @@
 // Transient, presentation-only five-click encounter. No game or score writes.
 export const SMEEMO_RETURN_MS=4400;
-export const SMEEMO_STINGER='/ramblegamble/assets/stingers/smeemo-explosive.mp4';
+export const SMEEMO_STINGER='/ramblegamble/assets/stingers/smeemo-explosive-alpha.webm';
 export function createSmeemoEncounter(){
  let phase='hidden',count=0;
  return {
@@ -11,6 +11,8 @@ export function createSmeemoEncounter(){
   reset(){phase='hidden';count=0;},
   get phase(){return phase;},get count(){return count;},
   get revealed(){return phase==='focused'&&count>=2||phase==='stinger';},
+  // Hide spectators, never the separate Smeemo mesh or its click target.
+  get hideCrowd(){return (phase==='focused'&&count>=3)||phase==='stinger';},
   get quiet(){return phase!=='hidden'&&count>=2;},
   get song(){return (phase==='focused'&&count>=1)||phase==='returning'?'smeemo':null;},
  };

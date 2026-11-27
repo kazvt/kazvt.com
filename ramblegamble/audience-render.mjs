@@ -199,9 +199,13 @@ export function createAudienceRenderer(THREE,scene) {
   let oldFrame=-1, oldEmotion='',oldMusicFrame=null;
   return {group,get cat(){return cat?.mesh;},dispose(){cat?.dispose();scene.remove(group);for(const p of panels){p.tex.dispose();p.mesh.geometry.dispose();p.mesh.material.dispose();}},update(time,emotion,reduced=false,eye,dance){
     if(!group.visible)return;
+    // All three silhouette panels can disappear independently of the cat.
+    const hideCrowd=!!dance?.hideCrowd;
+    for(const p of panels)p.mesh.visible=!hideCrowd;
     const frame=reduced||dance?.quiet?0:Math.floor(time*CROWD_FPS/1000);
     // Orientation must follow every rendered camera frame, not the 6 FPS paint clock.
     cat?.update(frame,emotion,reduced,eye,dance);
+    if(hideCrowd)return;
     const musicFrame=emotion==='cheer'&&!reduced&&!dance?.quiet&&Number.isFinite(dance?.time)?Math.floor(dance.time*CROWD_FPS/1000):null;
     if(frame===oldFrame&&emotion===oldEmotion&&musicFrame===oldMusicFrame)return;
     oldFrame=frame;oldEmotion=emotion;oldMusicFrame=musicFrame;

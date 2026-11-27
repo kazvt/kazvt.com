@@ -129,3 +129,12 @@ test('music-dependent paired dancing shares one beat and disables without music 
  function capture(list,musicFrame){const calls=[];const ctx=new Proxy({}, {get:(o,k)=>(...args)=>calls.push([k,...args]),set:(o,k,v)=>{calls.push([k,v]);return true;}});paintCrowd(ctx,396,180,list,4,'cheer',musicFrame);return calls;}
  assert.deepEqual(capture(people,null),capture(plain,null));assert.notDeepEqual(capture(people,3),capture(plain,3));
 });
+
+test('Smeemo silence immediately drops active and queued cheers, even manual cheer, without breaking future reactions',()=>{
+ for(const mode of ['auto','cheer','idle','suspense','shock']){
+  const s=createAudienceState(0,mode);s.react('cheer',0);s.step(5000);s.silence(5001);
+  assert.equal(s.active,'idle');assert.notEqual(s.pending,'cheer');assert.equal(s.mode,mode==='cheer'?'auto':mode);
+  for(const time of [5002,7000,10000,1e9])assert.notEqual(s.step(time),'cheer');
+  s.setMode('auto',1e9+5000);s.react('cheer',1e9+10000);assert.equal(s.active,'cheer');
+ }
+});

@@ -1,5 +1,5 @@
 import { createSlotMarquee } from "./slot-marquee.mjs?v=slot-marquee-20261128-v1";
-import { createSmeemoEncounter, createSmeemoStinger, createSmeemoTableSession, SMEEMO_RETURN_MS } from "./smeemo-reveal.mjs?v=smeemo-cinema-20261128-v1";
+import { createSmeemoEncounter, createSmeemoStinger, createSmeemoTableSession, SMEEMO_RETURN_MS } from "./smeemo-reveal.mjs?v=smeemo-alpha-20261128-v1";
 import { createFloatingSky } from "./floating-sky.mjs?v=sky-pingpong-20261128-v1";
 import { createStageDance, createDanceClock, createDanceIntensitySampler, dancePose } from "./stage-dance.mjs?v=music-intensity-20261128-v1";
 import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=freecam-music-20261128-v1";
@@ -14,8 +14,8 @@ import { createStageShow } from "./stage-show.mjs?v=smeemo-cinema-20261128-v1";
 import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state.mjs?v=all-curtain-20261127-v1";
 import { createCharacterOcclusion } from "./character-occlusion.mjs?v=stage-dance-20261127-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
-import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
-import { createAudienceRenderer, crowdCatAnchor, CROWD_CAT } from "./audience-render.mjs?v=music-intensity-20261128-v1";
+import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=smeemo-alpha-20261128-v1";
+import { createAudienceRenderer, crowdCatAnchor, CROWD_CAT } from "./audience-render.mjs?v=smeemo-alpha-20261128-v1";
 import { createShowFX } from "./show-fx.mjs?v=sky-soot-20261127-v1";
 import { createRouletteCabinetFX } from "./roulette-cabinet-fx.mjs?v=sky-soot-20261127-v1";
 import { cameraTravelDuration, isSpookyView, suspenseEase, crowdCloseupPose } from "./spooky-camera.mjs?v=cartoon-machines-20261127-v1";
@@ -147,14 +147,16 @@ import {
   const crowdState=createAudienceState(crowdClock,readAudienceMode());
   const audienceControls=document.getElementById("rg-audience-controls");
   function syncAudienceControls(){for(const b of audienceControls?.querySelectorAll("[data-audience]")||[])b.setAttribute("aria-pressed",String(b.dataset.audience===crowdState.mode));}
-  function selectAudienceMode(mode){if(document.documentElement.hasAttribute("data-rg-host-locked"))return;if(writeAudienceMode(mode)){crowdState.setMode(mode,crowdClock);syncAudienceControls();}}
+  function selectAudienceMode(mode){if(document.documentElement.hasAttribute("data-rg-host-locked"))return;if(writeAudienceMode(mode)){crowdState.setMode(mode,crowdClock);if(encounter.quiet)silenceCrowd();syncAudienceControls();}}
   for(const mode of AUDIENCE_MODES){if(!audienceControls)break;const b=document.createElement("button");b.type="button";b.dataset.audience=mode;b.textContent=mode.toUpperCase();b.className="rg-secondary-button";b.addEventListener("click",()=>selectAudienceMode(mode));audienceControls.append(b);}
   const crowdStatus=document.createElement("small"); crowdStatus.setAttribute("role","status"); audienceControls?.append(crowdStatus);
   let shownCrowdStatus="";
-  function updateCrowdStatus(){const label=encounter.quiet?"IDLE · SMEEMO":crowdState.active.toUpperCase()+(crowdState.pending!==crowdState.active?` → ${crowdState.pending.toUpperCase()}`:"");if(label!==shownCrowdStatus){crowdStatus.textContent=label;shownCrowdStatus=label;}}
+  function silenceCrowd(){const wasCheering=crowdState.mode==='cheer';crowdState.silence(crowdClock);if(wasCheering){writeAudienceMode(crowdState.mode);syncAudienceControls();}}
+  function reactCrowd(emotion){if(!encounter.quiet)crowdState.react(emotion,crowdClock);}
+  function updateCrowdStatus(){const label=encounter.hideCrowd?"HIDDEN · SMEEMO":encounter.quiet?"IDLE · SMEEMO":crowdState.active.toUpperCase()+(crowdState.pending!==crowdState.active?` → ${crowdState.pending.toUpperCase()}`:"");if(label!==shownCrowdStatus){crowdStatus.textContent=label;shownCrowdStatus=label;}}
   syncAudienceControls();
-  window.addEventListener("storage",event=>{if(event.key===AUDIENCE_KEY||event.key===null){crowdState.setMode(readAudienceMode(),crowdClock);syncAudienceControls();}});
-  window.addEventListener("rg:audience-reaction",event=>{if(gameStarted&&!pauseMenuOpen&&!document.hidden&&!document.documentElement.hasAttribute("data-rg-host-locked"))crowdState.react(event.detail?.emotion,crowdClock);});
+  window.addEventListener("storage",event=>{if(event.key===AUDIENCE_KEY||event.key===null){crowdState.setMode(readAudienceMode(),crowdClock);if(encounter.quiet)silenceCrowd();syncAudienceControls();}});
+  window.addEventListener("rg:audience-reaction",event=>{if(gameStarted&&!pauseMenuOpen&&!document.hidden&&!document.documentElement.hasAttribute("data-rg-host-locked"))reactCrowd(event.detail?.emotion);});
   let renderer;
   let scene;
   let camera;
@@ -253,6 +255,7 @@ import {
     // A cancelled encounter must not resume its old ambience on a later visit.
     // The post-return table phase is separate and may belong to a live Smeemo game.
     if(encounter.phase!=="table")soundtrack.resetTrackPosition("smeemo");
+    if(encounter.quiet)silenceCrowd();
     encounter.reset();stinger.cancel();smeemoTag.hidden=true;smeemoAura.hidden=true;preview.removeAttribute("data-smeemo-step");
     for(const channel of ["smeemo-encounter-drum","smeemo-encounter-rumble","smeemo-encounter-scare"])foley.stop(channel);
     stageShow?.dismiss(performance.now());syncMusic();
@@ -266,7 +269,7 @@ import {
     smeemoTag.classList.remove("rg-smeemo-pulse");void smeemoTag.offsetWidth;smeemoTag.classList.add("rg-smeemo-pulse");
     smeemoAura.classList.remove("rg-smeemo-aura-pulse");void smeemoAura.offsetWidth;smeemoAura.classList.add("rg-smeemo-aura-pulse");
     if(count===1)stinger.prepare();
-    if(count===2){foley.setRoomAmbience(false);foley.stopAll();crowdState.react("idle",crowdClock);stageShow?.silent(crowdCatAnchor(),performance.now());}
+    if(count===2){foley.setRoomAmbience(false);foley.stopAll();silenceCrowd();stageShow?.silent(crowdCatAnchor(),performance.now());}
     foley.start("smeemo-encounter-drum","stageDrumHit",{rate:1-count*.075,volume:.36+count*.075});
     if(count===3||count===4)stageShow?.silent(crowdCatAnchor(),performance.now());
     if(count>=3)foley.start("smeemo-encounter-rumble","smeemoRumble",{rate:.8,volume:.4+count*.07});
@@ -389,7 +392,7 @@ import {
     if (settled && audible && visible) {
       foley.start("roulette-landing", "ball", { volume: .65 });
       foley.start("roulette-settlement", "settlement");
-      showFX?.impact(performance.now(),true); crowdState.react("cheer",crowdClock);
+      showFX?.impact(performance.now(),true); reactCrowd("cheer");
     }
     const prompt = nextHostQuestion();
     if (prompt && !settled && visible) foley.play("question", { volume: .55 });
@@ -449,7 +452,7 @@ import {
   function startWheelSpin() {
     if (!beginTurn("wheel")) return;
     stopRouletteSettlement();
-    showFX?.clearRoulette(); if(gameStarted&&!pauseMenuOpen&&!document.hidden&&currentView.kind==="roulette")crowdState.react("suspense",crowdClock);
+    showFX?.clearRoulette(); if(gameStarted&&!pauseMenuOpen&&!document.hidden&&currentView.kind==="roulette")reactCrowd("suspense");
     foley.play("switch");
     foley.start("roulette", "wheel", { loop: true });
     foley.start("roulette-rattle", "slotRattle", { loop: true, volume: .64 });
@@ -1613,7 +1616,7 @@ import {
       else if(openingSlot||closingSlot)stageShow.slot(openingSlot,now);
       else if(stageShow.manual&&nextView.kind!=="smeemo-crowd")stageShow.dismiss(now);
     }
-    if(viewChanged&&!immediate&&sceneReady){preview.dataset.showArrival=nextView.kind;preview.classList.remove("rg-show-arrival");void preview.offsetWidth;preview.classList.add("rg-show-arrival");if(nextView.kind==="overview"&&!closingSlot)crowdState.react("idle",crowdClock);}
+    if(viewChanged&&!immediate&&sceneReady){preview.dataset.showArrival=nextView.kind;preview.classList.remove("rg-show-arrival");void preview.offsetWidth;preview.classList.add("rg-show-arrival");if(nextView.kind==="overview"&&!closingSlot)reactCrowd("idle");}
     if (!immediate && sceneReady && (currentView.kind !== nextView.kind || currentView.look !== (nextView.look ?? 0) || currentView.contestantId !== nextView.contestantId)) foley.play(nextView.kind === "overview" ? "back" : "navigate");
     currentView = { ...nextView, look: nextView.kind === "overview" ? nextView.look ?? 0 : 0 };
     syncMusic();
@@ -2385,7 +2388,7 @@ import {
     if(wasSmeemoActive&&!smeemoTable.active)soundtrack.resetTrackPosition("smeemo");
     result.hidden = true;
     window.dispatchEvent(new Event("rg:close-host-panel"));
-    if (cameraDetached || currentView.kind !== "card-table") { crowdState.react(mode === "menu" || mode === "shop" ? "idle" : "suspense",crowdClock); transitionToView({ kind: "card-table" }); }
+    if (cameraDetached || currentView.kind !== "card-table") { reactCrowd(mode === "menu" || mode === "shop" ? "idle" : "suspense"); transitionToView({ kind: "card-table" }); }
     else syncMusic(); // Same camera, different card game (notably Smeemo).
   }
 
@@ -2430,7 +2433,7 @@ import {
   }
 
   if(pointsHud)subscribePointScores(createScoreHud(pointsHud,{names:["faroe","erin","kaz"],assetPath:SLOT_SYMBOL_IMAGE_PATH,visible:()=>gameStarted&&!pauseMenuOpen}));
-  window.addEventListener("rg:slot-action-finish",event=>{if(gameStarted&&!pauseMenuOpen&&!diceModeOpen&&!document.hidden&&currentView.kind==="slot"&&Object.values(event.detail?.totals||{}).some(v=>v>0))crowdState.react("cheer",crowdClock);});
+  window.addEventListener("rg:slot-action-finish",event=>{if(gameStarted&&!pauseMenuOpen&&!diceModeOpen&&!document.hidden&&currentView.kind==="slot"&&Object.values(event.detail?.totals||{}).some(v=>v>0))reactCrowd("cheer");});
 
   function pointClickAt(clientX, clientY) {
     if (encounter.phase==="stinger"||document.documentElement.hasAttribute("data-rg-host-locked"))return;
@@ -3015,7 +3018,7 @@ import {
     // Intentional 30 FPS pose cadence, shared by the stage and DOM depth pass.
     danceTime=Math.floor(danceClock.step(time,roomVisible&&!diceModeOpen&&!reducedMotion.matches,soundtrack.playbackPosition())*30/1000)*1000/30;
     stageDance?.update(danceTime,Number.isFinite(danceTime));
-    audience?.update(crowdClock,emotion,reducedMotion.matches,camera.position,{time:danceTime,catIntensity:danceIntensity("crowd-cat:smeemo"),focused:encounter.phase==="focused"&&currentView.kind==="smeemo-crowd"&&!cameraTransition&&!cameraDetached&&!freecam?.active,revealed:encounter.revealed,quiet:encounter.quiet});
+    audience?.update(crowdClock,emotion,reducedMotion.matches,camera.position,{time:danceTime,catIntensity:danceIntensity("crowd-cat:smeemo"),focused:encounter.phase==="focused"&&currentView.kind==="smeemo-crowd"&&!cameraTransition&&!cameraDetached&&!freecam?.active,revealed:encounter.revealed,quiet:encounter.quiet,hideCrowd:encounter.hideCrowd});
     updateSmeemoEncounter(time,roomVisible);
     preview.classList.toggle("is-trivia",!cameraDetached && currentView.kind === "trivia");
     if (triviaLayer) triviaLayer.hidden = !(gameStarted && !pauseMenuOpen && !diceModeOpen && sceneReady && !cameraTransition && !cameraDetached && currentView.kind === "trivia" && triviaLayer.dataset.ready === "true");
@@ -3211,7 +3214,7 @@ import {
       overviewCameraBounds = getArcadeBounds();
       try { slotCabinetFX = createSlotCabinetFX(THREE, slotRig, slotsModel, { bayWidth: ARCADE_REFERENCE_LAYOUT.slotBay.right - ARCADE_REFERENCE_LAYOUT.slotBay.left, foley }); }
       catch (error) { console.warn("Slot cabinet effects unavailable", error); }
-      try { stageShow=createStageShow(THREE,scene,{slotRig,slotsModel,roots:[stageModel,rouletteModel,slotsModel,audience?.group],foley,onEmotion:emotion=>crowdState.react(emotion,crowdClock),reduced:()=>reducedMotion.matches});stageShow.group.visible=!pauseMenuOpen; }
+      try { stageShow=createStageShow(THREE,scene,{slotRig,slotsModel,roots:[stageModel,rouletteModel,slotsModel,audience?.group],foley,onEmotion:reactCrowd,reduced:()=>reducedMotion.matches});stageShow.group.visible=!pauseMenuOpen; }
       catch(error){scene.getObjectByName("rg-stage-theatre")?.removeFromParent();slotsModel.visible=true;console.warn("Stage theatre unavailable",error);}
       characterSelection=createCharacterSelection(THREE,scene,billboardLayer,{subscribePoints:subscribePointScores,subscribeStars:subscribeStarScores});
       try {characterOcclusion=createCharacterOcclusion(THREE,renderer,[stageModel,rouletteModel,slotsModel,stageShow?.group],billboards);}

@@ -168,7 +168,7 @@ test('local original and crowd sprite are separate PNGs, and the camera update f
  assert.deepEqual(dimensions(png('smeemo_scramble.png')),[236,601]);
  assert.deepEqual(dimensions(png('smeemo-crowd.png')),[30,76]);
  const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
- assert.match(src,/audience-render\.mjs\?v=music-intensity-20261128-v1/);
+ assert.match(src,/audience-render\.mjs\?v=smeemo-alpha-20261128-v1/);
  const animate=src.slice(src.indexOf('function animate(time)'));
  assert.ok(animate.indexOf('audience?.update(crowdClock,emotion,reducedMotion.matches,camera.position,')>animate.indexOf('focusOrbit.step(time'));
 });
@@ -213,5 +213,19 @@ test('Smeemo reveal exposes original photo at full opacity without dance, then r
   const photo=cat.material.map;assert.notEqual(photo,camo);assert.match(photo.canvas,/smeemo_scramble\.png$/);assert.equal(cat.material.opacity,1);assert.equal(cat.renderOrder,2);assert.equal(cat.matrixAutoUpdate,true);assert.equal(cat.position.y,a.y);assert.equal(cat.material.depthTest,true);
   audience.update(700,'idle',true,eye);assert.equal(cat.material.map,camo);assert.equal(cat.material.opacity,.86);assert.equal(cat.renderOrder,-1);
   audience.dispose();assert.equal(photo.disposed,true);assert.equal(camo.disposed,true);
+ }finally{if(old===undefined)delete globalThis.document;else globalThis.document=old;}
+});
+
+test('hide all spectator panels without hiding the cat or repainting crowd; restore idle textures on the first return frame',()=>{
+ const old=globalThis.document;let paints=0;
+ const ctx=new Proxy({}, {get:(o,k)=>k==='createLinearGradient'?()=>({addColorStop(){}}):k==='clearRect'?()=>paints++:()=>{}});
+ globalThis.document={createElement:()=>({getContext:()=>ctx})};
+ try{
+  const audience=createAudienceRenderer(THREE,new Group()),cat=audience.cat,a=crowdCatAnchor(),eye={x:a.x-4,z:a.z};
+  const panels=audience.group.children.filter(x=>x!==cat);
+  audience.update(0,'cheer',false,eye);assert.equal(paints,3);assert.ok(panels.every(p=>p.visible));
+  for(let i=3;i<=5;i++){audience.update(i*1000,'idle',false,eye,{revealed:true,quiet:true,hideCrowd:true});assert.ok(panels.every(p=>!p.visible));assert.ok(cat.visible);assert.ok(audience.group.visible);assert.equal(paints,3);}
+  audience.update(6000,'idle',false,eye,{quiet:true,hideCrowd:false});assert.ok(panels.every(p=>p.visible));assert.equal(paints,6);assert.ok(cat.visible);
+  audience.update(6100,'idle',false,eye);assert.ok(panels.every(p=>p.visible));audience.dispose();
  }finally{if(old===undefined)delete globalThis.document;else globalThis.document=old;}
 });

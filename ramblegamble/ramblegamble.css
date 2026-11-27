@@ -1104,8 +1104,8 @@ body.ramble-page *::after {
 .rg-preview[data-smeemo-step="4"] .rg-smeemo-tag {--character-accent:#ff918c;box-shadow:3px 3px 0 #211844,0 0 14px #d977b5;}
 .rg-smeemo-pulse {animation:rg-smeemo-pulse .5s cubic-bezier(.18,.8,.3,1.2);}
 @keyframes rg-smeemo-pulse {0%{transform:translate(-50%,-100%) scale(.91)}35%{transform:translate(-50%,-100%) scale(1.13)}100%{transform:translate(-50%,-100%) scale(1)}}
-.rg-smeemo-stinger {position:absolute;inset:0;z-index:30;background:#100b19;display:grid;place-items:center;overflow:hidden;isolation:isolate;}
-.rg-smeemo-stinger video {width:100%;height:100%;object-fit:contain;position:absolute;inset:0;}
+.rg-smeemo-stinger {position:absolute;inset:0;z-index:30;background:transparent;display:grid;place-items:center;overflow:hidden;isolation:isolate;}
+.rg-smeemo-stinger video {width:100%;height:100%;object-fit:contain;position:absolute;inset:0;background:transparent;}
 .rg-smeemo-stinger p {position:absolute;top:clamp(12px,4vh,42px);margin:0;text-align:center;max-width:90%;color:#f4d1ec;text-shadow:2px 3px #130c20;font:900 clamp(18px,3vw,36px)/1.2 monospace;letter-spacing:.12em;}
 .rg-smeemo-stinger video[hidden]+p {position:static;font-size:clamp(23px,5vw,56px);}
 .rg-smeemo-stinger button {position:absolute;bottom:clamp(12px,4vh,42px);right:clamp(12px,4vw,42px);}
@@ -1118,7 +1118,6 @@ body.ramble-page *::after {
 @keyframes rg-smeemo-aura-pulse {0%{transform:translate(-50%,-50%) scale(.8);opacity:.8}100%{transform:translate(-50%,-50%) scale(1);opacity:.4}}
 @media(prefers-reduced-motion:reduce){.rg-smeemo-aura-pulse{animation:none;}}
 /* Stinger artwork carries its own typography; do not double-caption it. */
-.rg-smeemo-stinger {background:#090306;}
 .rg-smeemo-stinger p[hidden] {display:none!important;}
 .rg-smeemo-stinger video {object-fit:contain;}
 .rg-smeemo-stinger button {background:#210b0e;border-color:#a74249;color:#ffe9df;box-shadow:0 3px 0 #080103;}

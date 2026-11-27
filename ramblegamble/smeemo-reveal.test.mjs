@@ -78,3 +78,22 @@ test('stinger suppresses duplicate caption on successful playback and reveals fa
 test('preload is silent and invisible on first encounter click; start reuses buffered source and cancellation clears it',()=>{
  const f=fixture();let loads=0;const load=f.video.load.bind(f.video);f.video.load=()=>{loads++;load();};f.player.prepare();assert.equal(f.root.hidden,true);assert.equal(f.video.src,SMEEMO_STINGER);assert.equal(f.video.paused,true);assert.equal(loads,1);f.player.prepare();assert.equal(loads,1);f.player.start();assert.equal(loads,1);assert.equal(f.root.hidden,false);f.player.cancel();assert.equal(f.video.src,'');assert.equal(loads,2);assert.equal(f.finishes,0);
 });
+
+test('spectators are absent only at stages 3, 4, 5, with Smeemo still revealed and return restoring the crowd quietly',()=>{
+ const e=createSmeemoEncounter();assert.equal(e.hideCrowd,false);e.focus();assert.equal(e.hideCrowd,false);
+ for(let i=1;i<=5;i++){assert.equal(e.click(),i);assert.equal(e.hideCrowd,i>=3);assert.equal(e.revealed,i>=2);}
+ assert.equal(e.finish(),true);assert.equal(e.hideCrowd,false);assert.equal(e.quiet,true);e.arrive();assert.equal(e.hideCrowd,false);assert.equal(e.quiet,true);e.reset();assert.equal(e.quiet,false);
+ for(let stop=1;stop<=5;stop++){e.focus();for(let i=0;i<stop;i++)e.click();e.reset();assert.equal(e.hideCrowd,false);assert.equal(e.count,0);}
+});
+test('native alpha WebM is selected, both overlay and video have transparent CSS backing',()=>{
+ assert.match(SMEEMO_STINGER,/smeemo-explosive-alpha\.webm$/);
+ const css=readFileSync(new URL('./ramblegamble.css',import.meta.url),'utf8');
+ for(const match of css.matchAll(/\.rg-smeemo-stinger(?: video)?\s*\{([^}]+)\}/g)){
+  const backgrounds=[...match[1].matchAll(/background(?:-color)?:\s*([^;]+)/g)];for(const b of backgrounds)assert.equal(b[1],'transparent');
+ }
+ assert.match(css,/\.rg-smeemo-stinger\s*\{[^}]*background:transparent/);
+ assert.match(css,/\.rg-smeemo-stinger video\s*\{[^}]*background:transparent/);
+ const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
+ assert.match(src,/hideCrowd:encounter\.hideCrowd/);assert.match(src,/if\(encounter\.quiet\)silenceCrowd\(\);\s*encounter\.reset/);
+ assert.match(src,/function reactCrowd\(emotion\)\{if\(!encounter\.quiet\)/);
+});
