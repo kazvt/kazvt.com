@@ -1,7 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,statSync} from 'node:fs';
-import {SKY_TILE,skyHeight,skyStride,skyTiles,tileRotation,SKY_FRAGMENT,createFloatingSky} from './floating-sky.mjs';
+import {SKY_TILE,SKY_VIDEO_URL,skyHeight,skyStride,skyTiles,tileRotation,SKY_FRAGMENT,createFloatingSky} from './floating-sky.mjs';
+
+test('regenerated packed sky video uses a fresh cache key',()=>{
+ assert.equal(SKY_VIDEO_URL,'/ramblegamble/assets/sky/floating-sky-matte.mp4?v=sky-video-70ec21f5-v1');
+});
 
 test('overhead height is exact, monotone, never passes camera, and returns to authored floor',()=>{
  for(let y=-30;y<=150;y+=.025){const h=skyHeight(y);assert.equal(h,Math.max(15,y+3));assert.ok(h>=15&&h-y>=3-1e-12);}
