@@ -752,3 +752,22 @@
   .rg-shop-card-motion.rg-shop-deal,.rg-shop-card-drift,.rg-shop-card-inner,.rg-shop-buyer img,.rg-shop-card-back::after,.rg-purchase-impact .rg-shop-card::after {animation:none!important;transition:none!important;}
   .rg-shop-card:is(:hover,:focus-visible,:active):not(:disabled) .rg-shop-card-inner,.rg-shop-buyer:is(:hover,:focus-visible) img {transform:none;}
 }
+
+/* Smeemo storm is a foreground scene plane, below the z=8 card UI and
+   above the z=2 character billboards. It never captures clicks or focus. */
+.rg-smeemo-lightning {
+  position:absolute;inset:0;width:100%;height:100%;z-index:3;
+  pointer-events:none;user-select:none;
+}
+.rg-smeemo-lightning[hidden],
+.rg-preview:is(.is-menu,.is-dice-mode,.is-freecam,.is-freecam-detached) .rg-smeemo-lightning,
+html[data-rg-host-locked] .rg-smeemo-lightning {display:none!important;}
+/* Keep the existing depth mask and per-character panel filter intact. This
+   subtle bounce light touches the iframe artwork, not its nametag or UI. */
+.rg-preview.is-smeemo-impact .rg-billboard :is(iframe,.rg-billboard-placeholder) {
+  filter:brightness(var(--storm-character-light,1));
+}
+@media(prefers-reduced-motion:reduce) {
+  .rg-smeemo-lightning {display:none!important;}
+  .rg-preview.is-smeemo-impact .rg-billboard :is(iframe,.rg-billboard-placeholder) {filter:none;}
+}

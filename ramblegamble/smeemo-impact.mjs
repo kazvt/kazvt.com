@@ -1,3 +1,4 @@
+import { createLightningStrike, sampleLightningStrike } from "./smeemo-lightning.mjs?v=smeemo-storm-20261127-v1";
 // Presentation-only: all inputs describe already committed game transitions.
 const clamp = (v, low, high) => Math.min(high, Math.max(low, v));
 const smooth = x => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
@@ -37,20 +38,30 @@ export function sampleSmeemoImpact(pulses, now, width, height) {
   return { energy: e, x, y, scale, uiX: x * .15, uiY: y * .19, uiScale: 1 + .012 * e };
 }
 
-export function createSmeemoImpact({ requestFrame, cancelFrame, now, canRun, isVisible, reduced, size, paint, clear, sound, stopSound }) {
-  let frame = null, pending = null, pulses = [], live = false;
+export function createSmeemoImpact({ requestFrame, cancelFrame, now, canRun, isVisible, reduced, size, paint, clear, sound, stopSound, anchor = () => ({x:.5,y:.83}), random = Math.random }) {
+  let frame = null, pending = null, pulses = [], strikes = [], live = false, serial = 0, lastBrightAt = -Infinity;
   function stop() {
     if (frame !== null) cancelFrame(frame);
-    frame = null; pending = null; pulses = []; live = false;
+    frame = null; pending = null; pulses = []; strikes = []; live = false;
     clear(); stopSound();
   }
   function schedule() { if (frame === null) frame = requestFrame(tick); }
   function begin(event, time) {
     const spec = smeemoImpactSpec(event.kind, event.count);
     live = true;
-    audioUntil = time + (event.kind === "win" ? 4700 : 1500);
+    audioUntil = time + 5000;
     sound(event, spec);
-    if (!reduced()) pulses.push({ ...spec, at: time });
+    if (!reduced()) {
+      pulses.push({ ...spec, at: time });
+      const strike = createLightningStrike(event,time,anchor(event),random,serial++);
+      // Still give every rapid reveal its own silhouette, but reserve the
+      // highest-luminance accents for events spaced at least 400 ms apart.
+      // Keep the gate across cancellation/restart to avoid a reset loophole.
+      strike.accent = time-lastBrightAt >= 400 ? 1 : .30;
+      if (strike.accent === 1) lastBrightAt = time;
+      strikes.push(strike);
+      strikes = strikes.slice(-3);
+    }
     // The visual tail is bounded even during a burst of clicks.
     pulses = pulses.slice(-10);
   }
@@ -63,11 +74,13 @@ export function createSmeemoImpact({ requestFrame, cancelFrame, now, canRun, isV
       const event = pending.event; pending = null; begin(event, time);
     }
     if (!isVisible()) { stop(); return; }
-    if (reduced()) pulses = [];
+    if (reduced()) { pulses = []; strikes = []; }
+    strikes = strikes.filter(s => time - s.at < s.duration);
     pulses = pulses.filter(p => time - p.at < p.duration);
-    if (pulses.length) {
+    if (pulses.length || strikes.length) {
       const { width, height } = size();
-      paint(sampleSmeemoImpact(pulses, time, width, height));
+      paint({ ...sampleSmeemoImpact(pulses, time, width, height), width, height,
+        lightning: strikes.map(s => sampleLightningStrike(s,time)).filter(Boolean) });
       schedule();
     } else {
       clear();

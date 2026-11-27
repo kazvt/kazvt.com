@@ -54,14 +54,14 @@ function mountUI(saved, initialPoints = {kaz:0,faroe:0,erin:0}) {
   get('#rg-card-games-layer').querySelector=get;
   get('#rg-card-mode').value='shop'; get('#rg-card-player').value='kaz';
   let data=normalizeCardGamesState(saved), subscriber, pointsSubscriber, balances={...initialPoints}, failPoints=false, failCards=false, deferPoints=false, releasePoints=null;
-  const calls=[], sounds=[], impacts=[], purchases=[];
+  const calls=[], sounds=[], impacts=[], purchases=[], stoppedSounds=[];let impactOptions;
   const listeners=new Map();
   const timers=new Map();let timerId=0;
   const window={queueMicrotask:fn=>fn(),matchMedia:()=>({matches:true}), clearTimeout(id){timers.delete(id);},setTimeout(fn){timers.set(++timerId,fn);return timerId;},addEventListener:(type,fn)=>listeners.set(type,fn),dispatchEvent(event){calls.push(event.type);listeners.get(event.type)?.(event);}};
   class FakeEvent {constructor(type,opts={}){this.type=type;this.detail=opts.detail;}}
   const code=readFileSync(new URL('./card-games-ui.js',import.meta.url),'utf8').replace(/^import\s+[\s\S]*?;\n/gm,'');
-  vm.runInNewContext(code,{audienceReact(){},showBurst(){},voteFlight(){},purchaseFlight(target,buyer,price){purchases.push({target,buyer,price});},requestAnimationFrame:fn=>fn(),...games,applyCardShowAction,activeCardStage,cardStageChange,smeemoImpactTransition,createSmeemoImpact:()=>({trigger:event=>impacts.push(event),stop(){}}),window,document:{querySelector:get,querySelectorAll:()=>[],createElement:()=>new FakeElement(),addEventListener(){}},CustomEvent:FakeEvent,Event:FakeEvent,readCardGames:()=>data,writeCardGames:value=>failCards?{state:data,persisted:false}:({state:data=normalizeCardGamesState(value),persisted:true}),subscribeLiveTrivia:()=>{},writeLiveTriviaDraft:()=>true,activeRoomRound:()=>data.round,subscribeCardGames:fn=>{subscriber=fn;fn(data);},readPointScores:()=>({...balances}),writePointScores:value=>{if(failPoints)return {scores:{...balances},persisted:false};balances={...value};pointsSubscriber?.({...balances});return {scores:{...balances},persisted:true};},subscribePointScores:fn=>{pointsSubscriber=fn;fn({...balances});},withPointScoresLock:async fn=>{if(deferPoints){deferPoints=false;await new Promise(resolve=>{releasePoints=resolve;});}return fn();},mountCardRoom:()=>({publish(){}}),foley:{start(channel,cue){sounds.push(cue);},stop(){},play(cue){sounds.push(cue);}},withRoomSubmissionLock:async fn=>fn()});
-  return {get,calls,sounds,impacts,purchases,window,get state(){return data;},get balances(){return balances;},setPoints(next){balances={...next};pointsSubscriber({...balances});},blockPoints(value){failPoints=value;},deferPointLock(){deferPoints=true;},releasePointLock(){releasePoints?.();},blockCards(value){failCards=value;},update(next){data=normalizeCardGamesState(next);subscriber(data);},flushTimers(){for(const [id,fn] of [...timers]){timers.delete(id);fn();}}};
+  vm.runInNewContext(code,{audienceReact(){},showBurst(){},voteFlight(){},purchaseFlight(target,buyer,price){purchases.push({target,buyer,price});},requestAnimationFrame:fn=>fn(),...games,applyCardShowAction,activeCardStage,cardStageChange,smeemoImpactTransition,createLightningLayer:()=>({paint(){},clear(){}}),createSmeemoImpact:options=>{impactOptions=options;return {trigger:event=>impacts.push(event),stop(){}}},window,document:{querySelector:get,querySelectorAll:()=>[],createElement:()=>new FakeElement(),addEventListener(){}},CustomEvent:FakeEvent,Event:FakeEvent,readCardGames:()=>data,writeCardGames:value=>failCards?{state:data,persisted:false}:({state:data=normalizeCardGamesState(value),persisted:true}),subscribeLiveTrivia:()=>{},writeLiveTriviaDraft:()=>true,activeRoomRound:()=>data.round,subscribeCardGames:fn=>{subscriber=fn;fn(data);},readPointScores:()=>({...balances}),writePointScores:value=>{if(failPoints)return {scores:{...balances},persisted:false};balances={...value};pointsSubscriber?.({...balances});return {scores:{...balances},persisted:true};},subscribePointScores:fn=>{pointsSubscriber=fn;fn({...balances});},withPointScoresLock:async fn=>{if(deferPoints){deferPoints=false;await new Promise(resolve=>{releasePoints=resolve;});}return fn();},mountCardRoom:()=>({publish(){}}),foley:{start(channel,cue){sounds.push(cue);},stop(channel){stoppedSounds.push(channel);},play(cue){sounds.push(cue);}},withRoomSubmissionLock:async fn=>fn()});
+  return {get,calls,sounds,impacts,purchases,stoppedSounds,impactOptions,window,get state(){return data;},get balances(){return balances;},setPoints(next){balances={...next};pointsSubscriber({...balances});},blockPoints(value){failPoints=value;},deferPointLock(){deferPoints=true;},releasePointLock(){releasePoints?.();},blockCards(value){failCards=value;},update(next){data=normalizeCardGamesState(next);subscriber(data);},flushTimers(){for(const [id,fn] of [...timers]){timers.delete(id);fn();}}};
 }
 test('restored shop stays hidden, menu has only three choices, and choosing Shop starts fresh',async()=>{
   const round=createShopRound(decks);
@@ -275,4 +275,13 @@ test('a queued shop click cannot purchase after leaving the stage',async()=>{
  const card=findClass(ui.get('#rg-card-games-content'),'rg-shop-card');
  ui.deferPointLock();const pending=card.click();ui.get('#rg-card-room').click();ui.releasePointLock();await pending;
  assert.equal(ui.state.round.cards[0].buyer,null);assert.equal(ui.purchases.length,0);
+});
+test('actual Smeemo UI routes every event to recorded thunder, preserves discovery scream and cancels all channels',()=>{
+ const ui=mountUI({});ui.sounds.length=0;ui.stoppedSounds.length=0;
+ const spec={strength:.8,rate:1};
+ ui.impactOptions.sound({kind:'start',count:0},spec);
+ ui.impactOptions.sound({kind:'reveal',count:1},spec);
+ ui.impactOptions.sound({kind:'win',count:2},spec);
+ assert.deepEqual(ui.sounds,['smeemoThunder','smeemoRumble','smeemoHit','smeemoThunder','smeemoRumble','smeemoHit','smeemoThunder','smeemoRumble','smeemoWin']);
+ ui.stoppedSounds.length=0;ui.impactOptions.stopSound();assert.deepEqual(ui.stoppedSounds,['smeemo-thunder','smeemo-rumble','smeemo-hit','smeemo-win']);
 });

@@ -1,12 +1,13 @@
 import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { showBurst, voteFlight, purchaseFlight } from "./show-ui-fx.mjs?v=shop-motion-20261127-v1";
-import { createSmeemoImpact, smeemoImpactTransition } from "./smeemo-impact.mjs?v=room-audio-20261127-v1";
+import { createSmeemoImpact, smeemoImpactTransition } from "./smeemo-impact.mjs?v=smeemo-storm-20261127-v1";
+import { createLightningLayer } from "./smeemo-lightning.mjs?v=smeemo-storm-20261127-v1";
 import { applyCardShowAction } from "./card-show-actions.mjs?v=card-polish-20261127-v1";
 import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia, writeLiveTriviaDraft } from "./live-trivia.mjs?v=match-number-20261127-v1";
 import { activeCardStage, cardStageChange } from "./card-stage-state.mjs?v=wildcard-shared-20261126-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
 import { mountCardRoom } from "./card-room-host.mjs?v=match-number-20261127-v1";
-import { foley } from "./game-foley.mjs?v=vip-water-gain-20261127-v1";
+import { foley } from "./game-foley.mjs?v=smeemo-storm-20261127-v1";
 import {
   CARD_GAME_CATEGORIES,
   CARD_GAME_PLAYERS,
@@ -91,30 +92,45 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
   let shopPresentation = { id: null, revealed: new Set() };
   let smeemoPresentation = { id: null, revealed: new Set() };
   const preview = $(".rg-preview");
+  const lightning = createLightningLayer(preview);
   const impact = createSmeemoImpact({
     requestFrame: fn => window.requestAnimationFrame(fn), cancelFrame: id => window.cancelAnimationFrame(id),
     now: () => performance.now(),
     canRun: () => !document.hidden && !document.documentElement?.hasAttribute("data-rg-host-locked")
       && !dismissedActive && !menuOpen && !layer.hidden && state.smeemo
-      && !preview.classList.contains("is-menu") && !preview.classList.contains("is-dice-mode"),
+      && !["is-menu", "is-dice-mode", "is-freecam", "is-freecam-detached"].some(c => preview.classList.contains(c)),
     isVisible: () => !layer.classList.contains("is-off-table"),
     reduced: () => reducedMotion.matches,
     size: () => ({ width: preview.clientWidth, height: preview.clientHeight }),
-    paint: ({ energy, x, y, scale, uiX, uiY, uiScale }) => {
+    anchor: () => {
+      const base = preview.getBoundingClientRect();
+      const board = content.querySelector(".rg-smeemo-board");
+      const card = [...content.querySelectorAll(".rg-smeemo-card.is-newly-revealed")].at(-1);
+      const rect = (board || content).getBoundingClientRect();
+      const focus = card?.getBoundingClientRect() || rect;
+      return {x:(focus.left+focus.width/2-base.left)/Math.max(1,base.width),
+        y:(rect.bottom-base.top+base.height*.12)/Math.max(1,base.height)};
+    },
+    paint: ({ energy, x, y, scale, uiX, uiY, uiScale, width, height, lightning: strikes }) => {
+      lightning.paint(strikes,width,height);
+      const glow = Math.min(1, strikes.reduce((sum,s)=>sum+s.glow,0));
+      preview.style.setProperty("--storm-character-light",String(1+glow*.12));
       const vars = { "--quake-x": `${x}px`, "--quake-y": `${y}px`, "--quake-scale": scale,
         "--quake-ui-x": `${uiX}px`, "--quake-ui-y": `${uiY}px`, "--quake-ui-scale": uiScale, "--quake-energy": energy };
       for (const [key, value] of Object.entries(vars)) preview.style.setProperty(key, String(value));
       preview.classList.add("is-smeemo-impact");
     },
-    clear: () => preview.classList.remove("is-smeemo-impact"),
+    clear: () => { lightning.clear(); preview.classList.remove("is-smeemo-impact"); preview.style.removeProperty("--storm-character-light"); },
     sound: (event, spec) => {
-      foley.start("smeemo-rumble", "smeemoRumble", { volume: .75 + spec.strength * .25 });
+      foley.stop("smeemo-win");
+      foley.start("smeemo-thunder", "smeemoThunder", { rate: .88 + Math.random()*.18 + (event.kind === "win" ? -.06 : 0), volume: .70 + spec.strength*.30 });
+      foley.start("smeemo-rumble", "smeemoRumble", { volume: .38 + spec.strength * .20 });
       if (event.kind === "win") {
         foley.stop("smeemo-hit");
         foley.start("smeemo-win", "smeemoWin", { maxDelay: 350 });
       } else foley.start("smeemo-hit", "smeemoHit", { rate: spec.rate, endRate: spec.rate * 1.12, volume: .8 + spec.strength * .2 });
     },
-    stopSound: () => { for (const channel of ["smeemo-rumble", "smeemo-hit", "smeemo-win"]) foley.stop(channel); },
+    stopSound: () => { for (const channel of ["smeemo-thunder", "smeemo-rumble", "smeemo-hit", "smeemo-win"]) foley.stop(channel); },
   });
   document.addEventListener("visibilitychange", () => { if (document.hidden) impact.stop(); });
   window.addEventListener("pagehide", impact.stop);

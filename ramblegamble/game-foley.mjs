@@ -1,6 +1,6 @@
 // Recorded samples only. This module never generates an oscillator/noise signal.
 // All assets are same-origin, installed by assets/sfx/install-foley.py.
-import { createRoomAmbience } from "./room-ambience.mjs?v=vip-water-gain-20261127-v1";
+import { createRoomAmbience } from "./room-ambience.mjs?v=vip-atmosphere-20261127-v1";
 const ROOT = new URL("./assets/sfx/foley/", import.meta.url);
 export const FOLEY_CUES = Object.freeze({
   switch: { files: ["switch.mp3"], fallback: ["click-1.ogg"], volume: .44 },
@@ -35,6 +35,7 @@ export const FOLEY_CUES = Object.freeze({
   error: { files: ["error-1.ogg", "error-2.ogg"], fallback: ["switch.mp3"], volume: .30 },
   purchase: { files: ["chips-stack-1.ogg", "chips-stack-2.ogg"], fallback: ["chips-handle-1.ogg"], volume: .48 },
   diceFace: { files: ["die-grab-1.ogg", "die-grab-2.ogg"], fallback: ["card-place-1.ogg"], volume: .30 },
+  smeemoThunder: { files: ["smeemo-thunder-crack.ogg", "smeemo-thunder-westport.ogg"], volume: .70, maxDuration: 4.5 },
   smeemoHit: { files: ["smeemo-hit.ogg"], fallback: ["chip-lay-1.ogg"], volume: .64, maxDuration: 1.1 },
   smeemoRumble: { files: ["smeemo-rumble.ogg"], fallback: ["die-throw-1.ogg"], volume: .32, maxDuration: 1.1 },
   smeemoWin: { files: ["smeemo-horror.mp3"], volume: .76, maxDuration: 4.2 },

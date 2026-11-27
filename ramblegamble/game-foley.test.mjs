@@ -128,3 +128,11 @@ test('VIP silence applies only to ambient layers; recorded dice impacts, settlem
  assert.equal(f.started.length,3);
  f.mixer.setAmbienceEnabled(false);assert.equal(await f.mixer.play('diceFace'),true);
 });
+test('Smeemo thunder alternates only real local recording slots and rejects stale or missing clips',async()=>{
+ const f=fixture();assert.equal(await f.mixer.start('smeemo-thunder','smeemoThunder'),true);
+ assert.equal(await f.mixer.start('smeemo-thunder','smeemoThunder'),true);
+ assert.match(f.started[0].buffer,/smeemo-thunder-crack\.ogg$/);assert.match(f.started[1].buffer,/smeemo-thunder-westport\.ogg$/);
+ assert.equal(f.stopped.length,1);
+ const pending=f.mixer.start('smeemo-thunder','smeemoThunder');f.mixer.stop('smeemo-thunder');assert.equal(await pending,false);
+ const missing=fixture({fetchFile:async()=>({ok:false})});assert.equal(await missing.mixer.play('smeemoThunder'),false);assert.equal(missing.started.length,0);
+});

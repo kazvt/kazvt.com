@@ -37,7 +37,7 @@ test('start waits for table, each rapid reveal restarts sound and stays in one R
   const f=fixture();f.controller.trigger({kind:'start',count:0});f.step(500);assert.equal(f.sounds.length,0);
   f.visible(true);f.step();assert.equal(f.sounds.length,1);f.step(100);assert.ok(f.paints.at(-1).energy>0);
   for(let count=1;count<=8;count++){f.controller.trigger({kind:'reveal',count});assert.equal(f.pending,1);f.step(25);assert.ok(f.paints.at(-1).energy<=1);}
-  assert.equal(f.sounds.length,9);f.step(4000);assert.equal(f.pending,0);assert.ok(f.clears>0);
+  assert.equal(f.sounds.length,9);f.step(5100);assert.equal(f.pending,0);assert.ok(f.clears>0);
 });
 test('offtable, hide, lock and reduced motion clean up, never replay on re-entry',()=>{
   const f=fixture();f.controller.trigger({kind:'start',count:0});f.step(3300);assert.equal(f.sounds.length,0);assert.equal(f.pending,0);
@@ -45,4 +45,18 @@ test('offtable, hide, lock and reduced motion clean up, never replay on re-entry
   f.visible(true);f.reduced(true);f.paints.length=0;f.controller.trigger({kind:'win',count:3});f.step();assert.equal(f.paints.length,0);assert.equal(f.sounds.at(-1)[0].kind,'win');
   f.allowed(false);f.step();assert.equal(f.pending,0);f.allowed(true);f.step();assert.equal(f.sounds.length,2);
   f.controller.trigger({kind:'reveal',count:4});f.controller.stop();assert.equal(f.pending,0);
+});
+test('each visible accepted event produces a distinct bounded strike, and reduced-motion/exit remove it',()=>{
+ const f=fixture();f.visible(true);f.controller.trigger({kind:'start',count:0});f.step(140);
+ const first=f.paints.at(-1).lightning[0].strike;assert.equal(first.trunk.length,33);
+ for(let count=1;count<=8;count++){
+  f.controller.trigger({kind:'reveal',count});f.step(25);
+  const strikes=f.paints.at(-1).lightning;assert.ok(strikes.length<=3);assert.equal(strikes.at(-1).strike.accent,.30);assert.notDeepEqual(strikes.at(-1).strike.trunk,first.trunk);
+ }
+ f.reduced(true);f.step();assert.ok(f.clears>0);f.visible(false);f.step();assert.equal(f.pending,0);
+});
+test('rapid restart cannot bypass the bright-accent gate; later strike regains full accent',()=>{
+ const f=fixture();f.visible(true);f.controller.trigger({kind:'start',count:0});f.step(10);assert.equal(f.paints.at(-1).lightning[0].strike.accent,1);
+ f.controller.stop();f.controller.trigger({kind:'start',count:0});f.step(10);assert.equal(f.paints.at(-1).lightning[0].strike.accent,.30);
+ f.step(410);f.controller.trigger({kind:'reveal',count:1});f.step(10);assert.equal(f.paints.at(-1).lightning.at(-1).strike.accent,1);
 });

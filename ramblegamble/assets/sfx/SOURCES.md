@@ -79,3 +79,14 @@ Two independently looping HTML media streams feed low-gain channels into the exi
 ### VIP doorway ambience
 
 - `foley/vip-water-drips-cave-loop.ogg`: [Dripping water loop — Independent.nu, submitted by qubodup](https://opengameart.org/content/dripping-water-loop), [CC0](https://creativecommons.org/publicdomain/zero/1.0/). OpenGameArt tags it as a looping cave/cellar drip. The installer downloads and SHA-1-checks its 20.06-second stereo FLAC, then creates a ~17-second crossfaded, filtered Ogg loop; the runtime applies an additional low-pass filter near the doorway. Run `python3 ramblegamble/assets/sfx/install-vip-water.py` from the project root. No login or API key is needed, and no synthetic fallback is used.
+
+### Smeemo lightning (recorded thunder; installation required)
+
+Run `python3 ramblegamble/assets/sfx/install-smeemo-thunder.py` from the project root on an internet-connected machine with Python 3 and FFmpeg. The two audio originals could not be retrieved in the patch environment (DNS/network and binary-fetch restrictions); neither edited file is bundled. The installer downloads the exact Wikimedia Commons originals, validates published SHA-1 checksums, trims a 4.2-second excerpt of each recording with a short fade and limiter, and installs the two Ogg files. If downloads are blocked, download the exact originals from the source pages below and pass `--downloads DIRECTORY`. The edited recordings remain **CC BY-SA 4.0**; retain this attribution and the license link when distributing. Do not deploy expecting thunder until both files have been installed and committed. No remote audio fetch occurs in the game; without these recordings the existing rumble/sting/scream still work, but there is no thunder substitute.
+
+| Output | Recording / license / changes |
+| --- | --- |
+| `foley/smeemo-thunder-crack.ogg` | [Thunder crack 2B.ogg — Jud McCranie (Bubba73), 17 April 2022](https://commons.wikimedia.org/wiki/File:Thunder_crack_2B.ogg), [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Original SHA-1 `2eedc224cd4d5b3a9caf3f7a86848cbc48675732`; locate loud onset, trim, high-pass, fade, limit, Ogg encode. |
+| `foley/smeemo-thunder-westport.ogg` | [Thunder Claps.ogg — Jonathan Hunt (Interactii), 12 August 2016](https://commons.wikimedia.org/wiki/File:Thunder_Claps.ogg), [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Original SHA-1 `7a4b3422c73f34e96a614a8513e2896c5df5a908`; trim from 3.55 s near documented first clap, high-pass, fade, limit, Ogg encode. |
+
+The same foley mixer alternates recordings and varies playback rate slightly, replacing the preceding thunder voice rather than stacking unbounded claps. The existing recorded discovery scream remains separate. The clips need an actual in-game listening check after installation; no synthesized foley is included.
