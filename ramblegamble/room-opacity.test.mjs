@@ -168,7 +168,7 @@ test('local original and crowd sprite are separate PNGs, and the camera update f
  assert.deepEqual(dimensions(png('smeemo_scramble.png')),[236,601]);
  assert.deepEqual(dimensions(png('smeemo-crowd.png')),[30,76]);
  const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
- assert.match(src,/audience-render\.mjs\?v=music-sync-20261127-v1/);
+ assert.match(src,/audience-render\.mjs\?v=music-intensity-20261128-v1/);
  const animate=src.slice(src.indexOf('function animate(time)'));
  assert.ok(animate.indexOf('audience?.update(crowdClock,emotion,reducedMotion.matches,camera.position,')>animate.indexOf('focusOrbit.step(time'));
 });
@@ -195,7 +195,8 @@ test('crowd Smeemo only enters the anchored dance during focused close-up, retai
  try{const scene=new Group(),audience=createAudienceRenderer({...THREE,Matrix4:Matrix},scene),cat=audience.group.children.find(m=>m.name==='rg-audience-spectator'),a=crowdCatAnchor(),eye={x:a.x-4,z:a.z};
   audience.update(300,'idle',false,eye,{time:300,focused:false});assert.ok(cat.visible);assert.equal(cat.matrixAutoUpdate,true);
   audience.update(0,'idle',true,eye,{focused:true});assert.equal(cat.material.opacity,.96);audience.update(0,'idle',true,eye);assert.equal(cat.material.opacity,.86);
-  const yaw=cat.rotation.y;audience.update(300,'idle',false,eye,{time:300,focused:true});assert.equal(cat.matrixAutoUpdate,false);assert.equal(cat.position.y,a.y);assert.equal(cat.rotation.y,yaw);assert.ok(cat.matrix.a[0]<1);assert.ok(Math.abs(cat.matrix.a[1])<=.085);
+  const yaw=cat.rotation.y;audience.update(300,'idle',false,eye,{time:300,focused:true,catIntensity:.8});assert.equal(cat.matrixAutoUpdate,false);assert.equal(cat.position.y,a.y);assert.equal(cat.rotation.y,yaw);assert.ok(cat.matrix.a[0]<1);assert.ok(Math.abs(cat.matrix.a[1])<=.085);const subtle=cat.matrix.a.slice();
+  audience.update(300,'idle',false,eye,{time:300,focused:true,catIntensity:1.2});const lively=cat.matrix.a.slice();assert.ok(1-lively[0]>1-subtle[0]);assert.ok(Math.abs(lively[1])>Math.abs(subtle[1]));assert.ok(Math.abs((1-lively[0])/(1-subtle[0])-1.5)<1e-8);assert.ok(Math.abs(lively[1]/subtle[1]-1.5)<1e-8);
   audience.update(400,'idle',false,eye,{time:NaN,focused:true});assert.equal(cat.matrixAutoUpdate,true);
   audience.update(400,'idle',false,eye,{time:400,focused:false});assert.equal(cat.matrixAutoUpdate,true);
   audience.update(400,'idle',true,eye,{time:400,focused:true});assert.equal(cat.matrixAutoUpdate,true);assert.equal(cat.position.y,a.y);audience.dispose();

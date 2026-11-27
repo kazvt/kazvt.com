@@ -1,4 +1,4 @@
-import { dancePose } from './stage-dance.mjs?v=music-sync-20261127-v1';
+import { dancePose } from './stage-dance.mjs?v=music-intensity-20261128-v1';
 // Original low-resolution silhouette art, three world-space cutout texture panels.
 // Only these canvases update at 6 fps; the rest of the scene renders normally.
 export const CROWD_FPS=6;
@@ -177,7 +177,7 @@ export function createCrowdCat(THREE,group) {
     mesh.renderOrder=revealed?2:-1;
     mesh.position.y=anchor.y;
     mesh.matrixAutoUpdate=true;
-    if(focused){const p=dancePose(dance.time,.78),h=CROWD_CAT.height;
+    if(focused){const p=dancePose(dance.time,.78,0,dance.catIntensity),h=CROWD_CAT.height;
       mesh.updateMatrix();mesh.matrix.multiply(new THREE.Matrix4().set(p.width,p.shear,0,p.shear*h/2,0,1,0,0,0,0,1,0,0,0,0,1));mesh.matrixAutoUpdate=false;mesh.matrixWorldNeedsUpdate=true;}
 
   },dispose(){if(disposed)return;disposed=true;mesh.visible=false;group.remove(mesh);tex.dispose();revealTex?.dispose();mesh.geometry.dispose();mesh.material.dispose();}};

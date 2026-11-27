@@ -1,7 +1,7 @@
 import { createSlotMarquee } from "./slot-marquee.mjs?v=slot-marquee-20261128-v1";
 import { createSmeemoEncounter, createSmeemoStinger, createSmeemoTableSession, SMEEMO_RETURN_MS } from "./smeemo-reveal.mjs?v=music-sync-20261127-v1";
 import { createFloatingSky } from "./floating-sky.mjs?v=sky-variety-20261127-v1";
-import { createStageDance, createDanceClock, dancePose } from "./stage-dance.mjs?v=music-sync-20261127-v1";
+import { createStageDance, createDanceClock, createDanceIntensitySampler, dancePose } from "./stage-dance.mjs?v=music-intensity-20261128-v1";
 import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=music-sync-20261127-v1";
 import { createMenuMarquee } from "./menu-marquee.mjs?v=corrective-review-20261127-v1";
 import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=smeemo-reveal-20261127-v1";
@@ -14,7 +14,7 @@ import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state
 import { createCharacterOcclusion } from "./character-occlusion.mjs?v=stage-dance-20261127-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
-import { createAudienceRenderer, crowdCatAnchor, CROWD_CAT } from "./audience-render.mjs?v=music-sync-20261127-v1";
+import { createAudienceRenderer, crowdCatAnchor, CROWD_CAT } from "./audience-render.mjs?v=music-intensity-20261128-v1";
 import { createShowFX } from "./show-fx.mjs?v=sky-soot-20261127-v1";
 import { createRouletteCabinetFX } from "./roulette-cabinet-fx.mjs?v=sky-soot-20261127-v1";
 import { cameraTravelDuration, isSpookyView, suspenseEase, crowdCloseupPose } from "./spooky-camera.mjs?v=cartoon-machines-20261127-v1";
@@ -137,6 +137,7 @@ import {
   };
   let audience, showFX, stageShow, signGlow, characterSelection, stageDance, slotMarquee;
   const danceClock=createDanceClock();
+  const danceIntensity=createDanceIntensitySampler();
   let danceTime=NaN;
   let characterSelectedAt=-Infinity;
   let crowdClock=0,crowdLastFrame=null;
@@ -2746,7 +2747,7 @@ import {
     const selectionId = !cameraDetached && !freecam?.active ? selectedCharacterId(currentView) : null;
     for (const billboard of billboards) {
       billboard.renderPose=characterRenderPose(billboard,billboard.id===selectionId?time-characterSelectedAt:Infinity,reducedMotion.matches,{time:undefined,...characterSelection?.reaction(billboard.id,time)});
-      const dance=dancePose(danceTime,reducedMotion.matches ? 0 : (billboard.seated ? .38 : .9));
+      const dance=dancePose(danceTime,reducedMotion.matches ? 0 : (billboard.seated ? .38 : .9),0,danceIntensity(`billboard:${billboard.id}`));
       billboard.renderPose.worldWidth*=dance.width;
       billboard.renderPose.shear=dance.shear;
       const quad = projectCharacterQuad(billboard.renderPose,camera.position,project,viewport,camera.near);
@@ -2968,7 +2969,7 @@ import {
     // Intentional 30 FPS pose cadence, shared by the stage and DOM depth pass.
     danceTime=Math.floor(danceClock.step(time,roomVisible&&!diceModeOpen&&!reducedMotion.matches,soundtrack.playbackPosition())*30/1000)*1000/30;
     stageDance?.update(danceTime,Number.isFinite(danceTime));
-    audience?.update(crowdClock,emotion,reducedMotion.matches,camera.position,{time:danceTime,focused:encounter.phase==="focused"&&currentView.kind==="smeemo-crowd"&&!cameraTransition&&!cameraDetached&&!freecam?.active,revealed:encounter.revealed,quiet:encounter.quiet});
+    audience?.update(crowdClock,emotion,reducedMotion.matches,camera.position,{time:danceTime,catIntensity:danceIntensity("crowd-cat:smeemo"),focused:encounter.phase==="focused"&&currentView.kind==="smeemo-crowd"&&!cameraTransition&&!cameraDetached&&!freecam?.active,revealed:encounter.revealed,quiet:encounter.quiet});
     updateSmeemoEncounter(time,roomVisible);
     preview.classList.toggle("is-trivia",!cameraDetached && currentView.kind === "trivia");
     if (triviaLayer) triviaLayer.hidden = !(gameStarted && !pauseMenuOpen && !diceModeOpen && sceneReady && !cameraTransition && !cameraDetached && currentView.kind === "trivia" && triviaLayer.dataset.ready === "true");
@@ -3116,7 +3117,7 @@ import {
       try {signGlow=createSignGlow(THREE,stageModel);} catch(error){console.warn("Sign animation unavailable",error);}
       stageModel.visible = !pauseMenuOpen;
       scene.add(stageModel);
-      try { stageDance=createStageDance(THREE,stageModel,stageGltf.parser.associations); }
+      try { stageDance=createStageDance(THREE,stageModel,stageGltf.parser.associations,danceIntensity); }
       catch(error){console.warn("Stage dance unavailable",error);}
       carveDiceDoorway(stageModel);
       if (liquidPortalFrame && liquidPortalLayer) {

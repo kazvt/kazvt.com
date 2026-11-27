@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {DANCE_AMPLITUDE,dancePose,cardSwing,createDanceClock,createStageDance,CARD_GROUPS,DICE_TRIANGLE_RANGES,splitIndexRanges} from './stage-dance.mjs';
+import {DANCE_AMPLITUDE,DANCE_INTENSITY_MIN,DANCE_INTENSITY_MAX,dancePose,cardSwing,createDanceClock,createDanceIntensitySampler,createStageDance,CARD_GROUPS,DICE_TRIANGLE_RANGES,splitIndexRanges} from './stage-dance.mjs';
 import {characterCorners,characterPlaneMatrix} from './character-billboards.mjs';
 const near=(a,b,e=1e-8)=>assert.ok(Math.abs(a-b)<e,`${a} != ${b}`);
 const close=(a,b,e=1e-8)=>a.forEach((v,i)=>near(v,b[i],e));
@@ -73,4 +73,44 @@ test('ambient amplitude is 35% of previous squash and shear, with identical card
   const pose=dancePose(time,strength,phase);near(1-pose.width,.35*strength*envelope*(.085+.008*shake));near(pose.shear,.35*side*strength*envelope*(.095+.012*shake));
   near(cardSwing(time,phase),Math.sin((time/2000+phase)*Math.PI*2)*Math.PI/60);
  }
+});
+
+
+test('per-object intensity sampler is seeded, cached, unique and bounded for every ambient prop family',()=>{
+ const seed=0x51a7c0de,first=createDanceIntensitySampler(seed),second=createDanceIntensitySampler(seed);
+ const keys=['contestant-stand:faroe','contestant-stand:erin','contestant-stand:kaz',
+  'tall-chair:12','tall-chair:11','tall-chair:10','desk-chair:9','desk-chair:13','desk-chair:14','desk-chair:15',
+  ...Array.from({length:9},(_,i)=>`card:${i+1}`),...Array.from({length:3},(_,i)=>`dice-stack:${i+1}`),
+  'ramble-gamble-sign','billboard:faroe','billboard:erin','billboard:kaz','billboard:lillie-host','billboard:hazel','crowd-cat:smeemo'];
+ const values=keys.map(first);
+ assert.equal(values.length,keys.length);assert.equal(new Set(values).size,keys.length,'each object receives a distinct multiplier');
+ for(const value of values)assert.ok(value>=DANCE_INTENSITY_MIN&&value<=DANCE_INTENSITY_MAX);
+ assert.deepEqual(keys.map(first),values,'a multiplier is cached and never rerolled per frame');
+ assert.deepEqual(keys.map(second),values,'the same seed and stable keys reproduce the same assignment');
+ assert.notDeepEqual(keys.map(createDanceIntensitySampler(seed+1)),values,'a new scene seed produces a fresh random cast');
+ assert.throws(()=>first(''),/stable object key/);
+});
+
+test('one per-object intensity multiplier scales both squash and shear, while card swing remains rotation-only',()=>{
+ const base=dancePose(300,.8,0,1),low=dancePose(300,.8,0,.8),high=dancePose(300,.8,0,1.2);
+ for(const pose of [low,base,high]){assert.ok(pose.width<1);assert.ok(Math.abs(pose.shear)>0);}
+ near((1-low.width)/(1-base.width),.8);near((1-high.width)/(1-base.width),1.2);
+ near(low.shear/base.shear,.8);near(high.shear/base.shear,1.2);
+ near(cardSwing(250,0,.8)/cardSwing(250),.8);near(cardSwing(250,0,1.2)/cardSwing(250),1.2);
+ assert.deepEqual(dancePose(300,.8,0,NaN),base,'invalid optional multipliers safely fall back to neutral scaling');
+});
+
+test('the same sampler feeds stage rigs, Fugi billboards and focused Smeemo without changing the shared music clock',()=>{
+ const {stage,associations}=fixture(),sampler=createDanceIntensitySampler(0x10293847),rig=createStageDance(THREE,stage,associations,sampler);
+ const all=[...rig.intensityMultipliers,...['faroe','erin','kaz','lillie-host','hazel'].map(id=>sampler(`billboard:${id}`)),sampler('crowd-cat:smeemo')];
+ assert.equal(rig.intensityKeys.length,23);assert.equal(new Set(all).size,all.length);
+ assert.ok(all.every(v=>v>=.8&&v<=1.2));
+ const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
+ assert.match(src,/const danceIntensity=createDanceIntensitySampler\(\)/);
+ assert.match(src,/createStageDance\(THREE,stageModel,stageGltf\.parser\.associations,danceIntensity\)/);
+ assert.match(src,/danceIntensity\(`billboard:\$\{billboard\.id\}`\)/);
+ assert.match(src,/catIntensity:danceIntensity\("crowd-cat:smeemo"\)/);
+ const frame=src.slice(src.indexOf('function animate(time)'));
+ assert.doesNotMatch(frame,/Math\.random/,'randomness is assigned at setup, never sampled during animation frames');
+ rig.dispose();
 });
