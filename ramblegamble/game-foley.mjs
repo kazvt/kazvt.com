@@ -9,6 +9,8 @@ export const FOLEY_CUES = Object.freeze({
   cheer: { files: ["cheer.ogg"], volume: .8 },
   lever: { files: ["lever.mp3"], fallback: ["switch.mp3"], volume: .46 },
   reel: { files: ["spinner.mp3"], fallback: ["reel.mp3"], volume: .28 },
+  slotRattle: { files: ["reel.mp3"], volume: .38, loopStart: 1.28, loopEnd: 4.95 },
+  slotMelody: { files: ["spinner.mp3"], volume: .28 },
   stop: { files: ["tick-1.ogg", "tick-2.ogg"], fallback: ["switch.mp3"], volume: .42 },
   place: { files: ["card-place-1.ogg", "card-place-2.ogg"], volume: .45 },
   remove: { files: ["card-slide-1.ogg", "card-slide-2.ogg"], volume: .40 },
@@ -171,6 +173,12 @@ export function createFoley({
       const gain = context.createGain();
       source.buffer = buffer;
       source.loop = loop;
+      // Cue points select the active portion of a real recording, skipping lead-in silence.
+      const offset = loop && Number.isFinite(cue.loopStart) && buffer.duration > cue.loopStart
+        ? cue.loopStart : 0;
+      if (offset && cue.loopEnd > offset && buffer.duration >= cue.loopEnd) {
+        source.loopStart = offset; source.loopEnd = cue.loopEnd;
+      }
       // Resampling the recording changes pitch; no generated oscillator.
       const safeRate = value => Math.max(.5, Math.min(2, Number.isFinite(value) ? value : 1));
       const from = safeRate(rate), to = safeRate(endRate);
@@ -198,7 +206,8 @@ export function createFoley({
         // start(duration) counts source seconds, not elapsed playback seconds.
         if (from === 1 && to === 1) source.start(0, 0, cue.maxDuration);
         else { source.start(); source.stop(context.currentTime + cue.maxDuration); }
-      } else source.start();
+      } else if (offset) source.start(0, offset);
+      else source.start();
       return true;
     }).catch(() => false).finally(() => {
       if (channel && channels.get(channel) === entry && !entry.voice) channels.delete(channel);

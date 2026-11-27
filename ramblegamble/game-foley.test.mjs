@@ -136,3 +136,14 @@ test('Smeemo thunder alternates only real local recording slots and rejects stal
  const pending=f.mixer.start('smeemo-thunder','smeemoThunder');f.mixer.stop('smeemo-thunder');assert.equal(await pending,false);
  const missing=fixture({fetchFile:async()=>({ok:false})});assert.equal(await missing.mixer.play('smeemoThunder'),false);assert.equal(missing.started.length,0);
 });
+
+test('slot mechanical loop uses the recorded ratchet section, independent melody and cancellable channels',async()=>{
+ const f=fixture({fetchFile:async url=>({ok:true,arrayBuffer:async()=>({path:url.pathname,duration:url.pathname.endsWith('reel.mp3')?5.994:11.926})})});
+ assert.equal(await f.mixer.start('slot-rattle','slotRattle',{loop:true}),true);
+ assert.equal(await f.mixer.start('slots','slotMelody',{loop:true}),true);
+ const [rattle,melody]=f.started;assert.match(rattle.buffer.path,/reel\.mp3$/);assert.match(melody.buffer.path,/spinner\.mp3$/);
+ assert.equal(rattle.loopStart,1.28);assert.equal(rattle.loopEnd,4.95);assert.deepEqual(rattle.startArgs,[0,1.28]);assert.equal(melody.loopStart,undefined);
+ f.mixer.stop('slot-rattle');f.mixer.stop('slots');assert.deepEqual(f.stopped,[rattle,melody]);
+ const missing=fixture({fetchFile:async url=>({ok:!url.pathname.endsWith('reel.mp3'),arrayBuffer:async()=>({duration:11.926})})});
+ assert.equal(await missing.mixer.start('slot-rattle','slotRattle',{loop:true}),false);assert.equal(await missing.mixer.start('slots','slotMelody',{loop:true}),true);
+});

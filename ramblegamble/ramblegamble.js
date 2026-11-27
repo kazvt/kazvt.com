@@ -15,8 +15,9 @@ import { CHARACTER_SOURCE_SIZE, CHARACTER_YAW_LIMIT, characterYaw, standingChara
 import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { createExteriorMist, EXTERIOR_FLOOR } from "./exterior-mist.mjs?v=crowd-mist-20261127-v1";
-import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=standing-characters-20261127-v1";
-import { foley } from "./game-foley.mjs?v=smeemo-storm-20261127-v1";
+import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=slot-cabinet-20261127-v1";
+import { foley } from "./game-foley.mjs?v=slot-cabinet-20261127-v1";
+import { createSlotCabinetFX } from "./slot-cabinet-fx.mjs?v=slot-cabinet-20261127-v1";
 import {
   resolvePointClickAction,
   resolvePointClickBack,
@@ -154,6 +155,7 @@ import {
   let lever;
   let rouletteRig;
   let slotRig;
+  let slotCabinetFX;
   let cardTableModel;
   let skyRoot;
   let exteriorMist;
@@ -707,7 +709,8 @@ import {
     slotReelMotion.action = kind;
     slotReelMotion.soundedStops = new Set();
     foley.play(pullCrank ? "lever" : "switch");
-    foley.start("slots", "reel", { loop: true });
+    if (slotCabinetFX) slotCabinetFX.begin(startedAt, pullCrank ? "crank" : "press", { active: canShowCabinetFX(), reduced: reducedMotion.matches });
+    else foley.start("slots", "reel", { loop: true });
     playing = true;
     preview.classList.add("is-playing");
     syncSlotPlacementControls();
@@ -755,6 +758,7 @@ import {
     hideResult();
     syncSlotPlacementControls();
     foley.play(selectedSlotBerry === SLOT_REEL_WILDCARD ? "wildcard" : "select");
+    slotCabinetFX?.begin(startedAt, "tap", { active: canShowCabinetFX(), reduced: reducedMotion.matches });
     window.dispatchEvent(new CustomEvent("rg:slot-action-start", { detail: { kind } }));
     drawSlotReelDisplay(startedAt);
     return true;
@@ -830,7 +834,13 @@ import {
       && !document.documentElement.hasAttribute("data-rg-host-locked");
   }
 
+  function canShowCabinetFX() {
+    return canShowSlotCelebration() && sceneReady && currentView.kind === "slot"
+      && !cameraDetached && !freecam?.active && !cameraTransition && !stageShow?.busy && slotsModel?.visible;
+  }
+
   async function finishSlotAction(motion, time = performance.now()) {
+    slotCabinetFX?.stopRolling();
     foley.stop("slots");
     const outcome = resolveSlotPayouts(motion.targetGrid);
     const hasPayout = Object.values(outcome.totals).some(amount => amount > 0);
@@ -866,6 +876,7 @@ import {
         saveSlotGrid(outcome.grid, { requirePersistence: Boolean(motion.baseGrid) });
       }
     } catch (error) {
+      slotCabinetFX?.reset();
       playing = false;
       preview.classList.remove("is-playing");
       drawSlotReelDisplay();
@@ -880,6 +891,7 @@ import {
     // the actual completion time, not the frame before waiting for the lock.
     const visible = canShowSlotCelebration();
     time = performance.now();
+    slotCabinetFX?.result(time, hasPayout, { active: canShowCabinetFX(), reduced: reducedMotion.matches, wasRolling: !motion.baseGrid });
     const animation = visible ? createSlotWinAnimation(motion.targetGrid, outcome, time, reducedMotion.matches) : null;
     if (animation) slotWinCelebration = { animation, motion, outcome };
     if (outcome.payouts.length && visible) {
@@ -1309,7 +1321,7 @@ import {
         return { x: relative.dot(right), y: relative.dot(viewUp), z: relative.dot(direction) };
       });
       const height = Math.max(1, preview.clientHeight);
-      const frame = fitSlotInteractionFrame(points, { width: height * aspect, height, fov: camera.fov, near: camera.near });
+      const frame = fitSlotInteractionFrame(points, { width: height * aspect, height, fov: camera.fov, near: camera.near, cabinetMotion: Boolean(slotCabinetFX) });
       target.addScaledVector(right, frame.shiftX).addScaledVector(viewUp, frame.shiftY);
       return { target, position: target.clone().addScaledVector(direction, frame.distance) };
     }
@@ -1460,6 +1472,7 @@ import {
     else if (!selectedCharacterId(nextView) || immediate) characterSelectedAt=-Infinity;
     cameraDetached = false;
     preview.classList.remove("is-freecam-detached");
+    if (nextView.kind !== "slot") slotCabinetFX?.reset();
     const openingSlot=currentView.kind!=="slot"&&nextView.kind==="slot";
     const closingSlot=currentView.kind==="slot"&&nextView.kind!=="slot";
     if(stageShow&&viewChanged){
@@ -2628,20 +2641,25 @@ import {
     };
     const { left, right, bottom } = SLOT_DISPLAY_PIXELS;
     const screenBottom = [left, right].map(x => toScreen(slotWorldPoint(x, bottom, .065)));
+    const movingPoint = point => slotCabinetFX ? slotCabinetFX.worldPoint(point) : point;
     const spinButtons = slotSpinButtonCorners.map(corners => {
-      const p = corners.map(toScreen);
+      // Use the same conservative world AABB as physical button picking.
+      const box = new THREE.Box3().setFromPoints(corners.map(movingPoint));
+      const p = [];
+      for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y]) for (const z of [box.min.z, box.max.z]) p.push(toScreen(new THREE.Vector3(x, y, z)));
       return { left: Math.min(...p.map(v => v.x)), right: Math.max(...p.map(v => v.x)), top: Math.min(...p.map(v => v.y)) };
     });
     for (const control of slotPlacementControls) {
-      const cameraSpace = camera.worldToLocal(control.anchor.clone());
+      const anchor = movingPoint(control.anchor);
+      const cameraSpace = camera.worldToLocal(anchor.clone());
       const depth = -cameraSpace.z;
-      const projected = control.anchor.clone().project(camera);
+      const projected = anchor.clone().project(camera);
       if (depth <= camera.near || projected.z < -1 || projected.z > 1) {
         control.button.style.visibility = "hidden";
         continue;
       }
-      const xSpacingPoint = control.xSpacingAnchor.clone().project(camera);
-      const ySpacingPoint = control.ySpacingAnchor.clone().project(camera);
+      const xSpacingPoint = movingPoint(control.xSpacingAnchor).clone().project(camera);
+      const ySpacingPoint = movingPoint(control.ySpacingAnchor).clone().project(camera);
       const horizontalGap = Math.hypot(
         (xSpacingPoint.x - projected.x) * width * 0.5,
         (xSpacingPoint.y - projected.y) * height * 0.5,
@@ -2785,6 +2803,7 @@ import {
       else if (isSlotWinFinished(slotWinCelebration.animation, time)) endSlotCelebration();
       else drawSlotReelDisplay(time);
     }
+    slotCabinetFX?.update(time, { active: canShowCabinetFX(), reduced: reducedMotion.matches });
     updateSkyAnimations(time);
     updateLiquidPortal(time);
     if (diceModeOpen) {
@@ -2859,6 +2878,7 @@ import {
         const key = line.column === undefined ? `r${line.row}` : `c${line.column}`;
         if (!slotReelMotion.soundedStops.has(key) && time >= slotReelMotion.startedAt + line.delay + line.duration) {
           slotReelMotion.soundedStops.add(key);
+          if (canShowCabinetFX() && time - (slotReelMotion.startedAt + line.delay + line.duration) < 220) slotCabinetFX?.brake(time);
           if (!pauseMenuOpen && time - (slotReelMotion.startedAt + line.delay + line.duration) < 220) foley.play("stop");
         }
       }
@@ -2954,6 +2974,8 @@ import {
       sceneReady = true;
       // Fit the overview only after all machines have their final world placement.
       overviewCameraBounds = getArcadeBounds();
+      try { slotCabinetFX = createSlotCabinetFX(THREE, slotRig, slotsModel, { bayWidth: ARCADE_REFERENCE_LAYOUT.slotBay.right - ARCADE_REFERENCE_LAYOUT.slotBay.left, foley }); }
+      catch (error) { console.warn("Slot cabinet effects unavailable", error); }
       try { stageShow=createStageShow(THREE,scene,{slotRig,slotsModel,roots:[stageModel,rouletteModel,slotsModel,audience?.group],foley,onEmotion:emotion=>crowdState.react(emotion,crowdClock),reduced:()=>reducedMotion.matches});stageShow.group.visible=!pauseMenuOpen; }
       catch(error){scene.getObjectByName("rg-stage-theatre")?.removeFromParent();slotsModel.visible=true;console.warn("Stage theatre unavailable",error);}
       characterSelection=createCharacterSelection(THREE,scene,billboardLayer,{subscribePoints:subscribePointScores,subscribeStars:subscribeStarScores});
@@ -2982,6 +3004,7 @@ import {
   }
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
+      slotCabinetFX?.reset();
       focusArrow.hide();
       stageShow?.reset(currentView.kind==="slot");
       crowdLastFrame=null;
@@ -3003,6 +3026,7 @@ import {
     liquidPortal?.dispose();
     exteriorMist?.dispose();
     menuPresentation.dispose();
+    slotCabinetFX?.dispose();
     focusArrow.dispose(); characterOcclusion?.dispose(); characterSelection?.dispose(); signGlow?.dispose(); audience?.dispose(); showFX?.dispose(); stageShow?.dispose();
     renderer?.dispose();
   }, { once: true });

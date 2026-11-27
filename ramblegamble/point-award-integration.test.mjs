@@ -20,20 +20,21 @@ function storageFixture() {
   return {store, storage, blocked, readPointScores:store.read, writePointScores:store.write, withPointScoresLock:store.withLock};
 }
 function slotFixture(visible=true) {
-  const f=storageFixture(), seen=[],events=[],sounds=[];
+  const f=storageFixture(), seen=[],events=[],sounds=[],cabinet=[];
   const original=Array(15).fill(null);original[0]='faroeberry';original[5]='faroeberry';
   const target=original.slice();target[10]='faroeberry';
   f.storage.setItem(GRID,JSON.stringify(original));f.store.subscribe(v=>seen.push(v));
   const context={...f, normalizeSlotGrid, resolveSlotPayouts, localStorage:f.storage, SLOT_GRID_STORAGE_KEY:GRID, slotReelGrid:original,
     playing:true, slotWinCelebration:null, performance:{now:()=>200}, reducedMotion:{matches:false},
     preview:{classList:{remove(){}}},result:{hidden:true}, drawSlotReelDisplay(){},syncSlotPlacementControls(){},
+    slotCabinetFX:{stopRolling(){cabinet.push(["stop"]);},reset(){cabinet.push(["reset"]);},result(time,won,options){cabinet.push(["result",time,won,options.active, f.store.read().faroe, JSON.parse(f.storage.getItem(GRID))]);}},canShowCabinetFX:()=>visible,
     canShowSlotCelebration:()=>visible, createSlotWinAnimation:(grid,outcome,time)=>({grid,outcome,time}),
     completeSlotPresentation(){context.playing=false;},foley:{play(name){sounds.push(name);},stop(){}},
     console:{warn(){},error(){}},CustomEvent:class {constructor(type,{detail}){this.type=type;this.detail=detail;}},window:{dispatchEvent:event=>events.push(event)}};
   const save=js.slice(js.indexOf('  function saveSlotGrid('),js.indexOf('  function startSlotAction('));
   const finish=js.slice(js.indexOf('  async function finishSlotAction('),js.indexOf('\n  applyTheme();',js.indexOf('  async function finishSlotAction(')));
   runInNewContext(`${save}\n${finish}\nthis.finish=finishSlotAction`,context);
-  return {...f,context,target,original,events,sounds,seen,run:()=>context.finish({targetGrid:target,action:'place-column'},100)};
+  return {...f,context,target,original,events,sounds,seen,cabinet,run:()=>context.finish({targetGrid:target,action:'place-column'},100)};
 }
 test('real slot finish code commits score and clears board before presentation, exactly once', async()=>{
   const f=slotFixture();await f.run();
@@ -42,12 +43,13 @@ test('real slot finish code commits score and clears board before presentation, 
   assert.deepEqual(JSON.parse(f.storage.getItem(GRID)),Array(15).fill(null));
   assert.equal(f.context.slotWinCelebration.animation.time,200);assert.equal(f.context.playing,true);
   assert.ok(f.sounds.includes('payout'));
+  assert.deepEqual(f.cabinet,[['stop'],['result',200,true,true,4100,Array(15).fill(null)]]);
 });
 test('real slot finish does not clear or celebrate when point write fails',async()=>{
   const f=slotFixture();f.blocked.add(POINTS);await f.run();
   assert.deepEqual(f.store.read(),{faroe:100,erin:200,kaz:300});
   assert.deepEqual(JSON.parse(f.storage.getItem(GRID)),f.original);assert.equal(f.context.slotWinCelebration,null);assert.equal(f.context.playing,false);
-  assert.equal(f.events.at(-1).detail.reason,'save-failed');assert.match(f.context.result.textContent,/Could not save points/);assert.equal(f.sounds.length,0);
+  assert.equal(f.events.at(-1).detail.reason,'save-failed');assert.match(f.context.result.textContent,/Could not save points/);assert.equal(f.sounds.length,0);assert.deepEqual(f.cabinet,[["stop"],["reset"]]);
 });
 test('real slot finish restores point balance if board persistence fails; hidden result still commits normally',async()=>{
   const f=slotFixture();f.blocked.add(GRID);await f.run();assert.deepEqual(f.store.read(),{faroe:100,erin:200,kaz:300});

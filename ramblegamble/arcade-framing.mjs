@@ -16,11 +16,13 @@ export function rouletteRecessCenter(radius) {
 // right/up/toward-camera basis, relative to a provisional target. Reserve space
 // for the berry picker, score HUD and navigation bands. Fit the actual points
 // in the perspective frustum, including their different depths.
-export function fitSlotInteractionFrame(points, {width, height, fov = 42, near = 0.1}) {
+export function fitSlotInteractionFrame(points, {width, height, fov = 42, near = 0.1, cabinetMotion = false}) {
   const w = Math.max(1, width), h = Math.max(1, height);
   const tanY = Math.tan(fov * Math.PI / 360), tanX = tanY * w / h;
   const side = Math.min(Math.min(96, Math.max(42, w * .075)) + 8, w * .17);
-  const top = Math.min(84, h * .30);
+  // Reserve a stable upper band on tall/high-resolution displays; the cabinet
+  // can hop without chasing it with the camera. Original framing on small screens.
+  const top = Math.min(Math.max(84, cabinetMotion ? h * .15 : 0), h * .30);
   const bottom = Math.min(Math.min(84, Math.max(48, h * .11)) + 8, h * .23);
   const xMin = -1 + 2 * side / w, xMax = 1 - 2 * side / w;
   const yMin = -1 + 2 * bottom / h, yMax = 1 - 2 * top / h;

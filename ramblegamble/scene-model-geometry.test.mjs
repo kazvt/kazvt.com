@@ -236,3 +236,47 @@ test('roulette base and outer rim rest on the actual exterior floor without subm
  assert.match(js,/slotRig\.position\.set\(\s*slotTargetCenter\.x - slotCenter\.x,\s*floorY - slotBounds\.min\.y/);
  assert.match(js,/rg_roulette\.gltf\?v=roulette-ground-20261127-v1/);
 });
+
+
+import { sampleCabinetPose, fitCabinetPose } from './slot-cabinet-fx.mjs';
+test('actual cabinet motion stays inside the authored bay and above the floor, including reel-brake kicks',()=>{
+ const {cabinet}=slotGeometry(), width=cabinet.max[0]-cabinet.min[0],height=cabinet.max[1]-cabinet.min[1],bayWidth=14.48-9.14;
+ let highest=0,lean=0;
+ for(const kind of ['crank','press','tap','win','loss'])for(let t=0;t<=2400;t+=9){
+  const p=fitCabinetPose(sampleCabinetPose(kind,t,{rolling:kind==='crank'||kind==='press',brakeAge:t%120}),{width,height,bayWidth});
+  highest=Math.max(highest,p.y);lean=Math.max(lean,Math.abs(p.roll));
+  for(const x of [-width/2,width/2])for(const y of [0,height]){
+   const xx=p.x+x*p.sx*Math.cos(p.roll)-y*p.sy*Math.sin(p.roll), yy=p.y+x*p.sx*Math.sin(p.roll)+y*p.sy*Math.cos(p.roll);
+   assert.ok(Math.abs(xx)<=bayWidth/2-.0349999);assert.ok(yy>=-1e-9);
+  }
+ }
+ assert.ok(highest>.19&&highest<.28);assert.ok(lean>.03&&lean<.06);
+});
+test('moving cabinet keeps actual controls and reel corners in the viewport across sizes and focus orbit angles',()=>{
+ const {points,cabinet,wp,spinButtons}=slotGeometry(),target=box(points).center;
+ const pivot=[cabinet.center[0],cabinet.min[1],cabinet.center[2]],width=cabinet.max[0]-cabinet.min[0],height=cabinet.max[1]-cabinet.min[1];
+ const samples=[['crank',235],['press',180],['win',285],['win',470],['loss',220],['loss',355],['crank',1720]];
+ for(const [w,h] of [[803,395],[1014,576],[1920,1080],[360,640],[320,240],[2560,720],[575,480],[3840,2160],[1440,2560],[1280,800]])for(const yaw of [-focusLimits('slot')[0],0,focusLimits('slot')[0]])for(const pitch of [-focusLimits('slot')[1],0,focusLimits('slot')[1]]){
+  const authored=basis(-.08,.14),fit=fitSlotInteractionFrame(relative(points,target,authored),{width:w,height:h,cabinetMotion:true});
+  const aim=add(add(target,mul(authored.right,fit.shiftX)),mul(authored.up,fit.shiftY));
+  const b=basis(-.08+yaw,Math.sin(Math.asin(.14)+pitch)),f={distance:fit.distance,shiftX:0,shiftY:0};
+  for(const [kind,t] of samples){
+   const pose=fitCabinetPose(sampleCabinetPose(kind,t,{rolling:kind==='crank'||kind==='press'}),{width,height,bayWidth:5.34});
+   const move=v=>{const [x,y,z]=sub(v,pivot),c=Math.cos(pose.roll),s=Math.sin(pose.roll);return add(pivot,[-pose.x+x*pose.sx*c+y*pose.sy*s,pose.y-x*pose.sx*s+y*pose.sy*c,z]);};
+   for(const [x,y,d] of project(relative(points.map(move),aim,b),f,w,h))assert.ok(d>.1&&Math.abs(x)<=1&&Math.abs(y)<=1,`${w}x${h} ${kind} ${t}: ${x},${y}`);
+   const px=v=>{const [x,y]=project(relative([v],aim,b),f,w,h)[0];return {x:(x+1)*w/2,y:(1-y)*h/2};};
+   const screenBottom=[px(move(wp(5,58,.065))),px(move(wp(75,58,.065)))];
+   const buttons=spinButtons.map(corners=>{const p=box(corners.map(move)).corners.map(px);return {left:Math.min(...p.map(v=>v.x)),right:Math.max(...p.map(v=>v.x)),top:Math.min(...p.map(v=>v.y))};});
+   for(let i=0;i<5;i++){
+    const x=5+(i+.5)*14,a=px(move(wp(x,65))),ax=px(move(wp(x+(i===4?-14:14),65))),ay=px(move(wp(x,79)));
+    const depth=f.distance-relative([move(wp(x,65))],aim,b)[0].z;
+    const ww=Math.hypot(...sub(wp(x-14*.32,65),wp(x+14*.32,65))),wh=Math.hypot(...sub(wp(x,65-14*.27),wp(x,65+14*.27)));
+    const preferred=Math.min(Math.max(22,Math.min(ww,wh)*h/(2*Math.tan(42*Math.PI/360))/depth),Math.hypot(a.x-ax.x,a.y-ax.y)*.9,Math.hypot(a.x-ay.x,a.y-ay.y)*.9);
+    const placement=fitSlotColumnArrow({x:px(move(wp(x,58,.065))).x,size:preferred,screenBottom,spinButtons:buttons,index:i});
+    assert.ok(placement,`moving arrow ${i} ${kind} at ${w}x${h}`);
+    assert.ok(placement.y+placement.size/2<=buttons[i].top-6+1e-6);
+   }
+
+  }
+ }
+});
