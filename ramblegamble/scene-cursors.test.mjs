@@ -47,3 +47,13 @@ test('forced colors use native cursors and trivia canvas advertises only its bac
   for(const [mode,,,,fallback] of modes)assert.ok(forced.includes(`#rg-canvas[data-rg-cursor="${mode}"] { cursor: ${fallback}; }`));
   assert.match(js,/if \(!cameraDetached && currentView\.kind === "trivia"\) \{\s+const backBand[^;]+;\s+setGameCursor\(event\.clientY >= rect\.bottom - backBand \? "back" : "default"\);\s+return;/);
 });
+
+ test('drag, freecam fallback and cleared routing use the idle PNG, with forced-colors native fallback',()=>{
+  const idle='cursor: url("assets/cursors/pixelarticons/idle.png") 10 8, default;';
+  assert.ok(css.match(/#rg-canvas \{[^}]+\}/)[0].includes(idle));
+  const rule='#rg-canvas:active, .rg-preview.is-freecam #rg-canvas';
+  assert.ok(css.includes(`${rule} { ${idle} }`));
+  assert.ok(css.includes(`${rule} { cursor: default; }`));
+  assert.doesNotMatch(css,/\.is-freecam #rg-canvas \{ cursor: move/);
+  assert.match(js,/canvas\.addEventListener\("pointerdown", \(\) => \{ lastScenePointer = null; hideGameCursor\(\); \}\)/);
+});

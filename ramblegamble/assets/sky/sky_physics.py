@@ -91,18 +91,6 @@ def compound(parts,r):
  if not result:raise ValueError('no collision geometry')
  return result
 
-def text_hulls(alpha,r):
- # Raster silhouette runs preserve spaces and letter counters rather than
- # treating an entire connected word as a rectangle. Merge identical runs.
- h,w=alpha.shape;scale=2*r/w;active={};rects=[]
- for y in range(h+1):
-  row=alpha[y]>64 if y<h else np.zeros(w,bool)
-  edges=np.flatnonzero(np.diff(np.r_[False,row,False]));runs=set(map(tuple,edges.reshape(-1,2)))
-  for run,start in list(active.items()):
-   if run not in runs:rects.append((*run,start,y));del active[run]
-  for run in runs:active.setdefault(run,y)
- return [MeshParts([Hull(box(((b-a)*scale,(d-c)*scale,1.),((a+b-w)*scale/2,(h-c-d)*scale/2,0))) for a,b,c,d in rects])]
-
 def sat(a,b):
  if np.any(a[4]<b[3]) or np.any(b[4]<a[3]):return None
  if not isinstance(a,MeshWorld) and not isinstance(b,MeshWorld):return convex_sat(a,b)
@@ -132,13 +120,13 @@ def convex_sat(a,b):
  return float(over[k]),normal,(ca+cb)*.5
 
 class Body:
- def __init__(self,hulls,p,v,rot,w,radius,*,text=False):
-  self.hulls=hulls;self.p=np.array(p,float);self.v=np.array(v,float);self.rot=rot;self.w=np.array(w,float);self.radius=radius;self.text=text
+ def __init__(self,hulls,p,v,rot,w,radius,*,inertia_per_mass=None):
+  self.hulls=hulls;self.p=np.array(p,float);self.v=np.array(v,float);self.rot=rot;self.w=np.array(w,float);self.radius=radius
   self.inv_mass=1/(radius/55)**2
   vtx=np.concatenate([h.v for h in hulls]);size=np.maximum(np.ptp(vtx,axis=0),1.)
-  self.inv_inertia=12*self.inv_mass/(np.sum(size**2)-size**2)
+  self.inv_inertia=np.diag(12*self.inv_mass/(np.sum(size**2)-size**2)) if inertia_per_mass is None else np.linalg.inv(inertia_per_mass*radius**2)*self.inv_mass
  def inertia(self):
-  r=self.rot.as_matrix();return (r*self.inv_inertia)@r.T if not self.text else np.zeros((3,3))
+  r=self.rot.as_matrix();return r@self.inv_inertia@r.T
  def world(self):return [h.transform(self.p,self.rot.as_matrix()) for h in self.hulls]
 
 def collide(a,b,contact):
@@ -156,10 +144,6 @@ def collide(a,b,contact):
   t=tangent/length;impulse(t,max(-.22*j,-length/denom(t)))
  return True
 
-def text_rotation(t):
- # Bounded three-axis tumble: more expressive, but the front stays directed downward.
- return Rotation.from_euler('xyz',np.deg2rad([20*np.sin(t*.71),18*np.cos(t*.83),28*np.sin(t*.51+.8)]))
-
 def simulate(bodies,seconds,fps):
  steps=round(seconds/DT);stride=round(1/(fps*DT));history=[];contacts=0;pair_contacts=set();min_spin=1e9
  for step in range(steps+1):
@@ -168,12 +152,10 @@ def simulate(bodies,seconds,fps):
   if step==steps:break
   for b in bodies:
    b.p+=b.v*DT
-   if b.text:b.rot=text_rotation(t+DT);b.w=(text_rotation(t+DT)*text_rotation(t).inv()).as_rotvec()/DT
-   else:
-    speed=np.linalg.norm(b.w)
-    if speed<MIN_SPIN:b.w=b.w*MIN_SPIN/speed if speed>1e-8 else np.full(3,MIN_SPIN/np.sqrt(3))
-    if speed>MAX_SPIN:b.w*=MAX_SPIN/speed
-    b.rot=Rotation.from_rotvec(b.w*DT)*b.rot;min_spin=min(min_spin,np.linalg.norm(b.w))
+   speed=np.linalg.norm(b.w)
+   if speed<MIN_SPIN:b.w=b.w*MIN_SPIN/speed if speed>1e-8 else np.full(3,MIN_SPIN/np.sqrt(3))
+   if speed>MAX_SPIN:b.w*=MAX_SPIN/speed
+   b.rot=Rotation.from_rotvec(b.w*DT)*b.rot;min_spin=min(min_spin,np.linalg.norm(b.w))
    # Keep the sparse composition inside a shallow zero-gravity volume. Wall impacts
    # use the actual rotated compound extrema rather than the bounding sphere.
    world=b.world();lo=np.min([h[3] for h in world],0);hi=np.max([h[4] for h in world],0)

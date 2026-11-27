@@ -6,12 +6,13 @@ import argparse, base64, io, json, math, subprocess, tempfile, multiprocessing a
 from pathlib import Path
 import cv2
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 from scipy.spatial.transform import Rotation
 import trimesh
 from sky_materials import mapped_parts
 from sky_models import CASTS,RADII,new_models
-from sky_physics import Body, Hull, box, compound, simulate, text_rotation, text_hulls
+from sky_physics import Body, Hull, box, compound, simulate
+from sky_lettering import lettering, lettering_hulls
 
 HERE=Path(__file__).resolve().parent
 N=1024; TILE_PIXELS=768; FPS=20; SECONDS=20; TAU=math.tau
@@ -139,11 +140,6 @@ def eye_sprite(frame,phase,photo=None):
   px=np.clip(((xx/.83+1)*.5*(photo.shape[1]-1)).astype(int),0,photo.shape[1]-1);py=np.clip((((yy-center)/.36+1)*.5*(photo.shape[0]-1)).astype(int),0,photo.shape[0]-1);scl=photo[py,px]*shade[:,:,None]
  out[aperture]=scl[aperture];alpha=np.uint8(np.clip((1-rr)*E,0,1)*255);return Image.fromarray(np.dstack([np.uint8(np.clip(out,0,255)),alpha]),'RGBA')
 
-def text_sprite():
- font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',95);im=Image.new('RGBA',(660,155));d=ImageDraw.Draw(im)
- for k in range(17,0,-1):d.text((13+k*.55,12+k), 'ILY LILLIE',font=font,fill=(92+k*3,53+k*2,116+k*3),stroke_width=1,stroke_fill=(62,35,91))
- d.text((13,12),'ILY LILLIE',font=font,fill='#ffe0ac',stroke_width=1,stroke_fill='#f7b4d9');return im.crop(im.getbbox())
-
 # Spin the shell texture in 3D, while the eye aperture faces the viewer below.
 def orb_frame(rot,eye):
  local=np.stack([xx,-yy,zz],-1)@rot
@@ -161,11 +157,6 @@ def sprite_depth(canvas,depth,sprite,x,y,r,z):
  left=round(x-r);top=round(y-r);a=max(0,left);b=max(0,top);c=min(N,left+2*r);e=min(N,top+2*r)
  if a>=c or b>=e:return
  im=im[b-top:e-top,a-left:c-left];d=d[b-top:e-top,a-left:c-left];ds=depth[b:e,a:c];m=(im[:,:,3]>0)&(d>ds);canvas[b:e,a:c][m]=im[m];ds[m]=d[m]
-
-def text_mesh(im):
- h=im.height/im.width;v=np.array([[-1,-h,.025],[1,-h,.025],[1,h,.025],[-1,h,.025]])
- ix=np.array([[0,1,2],[0,2,3]]);uv=np.array([[0,1],[1-1e-6,1],[1-1e-6,0],[0,0]],float);uv[:,1]=np.minimum(uv[:,1],1-1e-6)
- return [(v[ix],np.ones((2,3))*255,uv[ix],np.asarray(im))]
 
 # Preserve the existing 18-second unblended span (simulation frames 40..399).
 FORWARD_START=FPS*2
@@ -207,17 +198,18 @@ def make_cast(names,collision_assets,assets,photo,seed):
  radii=list(RADII)
  pos=[(122+(i%5)*195+((i//5)%2)*15,125+(i//5)*245) for i in range(len(names))]
  vel=local_rng.uniform(-34,34,(len(names),2));vel[0]=[27,13];vel[1]=[-27,14];vel[6]=[24,25];vel[10]=[-26,-24]
- text=text_sprite();assets={**assets,'text':text_mesh(text)}
+ text_parts,text_prisms,text_inertia=lettering();assets={**assets,'text':text_parts}
  bodies=[];phases=local_rng.uniform(0,TAU,(len(names),3))
  for i,(name,r) in enumerate(zip(names,radii)):
   ang=phases[i];rot=Rotation.from_euler('xyz',[(1.12 if name.startswith('book') else -.18)+.35*math.sin(ang[0]),.55*math.sin(ang[1])+.28+(math.pi if name=='card2' else 0),.32*math.sin(ang[2])]);w=local_rng.uniform(-1.65,1.65,3)
   if name=='orb':
    sphere=trimesh.creation.icosphere(subdivisions=2);hulls=[Hull(sphere.vertices*r)]
   elif name=='text':
-   hulls=text_hulls(np.asarray(text)[:,:,3],r)
-   rot=text_rotation(0);w=np.zeros(3)
+   hulls=lettering_hulls(text_prisms,r)
+   # Start legible, then integrate unrestricted three-axis rotation and impacts.
+   rot=Rotation.from_euler('xyz',[.18,-.26,.12]);w=np.array([.85,-1.05,.55])*(1 if seed==78298 else -1)
   else:hulls=compound(collision_assets[name],r)
-  bodies.append(Body(hulls,[pos[i][0],-pos[i][1]+N,local_rng.uniform(-18,18)],[vel[i][0],-vel[i][1],local_rng.uniform(-9,9)],rot,w,r,text=name=='text'))
+  bodies.append(Body(hulls,[pos[i][0],-pos[i][1]+N,local_rng.uniform(-18,18)],[vel[i][0],-vel[i][1],local_rng.uniform(-9,9)],rot,w,r,inertia_per_mass=text_inertia if name=='text' else None))
  history=simulate(bodies,SECONDS+FORWARD_START/FPS,FPS);eye_cache={}
  def frame(f):
   p,rotations=history[f];canvas=np.zeros((N,N,4),np.uint8);depth=np.full((N,N),-np.inf,np.float32)

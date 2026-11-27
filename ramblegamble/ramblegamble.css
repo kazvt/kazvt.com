@@ -58,7 +58,7 @@ body.ramble-page *::after {
   width: 100%;
   height: 100%;
   outline: 0;
-  cursor: auto;
+  cursor: url("assets/cursors/pixelarticons/idle.png") 10 8, default;
   touch-action: none;
 }
 
@@ -102,12 +102,16 @@ body.ramble-page *::after {
 #rg-canvas[data-rg-cursor="right"] { cursor: url("assets/cursors/pixelarticons/right.png") 23 15, e-resize; }
 #rg-canvas[data-rg-cursor="back"] { cursor: url("assets/cursors/pixelarticons/back.png") 16 23, s-resize; }
 
+#rg-canvas:active, .rg-preview.is-freecam #rg-canvas { cursor: url("assets/cursors/pixelarticons/idle.png") 10 8, default; }
+
 @media (forced-colors: active) {
+  #rg-canvas { cursor: default; }
   #rg-canvas[data-rg-cursor="default"] { cursor: default; }
   #rg-canvas[data-rg-cursor="hover"] { cursor: pointer; }
   #rg-canvas[data-rg-cursor="left"] { cursor: w-resize; }
   #rg-canvas[data-rg-cursor="right"] { cursor: e-resize; }
   #rg-canvas[data-rg-cursor="back"] { cursor: s-resize; }
+  #rg-canvas:active, .rg-preview.is-freecam #rg-canvas { cursor: default; }
 }
 
 .rg-billboard-layer {
@@ -1053,7 +1057,6 @@ body.ramble-page *::after {
 /* Temporary flight hides projected interaction UI, not its state or timers. */
 .rg-preview.is-freecam :is(#rg-card-games-layer, #rg-live-trivia, #rg-slot-control-layer, #rg-result) { visibility: hidden !important; pointer-events: none !important; }
 .rg-preview.is-freecam :is(#rg-card-games-layer, #rg-live-trivia, #rg-slot-control-layer) * { visibility: hidden !important; pointer-events: none !important; }
-.rg-preview.is-freecam #rg-canvas { cursor: move; }
 
 /* Screen-space mask on the wrapper; the child retains the exact projective transform. */
 .rg-character-visibility {position:absolute;inset:0;pointer-events:none;image-rendering:auto;}

@@ -3,7 +3,8 @@ import unittest
 from pathlib import Path
 import numpy as np
 from scipy.spatial.transform import Rotation
-from sky_physics import Body,Hull,box,sat,collide,simulate,text_rotation,compound,text_hulls,MIN_SPIN,MAX_SPIN,MeshParts
+from sky_lettering import lettering, lettering_hulls
+from sky_physics import Body,Hull,box,sat,collide,simulate,compound,MIN_SPIN,MAX_SPIN,MeshParts
 
 class PhysicsTests(unittest.TestCase):
  def test_narrowphase_rejects_broadphase_overlap(self):
@@ -19,15 +20,14 @@ class PhysicsTests(unittest.TestCase):
   c=sat(a.world()[0],b.world()[0]);self.assertIsNotNone(c);self.assertTrue(collide(a,b,c));self.assertGreater(np.linalg.norm(a.w),.01);self.assertGreater(np.linalg.norm(b.w),.01);np.testing.assert_allclose(a.v+b.v,[0,0,0],atol=1e-10)
  def test_z_separation(self):
   h=Hull(box((8,8,1)));self.assertIsNone(sat(h.transform([0,0,0],np.eye(3)),h.transform([0,0,2],np.eye(3))))
- def test_nonstop_rotation_and_text_readability(self):
+ def test_nonstop_rotation_and_unrestricted_text(self):
   h=Hull(box((8,8,8)));b=Body([h],[400,400,0],[12,0,0],Rotation.identity(),[0,0,0],8)
   hist=simulate([b],1,20);self.assertEqual(len(hist),21)
   for (p,r),(p1,r1) in zip(hist,hist[1:]):self.assertGreater(np.linalg.norm(r1-r),.001);np.testing.assert_allclose(p1-p,[[.6,0,0]],atol=1e-8)
-  poses=[text_rotation(t) for t in np.linspace(0,22,401)]
-  angles=np.array([pose.as_euler('xyz',degrees=True) for pose in poses])
-  np.testing.assert_allclose(np.max(np.abs(angles),axis=0),[20,18,28],atol=.05)
-  for pose in poses:self.assertGreaterEqual(pose.as_matrix()[2,2],np.cos(np.deg2rad(20))*np.cos(np.deg2rad(18))-1e-10)
-  self.assertGreater(min((b*a.inv()).magnitude() for a,b in zip(poses,poses[1:])),.001)
+  parts,prisms,inertia=lettering();body=Body(lettering_hulls(prisms,95),[500,500,0],[0,0,0],Rotation.identity(),[1.05,.81,.52],95,inertia_per_mass=inertia)
+  hist=simulate([body],5,20);normals=np.array([r[0,:,2] for _,r in hist]);self.assertLess(normals[:,2].min(),-.6);self.assertGreater(np.ptp(normals[:,0]),1);self.assertGreater(np.ptp(normals[:,1]),1)
+  self.assertTrue(np.all(np.linalg.eigvalsh(body.inertia())>0))
+  for (_,a),(_,b) in zip(hist,hist[1:]):self.assertGreater(Rotation.from_matrix(b[0]@a[0].T).magnitude(),.01)
 
 class RenderTests(unittest.TestCase):
  @classmethod
@@ -59,11 +59,35 @@ class RenderTests(unittest.TestCase):
    # Contact still occurs at an actual triangle rather than disabling the prop.
    face=parts[0][0][0]*45;on_face=probe.transform(face.mean(0),i)
    self.assertTrue(any(sat(h.transform(zero,i),on_face) is not None for h in shapes),name)
- def test_letter_counter_is_not_solid_rectangle(self):
-  alpha=np.ones((20,20),np.uint8)*255;alpha[5:15,5:15]=0
-  world=text_hulls(alpha,10)[0].transform(np.zeros(3),np.eye(3));probe=Hull(box((2,2,.5)))
-  self.assertIsNone(sat(world,probe.transform([0,0,0],np.eye(3))))
-  self.assertIsNotNone(sat(world,probe.transform([8,0,0],np.eye(3))))
+ def test_lettering_solid_mesh_exact_prism_volume_and_gaps(self):
+  import trimesh
+  from scipy.spatial import ConvexHull
+  parts,prisms,inertia=lettering();tri,colors,uv,texture=parts[0];self.assertIsNone(uv);self.assertIsNone(texture)
+  mesh=trimesh.Trimesh(vertices=tri.reshape(-1,3),faces=np.arange(tri.size//3).reshape(-1,3),process=True)
+  self.assertTrue(mesh.is_watertight);self.assertTrue(mesh.is_winding_consistent);self.assertEqual(len(mesh.split()),9)
+  self.assertGreater(mesh.extents[2]/mesh.extents[1],.8);self.assertAlmostEqual(mesh.volume,sum(ConvexHull(p).volume for p in prisms),places=10)
+  np.testing.assert_allclose(mesh.center_mass,[0,0,0],atol=1e-10);np.testing.assert_allclose(mesh.moment_inertia/mesh.mass,inertia,atol=1e-10)
+  # All prism vertices are actual render vertices; letter gaps stay empty.
+  for p in prisms:
+   for v in p:self.assertTrue(np.any(np.linalg.norm(tri.reshape(-1,3)-v,axis=1)<1e-9))
+  components=sorted(mesh.split(),key=lambda m:m.bounds[0,0]);world=lettering_hulls(prisms,95)[0].transform(np.zeros(3),np.eye(3));probe=Hull(box((.5,.5,.5)))
+  for a,b in zip(components,components[1:]):
+   gap=(a.bounds[1,0]+b.bounds[0,0])*95/2
+   self.assertIsNone(sat(world,probe.transform([gap,0,0],np.eye(3))))
+  for prism in prisms:self.assertIsNotNone(sat(world,probe.transform(prism.mean(0)*95,np.eye(3))))
+ def test_text_contacts_transfer_angular_impulses(self):
+  _,prisms,inertia=lettering();a=Body(lettering_hulls(prisms,95),[0,0,0],[0,0,0],Rotation.identity(),[0,0,0],95,inertia_per_mass=inertia)
+  # Strike a real letter off-center along its front face.
+  p=prisms[0].mean(0)*95;p[2]=prisms[0][:,2].max()*95+.25
+  b=Body([Hull(box((2,2,2)))],p,[0,0,-15],Rotation.identity(),[0,0,0],2)
+  c=sat(a.world()[0],b.world()[0]);self.assertIsNotNone(c);self.assertTrue(collide(a,b,c));self.assertGreater(np.linalg.norm(a.w),1e-6)
+  self.assertGreater(np.linalg.norm(a.v),0)
+ def test_lettering_renders_front_back_and_real_sidewalls(self):
+  r=self.render;parts,_,_=lettering();masks=[];colors=[]
+  for rotation in (Rotation.identity(),Rotation.from_euler('y',90,degrees=True),Rotation.from_euler('y',180,degrees=True)):
+   canvas=np.zeros((r.N,r.N,4),np.uint8);depth=np.full((r.N,r.N),-np.inf,np.float32)
+   r.render_mesh(canvas,depth,parts,np.array([512,512]),95,rotation.as_matrix());masks.append(np.count_nonzero(canvas[:,:,3]));colors.append(canvas[canvas[:,:,3]>0,:3].mean(0))
+  self.assertGreater(min(masks),100);self.assertNotEqual(masks[0],masks[1]);self.assertGreater(np.linalg.norm(colors[0]-colors[2]),15)
  def test_angular_motion_has_stronger_floor_and_cap(self):
   h=Hull(box((8,8,8)));b=Body([h],[400,400,0],[0,0,0],Rotation.identity(),[0,0,0],8)
   hist=simulate([b],1,20)

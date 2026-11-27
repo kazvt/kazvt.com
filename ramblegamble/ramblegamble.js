@@ -2,7 +2,7 @@ import { horrorRenderScale, HORROR_FRAME_MS } from "./smeemo-horror.mjs?v=smeemo
 import { readCardGames } from "./card-games-store.mjs?v=show-stage-20261126-v1";
 import { createSlotMarquee } from "./slot-marquee.mjs?v=slot-marquee-20261128-v1";
 import { createSmeemoEncounter, createSmeemoStinger, createSmeemoTableSession, SMEEMO_RETURN_MS } from "./smeemo-reveal.mjs?v=smeemo-alpha-20261128-v1";
-import { createFloatingSky } from "./floating-sky.mjs?v=sky-pingpong-20261128-v1";
+import { createFloatingSky } from "./floating-sky.mjs?v=sky-solid-lettering-20261128-v1";
 import { createStageDance, createDanceClock, createDanceIntensitySampler, dancePose } from "./stage-dance.mjs?v=music-intensity-20261128-v1";
 import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=freecam-music-20261128-v1";
 import { createVipInteriorTracker, sampleMusicZoneGain } from "./music-zones.mjs?v=music-zone-fade-20261128-v1";
@@ -25,7 +25,7 @@ import { CHARACTER_SOURCE_SIZE, CHARACTER_YAW_LIMIT, characterYaw, standingChara
 import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { createExteriorMist, EXTERIOR_FLOOR } from "./exterior-mist.mjs?v=crowd-mist-20261127-v1";
-import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=crank-hop-20261127-v1";
+import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=slot-closeup-20261128-v1";
 import { foley } from "./game-foley.mjs?v=sky-soot-20261127-v1";
 import { createSlotCabinetFX } from "./slot-cabinet-fx.mjs?v=sky-soot-20261127-v1";
 import {
@@ -2597,7 +2597,7 @@ import {
   const rememberPointer = event => { if (freecam.active) return; lastScenePointer = event; updatePointer(event); };
   canvas.addEventListener("pointerenter", rememberPointer);
   canvas.addEventListener("pointermove", rememberPointer);
-  canvas.addEventListener("pointerdown", () => { lastScenePointer = null; });
+  canvas.addEventListener("pointerdown", () => { lastScenePointer = null; hideGameCursor(); });
   canvas.addEventListener("pointerup", rememberPointer);
   canvas.addEventListener("pointercancel", () => { lastScenePointer = null; hideGameCursor(); });
   reducedMotion.addEventListener?.("change", () => { if (reducedMotion.matches) focusDrag.clearHover(); });
