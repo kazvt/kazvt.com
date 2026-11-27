@@ -15,6 +15,7 @@ SOURCE = 'https://incompetech.com/music/royalty-free/mp3-royaltyfree/Evening%20o
 ALLOWED_HOSTS = {'incompetech.com', 'www.incompetech.com'}
 MAX_BYTES = 32 * 1024 * 1024
 EXPECTED_DURATION = 282
+EXPECTED_SHA256 = '00a2fee94641761f37e74973eaaa654e1a8a628269f585707d46987558d07573'
 
 
 def validate(path):
@@ -31,6 +32,9 @@ def validate(path):
         raise ValueError('source does not contain MP3 audio')
     if abs(duration - EXPECTED_DURATION) > 2:
         raise ValueError(f'unexpected duration: {duration:.3f}s')
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    if digest != EXPECTED_SHA256:
+        raise ValueError('track checksum mismatch; refusing unexpected audio')
     return duration
 
 
