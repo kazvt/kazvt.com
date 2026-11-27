@@ -3,7 +3,7 @@
 const names = ['faroe', 'erin', 'kaz'];
 const cards = ['close', 'reveal', 'all', 'vote', 'results'];
 const trivia = ['answers', 'close', 'next', 'previous', 'hide', 'show'];
-const roots = ['help', 'clear', 'answers', 'points', 'berryblast', 'redhanded', 'red-handed', 'cards', 'smeemo', 'trivia', 'audience', 'emote'];
+const roots = ['help', 'clear', 'answers', 'points', 'stars', 'star', 'berryblast', 'redhanded', 'red-handed', 'cards', 'smeemo', 'trivia', 'audience', 'emote'];
 const numbers = n => Array.from({length:n}, (_,i) => String(i+1));
 
 export function commandSuggestions(value, caret = value.length) {
@@ -17,9 +17,9 @@ export function commandSuggestions(value, caret = value.length) {
   let choices = [];
   const playerNames = prefix.startsWith('@') ? names.map(n => '@'+n) : names;
   if (!prior.length) choices = roots;
-  else if (root === 'points') {
-    if (prior.length === 1) choices = [...playerNames, 'add', 'remove', 'set', 'reset'];
-    else if (prior.length === 2 && ['add','remove','set','reset'].includes(sub)) choices = playerNames;
+  else if (['points','stars','star'].includes(root)) {
+    if (prior.length === 1) choices = [...playerNames, 'add', 'remove', 'set', 'reset', 'give', 'take'];
+    else if (prior.length === 2 && ['add','remove','set','reset','give','take'].includes(sub)) choices = playerNames;
   } else if (['berryblast','redhanded','red-handed','cards'].includes(root)) {
     if (prior.length === 1) choices = root === 'cards' ? cards : ['start', ...cards];
     else if (prior.length === 2 && sub === 'reveal') choices = ['next','all'];

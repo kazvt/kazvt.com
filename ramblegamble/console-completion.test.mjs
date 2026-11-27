@@ -40,3 +40,13 @@ test('three-row window always contains selected item and never exceeds list boun
     const start=completionWindow(i,n,old);assert.ok(start<=i && i<start+3);assert.ok(start>=0 && start<=Math.max(0,n-3));
   }
 });
+
+test('star commands complete both roots, aliases and fixed seat names',()=>{
+  assert.deepEqual(options('sta'),['star','stars']);
+  for(const root of ['star','stars','points']){
+    assert.deepEqual(options(`${root} g`),['give']);
+    assert.deepEqual(options(`${root} take @`),['@erin','@faroe','@kaz']);
+    assert.deepEqual(options(`${root} set `),['erin','faroe','kaz']);
+    assert.deepEqual(options(`${root} give kaz `),[]);
+  }
+});

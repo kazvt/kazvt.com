@@ -57,7 +57,7 @@ test('real slot finish restores point balance if board persistence fails; hidden
 test('real console code serializes rapid adds, sets, inspection and reset and reports failed writes',async()=>{
   const f=storageFixture(), lines=[];
   const source=consoleJs.slice(consoleJs.indexOf('async function execute('),consoleJs.indexOf('\nform.addEventListener'));
-  const context={...f,RG_CONTESTANTS,parsePointsCommand,addLine:(text,style)=>lines.push({text,style}),formatScores:s=>JSON.stringify(s)};
+  const context={...f,RG_CONTESTANTS,parsePointsCommand,document:{documentElement:{hasAttribute:()=>false}},addLine:(text,style)=>lines.push({text,style}),formatScores:s=>JSON.stringify(s)};
   runInNewContext(`${source}\nthis.execute=execute`,context);
   await Promise.all([context.execute('points add faroe 20'),context.execute('points add faroe 30'),context.execute('points set erin 33'),context.execute('points faroe')]);
   assert.deepEqual(f.store.read(),{faroe:150,erin:33,kaz:300});assert.equal(lines.at(-1).text,'faroe: 150');
@@ -68,7 +68,7 @@ test('real console code serializes rapid adds, sets, inspection and reset and re
 test('real console remove handler clamps at zero, reports actual removal, and serializes with adds',async()=>{
   const f=storageFixture(),lines=[];
   const source=consoleJs.slice(consoleJs.indexOf('async function execute('),consoleJs.indexOf('\nform.addEventListener'));
-  const context={...f,RG_CONTESTANTS,parsePointsCommand,addLine:(text,style)=>lines.push({text,style}),formatScores:s=>JSON.stringify(s)};
+  const context={...f,RG_CONTESTANTS,parsePointsCommand,document:{documentElement:{hasAttribute:()=>false}},addLine:(text,style)=>lines.push({text,style}),formatScores:s=>JSON.stringify(s)};
   runInNewContext(`${source}\nthis.execute=execute`,context);
   await Promise.all([context.execute('points remove faroe 25'),context.execute('points add faroe 30'),context.execute('points remove faroe 10')]);
   assert.equal(f.store.read().faroe,95);assert.equal(lines.at(-1).text,'faroe: 95 (-10)');
@@ -82,4 +82,25 @@ test('manual placement payout cancels stale board and preserves pre-placement bo
   const g=slotFixture(),newer=g.original.slice();newer[2]='star';g.storage.setItem(GRID,JSON.stringify(newer));
   await g.context.finish({targetGrid:g.target,baseGrid:g.original,action:'cell-place'},100);
   assert.deepEqual(JSON.parse(g.storage.getItem(GRID)),newer);assert.equal(g.store.read().faroe,100);assert.match(g.context.result.textContent,/board changed/);
+});
+
+import {createStarStore} from './points-store.mjs';
+const STARS='ramblegamble.stars.v1';
+test('real console star commands save independently, serialize, floor at zero, reject overflow and respect lock',async()=>{
+  const f=storageFixture(),lines=[],tasks=[];let locked=false;
+  const starStore=createStarStore({getStorage:()=>f.storage,makeChannel:()=>null,locks:{request(name,fn){assert.equal(name,'ramblegamble.stars.mutation.v1');const next=(tasks.at(-1)||Promise.resolve()).catch(()=>{}).then(fn);tasks.push(next);return next;}}});
+  const source=consoleJs.slice(consoleJs.indexOf('async function execute('),consoleJs.indexOf('\nform.addEventListener'));
+  const context={...f,RG_CONTESTANTS,parsePointsCommand,readStarScores:starStore.read,writeStarScores:starStore.write,withStarScoresLock:starStore.withLock,document:{documentElement:{hasAttribute:()=>locked}},addLine:(text,style)=>lines.push({text,style}),formatScores:s=>JSON.stringify(s)};
+  runInNewContext(`${source}\nthis.execute=execute`,context);
+  assert.deepEqual(starStore.read(),{faroe:0,erin:0,kaz:0});assert.equal(f.storage.getItem(STARS),null);
+  await Promise.all([context.execute('star give faroe'),context.execute('stars add faroe 4'),context.execute('stars set erin 2'),context.execute('points add kaz 6')]);
+  assert.deepEqual(starStore.read(),{faroe:5,erin:2,kaz:0});assert.deepEqual(f.store.read(),{faroe:100,erin:200,kaz:306});
+  await context.execute('star take faroe 30');assert.equal(lines.at(-1).text,'faroe: 0 stars (-5)');
+  await context.execute('stars set kaz 9007199254740991');await context.execute('stars give kaz');assert.equal(lines.at(-1).style,'terminal-error');assert.equal(starStore.read().kaz,Number.MAX_SAFE_INTEGER);
+  f.blocked.add(STARS);await context.execute('stars add erin');assert.match(lines.at(-1).text,/Could not save stars/);assert.equal(starStore.read().erin,2);f.blocked.delete(STARS);
+  const pending=context.execute('stars give erin 10');locked=true;await pending;assert.match(lines.at(-1).text,/Host is locked/);assert.equal(starStore.read().erin,2);locked=false;
+  await context.execute('stars reset kaz');assert.equal(starStore.read().kaz,0);assert.equal(starStore.read().erin,2);
+  await context.execute('stars');assert.match(lines.at(-1).text,/Stars - .*"erin":2/);
+  await context.execute('stars reset');assert.deepEqual(starStore.read(),{faroe:0,erin:0,kaz:0});assert.deepEqual(f.store.read(),{faroe:100,erin:200,kaz:306});
+  await context.execute('stars give erin 4');await context.execute('points reset');assert.equal(starStore.read().erin,4);assert.deepEqual(f.store.read(),{faroe:0,erin:0,kaz:0});
 });

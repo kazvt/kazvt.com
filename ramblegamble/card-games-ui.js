@@ -24,7 +24,7 @@ import {
   buyShopCard,
 } from "./card-games.mjs?v=show-stage-20261126-v1";
 import { readCardGames, writeCardGames, subscribeCardGames } from "./card-games-store.mjs?v=show-stage-20261126-v1";
-import { readPointScores, subscribePointScores, writePointScores, withPointScoresLock } from "./points-store.mjs?v=card-score-sync-20261127-v1";
+import { readPointScores, subscribePointScores, writePointScores, withPointScoresLock } from "./points-store.mjs?v=player-stats-20261127-v1";
 
 (() => {
   "use strict";

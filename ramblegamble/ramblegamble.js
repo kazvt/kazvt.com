@@ -1,5 +1,5 @@
 import { createSignGlow } from "./sign-glow.mjs?v=neon-focus-20261127-v1";
-import { selectedCharacterId, characterRenderPose, createCharacterSelection } from "./character-selection.mjs?v=neon-focus-20261127-v1";
+import { selectedCharacterId, characterRenderPose, createCharacterSelection } from "./character-selection.mjs?v=player-stats-20261127-v1";
 import { sampleVipAmbience } from "./vip-atmosphere.mjs?v=vip-atmosphere-20261127-v1";
 import { createStageShow } from "./stage-show.mjs?v=all-curtain-20261127-v1";
 import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state.mjs?v=all-curtain-20261127-v1";
@@ -25,7 +25,7 @@ import {
 } from "./point-click-routing.js?v=host-cell-cards-20261127-v1";
 import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
 import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-door-wall-target-20261120-v1";
-import { readPointScores, subscribePointScores, writePointScores, withPointScoresLock } from "./points-store.mjs?v=card-score-sync-20261127-v1";
+import { readPointScores, subscribePointScores, subscribeStarScores, writePointScores, withPointScoresLock } from "./points-store.mjs?v=player-stats-20261127-v1";
 import {
   createLiquidPortal,
   createCssProjectiveQuad,
@@ -2626,7 +2626,8 @@ import {
       if (!characterOcclusion) throw new Error("Character depth pass unavailable");
       scene.updateMatrixWorld(true);
       characterOcclusion.update(visible,viewport,camera);
-      characterSelection?.update(visible.find(entry=>entry.id===selectionId),time,time-characterSelectedAt,reducedMotion.matches,viewport,characterOcclusion);
+      const groupTags=!cameraDetached&&!freecam?.active&&!cameraTransition&&currentView.kind==="contestants"?contestants:[];
+      characterSelection?.update(visible.find(entry=>entry.id===selectionId),time,time-characterSelectedAt,reducedMotion.matches,viewport,characterOcclusion,groupTags);
     } catch(error) {
       // Fail closed instead of letting a character show through walls.
       for(const entry of visible)entry.panel.style.visibility="hidden";
@@ -2924,7 +2925,7 @@ import {
       overviewCameraBounds = getArcadeBounds();
       try { stageShow=createStageShow(THREE,scene,{slotRig,slotsModel,roots:[stageModel,rouletteModel,slotsModel,audience?.group],foley,onEmotion:emotion=>crowdState.react(emotion,crowdClock),reduced:()=>reducedMotion.matches});stageShow.group.visible=!pauseMenuOpen; }
       catch(error){scene.getObjectByName("rg-stage-theatre")?.removeFromParent();slotsModel.visible=true;console.warn("Stage theatre unavailable",error);}
-      characterSelection=createCharacterSelection(THREE,scene,billboardLayer);
+      characterSelection=createCharacterSelection(THREE,scene,billboardLayer,{subscribePoints:subscribePointScores,subscribeStars:subscribeStarScores});
       try {characterOcclusion=createCharacterOcclusion(THREE,renderer,[stageModel,rouletteModel,slotsModel,stageShow?.group],billboards);}
       catch(error){console.warn("Character depth pass unavailable",error);}
       fitCamera();

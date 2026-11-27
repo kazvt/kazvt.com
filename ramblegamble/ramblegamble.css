@@ -1019,4 +1019,31 @@ body.ramble-page *::after {
 /* Selection nameplate is a screen-space game HUD, not part of the live iframe. */
 .rg-character-tag {position:absolute;z-index:10;pointer-events:none;white-space:nowrap;transform-origin:center bottom;color:#fff5da;background:#302451;border:2px solid var(--character-accent,#ffe567);box-shadow:3px 3px 0 #211844;text-shadow:2px 2px 0 #211844;padding:3px 9px;font:900 clamp(14px,1.6vw,22px)/1.1 monospace;letter-spacing:.08em;}
 .rg-character-tag[hidden] {display:none;}
-.rg-character-tag::after {content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--character-accent,#ffe567);}
+.rg-character-tag::after {content:"";position:absolute;top:100%;left:var(--character-arrow-x,50%);transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--character-accent,#ffe567);}
+
+/* Character balance readouts use the actual chip and star art, plus text so
+   the two currencies are distinguishable without relying on icon color. */
+.rg-character-contestant-tag {box-sizing:border-box;max-width:calc(100% - 12px);padding:5px 7px 6px;white-space:normal;text-align:center;letter-spacing:0;container-type:inline-size;}
+.rg-character-name {letter-spacing:.08em;overflow-wrap:anywhere;}
+.rg-character-stats {display:grid;gap:4px;margin-top:5px;padding-top:5px;border-top:1px solid #756491;}
+.rg-character-stat {display:grid;grid-template-columns:24px minmax(0,1fr);column-gap:5px;align-items:center;text-align:left;line-height:1.1;}
+.rg-character-stat img {grid-column:1;grid-row:1 / span 2;display:block;width:24px;height:24px;object-fit:contain;}
+/* The provided chip is an opaque circular texture on black; clip only the
+   outside corners at display time, retaining the exact source PNG. */
+.rg-character-stat:first-child img {clip-path:circle(50%);}
+.rg-character-stat-label {grid-column:2;color:#e2d5f8;font:700 10px/1.1 monospace;text-transform:uppercase;}
+.rg-character-stat-value {grid-column:2;min-width:0;color:#fff5da;font:900 clamp(13px,1.45vw,17px)/1.1 monospace;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;}
+.rg-billboard-layer.rg-group-stats-visible ~ .rg-points-hud {visibility:hidden;}
+
+/* A wider tag can place the two counters side by side, giving the character
+   more vertical space. The stacked fallback fits narrow participant lanes. */
+@container (min-width: 132px) {
+  .rg-character-stats {grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;}
+  .rg-character-stat {grid-template-columns:20px minmax(0,1fr);column-gap:3px;row-gap:2px;}
+  .rg-character-stat img {grid-row:1;width:20px;height:20px;}
+  .rg-character-stat-label {grid-row:1;}
+  .rg-character-stat-value {grid-column:1 / -1;text-align:center;}
+}
+/* If depth clipping hides a seat, preserve the legacy all-player points HUD
+   but move it away from the remaining top-anchored nameplates. */
+.rg-billboard-layer.rg-group-stats-partial ~ .rg-points-hud {top:auto;bottom:max(12px,env(safe-area-inset-bottom));}

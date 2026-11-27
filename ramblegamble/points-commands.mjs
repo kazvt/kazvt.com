@@ -1,7 +1,7 @@
 import { validAudienceMode } from "./audience-state.mjs?v=show-energy-20261127-v1";
-import { RG_CONTESTANTS } from "./points-store.mjs?v=card-score-sync-20261127-v1";
+import { RG_CONTESTANTS } from "./points-store.mjs?v=player-stats-20261127-v1";
 
-export const POINTS_HELP = "help - clear - answers - points [faroe|erin|kaz] - points add <name> [amount] - points remove <name> [amount] - points set <name> <total> - points reset [name] - berryblast|redhanded start [prompt] - cards close|reveal|all|vote <1-3>|results - audience auto|idle|cheer|suspense|shock - smeemo start|reset - trivia <round 1-36> <difficulty 1-5> - trivia answers|close|next|previous|hide|show";
+export const POINTS_HELP = "help - clear - answers - points [faroe|erin|kaz] - points add|give <name> [amount] - points remove|take <name> [amount] - points set <name> <total> - points reset [name] - stars|star [faroe|erin|kaz] - stars add|give <name> [amount] - stars remove|take <name> [amount] - stars set <name> <total> - stars reset [name] - berryblast|redhanded start [prompt] - cards close|reveal|all|vote <1-3>|results - audience auto|idle|cheer|suspense|shock - smeemo start|reset - trivia <round 1-36> <difficulty 1-5> - trivia answers|close|next|previous|hide|show";
 
 function parseName(value) {
   const name = String(value || "").trim().replace(/^@/, "").toLowerCase();
@@ -49,11 +49,17 @@ export function parsePointsCommand(rawCommand) {
     if(args.length===2&&round!==null&&round<=36&&difficulty!==null&&difficulty<=5)return {action:"trivia-start",round:String(round).padStart(2,"0"),difficulty};
     return {action:"error",message:"Use: trivia <round 1-36> <difficulty 1-5>, or trivia answers/close/next/previous/hide/show."};
   }
-  if (action !== "points") return { action: "error", message: `Unknown command: ${verb}. Type help.` };
+  if (!["points", "stars", "star"].includes(action)) return { action: "error", message: `Unknown command: ${verb}. Type help.` };
+  const parsed = parseBalanceArgs(args);
+  return action !== "points" && parsed.action !== "error" ? { ...parsed, currency: "stars" } : parsed;
+}
+
+function parseBalanceArgs(args) {
   if (!args.length) return { action: "inspect-all" };
 
   const [subcommand, ...rest] = args;
-  const normalized = subcommand.toLowerCase();
+  const verb = subcommand.toLowerCase();
+  const normalized = verb === "give" ? "add" : verb === "take" ? "remove" : verb;
   if (["add", "remove"].includes(normalized)) {
     if (rest.length < 1 || rest.length > 2) return { action: "error" };
     const name = parseName(rest[0]);

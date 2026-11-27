@@ -1,5 +1,5 @@
 import { AUDIENCE_KEY, AUDIENCE_MODES, readAudienceMode, writeAudienceMode } from "/ramblegamble/audience-state.mjs?v=show-energy-20261127-v1";
-import { mountCommandCompletion } from "/ramblegamble/console-completion.mjs?v=show-energy-20261127-v1";
+import { mountCommandCompletion } from "/ramblegamble/console-completion.mjs?v=player-stats-20261127-v1";
 import { applyCardShowAction } from "/ramblegamble/card-show-actions.mjs?v=card-polish-20261127-v1";
 import { renderTriviaResponses } from "/ramblegamble/trivia-live-view.mjs?v=neon-focus-20261127-v1";
 import { activeRoomRound, readLiveTrivia, writeLiveTrivia, writeLiveTriviaDraft, subscribeLiveTrivia, newTriviaId, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, updateTrivia, answerSummary } from "/ramblegamble/live-trivia.mjs?v=match-number-20261127-v1";
@@ -10,8 +10,11 @@ import {
   readPointScores,
   writePointScores,
   withPointScoresLock,
-} from "/ramblegamble/points-store.mjs?v=card-score-sync-20261127-v1";
-import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=show-energy-20261127-v1";
+  readStarScores,
+  writeStarScores,
+  withStarScoresLock,
+} from "/ramblegamble/points-store.mjs?v=player-stats-20261127-v1";
+import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=player-stats-20261127-v1";
 import { createSmeemoGame } from "/ramblegamble/card-games.mjs?v=show-stage-20261126-v1";
 import { readCardGames, writeCardGames, subscribeCardGames } from "/ramblegamble/card-games-store.mjs?v=show-stage-20261126-v1";
 
@@ -121,13 +124,21 @@ async function execute(rawCommand) {
     try{await updateTrivia(current=>{if(!current||current.id!==round.id)throw Error('Question changed.');if(action==='close')return {...current,phase:'closed'};const q={...current.question};if(['next','previous'].includes(action)){if(!['image-sequence','text-sequence'].includes(q.kind))throw Error('Not a sequence.');q.sequenceIndex=Math.max(0,Math.min(q.items.length-1,q.sequenceIndex+(action==='next'?1:-1)));}else{if(q.kind!=='memory-number')throw Error('Not a memory question.');q.imageVisible=action==='show';q.promptImage=q.imageVisible?current.secret.memoryImage:'';}return {...current,question:q};});addLine(`Trivia ${action}.`);}catch(e){addLine(e.message,"terminal-error");}return;
   }
   try {
-    await withPointScoresLock(() => {
-      const latest = readPointScores({ strict: true });
-      if (parsed.action === "inspect-all") { addLine(formatScores(latest)); return; }
-      if (parsed.action === "inspect") { addLine(`${parsed.name}: ${latest[parsed.name]}`); return; }
+    const isStars = parsed.currency === "stars";
+    const lock = isStars ? withStarScoresLock : withPointScoresLock;
+    const read = isStars ? readStarScores : readPointScores;
+    const write = isStars ? writeStarScores : writePointScores;
+    const unit = isStars ? "stars" : "points";
+    const suffix = isStars ? " stars" : "";
+    await lock(() => {
+      // Recheck after waiting: a queued host command must not commit after locking.
+      if (document.documentElement.hasAttribute("data-rg-host-locked")) throw Error("Host is locked; no changes made.");
+      const latest = read({ strict: true });
+      if (parsed.action === "inspect-all") { addLine(`${isStars ? "Stars - " : ""}${formatScores(latest)}`); return; }
+      if (parsed.action === "inspect") { addLine(`${parsed.name}: ${latest[parsed.name]}${suffix}`); return; }
       let removed = 0;
       if (parsed.action === "add") {
-        if (latest[parsed.name] + parsed.amount > Number.MAX_SAFE_INTEGER) throw Error("Point total would exceed the safe integer limit.");
+        if (parsed.amount > Number.MAX_SAFE_INTEGER - latest[parsed.name]) throw Error(`${isStars ? "Star" : "Point"} total would exceed the safe integer limit.`);
         latest[parsed.name] += parsed.amount;
       } else if (parsed.action === "remove") {
         removed = Math.min(latest[parsed.name], parsed.amount);
@@ -137,9 +148,9 @@ async function execute(rawCommand) {
         if (parsed.name) latest[parsed.name] = 0;
         else for (const contestant of RG_CONTESTANTS) latest[contestant] = 0;
       } else return;
-      const result = writePointScores(latest);
-      if (!result.persisted) throw Error("Could not save points; no update committed.");
-      addLine(parsed.name ? `${parsed.name}: ${result.scores[parsed.name]}${parsed.action === "add" ? ` (+${parsed.amount})` : parsed.action === "remove" ? ` (-${removed})` : ""}` : `Scores reset - ${formatScores(result.scores)}`);
+      const result = write(latest);
+      if (!result.persisted) throw Error(`Could not save ${unit}; no update committed.`);
+      addLine(parsed.name ? `${parsed.name}: ${result.scores[parsed.name]}${suffix}${parsed.action === "add" ? ` (+${parsed.amount})` : parsed.action === "remove" ? ` (-${removed})` : ""}` : `${isStars ? "Stars" : "Scores"} reset - ${formatScores(result.scores)}`);
     });
   } catch (error) { addLine(error.message, "terminal-error"); }
 
@@ -177,7 +188,8 @@ input.addEventListener("keydown", (event) => {
 });
 
 addLine("RG console - type help");
-addLine(formatScores(readPointScores()));
+addLine(`Points - ${formatScores(readPointScores())}`);
+addLine(`Stars - ${formatScores(readStarScores())}`);
 
 const cardRoom = mountCardRoom(document.getElementById("console-card-room"), {
   role: "/rg/console/",

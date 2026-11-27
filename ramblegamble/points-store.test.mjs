@@ -93,3 +93,28 @@ test('subscriber exceptions do not prevent persistence or other subscribers',()=
   const f=fixture(), a=f.tab(), old=console.error; console.error=()=>{};
   try {a.subscribe(()=>{throw Error('view failed');});const observed=[];a.subscribe(value=>observed.push(value));assert.equal(a.write(scores(77)).persisted,true);assert.deepEqual(observed.at(-1),scores(77));} finally {console.error=old;}
 });
+
+import {createStarStore,normalizeStarScores} from './points-store.mjs';
+test('star storage, channel and mutation locks are distinct from legacy points',async()=>{
+  const data=new Map([[KEY,JSON.stringify(scores(100,200,300))]]),channels=[],lockNames=[],pending=[];
+  const storage={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v)};
+  const buses=new Map();
+  const makeChannel=key=>{channels.push(key);const bus=new EventTarget();const group=buses.get(key)||[];group.push(bus);buses.set(key,group);bus.postMessage=message=>{for(const other of group)if(other!==bus)pending.push(()=>other.dispatchEvent(Object.assign(new Event('message'),{data:message})));};return bus;};
+  const tails=new Map();const locks={request(name,fn){lockNames.push(name);const next=(tails.get(name)||Promise.resolve()).then(fn);tails.set(name,next.catch(()=>{}));return next;}};
+  const options={getStorage:()=>storage,makeChannel,locks};
+  const points=createPointStore(options),a=createStarStore(options),b=createStarStore(options),seen=[],pointSeen=[];
+  points.subscribe(v=>pointSeen.push(v));b.subscribe(v=>seen.push(v));a.subscribe(()=>{});
+  assert.deepEqual(a.read(),scores());assert.deepEqual(points.read(),scores(100,200,300));
+  assert.equal(data.has('ramblegamble.stars.v1'),false);
+  await Promise.all(Array.from({length:100},(_,i)=>{const store=i%2?a:b;return store.withLock(()=>{const next=store.read({strict:true});next.kaz++;assert.ok(store.write(next).persisted);});}));
+  pending.reverse().forEach(fn=>fn());assert.deepEqual(b.read(),scores(0,0,100));assert.deepEqual(seen.at(-1),scores(0,0,100));
+  assert.deepEqual(pointSeen,[scores(100,200,300)]);assert.deepEqual(channels,[KEY,'ramblegamble.stars.v1','ramblegamble.stars.v1']);assert.ok(lockNames.every(v=>v==='ramblegamble.stars.mutation.v1'));
+  assert.deepEqual(createStarStore(options).read(),scores(0,0,100));
+  data.set('ramblegamble.stars.v1','{');assert.throws(()=>a.read({strict:true}),/Could not read saved stars/);assert.deepEqual(a.read(),scores(0,0,100));assert.deepEqual(points.read(),scores(100,200,300));
+});
+
+
+test('new star saves never coerce corrupt strings, booleans, arrays or fractions into awards',()=>{
+  for(const invalid of [true,false,'12',[5],{},null,undefined,1.5,-2,Number.MAX_SAFE_INTEGER+1,NaN,Infinity])assert.deepEqual(normalizeStarScores({faroe:invalid,erin:2,kaz:3}),scores(0,2,3));
+  assert.deepEqual(normalizeStarScores({faroe:Number.MAX_SAFE_INTEGER,erin:0,kaz:1,lillie:42}),scores(Number.MAX_SAFE_INTEGER,0,1));
+});
