@@ -2,10 +2,13 @@
 export const SOUNDTRACK_FILES = Object.freeze({
   general: 'sonic_gammon_leel_theme.mp3',
   cards: 'sonic_no_daifuugou_title_theme.mp3',
+  smeemo: 'smeemo_theme.mp3',
 });
 const base = new URL('./assets/music/', import.meta.url);
-export function soundtrackFor({ active, muted, dice, view, cardMode }) {
-  if (!active || muted || dice || view === 'dice-door' || (view === 'card-table' && cardMode === 'smeemo')) return null;
+export function soundtrackFor({ active, muted, dice, view, cardMode, encounter }) {
+  if (!active || muted || dice || view === 'dice-door' || encounter === 'stinger') return null;
+  if (encounter === 'smeemo') return 'smeemo';
+  if (view === 'card-table' && cardMode === 'smeemo') return null;
   return ['roulette', 'card-table', 'trivia'].includes(view) ? 'cards' : 'general';
 }
 

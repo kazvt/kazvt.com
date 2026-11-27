@@ -168,7 +168,7 @@ test('local original and crowd sprite are separate PNGs, and the camera update f
  assert.deepEqual(dimensions(png('smeemo_scramble.png')),[236,601]);
  assert.deepEqual(dimensions(png('smeemo-crowd.png')),[30,76]);
  const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
- assert.match(src,/audience-render\.mjs\?v=mesh-sky-20261127-v1/);
+ assert.match(src,/audience-render\.mjs\?v=smeemo-reveal-20261127-v1/);
  const animate=src.slice(src.indexOf('function animate(time)'));
  assert.ok(animate.indexOf('audience?.update(crowdClock,emotion,reducedMotion.matches,camera.position,')>animate.indexOf('focusOrbit.step(time'));
 });
@@ -199,4 +199,17 @@ test('crowd Smeemo only enters the anchored dance during focused close-up, retai
   audience.update(400,'idle',false,eye,{time:400,focused:false});assert.equal(cat.matrixAutoUpdate,true);
   audience.update(400,'idle',true,eye,{time:400,focused:true});assert.equal(cat.matrixAutoUpdate,true);assert.equal(cat.position.y,a.y);audience.dispose();
  }finally{if(originalUpdate)Mesh.prototype.updateMatrix=originalUpdate;else delete Mesh.prototype.updateMatrix;if(old===undefined)delete globalThis.document;else globalThis.document=old;}
+});
+
+test('Smeemo reveal exposes original photo at full opacity without dance, then restores hidden texture',()=>{
+ const old=globalThis.document,ctx=new Proxy({}, {get:(o,k)=>k==='createLinearGradient'?()=>({addColorStop(){}}):()=>{}});
+ globalThis.document={createElement:()=>({getContext:()=>ctx})};
+ try{
+  const audience=createAudienceRenderer(THREE,new Group()),cat=audience.cat,a=crowdCatAnchor(),eye={x:a.x-4,z:a.z};
+  audience.update(300,'cheer',true,eye,{focused:true});const camo=cat.material.map;
+  audience.update(500,'cheer',false,eye,{focused:true,revealed:true,quiet:true});
+  const photo=cat.material.map;assert.notEqual(photo,camo);assert.match(photo.canvas,/smeemo_scramble\.png$/);assert.equal(cat.material.opacity,1);assert.equal(cat.renderOrder,2);assert.equal(cat.matrixAutoUpdate,true);assert.equal(cat.position.y,a.y);assert.equal(cat.material.depthTest,true);
+  audience.update(700,'idle',true,eye);assert.equal(cat.material.map,camo);assert.equal(cat.material.opacity,.86);assert.equal(cat.renderOrder,-1);
+  audience.dispose();assert.equal(photo.disposed,true);assert.equal(camo.disposed,true);
+ }finally{if(old===undefined)delete globalThis.document;else globalThis.document=old;}
 });

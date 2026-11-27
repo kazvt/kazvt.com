@@ -22,7 +22,7 @@ function fixture({defer=false}={}) {
   return {media,mixer,log,pending,get created(){return created;},advance(ms){clock+=ms;}};
 }
 
-test('only two tracks; exact mode priority including silent games, pause, lock and mute',()=>{
+test('three tracks; exact mode priority including silent games, pause, lock and mute',()=>{
   for(const v of ['overview','slot','contestants','host','contestant','hazel']) assert.equal(mode(v),'general');
   for(const v of ['roulette','trivia']) assert.equal(mode(v),'cards');
   for(const m of ['', 'menu','shop','quiplash','red-handed']) assert.equal(mode('card-table',m),'cards');
@@ -30,7 +30,8 @@ test('only two tracks; exact mode priority including silent games, pause, lock a
   assert.equal(mode('overview','smeemo'),'general');
   assert.equal(mode('dice-door'),null);
   for(const view of ['overview','slot','roulette','card-table','hazel']) for(const extra of [{active:false},{muted:true},{dice:true}]) assert.equal(mode(view,'menu',extra),null);
-  assert.deepEqual(Object.values(SOUNDTRACK_FILES),['sonic_gammon_leel_theme.mp3','sonic_no_daifuugou_title_theme.mp3']);
+  assert.deepEqual(Object.values(SOUNDTRACK_FILES),['sonic_gammon_leel_theme.mp3','sonic_no_daifuugou_title_theme.mp3','smeemo_theme.mp3']);
+  assert.equal(mode('smeemo-crowd','',{encounter:'smeemo'}),'smeemo');assert.equal(mode('card-table','smeemo',{encounter:'smeemo'}),'smeemo');assert.equal(mode('smeemo-crowd','',{encounter:'stinger'}),null);assert.equal(mode('smeemo-crowd','',{encounter:'smeemo',muted:true}),null);
 });
 
 test('shared songs are uninterrupted, fade in, switch on one media voice, and suspend/resume without rewinding',async()=>{

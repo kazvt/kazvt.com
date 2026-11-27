@@ -153,7 +153,7 @@ export function crowdCatFacing(eye,anchor,section=CROWD_SECTIONS[CROWD_CAT.secti
 }
 export function createCrowdCat(THREE,group) {
   const section=CROWD_SECTIONS[CROWD_CAT.section],anchor=crowdCatAnchor(section);
-  let ready=false,disposed=false;
+  let ready=false,disposed=false,revealTex=null,revealReady=false;
   const tex=new THREE.TextureLoader().load(new URL('./assets/berries/smeemo-crowd.png?v=crowd-peek-20261127-v1',import.meta.url).href,
     ()=>{if(!disposed)ready=true;},undefined,()=>{ready=false;});
   tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestFilter;tex.generateMipmaps=false;tex.colorSpace=THREE.SRGBColorSpace;
@@ -161,7 +161,7 @@ export function createCrowdCat(THREE,group) {
   mesh.name='rg-audience-spectator';mesh.position.set(anchor.x,anchor.y,anchor.z);mesh.rotation.y=section.yaw;mesh.visible=false;
   // Draw behind the translucent silhouettes regardless of object-center sort.
   // The setback clears the panel at every allowed yaw; opaque scenery still
-  // occludes it through the normal depth test. No picking or HUD registration.
+  // occludes it through the normal depth test. Normal state stays camouflaged; reveal deliberately draws in front of the translucent crowd.
   mesh.renderOrder=-1;group.add(mesh);
   return {mesh,update(frame,emotion,reduced,eye,dance){
     if(disposed)return;
@@ -170,14 +170,18 @@ export function createCrowdCat(THREE,group) {
     if(!mesh.visible)return;
     mesh.rotation.y=yaw;
     const beat=frame/CROWD_FPS*2.1+1.7;
-    const focused=!!dance?.focused&&!reduced;
-    mesh.material.opacity=dance?.focused ? .96 : .86;
-    mesh.position.y=anchor.y+(focused||reduced?0:emotion==='cheer'?Math.max(0,Math.sin(beat))* .055:Math.sin(beat)*.018);
+    const revealed=!!dance?.revealed;
+    if(revealed&&!revealTex){revealTex=new THREE.TextureLoader().load(new URL('./assets/berries/smeemo_scramble.png',import.meta.url).href,()=>{if(!disposed)revealReady=true;},undefined,()=>{revealReady=false;});revealTex.magFilter=THREE.NearestFilter;revealTex.minFilter=THREE.NearestFilter;revealTex.generateMipmaps=false;revealTex.colorSpace=THREE.SRGBColorSpace;}
+    const map=revealed&&revealReady?revealTex:tex;if(mesh.material.map!==map){mesh.material.map=map;mesh.material.needsUpdate=true;}
+    const focused=!!dance?.focused&&!reduced&&!revealed;
+    mesh.material.opacity=revealed?1:dance?.focused ? .96 : .86;
+    mesh.renderOrder=revealed?2:-1;
+    mesh.position.y=anchor.y+(focused||reduced||revealed?0:emotion==='cheer'?Math.max(0,Math.sin(beat))* .055:Math.sin(beat)*.018);
     mesh.matrixAutoUpdate=true;
     if(focused){const p=dancePose(dance.time,.78,.16),h=CROWD_CAT.height;
       mesh.updateMatrix();mesh.matrix.multiply(new THREE.Matrix4().set(p.width,p.shear,0,p.shear*h/2,0,1,0,0,0,0,1,0,0,0,0,1));mesh.matrixAutoUpdate=false;mesh.matrixWorldNeedsUpdate=true;}
 
-  },dispose(){if(disposed)return;disposed=true;mesh.visible=false;group.remove(mesh);tex.dispose();mesh.geometry.dispose();mesh.material.dispose();}};
+  },dispose(){if(disposed)return;disposed=true;mesh.visible=false;group.remove(mesh);tex.dispose();revealTex?.dispose();mesh.geometry.dispose();mesh.material.dispose();}};
 }
 export function createAudienceRenderer(THREE,scene) {
   const group=new THREE.Group();group.name='rg-audience';scene.add(group);
@@ -194,9 +198,9 @@ export function createAudienceRenderer(THREE,scene) {
   let cat=null;
   try { cat=createCrowdCat(THREE,group); } catch(error) { console.warn('Audience decoration unavailable',error); }
   let oldFrame=-1, oldEmotion='';
-  return {group,dispose(){cat?.dispose();scene.remove(group);for(const p of panels){p.tex.dispose();p.mesh.geometry.dispose();p.mesh.material.dispose();}},update(time,emotion,reduced=false,eye,dance){
+  return {group,get cat(){return cat?.mesh;},dispose(){cat?.dispose();scene.remove(group);for(const p of panels){p.tex.dispose();p.mesh.geometry.dispose();p.mesh.material.dispose();}},update(time,emotion,reduced=false,eye,dance){
     if(!group.visible)return;
-    const frame=reduced?0:Math.floor(time*CROWD_FPS/1000);
+    const frame=reduced||dance?.quiet?0:Math.floor(time*CROWD_FPS/1000);
     // Orientation must follow every rendered camera frame, not the 6 FPS paint clock.
     cat?.update(frame,emotion,reduced,eye,dance);
     if(frame===oldFrame&&emotion===oldEmotion)return;

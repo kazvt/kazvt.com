@@ -1,4 +1,4 @@
-import { createStageShowState } from './stage-show-state.mjs?v=all-curtain-20261127-v1';
+import { createStageShowState } from './stage-show-state.mjs?v=smeemo-reveal-20261127-v1';
 import { curtainLayout, createCurtainProfile, curtainVertex } from './stage-curtain.mjs?v=all-curtain-20261127-v1';
 // Unlit GLTF art deliberately stays unlit outside a show. A world-space cone
 // mask illuminates the original texels rather than replacing all room materials.
@@ -114,6 +114,7 @@ export function createStageShow(THREE,scene,{slotRig,slotsModel,roots,foley,onEm
   function reset(open){state.reset(open);foley.stop('stage-hit');foley.stop('stage-cheer');burst=null;confetti.visible=false;lightTarget=null;restoreLighting();for(const b of beams)b.visible=false;const s=state.step(lastTime);updateCurtains(s.curtain,s.travel,lastTime);lastPose=s.curtain;lastTravel=s.travel;}
   function toggle(point,time){lastTime=time;lightTarget=new THREE.Vector3(point.x,point.y,point.z);return state.toggle(point,time,reduced());}
   function dismiss(time){lastTime=time;return state.dismiss(time);}
+  function silent(point,time){lastTime=time;burst=null;confetti.visible=false;for(const key of ['stage-roll','stage-hit','stage-cheer'])foley.stop(key);lightTarget=new THREE.Vector3(point.x,point.y,point.z);return state.begin(point,time,'silent',reduced());}
   function brightnessAt(point){
     const strength=uniforms.rgShow.value;if(!strength)return 1;let lit=0;
     for(let i=0;i<3;i++){const from=uniforms.rgLamp.value[i],aim=uniforms.rgAim.value[i];const x=point.x-from.x,y=point.y-from.y,z=point.z-from.z;const ax=aim.x-from.x,ay=aim.y-from.y,az=aim.z-from.z;const d=Math.max(.001,Math.hypot(x,y,z)),dot=(x*ax+y*ay+z*az)/(d*Math.max(.001,Math.hypot(ax,ay,az)));lit=Math.max(lit,Math.max(0,Math.min(1,(dot-.925)/.055)));}
@@ -121,5 +122,5 @@ export function createStageShow(THREE,scene,{slotRig,slotsModel,roots,foley,onEm
   }
   function dispose(){reset(false);scene.remove(group);const geometries=new Set(),materials=new Set();group.traverse(o=>{if(o.geometry)geometries.add(o.geometry);if(o.material)materials.add(o.material);if(o.isInstancedMesh)o.dispose?.();});for(const g of geometries)g.dispose();for(const m of materials)m.dispose();texture.dispose();}
   reset(false);
-  return {group,curtains:curtains.map(c=>c.mesh),slot,toggle,dismiss,reset,update,dispose,brightnessAt,get busy(){return state.busy;},get manual(){return state.owner==='manual';},get target(){return lightTarget;}};
+  return {group,curtains:curtains.map(c=>c.mesh),slot,toggle,dismiss,silent,reset,update,dispose,brightnessAt,get busy(){return state.busy;},get silentActive(){return state.owner==='silent';},get manual(){return state.owner==='manual';},get target(){return lightTarget;}};
 }

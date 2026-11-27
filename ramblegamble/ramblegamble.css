@@ -1095,3 +1095,25 @@ body.ramble-page *::after {
 /* The VIP top-layer has its own marker; keep it below the staff controls. */
 .rg-dice-dialog > .rg-focus-arrow {z-index:1;}
 .rg-dice-dialog:not([open]) > .rg-focus-arrow,.rg-dice-dialog.rg-dice-exiting > .rg-focus-arrow {display:none!important;}
+
+/* Secret encounter: compact anchored tag and escalating accents. */
+.rg-smeemo-tag {z-index:13;pointer-events:auto;cursor:pointer;transform:translate(-50%,-100%);--character-accent:#b898f0;display:flex;align-items:center;gap:.6em;max-width:calc(100% - 12px);font-size:clamp(12px,1.45vw,19px);}
+.rg-smeemo-tag strong {color:#f7db8a;border-left:1px solid #997ac7;padding-left:.55em;}
+.rg-smeemo-tag:focus-visible {outline:2px solid #fff4bf;outline-offset:3px;}
+.rg-preview[data-smeemo-step="2"] .rg-smeemo-tag,.rg-preview[data-smeemo-step="3"] .rg-smeemo-tag {--character-accent:#de9bd5;}
+.rg-preview[data-smeemo-step="4"] .rg-smeemo-tag {--character-accent:#ff918c;box-shadow:3px 3px 0 #211844,0 0 14px #d977b5;}
+.rg-smeemo-pulse {animation:rg-smeemo-pulse .5s cubic-bezier(.18,.8,.3,1.2);}
+@keyframes rg-smeemo-pulse {0%{transform:translate(-50%,-100%) scale(.91)}35%{transform:translate(-50%,-100%) scale(1.13)}100%{transform:translate(-50%,-100%) scale(1)}}
+.rg-smeemo-stinger {position:absolute;inset:0;z-index:30;background:#100b19;display:grid;place-items:center;overflow:hidden;isolation:isolate;}
+.rg-smeemo-stinger video {width:100%;height:100%;object-fit:contain;position:absolute;inset:0;}
+.rg-smeemo-stinger p {position:absolute;top:clamp(12px,4vh,42px);margin:0;text-align:center;max-width:90%;color:#f4d1ec;text-shadow:2px 3px #130c20;font:900 clamp(18px,3vw,36px)/1.2 monospace;letter-spacing:.12em;}
+.rg-smeemo-stinger video[hidden]+p {position:static;font-size:clamp(23px,5vw,56px);}
+.rg-smeemo-stinger button {position:absolute;bottom:clamp(12px,4vh,42px);right:clamp(12px,4vw,42px);}
+.rg-smeemo-tag[hidden],.rg-smeemo-stinger[hidden],.rg-smeemo-stinger video[hidden],html[data-rg-host-locked] :is(.rg-smeemo-tag,.rg-smeemo-stinger) {display:none!important;}
+@media(prefers-reduced-motion:reduce){.rg-smeemo-pulse{animation:none;}}
+.rg-smeemo-aura {position:absolute;z-index:9;pointer-events:none;aspect-ratio:1;transform:translate(-50%,-50%);border:2px solid #d9a2ec99;border-radius:50%;box-shadow:0 0 18px #b188e85c,inset 0 0 12px #ad7fce42;opacity:.4;}
+.rg-smeemo-aura[hidden],html[data-rg-host-locked] .rg-smeemo-aura {display:none!important;}
+.rg-preview[data-smeemo-step="4"] .rg-smeemo-aura {border-color:#f3adad;box-shadow:0 0 26px #d980bb77;}
+.rg-smeemo-aura-pulse {animation:rg-smeemo-aura-pulse 1.1s ease-out;}
+@keyframes rg-smeemo-aura-pulse {0%{transform:translate(-50%,-50%) scale(.8);opacity:.8}100%{transform:translate(-50%,-50%) scale(1);opacity:.4}}
+@media(prefers-reduced-motion:reduce){.rg-smeemo-aura-pulse{animation:none;}}

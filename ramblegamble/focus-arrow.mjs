@@ -4,7 +4,7 @@ const version='?v=arrow-restored-20261127-v1';
 const finite=p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y);
 export function focusArrowKey(view){
   if(view?.kind==='contestant')return ['faroe','erin','kaz'].includes(view.contestantId)?`contestant:${view.contestantId}`:null;
-  return ['host','hazel','contestants','slot','roulette','dice-door','dice','card-table','trivia'].includes(view?.kind)?view.kind:null;
+  return ['host','hazel','contestants','slot','roulette','dice-door','dice','card-table','trivia','smeemo-crowd'].includes(view?.kind)?view.kind:null;
 }
 export function screenBounds(points){
   if(!points?.length||!points.every(finite))return null;

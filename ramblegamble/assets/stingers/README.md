@@ -1,0 +1,2 @@
+# Smeemo encounter stinger
+Place your video here as `smeemo_annoyed.webm` (exact lowercase filename). The host plays it once at 5/5 and waits for `ended` before the 4.4-second return to the card table. It respects shared mute; regular music pauses for its duration. Continue/Skip is always available. A missing, undecodable, blocked, or stalled file shows a brief fallback title and continues. No placeholder video is shipped.

@@ -1,18 +1,19 @@
-import { createFloatingSky } from "./floating-sky.mjs?v=sky-refresh-20261127-v2";
+import { createSmeemoEncounter, createSmeemoStinger, SMEEMO_RETURN_MS } from "./smeemo-reveal.mjs?v=smeemo-reveal-20261127-v1";
+import { createFloatingSky } from "./floating-sky.mjs?v=sky-text-20261127-v1";
 import { createStageDance, createDanceClock, dancePose } from "./stage-dance.mjs?v=ambient-tuning-20261127-v1";
-import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=corrective-review-20261127-v1";
+import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=smeemo-reveal-20261127-v1";
 import { createMenuMarquee } from "./menu-marquee.mjs?v=corrective-review-20261127-v1";
-import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=sky-soot-20261127-v1";
+import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=smeemo-reveal-20261127-v1";
 import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcony.mjs?v=hazel-balcony-20261127-v1";
 import { createSignGlow } from "./sign-glow.mjs?v=neon-focus-20261127-v1";
 import { selectedCharacterId, characterRenderPose, createCharacterSelection } from "./character-selection.mjs?v=stage-dance-20261127-v1";
 import { sampleVipAmbience } from "./vip-atmosphere.mjs?v=sky-soot-20261127-v1";
-import { createStageShow } from "./stage-show.mjs?v=all-curtain-20261127-v1";
+import { createStageShow } from "./stage-show.mjs?v=smeemo-reveal-20261127-v1";
 import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state.mjs?v=all-curtain-20261127-v1";
 import { createCharacterOcclusion } from "./character-occlusion.mjs?v=stage-dance-20261127-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
-import { createAudienceRenderer, crowdCatAnchor } from "./audience-render.mjs?v=mesh-sky-20261127-v1";
+import { createAudienceRenderer, crowdCatAnchor, CROWD_CAT } from "./audience-render.mjs?v=smeemo-reveal-20261127-v1";
 import { createShowFX } from "./show-fx.mjs?v=sky-soot-20261127-v1";
 import { createRouletteCabinetFX } from "./roulette-cabinet-fx.mjs?v=sky-soot-20261127-v1";
 import { cameraTravelDuration, isSpookyView, suspenseEase, crowdCloseupPose } from "./spooky-camera.mjs?v=cartoon-machines-20261127-v1";
@@ -145,7 +146,7 @@ import {
   for(const mode of AUDIENCE_MODES){if(!audienceControls)break;const b=document.createElement("button");b.type="button";b.dataset.audience=mode;b.textContent=mode.toUpperCase();b.className="rg-secondary-button";b.addEventListener("click",()=>selectAudienceMode(mode));audienceControls.append(b);}
   const crowdStatus=document.createElement("small"); crowdStatus.setAttribute("role","status"); audienceControls?.append(crowdStatus);
   let shownCrowdStatus="";
-  function updateCrowdStatus(){const label=crowdState.active.toUpperCase()+(crowdState.pending!==crowdState.active?` → ${crowdState.pending.toUpperCase()}`:"");if(label!==shownCrowdStatus){crowdStatus.textContent=label;shownCrowdStatus=label;}}
+  function updateCrowdStatus(){const label=encounter.quiet?"IDLE · SMEEMO":crowdState.active.toUpperCase()+(crowdState.pending!==crowdState.active?` → ${crowdState.pending.toUpperCase()}`:"");if(label!==shownCrowdStatus){crowdStatus.textContent=label;shownCrowdStatus=label;}}
   syncAudienceControls();
   window.addEventListener("storage",event=>{if(event.key===AUDIENCE_KEY||event.key===null){crowdState.setMode(readAudienceMode(),crowdClock);syncAudienceControls();}});
   window.addEventListener("rg:audience-reaction",event=>{if(gameStarted&&!pauseMenuOpen&&!document.hidden&&!document.documentElement.hasAttribute("data-rg-host-locked"))crowdState.react(event.detail?.emotion,crowdClock);});
@@ -233,12 +234,59 @@ import {
   let pendingTrivia = false;
   let cardMusicMode = "";
   const soundtrack = createSoundtrack();
+  const encounter = createSmeemoEncounter();
+  const smeemoAura=document.getElementById("rg-smeemo-aura"), smeemoTag=document.getElementById("rg-smeemo-tag"), smeemoCount=document.getElementById("rg-smeemo-count");
+  const stinger=createSmeemoStinger({root:document.getElementById("rg-smeemo-stinger"),video:document.getElementById("rg-smeemo-video"),skip:document.getElementById("rg-smeemo-skip"),caption:document.getElementById("rg-smeemo-stinger-caption"),muted:()=>foley.muted,onFinish:()=>{
+    if(encounter.finish()){canvas.focus({preventScroll:true});transitionToView({kind:"card-table"},{encounterReturn:true});}
+  }});
+  function resetEncounter(){
+    if(encounter.phase==="hidden")return;
+    encounter.reset();stinger.cancel();smeemoTag.hidden=true;smeemoAura.hidden=true;preview.removeAttribute("data-smeemo-step");
+    for(const channel of ["smeemo-encounter-drum","smeemo-encounter-rumble","smeemo-encounter-scare"])foley.stop(channel);
+    stageShow?.dismiss(performance.now());syncMusic();
+  }
+  function clickSmeemo(){
+    if(!gameStarted||pauseMenuOpen||diceModeOpen||document.hidden||document.documentElement.hasAttribute("data-rg-host-locked")||document.querySelector("dialog[open]"))return;
+    if(currentView.kind!=="smeemo-crowd"||cameraDetached)transitionToView({kind:"smeemo-crowd"});
+    else if(cameraTransition)return;
+    encounter.focus();const count=encounter.click();if(count===null)return;
+    smeemoCount.textContent=`${count}/5`;preview.dataset.smeemoStep=String(count);
+    smeemoTag.classList.remove("rg-smeemo-pulse");void smeemoTag.offsetWidth;smeemoTag.classList.add("rg-smeemo-pulse");
+    smeemoAura.classList.remove("rg-smeemo-aura-pulse");void smeemoAura.offsetWidth;smeemoAura.classList.add("rg-smeemo-aura-pulse");
+    if(count===2){foley.setRoomAmbience(false);foley.stopAll();crowdState.react("idle",crowdClock);stageShow?.silent(crowdCatAnchor(),performance.now());}
+    foley.start("smeemo-encounter-drum","stageDrumHit",{rate:1-count*.075,volume:.36+count*.075});
+    if(count===3||count===4)stageShow?.silent(crowdCatAnchor(),performance.now());
+    if(count>=3)foley.start("smeemo-encounter-rumble","smeemoRumble",{rate:.8,volume:.4+count*.07});
+    if(count===4)foley.start("smeemo-encounter-scare","smeemoWin",{rate:.72,volume:.28});
+    if(count===5)foley.stop("smeemo-encounter-scare");
+    syncMusic(true);
+    if(count===5){smeemoTag.hidden=true;smeemoAura.hidden=true;focusArrow.hide();stinger.start();}
+  }
+  smeemoTag.addEventListener("click",clickSmeemo);
+  function updateSmeemoEncounter(time,roomVisible){
+    if(!roomVisible||diceModeOpen||cameraDetached||freecam?.active||document.querySelector("dialog[open]")){resetEncounter();return;}
+    stinger.step();
+    if(encounter.phase==="returning"&&!cameraTransition&&currentView.kind==="card-table"&&encounter.arrive()&&cardTableModel){const b=new THREE.Box3().setFromObject(cardTableModel),center=b.getCenter(new THREE.Vector3());center.y=b.max.y;stageShow?.silent(center,time);}
+    if(encounter.phase==="focused"&&currentView.kind==="smeemo-crowd"&&!cameraTransition&&stageShow&&!reducedMotion.matches&&!stageShow.silentActive)stageShow.silent(crowdCatAnchor(),time);
+    const cat=audience?.cat;
+    smeemoTag.hidden=!(encounter.phase==="focused"&&!cameraTransition&&currentView.kind==="smeemo-crowd"&&cat?.visible);
+    smeemoAura.hidden=smeemoTag.hidden||encounter.count<2;
+    if(smeemoTag.hidden)return;
+    cat.updateWorldMatrix(true,false);
+    const top=new THREE.Vector3(0,CROWD_CAT.height*.5,0).applyMatrix4(cat.matrixWorld).project(camera);
+    if(top.z< -1||top.z>1||Math.abs(top.x)>1||Math.abs(top.y)>1){smeemoTag.hidden=true;smeemoAura.hidden=true;return;}
+    const center=new THREE.Vector3().setFromMatrixPosition(cat.matrixWorld).project(camera);
+    smeemoAura.style.left=`${(center.x+1)*preview.clientWidth*.5}px`;smeemoAura.style.top=`${(1-center.y)*preview.clientHeight*.5}px`;
+    smeemoAura.style.width=`${Math.max(60,Math.abs(top.y-center.y)*preview.clientHeight*.9)}px`;
+    smeemoTag.style.left=`${Math.max(70,Math.min(preview.clientWidth-70,(top.x+1)*preview.clientWidth*.5))}px`;
+    smeemoTag.style.top=`${Math.max(48,(1-top.y)*preview.clientHeight*.5-8)}px`;
+  }
   function syncMusic(retry = false) {
     // The marquee is music too: the shared sound preference applies to it.
     if (menuMarquee.muted !== foley.muted) menuMarquee.muted = foley.muted;
     soundtrack.sync(soundtrackFor({
       active: gameStarted && sceneReady && !pauseMenuOpen && !document.hidden && !document.documentElement.hasAttribute("data-rg-host-locked"),
-      muted: foley.muted, dice: diceModeOpen, view: currentView.kind, cardMode: cardMusicMode,
+      muted: foley.muted, dice: diceModeOpen, view: currentView.kind, cardMode: cardMusicMode, encounter:encounter.phase==="stinger"?"stinger":encounter.song,
     }), { retry });
   }
   for (const type of ["pointerdown", "keydown", "click"]) document.addEventListener(type, event => {
@@ -248,7 +296,7 @@ import {
   window.addEventListener("storage", event => {
     if (event.key === "ramblegamble.foley.muted.v1" || event.key === null) syncMusic();
   });
-  new MutationObserver(() => { syncMusic(); if (document.documentElement.hasAttribute("data-rg-host-locked")) floatingSky?.suspend(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-rg-host-locked"] });
+  new MutationObserver(() => { syncMusic(); if (document.documentElement.hasAttribute("data-rg-host-locked")) { resetEncounter(); floatingSky?.suspend(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-rg-host-locked"] });
   const triviaLayer = document.getElementById("rg-live-trivia");
   let skyRandomState = 0x4b415a56;
 
@@ -1504,9 +1552,14 @@ import {
     camera.updateMatrixWorld(true);
   }
 
-  function transitionToView(nextView, { immediate = false } = {}) {
+  function transitionToView(nextView, { immediate = false, encounterReturn = false } = {}) {
     hideGameCursor(); lastScenePointer = null;
     freecam?.stop();
+    if(!encounterReturn&&((nextView.kind!=="smeemo-crowd"&&(nextView.kind!=="card-table"||encounter.phase!=="table"))||(nextView.kind==="smeemo-crowd"&&encounter.phase!=="focused")))resetEncounter();
+    if(nextView.kind==="smeemo-crowd"&&encounter.phase==="hidden"){
+      encounter.focus();smeemoCount.textContent="0/5";preview.dataset.smeemoStep="0";stageShow?.silent(crowdCatAnchor(),performance.now());
+    }
+    if(encounterReturn)stageShow?.dismiss(performance.now());
     if (nextView.kind !== "roulette") {foley.stop("roulette-rattle"); stopRouletteSettlement(); rouletteCabinetFX?.reset(); showFX?.clearRoulette();}
     const viewChanged=currentView.kind!==nextView.kind||currentView.contestantId!==nextView.contestantId;
     if(stageShow?.busy&&!viewChanged&&nextView.kind==="slot"&&!immediate)return;
@@ -1521,7 +1574,7 @@ import {
       const now=performance.now();
       if(immediate)stageShow.reset(nextView.kind==="slot");
       else if(openingSlot||closingSlot)stageShow.slot(openingSlot,now);
-      else if(stageShow.manual)stageShow.dismiss(now);
+      else if(stageShow.manual&&nextView.kind!=="smeemo-crowd")stageShow.dismiss(now);
     }
     if(viewChanged&&!immediate&&sceneReady){preview.dataset.showArrival=nextView.kind;preview.classList.remove("rg-show-arrival");void preview.offsetWidth;preview.classList.add("rg-show-arrival");if(nextView.kind==="overview"&&!closingSlot)crowdState.react("idle",crowdClock);}
     if (!immediate && sceneReady && (currentView.kind !== nextView.kind || currentView.look !== (nextView.look ?? 0) || currentView.contestantId !== nextView.contestantId)) foley.play(nextView.kind === "overview" ? "back" : "navigate");
@@ -1540,8 +1593,8 @@ import {
 
     cameraTransition = {
       started: performance.now(),
-      duration: cameraTravelDuration(nextView.kind, stageShow&&(openingSlot||closingSlot) ? (openingSlot?REVEAL_MS:RETRACT_MS) : 0),
-      spooky: isSpookyView(nextView.kind),
+      duration: encounterReturn ? SMEEMO_RETURN_MS : cameraTravelDuration(nextView.kind, stageShow&&(openingSlot||closingSlot) ? (openingSlot?REVEAL_MS:RETRACT_MS) : 0),
+      spooky: encounterReturn || isSpookyView(nextView.kind),
       theatre: Boolean(stageShow&&(openingSlot||closingSlot)),
       fromPosition: camera.position.clone(),
       fromTarget: cameraTarget.clone(),
@@ -2042,6 +2095,18 @@ import {
     pointer.x = ((clientX - bounds.left) / bounds.width) * 2 - 1;
     pointer.y = -((clientY - bounds.top) / bounds.height) * 2 + 1;
     raycaster.setFromCamera(pointer, camera);
+    const cat=audience?.cat;
+    if(cat?.visible&&audience.group.visible){
+      const hit=raycaster.intersectObject(cat,false)[0];
+      if(hit&&hit.uv&&hit.uv.x>.08&&hit.uv.x<.94&&hit.uv.y>.02){
+        const blocker=raycaster.intersectObjects([stageModel,rouletteModel,slotsModel?.visible?slotsModel:null,...(stageShow?.curtains||[])].filter(Boolean),true).find(h=>{
+          for(let o=h.object;o;o=o.parent)if(!o.visible)return false;
+          const m=Array.isArray(h.object.material)?h.object.material[h.face?.materialIndex??0]:h.object.material;
+          return m?.visible!==false&&m?.colorWrite!==false&&!m?.transparent;
+        });
+        if(!blocker||blocker.distance>=hit.distance-.005)return {machine:"smeemo-crowd",distance:hit.distance};
+      }
+    }
     const wheelHit = raycaster.intersectObjects(rouletteTargets, true)[0];
     const slotIntersections = raycaster.intersectObjects([...(slotsModel?.visible ? slotTargets : []), ...(stageShow?.curtains||[])], true);
     const slotHit = slotIntersections[0];
@@ -2210,6 +2275,7 @@ import {
   function showPauseMenu() {
     if (pauseMenuOpen) return;
     freecam?.stop();
+    resetEncounter();
     stageShow?.reset(currentView.kind==="slot");
     foley.setRoomAmbience(false);
     foley.stopAll();
@@ -2317,6 +2383,7 @@ import {
   window.addEventListener("rg:slot-action-finish",event=>{if(gameStarted&&!pauseMenuOpen&&!diceModeOpen&&!document.hidden&&currentView.kind==="slot"&&Object.values(event.detail?.totals||{}).some(v=>v>0))crowdState.react("cheer",crowdClock);});
 
   function pointClickAt(clientX, clientY) {
+    if (encounter.phase==="stinger"||document.documentElement.hasAttribute("data-rg-host-locked"))return;
     if (freecam?.active || !gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen || cameraTransition || stageShow?.busy) return;
     const rect = preview.getBoundingClientRect();
     if(!cameraDetached && currentView.kind==="trivia") { if(clientY>=rect.bottom-Math.min(84,Math.max(48,rect.height*.11)))goBack(); return; }
@@ -2333,6 +2400,7 @@ import {
     if (zone === "right") return setLookDirection(1);
     if (zone === "back") return goBack();
     if (!interaction) return;
+    if(interaction.machine==="smeemo-crowd"){clickSmeemo();return;}
     // A free camera has no focused controls. A scene click deliberately docks
     // at the selected object; it never spends a berry or spins a machine.
     if (cameraDetached) {
@@ -2416,6 +2484,7 @@ import {
       camera.lookAt(cameraTarget); camera.updateMatrixWorld(true);
     },
     onStart: () => {
+      resetEncounter();
       cameraTransition = null;
       focusDrag?.reset(); focusOrbit.reset(currentView.kind); lastScenePointer = null;
       slotHoverCell = -1; slotHoverLine = null; drawSlotReelDisplay(); hideGameCursor();
@@ -2450,7 +2519,8 @@ import {
   reducedMotion.addEventListener?.("change", () => { if (reducedMotion.matches) focusDrag.clearHover(); });
   // Shift-click is a presentation gesture, never a machine activation.
   function spotlightAt(clientX,clientY){
-    if(!stageShow||!canFreecam()||freecam.active||cameraTransition)return;
+    if(!stageShow||!canFreecam()||freecam.active||cameraTransition||encounter.phase==="stinger"||encounter.phase==="focused")return;
+    if(encounter.phase==="table")resetEncounter();
     const character=getBillboardAtScreen(clientX,clientY);
     const entry=character?.machine==="hazel"?hazelBillboard:character?.machine==="host"?hostBillboard:character?.machine==="contestant"?contestants.find(c=>c.id===character.contestantId):null;
     let point=entry?.anchor;
@@ -2515,7 +2585,7 @@ import {
   window.addEventListener("rg:dice-mode-state", (event) => {
     const open = Boolean(event.detail?.open);
     if (open === diceModeOpen) return;
-    if (open) { freecam?.stop(); stageShow?.reset(currentView.kind==="slot"); }
+    if (open) { freecam?.stop(); resetEncounter(); stageShow?.reset(currentView.kind==="slot"); }
     diceModeOpen = open;
     if (open) syncMusic();
     syncVipAmbience(gameStarted&&sceneReady&&!pauseMenuOpen&&!document.hidden&&!document.documentElement.hasAttribute("data-rg-host-locked"));
@@ -2561,6 +2631,7 @@ import {
     if (event.target instanceof Element && (event.target.isContentEditable || event.target.closest("input, textarea, select, [role='textbox']"))) return;
     if (!gameStarted || pauseMenuOpen || document.documentElement.hasAttribute("data-rg-host-locked")) return;
     const key = event.key.toLowerCase();
+    if(encounter.phase==="stinger"&&!["escape","backspace","arrowdown"].includes(key))return;
     // Keep native button activation: the canvas shortcut must not steal row clicks.
     if ((key === "enter" || key === " ") && event.target instanceof Element && event.target.closest("button, [role='button']")) return;
     // Arrow-key orbit remains continuous; all other arcade shortcuts are discrete.
@@ -2590,7 +2661,7 @@ import {
     else if (shortcut === "smeemo-crowd") {
       // Deliberately unlisted Easter-egg shortcut; no visible marker or hover hint.
       if (!event.repeat && sceneReady && audience && !document.documentElement.hasAttribute("data-rg-host-locked")
-          && (cameraDetached || currentView.kind !== "smeemo-crowd")) transitionToView({kind:"smeemo-crowd"});
+          && (cameraDetached || currentView.kind !== "smeemo-crowd" || encounter.phase==="hidden")) transitionToView({kind:"smeemo-crowd"});
     }
     else if (shortcut === "card-table") transitionToView({ kind: "card-table" });
     else if (key === "b" && event.shiftKey) window.dispatchEvent(new CustomEvent("rg:open-host-panel", {detail:{tab:"card-games"}}));
@@ -2803,7 +2874,14 @@ import {
     const kind=currentView.kind;
     const id=selectedCharacterId(currentView);
     let target=null;
-    if(id || kind==="contestants") {
+    if(kind==="smeemo-crowd"){
+      const cat=audience?.cat;
+      if(cat?.visible&&encounter.phase==="focused"){
+        cat.updateWorldMatrix(true,false);
+        const points=[[-.5,-.5],[-.5,.5],[.5,.5],[.5,-.5]].map(([x,y])=>new THREE.Vector3(x*CROWD_CAT.width,y*CROWD_CAT.height,0).applyMatrix4(cat.matrixWorld).project(camera));
+        if(points.every(p=>p.z>=-1&&p.z<=1))target=projectedArrowTarget(points.map(p=>({x:(p.x+1)*viewport.width/2,y:(1-p.y)*viewport.height/2})),viewport);
+      }
+    } else if(id || kind==="contestants") {
       const entries=id?billboards.filter(entry=>entry.id===id):contestants;
       target=entries.map(entry=>characterArrowTarget(entry,viewport,characterOcclusion)).filter(Boolean).sort((a,b)=>a.bounds.left-b.bounds.left)[0]||null;
     } else {
@@ -2853,7 +2931,7 @@ import {
     const mix=sampleVipAmbience(camera?.position,DICE_DOOR_OPENING,{
       inside:diceModeOpen,focused:!cameraDetached&&!freecam?.active&&!cameraTransition&&currentView.kind==="dice-door",
     });
-    foley.setRoomAmbience(roomVisible,mix.room,emotion,mix.water,mix.cutoff);
+    foley.setRoomAmbience(roomVisible&&!encounter.quiet,mix.room,emotion,mix.water,mix.cutoff);
   }
 
   function animate(time) {
@@ -2863,7 +2941,7 @@ import {
     const roomVisible=gameStarted&&sceneReady&&!pauseMenuOpen&&!document.hidden&&!document.documentElement.hasAttribute("data-rg-host-locked");
     stageShow?.update(time,roomVisible&&!diceModeOpen,currentView.kind==="slot");
     if(roomVisible){if(crowdLastFrame!==null)crowdClock+=Math.max(0,Math.min(250,time-crowdLastFrame));crowdLastFrame=time;}else crowdLastFrame=null;
-    const emotion=crowdState.step(crowdClock); updateCrowdStatus();
+    const emotion=encounter.quiet?"idle":crowdState.step(crowdClock); updateCrowdStatus();
     if(audience)audience.group.visible=roomVisible&&!diceModeOpen;
     signGlow?.update(time,roomVisible&&!diceModeOpen,reducedMotion.matches);
     if(!roomVisible||diceModeOpen){characterSelection?.hide();focusArrow.hide();}
@@ -2884,7 +2962,8 @@ import {
     // Intentional 30 FPS pose cadence, shared by the stage and DOM depth pass.
     danceTime=Math.floor(danceClock.step(time,roomVisible&&!diceModeOpen,soundtrack.playbackPosition())*30/1000)*1000/30;
     stageDance?.update(danceTime,roomVisible&&!diceModeOpen&&!reducedMotion.matches);
-    audience?.update(crowdClock,emotion,reducedMotion.matches,camera.position,{time:danceTime,focused:currentView.kind==="smeemo-crowd"&&!cameraTransition&&!cameraDetached&&!freecam?.active});
+    audience?.update(crowdClock,emotion,reducedMotion.matches,camera.position,{time:danceTime,focused:encounter.phase==="focused"&&currentView.kind==="smeemo-crowd"&&!cameraTransition&&!cameraDetached&&!freecam?.active,revealed:encounter.revealed,quiet:encounter.quiet});
+    updateSmeemoEncounter(time,roomVisible);
     preview.classList.toggle("is-trivia",!cameraDetached && currentView.kind === "trivia");
     if (triviaLayer) triviaLayer.hidden = !(gameStarted && !pauseMenuOpen && !diceModeOpen && sceneReady && !cameraTransition && !cameraDetached && currentView.kind === "trivia" && triviaLayer.dataset.ready === "true");
     updateCardTableProjection();
@@ -3107,6 +3186,7 @@ import {
     syncMusic();
     if (document.hidden) {
       floatingSky?.suspend();
+      resetEncounter();
       characterSelection?.hide();
       slotCabinetFX?.reset();
       rouletteCabinetFX?.reset();
@@ -3135,6 +3215,7 @@ import {
   });
 
   window.addEventListener("pagehide", event => {
+    resetEncounter();
     cancelAnimationFrame(animationFrame);
     animationFrame = 0;
     if (event.persisted) {

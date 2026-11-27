@@ -17,7 +17,7 @@ test('reversing an interrupted curtain keeps the exact pose and never triggers s
  s.step(1630+RETRACT_MS);s.step(10000);assert.equal(events.filter(x=>x==='reveal').length,0);assert.equal(s.open,false);
 });
 test('manual light holds indefinitely and same-target click fades it away exactly once',()=>{
- const {s,events}=setup();s.toggle(point,0);assert.equal(s.step(3000).phase,'roll');assert.equal(s.step(REVEAL_MS).phase,'reveal');assert.equal(s.step(86400000).strength,1);assert.ok(s.toggle({...point,x:10.2},86400001));assert.equal(s.step(86400001).strength,1);assert.equal(s.step(86400001+LIGHT_RELEASE_MS).strength,0);assert.equal(s.owner,null);assert.equal(events.filter(x=>x==='reveal').length,1);assert.equal(events.filter(x=>x==='hide').length,1);
+ const {s,events}=setup();s.toggle(point,0);assert.equal(s.step(3000).phase,'roll');assert.equal(s.step(REVEAL_MS).phase,'reveal');assert.equal(s.step(86400000).strength,1);assert.ok(s.toggle({...point,x:10.2},86400001));assert.equal(s.step(86400001).strength,1);assert.equal(s.step(86400001+LIGHT_RELEASE_MS).strength,0);assert.equal(s.owner,null);assert.equal(events.filter(x=>x==='reveal').length,1);assert.equal(events.filter(x=>x==='hide').length,0);
 });
 test('retarget cancels old roll, keeps darkness continuous, reveals new target only',()=>{
  const {s,events}=setup();s.toggle(point,0);const a=s.step(1200);const next={x:2,y:0,z:3};s.toggle(next,1200);assert.equal(s.step(1200).strength,a.strength);assert.equal(s.step(4000).phase,'roll');const b=s.step(5200);assert.deepEqual(b.target,next);assert.equal(b.phase,'reveal');assert.equal(events.filter(x=>x==='reveal').length,1);s.reset(true);assert.equal(s.step(100000).strength,0);assert.equal(s.step(100001).travel,1);

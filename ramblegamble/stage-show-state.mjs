@@ -24,12 +24,12 @@ export function createStageShowState({ cue=()=>{} }={}) {
   function begin(point,time,kind='manual',reduced=false){
     if(reduced)return false;
     const from=lighting?.strength??0;stopSound();target={...point};owner=kind;
-    lighting={started:time,phase:'roll',strength:from,from};cue('roll');return true;
+    lighting={started:time,phase:'roll',strength:from,from};if(kind!=='silent')cue('roll');return true;
   }
   function dismiss(time,cheer=true){
     if(!lighting||lighting.phase==='out')return false;
     stopSound();lighting={started:time,phase:'out',strength:lighting.strength,from:lighting.strength};
-    if(cheer)cue('hide');return true;
+    if(cheer&&owner==='slot')cue('hide');return true;
   }
   function hide(point,time){
     const from=lighting?.strength??0;stopSound();target={...point};owner="slot";lighting={started:time,phase:"hide",strength:from,from};cue("hide");
@@ -45,7 +45,7 @@ export function createStageShowState({ cue=()=>{} }={}) {
     let phase='off',strength=0,search=0;
     if(lighting){let age=Math.max(0,time-lighting.started);
       if(lighting.phase==='roll'){
-        if(age>=REVEAL_MS){lighting={started:lighting.started+REVEAL_MS,phase:'reveal',strength:1};stopSound();cue('reveal');age=Math.max(0,time-lighting.started);}
+        if(age>=REVEAL_MS){lighting={started:lighting.started+REVEAL_MS,phase:'reveal',strength:1};stopSound();if(owner!=='silent')cue('reveal');age=Math.max(0,time-lighting.started);}
         else {strength=lighting.from+(1-lighting.from)*smooth(age/650);search=1-smooth((age-2350)/1650);}
       }
       if(lighting.phase==='reveal'){

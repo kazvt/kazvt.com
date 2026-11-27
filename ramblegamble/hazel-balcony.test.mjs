@@ -57,7 +57,7 @@ test('72 responsive orbit/framing cases keep the upper billboard, ledge and uppe
 test('real shortcut handler focuses Hazel only when the room is ready and accepts the normal back navigation',()=>{
  const transitions=[];let callback,locked=false,dialog=false;
  class Element {closest(){return null;}}
- const ctx={Element,freecam:{active:false},diceModeOpen:false,gameStarted:true,pauseMenuOpen:false,sceneReady:true,hazelBillboard:{id:'hazel'},currentView:{kind:'overview'},resolveArcadeShortcut,document:{querySelector:()=>dialog?{}:null,documentElement:{hasAttribute:()=>locked}},window:{addEventListener:(type,fn)=>{callback=fn;}},transitionToView:view=>{transitions.push(view.kind);ctx.currentView=view;}};
+ const ctx={encounter:{phase:"hidden"},Element,freecam:{active:false},diceModeOpen:false,gameStarted:true,pauseMenuOpen:false,sceneReady:true,hazelBillboard:{id:'hazel'},currentView:{kind:'overview'},resolveArcadeShortcut,document:{querySelector:()=>dialog?{}:null,documentElement:{hasAttribute:()=>locked}},window:{addEventListener:(type,fn)=>{callback=fn;}},transitionToView:view=>{transitions.push(view.kind);ctx.currentView=view;}};
  runInNewContext(section('  window.addEventListener("keydown", (event) => {','  window.addEventListener("rg:spin-wheel"'),ctx);
  const press=(opts={})=>{let prevented=false;callback({key:'8',target:new Element(),preventDefault:()=>prevented=true,...opts});return prevented;};
  assert.equal(press(),true);assert.deepEqual(transitions,['hazel']);assert.equal(resolvePointClickBack(ctx.currentView).kind,'overview');
