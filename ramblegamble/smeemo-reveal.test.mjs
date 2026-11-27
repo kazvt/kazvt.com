@@ -40,11 +40,11 @@ test('music routes through one existing player; encounter music is temporary and
  assert.equal(soundtrackFor({...base,encounter:'smeemo',active:false}),null);
  assert.equal(soundtrackFor({...base,encounter:'smeemo',dice:true}),null);
 });
-test('production hook checks scene occlusion, uses projected tag and arrow, preserves slow return without arming table music',()=>{
+test('production hook checks scene occlusion, uses projected tag and arrow, preserves slow return and starts a fresh round only on arrival',()=>{
  const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
  assert.match(src,/raycaster\.intersectObject\(cat,false\)/);assert.match(src,/blocker\.distance>=hit\.distance/);
- assert.match(src,/if\(encounter\.finish\(\)\)\{cardMusicMode="";canvas\.focus\([^;]+;transitionToView\(\{kind:"card-table"\},\{encounterReturn:true\}\)/);
- assert.doesNotMatch(src,/encounter\.finish\(\)\)\{smeemoTable\.begin\(\)/);
+ assert.match(src,/if\(encounter\.finish\(\)\)\{encounterReturnRevision=readCardGames\(\)\.activityRevision;cardMusicMode="";canvas\.focus\([^;]+;transitionToView\(\{kind:"card-table"\},\{encounterReturn:true\}\)/);
+ assert.match(src,/encounter\.arrive\(\)\)\{[\s\S]*?rg:start-smeemo-after-arrival/);
  assert.match(src,/duration: encounterReturn \? SMEEMO_RETURN_MS/);assert.match(src,/spooky: encounterReturn \|\| isSpookyView/);
  assert.match(src,/revealed:encounter\.revealed,quiet:encounter\.quiet/);assert.match(src,/roomVisible&&!encounter\.quiet/);
  assert.match(src,/smeemoTable\.cancel\(\)/);assert.match(src,/soundtrack\.resetTrackPosition\("smeemo"\)/);
@@ -92,7 +92,8 @@ test('native alpha WebM is selected, both overlay and video have transparent CSS
   const backgrounds=[...match[1].matchAll(/background(?:-color)?:\s*([^;]+)/g)];for(const b of backgrounds)assert.equal(b[1],'transparent');
  }
  assert.match(css,/\.rg-smeemo-stinger\s*\{[^}]*background:transparent/);
- assert.match(css,/\.rg-smeemo-stinger video\s*\{[^}]*background:transparent/);
+ assert.match(css,/\.rg-smeemo-stinger video\s*\{[^}]*object-fit:fill;[^}]*background:transparent/);
+ assert.doesNotMatch(css,/\.rg-smeemo-stinger video\s*\{[^}]*object-fit:contain/);
  const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
  assert.match(src,/hideCrowd:encounter\.hideCrowd/);assert.match(src,/if\(encounter\.quiet\)silenceCrowd\(\);\s*encounter\.reset/);
  assert.match(src,/function reactCrowd\(emotion\)\{if\(!encounter\.quiet\)/);

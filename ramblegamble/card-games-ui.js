@@ -1,8 +1,8 @@
-import { cardStains, stainUrl, mountSmeemoHorror } from "./smeemo-horror.mjs?v=smeemo-cinema-20261128-v1";
+import { cardStains, stainUrl, mountSmeemoHorror } from "./smeemo-horror.mjs?v=smeemo-arrival-20261128-v1";
 import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { showBurst, voteFlight, purchaseFlight } from "./show-ui-fx.mjs?v=shop-motion-20261127-v1";
 import { createSmeemoImpact, smeemoImpactTransition } from "./smeemo-impact.mjs?v=smeemo-cinema-20261128-v1";
-import { createLightningLayer } from "./smeemo-lightning.mjs?v=smeemo-cinema-20261128-v1";
+import { createLightningLayer } from "./smeemo-lightning.mjs?v=smeemo-arrival-20261128-v1";
 import { applyCardShowAction } from "./card-show-actions.mjs?v=card-polish-20261127-v1";
 import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia, writeLiveTriviaDraft } from "./live-trivia.mjs?v=match-number-20261127-v1";
 import { activeCardStage, cardStageChange } from "./card-stage-state.mjs?v=wildcard-shared-20261126-v1";
@@ -16,6 +16,7 @@ import {
   newRoundId,
   createRedHandedRound,
   createShopRound,
+  createSmeemoGame,
   advanceSmeemoPhase,
   drawSmeemoCard,
   normalizeTextList,
@@ -971,6 +972,18 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     menuTimer = 0;
     layer.hidden = true;
     window.dispatchEvent(new Event("rg:close-card-games"));
+  });
+  window.addEventListener("rg:start-smeemo-after-arrival", ({detail}) => {
+    if(!detail?.isCurrent?.())return;
+    detail.handled=true;
+    runRoomMutation(() => {
+      if(!detail.isCurrent())return;
+      const latest=readCardGames();
+      // A fresh remote/console activity during camera travel takes precedence.
+      if(latest.activityRevision!==detail.expectedRevision)return;
+      sync({...latest,round:null,smeemo:createSmeemoGame()});
+      closeHostPanel();
+    },error=>{adminStatus.textContent=error.message;liveStatus.textContent=error.message;console.warn("Smeemo arrival could not start",error);}).finally(()=>detail.onSettled?.());
   });
   window.addEventListener("rg:show-card-menu", () => {
     // Repeated table clicks are not permission to interrupt a running game.

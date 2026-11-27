@@ -1,3 +1,5 @@
+import { horrorRenderScale, HORROR_FRAME_MS } from "./smeemo-horror.mjs?v=smeemo-arrival-20261128-v1";
+import { readCardGames } from "./card-games-store.mjs?v=show-stage-20261126-v1";
 import { createSlotMarquee } from "./slot-marquee.mjs?v=slot-marquee-20261128-v1";
 import { createSmeemoEncounter, createSmeemoStinger, createSmeemoTableSession, SMEEMO_RETURN_MS } from "./smeemo-reveal.mjs?v=smeemo-alpha-20261128-v1";
 import { createFloatingSky } from "./floating-sky.mjs?v=sky-pingpong-20261128-v1";
@@ -246,11 +248,14 @@ import {
   const spatialAudioState = { insideVip:false, vipMix:{room:1,water:0,cutoff:null}, musicGain:1 };
   const encounter = createSmeemoEncounter();
   const smeemoTable = createSmeemoTableSession();
+  let encounterStartPending = null;
+  let encounterReturnRevision = null;
   const smeemoAura=document.getElementById("rg-smeemo-aura"), smeemoTag=document.getElementById("rg-smeemo-tag"), smeemoCount=document.getElementById("rg-smeemo-count");
   const stinger=createSmeemoStinger({root:document.getElementById("rg-smeemo-stinger"),video:document.getElementById("rg-smeemo-video"),skip:document.getElementById("rg-smeemo-skip"),caption:document.getElementById("rg-smeemo-stinger-caption"),muted:()=>foley.muted,onFinish:()=>{
-    if(encounter.finish()){cardMusicMode="";canvas.focus({preventScroll:true});transitionToView({kind:"card-table"},{encounterReturn:true});}
+    if(encounter.finish()){encounterReturnRevision=readCardGames().activityRevision;cardMusicMode="";canvas.focus({preventScroll:true});transitionToView({kind:"card-table"},{encounterReturn:true});}
   }});
   function resetEncounter(){
+    encounterStartPending=null;encounterReturnRevision=null;
     if(encounter.phase==="hidden")return;
     // A cancelled encounter must not resume its old ambience on a later visit.
     // The post-return table phase is separate and may belong to a live Smeemo game.
@@ -282,7 +287,20 @@ import {
   function updateSmeemoEncounter(time,roomVisible){
     if(!roomVisible||diceModeOpen||cameraDetached||freecam?.active||document.querySelector("dialog[open]")){resetEncounter();return;}
     stinger.step();
-    if(encounter.phase==="returning"&&!cameraTransition&&currentView.kind==="card-table"&&encounter.arrive()&&cardTableModel){const b=new THREE.Box3().setFromObject(cardTableModel),center=b.getCenter(new THREE.Vector3());center.y=b.max.y;stageShow?.silent(center,time);}
+    if(encounter.phase==="returning"&&!cameraTransition&&currentView.kind==="card-table"&&encounter.arrive()){
+      if(cardTableModel){const b=new THREE.Box3().setFromObject(cardTableModel),center=b.getCenter(new THREE.Vector3());center.y=b.max.y;stageShow?.silent(center,time);}
+      // Arrival, not stinger end, owns the fresh round. Keep the encounter
+      // track through the asynchronous room lock; cancellation invalidates the ticket.
+      const ticket={};encounterStartPending=ticket;cardLayer?.classList.add("is-off-table");
+      const isCurrent=()=>encounterStartPending===ticket&&encounter.phase==="table"&&currentView.kind==="card-table"&&!cameraTransition&&!cameraDetached&&!freecam?.active&&gameStarted&&!pauseMenuOpen&&!diceModeOpen&&!document.hidden&&!document.documentElement.hasAttribute("data-rg-host-locked")&&!document.querySelector("dialog[open]");
+      const detail={expectedRevision:encounterReturnRevision,isCurrent,handled:false,onSettled:()=>{
+        if(encounterStartPending!==ticket)return;
+        encounterStartPending=null;encounterReturnRevision=null;
+        if(!smeemoTable.active)resetEncounter();else syncMusic();
+      }};
+      window.dispatchEvent(new CustomEvent("rg:start-smeemo-after-arrival",{detail}));
+      if(!detail.handled)detail.onSettled(); // A missing UI must not leave music/controls stuck.
+    }
     if(encounter.phase==="focused"&&currentView.kind==="smeemo-crowd"&&!cameraTransition&&stageShow&&!reducedMotion.matches&&!stageShow.silentActive)stageShow.silent(crowdCatAnchor(),time);
     const cat=audience?.cat;
     smeemoTag.hidden=!(encounter.phase==="focused"&&!cameraTransition&&currentView.kind==="smeemo-crowd"&&cat?.visible);
@@ -320,7 +338,7 @@ import {
     zones ||= sampleSpatialAudioZones();
     const nextTrack = soundtrackFor({
       active: gameStarted && sceneReady && !pauseMenuOpen && !document.hidden && !document.documentElement.hasAttribute("data-rg-host-locked"),
-      muted: foley.muted, dice: diceModeOpen, view: currentView.kind, cardMode: cardMusicMode, encounter:encounter.phase==="stinger"?"stinger":encounter.song, smeemoTable:smeemoTable.active, detached:cameraDetached||!!freecam?.active,
+      muted: foley.muted, dice: diceModeOpen, view: currentView.kind, cardMode: cardMusicMode, encounter:encounter.phase==="stinger"?"stinger":encounter.song||(encounterStartPending?"smeemo":null), smeemoTable:smeemoTable.active, detached:cameraDetached||!!freecam?.active,
     });
     // The authored Smeemo encounter/table track is intentional music for that
     // sequence. Spatial silence applies to ordinary scene music around the
@@ -1367,6 +1385,14 @@ import {
     if (skyShootingStarsMesh.instanceColor) skyShootingStarsMesh.instanceColor.needsUpdate = true;
   }
 
+  let lastHorrorScaleMode = null;
+  function syncHorrorRenderScale(width=preview.clientWidth,height=preview.clientHeight) {
+    if(!renderer)return;
+    lastHorrorScaleMode=preview.classList.contains("is-smeemo-cinema");
+    const ratio=horrorRenderScale(width,height,window.devicePixelRatio||1,lastHorrorScaleMode);
+    if(renderer.getPixelRatio()!==ratio)renderer.setPixelRatio(ratio);
+  }
+
   function fitCamera() {
     if (!camera || !renderer) return;
     const width = Math.max(1, preview.clientWidth);
@@ -1374,7 +1400,7 @@ import {
     const aspect = width / height;
     camera.aspect = aspect;
     camera.updateProjectionMatrix();
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
+    syncHorrorRenderScale(width,height);
     renderer.setSize(width, height, false);
     if (!sceneReady || freecam?.active || cameraDetached) return;
 
@@ -2382,6 +2408,9 @@ import {
       setMenuSceneVisibility(true);
       menuPresentation.sync();
     }
+    // A newer non-Smeemo activity must not inherit the encounter spotlight,
+    // quiet crowd or pending automatic start, even on the same table camera.
+    if(mode!=="smeemo"&&["returning","table"].includes(encounter.phase))resetEncounter();
     cardMusicMode = mode;
     const wasSmeemoActive=smeemoTable.active;
     smeemoTable.choose(mode);
@@ -2901,7 +2930,7 @@ import {
   let cardTableBounds = null;
   function updateCardTableProjection() {
     if (!cardLayer || freecam?.active || cameraDetached) return;
-    const active = gameStarted && !pauseMenuOpen && !diceModeOpen && !cameraTransition && currentView.kind === "card-table" && cardTableModel;
+    const active = gameStarted && !pauseMenuOpen && !diceModeOpen && !cameraTransition && !encounterStartPending && currentView.kind === "card-table" && cardTableModel;
     cardLayer.classList.toggle("is-off-table", !active);
     if (!active || cardLayer.hidden) return;
     cardTableBounds ||= new THREE.Box3().setFromObject(cardTableModel);
@@ -2916,8 +2945,10 @@ import {
     shell?.classList.toggle("is-scrollable", shell.scrollHeight > shell.clientHeight + 1);
     const halfWidth = Math.min(width / 2, (shell?.offsetWidth || width) / 2 + 4);
     const halfHeight = Math.min(height / 2, (shell?.offsetHeight || height) / 2 + 4);
-    cardLayer.style.setProperty("--table-x", `${Math.max(halfWidth, Math.min(width - halfWidth, (center.x + 1) * width / 2))}px`);
-    cardLayer.style.setProperty("--table-y", `${Math.max(halfHeight, Math.min(height - halfHeight, (1 - center.y) * height / 2))}px`);
+    const x=`${Math.max(halfWidth, Math.min(width - halfWidth, (center.x + 1) * width / 2))}px`;
+    const y=`${Math.max(halfHeight, Math.min(height - halfHeight, (1 - center.y) * height / 2))}px`;
+    if(cardLayer.style.getPropertyValue("--table-x")!==x)cardLayer.style.setProperty("--table-x",x);
+    if(cardLayer.style.getPropertyValue("--table-y")!==y)cardLayer.style.setProperty("--table-y",y);
   }
 
   function updateFocusArrow(time, roomVisible) {
@@ -3015,8 +3046,12 @@ import {
     const audioZones=sampleSpatialAudioZones();
     syncVipAmbience(roomVisible,emotion,audioZones);
     syncMusic(false,audioZones);
-    // Intentional 30 FPS pose cadence, shared by the stage and DOM depth pass.
-    danceTime=Math.floor(danceClock.step(time,roomVisible&&!diceModeOpen&&!reducedMotion.matches,soundtrack.playbackPosition())*30/1000)*1000/30;
+    // Keep camera/input continuous; only decorative pose sampling is 10 FPS in horror.
+    // The DOM depth pass caches identical geometry, so this also reduces readbacks.
+    const horrorActive=preview.classList.contains("is-smeemo-cinema");
+    const poseInterval=horrorActive?HORROR_FRAME_MS:1000/30;
+    danceTime=Math.floor(danceClock.step(time,roomVisible&&!diceModeOpen&&!reducedMotion.matches,soundtrack.playbackPosition())/poseInterval)*poseInterval;
+    if(horrorActive!==lastHorrorScaleMode)syncHorrorRenderScale();
     stageDance?.update(danceTime,Number.isFinite(danceTime));
     audience?.update(crowdClock,emotion,reducedMotion.matches,camera.position,{time:danceTime,catIntensity:danceIntensity("crowd-cat:smeemo"),focused:encounter.phase==="focused"&&currentView.kind==="smeemo-crowd"&&!cameraTransition&&!cameraDetached&&!freecam?.active,revealed:encounter.revealed,quiet:encounter.quiet,hideCrowd:encounter.hideCrowd});
     updateSmeemoEncounter(time,roomVisible);

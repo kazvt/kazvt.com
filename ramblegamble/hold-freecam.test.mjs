@@ -86,13 +86,13 @@ test('production room wiring snapshots camera direction, suspends orbit and reta
  const currentView={kind:'card-table',look:0},classes=new Set();
  const ctx={resetEncounter(){},syncMusic(retry){music.push({detached:ctx.cameraDetached,retry});},stageShow:{busy:false},freecam:null,cameraDetached:false,gameStarted:true,sceneReady:true,pauseMenuOpen:false,diceModeOpen:false,document:{hidden:false,querySelector:()=>null,documentElement:{hasAttribute:()=>false}},
   camera:{position:{x:7,y:4,z:6,set(...v){position=v;}},aspect:1.2,getWorldDirection:()=>forward,lookAt:t=>lookAt=t.values,updateMatrixWorld(){},updateProjectionMatrix(){projection++;}},
-  THREE:{Vector3:class{}},cameraTarget:{set(...v){this.values=v;}},canvas:{},preview:{clientWidth:1200,clientHeight:600,classList:{add:(...ks)=>ks.forEach(k=>classes.add(k)),remove:k=>classes.delete(k)}},
+  THREE:{Vector3:class{}},cameraTarget:{set(...v){this.values=v;}},canvas:{},preview:{clientWidth:1200,clientHeight:600,classList:{add:(...ks)=>ks.forEach(k=>classes.add(k)),remove:k=>classes.delete(k),contains:k=>classes.has(k)}},
   currentView,cameraTransition:{},focusDrag:{reset(){}},focusOrbit:{reset(){}},lastScenePointer:{},slotHoverCell:4,slotHoverLine:{},drawSlotReelDisplay(){draws++;},hideGameCursor(){},
   getCameraPoseForView:(view,aspect)=>({view,aspect}),applyCameraPose:p=>applied=p,
   updateCardTableProjection(){},updateSlotPlacementControlProjection(){},updateBillboardProjection(){},
-  renderer:{setPixelRatio(){},setSize(){resize++;}},window:{devicePixelRatio:1,addEventListener(){}},
+  horrorRenderScale:()=>1,renderer:{getPixelRatio:()=>1,setPixelRatio(){},setSize(){resize++;}},window:{devicePixelRatio:1,addEventListener(){}},
   bindHoldFreecam:opts=>{callbacks=opts;return {active:false,stop(){}};}};
- runInNewContext(extract('  const canFreecam =','  const canOrbit =')+extract('  function fitCamera()','  function getCameraPoseForView(')+'\nthis.fit=fitCamera;',ctx);
+ runInNewContext(extract('  const canFreecam =','  const canOrbit =')+extract('  let lastHorrorScaleMode =','  function getCameraPoseForView(')+'\nthis.fit=fitCamera;',ctx);
  assert.equal(callbacks.eligible(),true);ctx.stageShow.busy=true;assert.equal(callbacks.eligible(),false);ctx.stageShow.busy=false;
  assert.deepEqual({...callbacks.readPose().position},{x:7,y:4,z:6});
  assert.equal(callbacks.readPose().direction,forward);

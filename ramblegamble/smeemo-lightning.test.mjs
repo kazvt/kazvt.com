@@ -49,7 +49,7 @@ test('one inert reusable canvas; resolution is capped and clear is idempotent',(
  const layer=createLightningLayer({ownerDocument:{createElement:()=>canvas},append:c=>children.push(c)});
  assert.equal(children.length,1);assert.equal(attributes['aria-hidden'],'true');assert.equal(canvas.hidden,true);
  const s=createLightningStrike({kind:'start',count:0},0,{x:.5,y:.85},rng(1));
- layer.paint([sampleLightningStrike(s,200)],7680,4320);assert.equal(canvas.hidden,false);assert.ok(canvas.width*canvas.height<=2505000);
+ layer.paint([sampleLightningStrike(s,200)],7680,4320);assert.equal(canvas.hidden,false);assert.ok(canvas.width*canvas.height<=902000);
  layer.clear();assert.equal(canvas.hidden,true);const size=calls.length;layer.clear();assert.equal(calls.length,size);
 });
 test('unavailable canvas context is a harmless visual-only degradation',()=>{

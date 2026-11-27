@@ -110,7 +110,7 @@ export function createLightningLayer(preview) {
   return {
     paint(samples,width,height) {
       if(!ctx || !samples.length || width<=0 || height<=0){canvas.hidden=true;return;}
-      const ratio=Math.min(1.5,globalThis.devicePixelRatio||1,Math.sqrt(2500000/(width*height)));
+      const ratio=Math.min(1,globalThis.devicePixelRatio||1,Math.sqrt(900000/(width*height)));
       const w=Math.max(1,Math.round(width*ratio)),h=Math.max(1,Math.round(height*ratio));
       if(canvas.width!==w)canvas.width=w;if(canvas.height!==h)canvas.height=h;
       canvas.hidden=false;ctx.setTransform(w/width,0,0,h/height,0,0);paintLightning(ctx,width,height,samples);

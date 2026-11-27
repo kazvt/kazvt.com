@@ -1,5 +1,11 @@
 // Pure presentation: no card outcome, order, scoring or storage access.
 export const HORROR_FRAME_MS = 100;
+// Limit only the scene drawing buffer, not DOM/card/media resolution. The
+// normal DPR is restored outside the mode; the pixel budget also covers 4K.
+export function horrorRenderScale(width,height,dpr,active) {
+  const normal=Math.min(dpr||1,1.6);
+  return active?Math.min(normal,1,Math.sqrt(1600000/Math.max(1,width*height))):normal;
+}
 export const HORROR_VIDEO = '/ramblegamble/assets/smeemo/apparitions.mp4';
 export function horrorFrame(time) { return Math.floor(time / HORROR_FRAME_MS) * HORROR_FRAME_MS; }
 function hash(value) {

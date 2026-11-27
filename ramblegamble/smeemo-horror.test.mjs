@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
-import {cardStains,stainUrl,horrorFrame,horrorVisible,HORROR_VIDEO} from './smeemo-horror.mjs';
+import {cardStains,stainUrl,horrorFrame,horrorVisible,horrorRenderScale,HORROR_VIDEO} from './smeemo-horror.mjs';
 import {createLightningStrike} from './smeemo-lightning.mjs';
 import {createSmeemoImpact} from './smeemo-impact.mjs';
 import {SMEEMO_STINGER} from './smeemo-reveal.mjs';
@@ -35,4 +35,15 @@ test('card motion durations and stagger are on the tenth-second grid',()=>{
  const css=readFileSync(new URL('./card-games.css',import.meta.url),'utf8');const ui=readFileSync(new URL('./card-games-ui.js',import.meta.url),'utf8');
  for(const name of ['arrive','stack','deal','flip-down','turn','win-turn','wave-a','wave-b'])assert.match(css,new RegExp('@keyframes rg-smeemo-'+name+' \\{[^\\n]*animation-timing-function:steps'));
  assert.match(ui,/bindCardTilt\(button,100\)/);assert.match(ui,/cardStains\(game.id, game.cards.map\(c=>c.id\)\)/);
+});
+
+test('Scramble resolution budget scales only WebGL pixels and restores normal DPR on exit',()=>{
+ for(const [w,h,dpr] of [[1280,720,1],[1920,1080,1.6],[3440,1440,2],[3840,2160,3],[390,844,3],[800,600,.8]]){
+  const normal=horrorRenderScale(w,h,dpr,false),active=horrorRenderScale(w,h,dpr,true);
+  assert.equal(normal,Math.min(dpr,1.6));assert.ok(active<=1&&active<=normal);assert.ok(w*h*active*active<=1600000.00001);
+  assert.equal(horrorRenderScale(w,h,dpr,false),normal);
+ }
+ const css=readFileSync(new URL('./card-games.css',import.meta.url),'utf8');
+ assert.doesNotMatch(css,/\.rg-preview\.is-smeemo-cinema >[^{}]+\{[^}]*filter:/);
+ assert.match(css,/\.rg-smeemo-fog::before \{[^}]*inset:-10%/);assert.doesNotMatch(css,/\.rg-smeemo-fog::after\s*\{/);
 });
