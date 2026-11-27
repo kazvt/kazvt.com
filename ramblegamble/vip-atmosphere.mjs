@@ -11,11 +11,12 @@ export function portalDistance(position, door) {
   return Math.hypot(position.x-door.wallX, position.y-y, position.z-z);
 }
 
-export function sampleVipAmbience(position, door, { inside = false, focused = false } = {}) {
-  if (inside) return { room: 0, water: 1, cutoff: VIP_ZONE.insideCutoff };
+export function sampleVipAmbience(position, door, { inside = false, focused = false } = {}, out = {}) {
+  if (inside) { out.room=0;out.water=1;out.cutoff=VIP_ZONE.insideCutoff;return out; }
   const d = focused ? Math.min(portalDistance(position,door), VIP_ZONE.silentDistance) : portalDistance(position,door);
   const room = smooth((d-VIP_ZONE.silentDistance)/(VIP_ZONE.fadeDistance-VIP_ZONE.silentDistance));
-  return { room, water: VIP_ZONE.outsideDrip*(1-room), cutoff: VIP_ZONE.outsideCutoff };
+  out.room=room;out.water=VIP_ZONE.outsideDrip*(1-room);out.cutoff=VIP_ZONE.outsideCutoff;
+  return out;
 }
 
 export const PORTAL_PARTICLE_COUNT = 84;

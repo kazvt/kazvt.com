@@ -2,7 +2,8 @@ import { createSlotMarquee } from "./slot-marquee.mjs?v=slot-marquee-20261128-v1
 import { createSmeemoEncounter, createSmeemoStinger, createSmeemoTableSession, SMEEMO_RETURN_MS } from "./smeemo-reveal.mjs?v=music-sync-20261127-v1";
 import { createFloatingSky } from "./floating-sky.mjs?v=sky-variety-20261127-v1";
 import { createStageDance, createDanceClock, createDanceIntensitySampler, dancePose } from "./stage-dance.mjs?v=music-intensity-20261128-v1";
-import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=music-sync-20261127-v1";
+import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=music-zone-fade-20261128-v1";
+import { createVipInteriorTracker, sampleMusicZoneGain } from "./music-zones.mjs?v=music-zone-fade-20261128-v1";
 import { createMenuMarquee } from "./menu-marquee.mjs?v=corrective-review-20261127-v1";
 import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=smeemo-reveal-20261127-v1";
 import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcony.mjs?v=hazel-balcony-20261127-v1";
@@ -236,6 +237,9 @@ import {
   let pendingTrivia = false;
   let cardMusicMode = "";
   const soundtrack = createSoundtrack();
+  const vipMusicInterior = createVipInteriorTracker(DICE_DOOR_OPENING);
+  const smeemoMusicAnchor = Object.freeze(crowdCatAnchor());
+  const spatialAudioState = { insideVip:false, vipMix:{room:1,water:0,cutoff:null}, musicGain:1 };
   const encounter = createSmeemoEncounter();
   const smeemoTable = createSmeemoTableSession();
   const smeemoAura=document.getElementById("rg-smeemo-aura"), smeemoTag=document.getElementById("rg-smeemo-tag"), smeemoCount=document.getElementById("rg-smeemo-count");
@@ -284,13 +288,33 @@ import {
     smeemoTag.style.left=`${Math.max(70,Math.min(preview.clientWidth-70,(top.x+1)*preview.clientWidth*.5))}px`;
     smeemoTag.style.top=`${Math.max(48,(1-top.y)*preview.clientHeight*.5-8)}px`;
   }
-  function syncMusic(retry = false) {
+  function sampleSpatialAudioZones() {
+    const position = camera?.position;
+    const trackedInsideVip = vipMusicInterior.update(position);
+    const insideVip = diceModeOpen || trackedInsideVip;
+    // Reuse the same VIP falloff sample for foley and music; no per-frame
+    // allocations are needed for the audio-zone state or Smeemo anchor.
+    sampleVipAmbience(position, DICE_DOOR_OPENING, { inside: insideVip }, spatialAudioState.vipMix);
+    spatialAudioState.insideVip = insideVip;
+    // Smeemo and the VIP room attenuate normal music by actual camera
+    // position, not by the selected view or the way the camera got there.
+    spatialAudioState.musicGain = sampleMusicZoneGain(position, DICE_DOOR_OPENING, smeemoMusicAnchor, {
+      insideVip, vipGain:spatialAudioState.vipMix.room,
+    });
+    return spatialAudioState;
+  }
+  function syncMusic(retry = false, zones = null) {
     // The marquee is music too: the shared sound preference applies to it.
     if (menuMarquee.muted !== foley.muted) menuMarquee.muted = foley.muted;
-    soundtrack.sync(soundtrackFor({
+    zones ||= sampleSpatialAudioZones();
+    const nextTrack = soundtrackFor({
       active: gameStarted && sceneReady && !pauseMenuOpen && !document.hidden && !document.documentElement.hasAttribute("data-rg-host-locked"),
       muted: foley.muted, dice: diceModeOpen, view: currentView.kind, cardMode: cardMusicMode, encounter:encounter.phase==="stinger"?"stinger":encounter.song, smeemoTable:smeemoTable.active, detached:cameraDetached||!!freecam?.active,
-    }), { retry });
+    });
+    // The authored Smeemo encounter/table track is intentional music for that
+    // sequence. Spatial silence applies to ordinary scene music around the
+    // hidden cat and VIP doorway, including while flying there in freecam.
+    soundtrack.sync(nextTrack, { retry, spatialGain: nextTrack === "smeemo" ? 1 : zones.musicGain });
   }
   for (const type of ["pointerdown", "keydown", "click"]) document.addEventListener(type, event => {
     if (event.isTrusted) syncMusic(true);
@@ -2935,10 +2959,9 @@ import {
     focusArrow.update(currentView,target,viewport,time,reducedMotion.matches);
   }
 
-  function syncVipAmbience(roomVisible, emotion=crowdState.active) {
-    const mix=sampleVipAmbience(camera?.position,DICE_DOOR_OPENING,{
-      inside:diceModeOpen,focused:!cameraDetached&&!freecam?.active&&!cameraTransition&&currentView.kind==="dice-door",
-    });
+  function syncVipAmbience(roomVisible, emotion=crowdState.active, zones=null) {
+    zones ||= sampleSpatialAudioZones();
+    const mix=zones.vipMix;
     foley.setRoomAmbience(roomVisible&&!encounter.quiet,mix.room,emotion,mix.water,mix.cutoff);
   }
 
@@ -2966,8 +2989,9 @@ import {
       // Re-pick under a stationary cursor as the damped camera moves, including its final frame.
       if ((changed || moving) && lastScenePointer && !lastScenePointer.buttons) updatePointer(lastScenePointer);
     }
-    syncVipAmbience(roomVisible,emotion);
-    syncMusic();
+    const audioZones=sampleSpatialAudioZones();
+    syncVipAmbience(roomVisible,emotion,audioZones);
+    syncMusic(false,audioZones);
     // Intentional 30 FPS pose cadence, shared by the stage and DOM depth pass.
     danceTime=Math.floor(danceClock.step(time,roomVisible&&!diceModeOpen&&!reducedMotion.matches,soundtrack.playbackPosition())*30/1000)*1000/30;
     stageDance?.update(danceTime,Number.isFinite(danceTime));

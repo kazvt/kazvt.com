@@ -28,7 +28,9 @@ test('three tracks; exact mode priority including silent games, pause, lock and 
   for(const m of ['', 'menu','shop','quiplash','red-handed']) assert.equal(mode('card-table',m),'cards');
   assert.equal(mode('card-table','smeemo'),null);
   assert.equal(mode('overview','smeemo'),'general');
-  assert.equal(mode('dice-door'),null);
+  // The Dice doorway is selected as a base track; the spatial zone fades it
+  // to silence as the camera approaches instead of cutting it off by view ID.
+  assert.equal(mode('dice-door'),'general');
   for(const view of ['overview','slot','roulette','card-table','hazel']) for(const extra of [{active:false},{muted:true},{dice:true}]) assert.equal(mode(view,'menu',extra),null);
   assert.deepEqual(Object.values(SOUNDTRACK_FILES),['sonic_gammon_leel_theme.mp3','sonic_no_daifuugou_title_theme.mp3','smeemo_ambiance.mp3']);
   assert.equal(mode('smeemo-crowd','',{encounter:'smeemo'}),'smeemo');assert.equal(mode('card-table','smeemo',{encounter:'smeemo'}),'smeemo');assert.equal(mode('smeemo-crowd','',{encounter:'stinger'}),null);assert.equal(mode('smeemo-crowd','',{encounter:'smeemo',muted:true}),null);
@@ -114,4 +116,51 @@ test('table horror has strict camera and mode priority',()=>{
  for(const m of ['shop','red-handed','quiplash'])assert.equal(mode('card-table',m,{smeemoTable:true}),'cards');
  for(const extra of [{muted:true},{active:false},{dice:true},{detached:true},{encounter:'stinger'}])assert.notEqual(mode('card-table','smeemo',{smeemoTable:true,...extra}),'smeemo');
  assert.equal(mode('card-table','smeemo',{smeemoTable:false}),null);
+});
+
+
+test('spatial zone gain fades down and back up without restarting or rewinding the single music voice',async()=>{
+  const f=fixture(),{mixer,media,log}=f;
+  mixer.sync('general',{spatialGain:1});await flush();
+  f.advance(300);mixer.sync('general',{spatialGain:1});assert.equal(media.volume,.2);
+  media.currentTime=23.5;
+  f.advance(100);mixer.sync('general',{spatialGain:0});
+  assert.ok(media.volume<.2&&media.volume>0,'entering a silent area fades rather than cuts');
+  f.advance(3000);mixer.sync('general',{spatialGain:0});
+  assert.equal(media.volume,0);assert.equal(mixer.playbackPosition(),null);
+  assert.equal(media.paused,false,'spatially silent playback retains the same media clock');
+  assert.equal(media.currentTime,23.5);
+  f.advance(16);mixer.sync('general',{spatialGain:1});
+  assert.ok(media.volume>0&&media.volume<.2,'leaving a silent area fades back in');
+  f.advance(3000);mixer.sync('general',{spatialGain:1});
+  assert.equal(media.volume,.2);assert.equal(media.currentTime,23.5);
+  assert.equal(log.filter(a=>a[0]==='play').length,1);
+  assert.equal(log.filter(a=>a[0]==='src').length,1);
+});
+
+test('Smeemo encounter music intentionally bypasses spatial scene attenuation',()=>{
+  assert.equal(mode('smeemo-crowd','',{encounter:'smeemo'}),'smeemo');
+  assert.equal(mode('card-table','',{encounter:'smeemo'}),'smeemo');
+});
+
+test('main animation samples spatial audio after freecam movement every frame',()=>{
+  const frame=section('  function animate(time) {','  function dispose()');
+  assert.ok(frame.indexOf('freecam.step(time)')<frame.indexOf('sampleSpatialAudioZones()'));
+  assert.ok(frame.includes('syncVipAmbience(roomVisible,emotion,audioZones)'));
+  assert.ok(frame.includes('syncMusic(false,audioZones)'));
+  assert.match(js,/soundtrack\.sync\(nextTrack, \{ retry, spatialGain: nextTrack === "smeemo" \? 1 : zones\.musicGain \}\)/);
+});
+
+
+test('spatial fade smoothing is time-based and effectively identical at 30 and 60 FPS',async()=>{
+  async function run(fps){
+    const f=fixture(),{mixer,media}=f;
+    mixer.sync('general',{spatialGain:1});await flush();
+    f.advance(300);mixer.sync('general',{spatialGain:1});
+    const frames=Math.round(.7*fps),step=700/frames;
+    for(let i=0;i<frames;i++){f.advance(step);mixer.sync('general',{spatialGain:0});}
+    return media.volume;
+  }
+  const thirty=await run(30),sixty=await run(60);
+  assert.ok(Math.abs(thirty-sixty)<1e-9,`${thirty} vs ${sixty}`);
 });

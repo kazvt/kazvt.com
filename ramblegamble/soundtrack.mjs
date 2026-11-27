@@ -6,7 +6,7 @@ export const SOUNDTRACK_FILES = Object.freeze({
 });
 const base = new URL('./assets/music/', import.meta.url);
 export function soundtrackFor({ active, muted, dice, view, cardMode, encounter, smeemoTable = false, detached = false }) {
-  if (!active || muted || dice || view === 'dice-door' || encounter === 'stinger') return null;
+  if (!active || muted || dice || encounter === 'stinger') return null;
   if (!detached && (encounter === 'smeemo' && ['smeemo-crowd','card-table'].includes(view) || view === 'card-table' && smeemoTable && ['', 'menu', 'smeemo'].includes(cardMode ?? ''))) return 'smeemo';
   if (view === 'card-table' && cardMode === 'smeemo') return null;
   return ['roulette', 'card-table', 'trivia'].includes(view) ? 'cards' : 'general';
@@ -17,6 +17,26 @@ export function createSoundtrack({ createMedia = () => new Audio(), now = () => 
   const failed = new Set();
   let smeemoPosition = 0;
   const gain = Math.max(0, Math.min(1, volume));
+  // Spatial attenuation is a frame-rate-independent one-pole smoother. The
+  // same media element keeps playing at zero volume, so leaving a silent zone
+  // fades the current song back in without restarting or adding another voice.
+  const spatialTimeConstantMs = 220;
+  let spatialGain = 1;
+  let spatialUpdatedAt = null;
+  function updateSpatialGain(target) {
+    const safeTarget = Number.isFinite(target) ? Math.max(0, Math.min(1, target)) : 0;
+    const time = now();
+    if (spatialUpdatedAt === null) {
+      spatialUpdatedAt = time;
+      spatialGain = safeTarget;
+      return spatialGain;
+    }
+    const dt = Math.max(0, time - spatialUpdatedAt);
+    spatialUpdatedAt = time;
+    if (dt > 0) spatialGain += (safeTarget - spatialGain) * (1 - Math.exp(-dt / spatialTimeConstantMs));
+    if (Math.abs(safeTarget - spatialGain) < .001) spatialGain = safeTarget;
+    return spatialGain;
+  }
   function stop() {
     epoch++; requested = false; blocked = false; fadeAt = null;
     if (media) { media.pause(); media.volume = 0; }
@@ -34,8 +54,9 @@ export function createSoundtrack({ createMedia = () => new Audio(), now = () => 
       return true;
     } catch { media = null; return false; }
   }
-  function sync(next, { retry = false } = {}) {
+  function sync(next, { retry = false, spatialGain: requestedSpatialGain = 1 } = {}) {
     if (disposed) return;
+    const currentSpatialGain = updateSpatialGain(requestedSpatialGain);
     next = Object.hasOwn(SOUNDTRACK_FILES, next) ? next : null;
     if (wanted !== next) {
       if (track === 'smeemo' && wanted === track && Number.isFinite(media?.currentTime)) smeemoPosition = media.currentTime;
@@ -74,7 +95,7 @@ export function createSoundtrack({ createMedia = () => new Audio(), now = () => 
         }, rejected);
       } catch (error) { rejected(error); }
     }
-    if (fadeAt !== null && requested) media.volume = gain * Math.max(0, Math.min(1, (now() - fadeAt) / 300));
+    if (fadeAt !== null && requested) media.volume = gain * Math.max(0, Math.min(1, (now() - fadeAt) / 300)) * currentSpatialGain;
   }
   function dispose() {
     if (disposed) return;
