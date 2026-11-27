@@ -1,9 +1,12 @@
 // Streaming recorded audio, not decoded into a potentially huge AudioBuffer.
+// GainNode gain is a linear sample multiplier: 0.42 is exactly 1.5x the
+// previous 0.28 VIP water-bed gain, without changing its spatial falloff.
+export const VIP_WATER_GAIN = .28 * 1.5;
 const tracks = [
   { file: 'room-bed.mp3', gain: .13 },
   { file: 'room-detail.mp3', gain: .042 },
   { file: 'audience-cheer.mp3', gain: .14, cheer: true },
-  { file: 'vip-water-drips-cave-loop.ogg', gain: .28, water: true },
+  { file: 'vip-water-drips-cave-loop.ogg', gain: VIP_WATER_GAIN, water: true },
 ];
 const base = new URL('./assets/sfx/foley/', import.meta.url);
 export function createRoomAmbience({ createMedia = () => new Audio(), random = Math.random } = {}) {

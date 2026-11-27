@@ -85,6 +85,7 @@ test('per-object intensity sampler is seeded, cached, unique and bounded for eve
  const values=keys.map(first);
  assert.equal(values.length,keys.length);assert.equal(new Set(values).size,keys.length,'each object receives a distinct multiplier');
  for(const value of values)assert.ok(value>=DANCE_INTENSITY_MIN&&value<=DANCE_INTENSITY_MAX);
+ assert.equal(DANCE_INTENSITY_MIN,.5);assert.equal(DANCE_INTENSITY_MAX,1.5);
  assert.deepEqual(keys.map(first),values,'a multiplier is cached and never rerolled per frame');
  assert.deepEqual(keys.map(second),values,'the same seed and stable keys reproduce the same assignment');
  assert.notDeepEqual(keys.map(createDanceIntensitySampler(seed+1)),values,'a new scene seed produces a fresh random cast');
@@ -92,11 +93,11 @@ test('per-object intensity sampler is seeded, cached, unique and bounded for eve
 });
 
 test('one per-object intensity multiplier scales both squash and shear, while card swing remains rotation-only',()=>{
- const base=dancePose(300,.8,0,1),low=dancePose(300,.8,0,.8),high=dancePose(300,.8,0,1.2);
+ const base=dancePose(300,.8,0,1),low=dancePose(300,.8,0,.5),high=dancePose(300,.8,0,1.5);
  for(const pose of [low,base,high]){assert.ok(pose.width<1);assert.ok(Math.abs(pose.shear)>0);}
- near((1-low.width)/(1-base.width),.8);near((1-high.width)/(1-base.width),1.2);
- near(low.shear/base.shear,.8);near(high.shear/base.shear,1.2);
- near(cardSwing(250,0,.8)/cardSwing(250),.8);near(cardSwing(250,0,1.2)/cardSwing(250),1.2);
+ near((1-low.width)/(1-base.width),.5);near((1-high.width)/(1-base.width),1.5);
+ near(low.shear/base.shear,.5);near(high.shear/base.shear,1.5);
+ near(cardSwing(250,0,.5)/cardSwing(250),.5);near(cardSwing(250,0,1.5)/cardSwing(250),1.5);
  assert.deepEqual(dancePose(300,.8,0,NaN),base,'invalid optional multipliers safely fall back to neutral scaling');
 });
 
@@ -104,7 +105,7 @@ test('the same sampler feeds stage rigs, Fugi billboards and focused Smeemo with
  const {stage,associations}=fixture(),sampler=createDanceIntensitySampler(0x10293847),rig=createStageDance(THREE,stage,associations,sampler);
  const all=[...rig.intensityMultipliers,...['faroe','erin','kaz','lillie-host','hazel'].map(id=>sampler(`billboard:${id}`)),sampler('crowd-cat:smeemo')];
  assert.equal(rig.intensityKeys.length,23);assert.equal(new Set(all).size,all.length);
- assert.ok(all.every(v=>v>=.8&&v<=1.2));
+ assert.ok(all.every(v=>v>=.5&&v<=1.5));
  const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
  assert.match(src,/const danceIntensity=createDanceIntensitySampler\(\)/);
  assert.match(src,/createStageDance\(THREE,stageModel,stageGltf\.parser\.associations,danceIntensity\)/);

@@ -7,8 +7,12 @@ export const SOUNDTRACK_FILES = Object.freeze({
 const base = new URL('./assets/music/', import.meta.url);
 export function soundtrackFor({ active, muted, dice, view, cardMode, encounter, smeemoTable = false, detached = false }) {
   if (!active || muted || dice || encounter === 'stinger') return null;
-  if (!detached && (encounter === 'smeemo' && ['smeemo-crowd','card-table'].includes(view) || view === 'card-table' && smeemoTable && ['', 'menu', 'smeemo'].includes(cardMode ?? ''))) return 'smeemo';
-  if (view === 'card-table' && cardMode === 'smeemo') return null;
+  const encounterTrack = encounter === 'smeemo' && ['smeemo-crowd','card-table'].includes(view);
+  const activeTableGame = view === 'card-table' && cardMode === 'smeemo' && smeemoTable === true;
+  if (!detached && (encounterTrack || activeTableGame)) return 'smeemo';
+  // A selected-but-not-running/cancelled Smeemo round is not a silence mode.
+  // The ordinary card-table theme remains the fallback unless the live game
+  // session explicitly owns the Smeemo ambience.
   return ['roulette', 'card-table', 'trivia'].includes(view) ? 'cards' : 'general';
 }
 
@@ -16,6 +20,7 @@ export function createSoundtrack({ createMedia = () => new Audio(), now = () => 
   let media, track = null, wanted = null, requested = false, blocked = false, disposed = false, epoch = 0, fadeAt = null;
   const failed = new Set();
   let smeemoPosition = 0;
+  let forgetSmeemoPositionOnExit = false;
   const gain = Math.max(0, Math.min(1, volume));
   // Spatial attenuation is a frame-rate-independent one-pole smoother. The
   // same media element keeps playing at zero volume, so leaving a silent zone
@@ -59,7 +64,10 @@ export function createSoundtrack({ createMedia = () => new Audio(), now = () => 
     const currentSpatialGain = updateSpatialGain(requestedSpatialGain);
     next = Object.hasOwn(SOUNDTRACK_FILES, next) ? next : null;
     if (wanted !== next) {
-      if (track === 'smeemo' && wanted === track && Number.isFinite(media?.currentTime)) smeemoPosition = media.currentTime;
+      if (track === 'smeemo' && wanted === track && Number.isFinite(media?.currentTime)) {
+        smeemoPosition = forgetSmeemoPositionOnExit ? 0 : media.currentTime;
+      }
+      if (track === 'smeemo') forgetSmeemoPositionOnExit = false;
       stop(); wanted = next;
     }
     if (!wanted || failed.has(wanted) || !initialize()) return;
@@ -106,5 +114,14 @@ export function createSoundtrack({ createMedia = () => new Audio(), now = () => 
     return !disposed&&wanted===track&&requested&&fadeAt!==null&&media&&!media.paused&&!media.ended&&!media.seeking&&!media.muted&&media.volume>0&&media.readyState>=3&&Number.isFinite(media.currentTime)
       ? {track,seconds:media.currentTime}:null;
   }
-  return { sync, dispose, playbackPosition };
+  function resetTrackPosition(name) {
+    if (name !== 'smeemo') return false;
+    smeemoPosition = 0;
+    if (track === 'smeemo' && wanted === 'smeemo') {
+      forgetSmeemoPositionOnExit = true;
+      try { if (media && Number.isFinite(media.currentTime)) media.currentTime = 0; } catch {}
+    }
+    return true;
+  }
+  return { sync, dispose, playbackPosition, resetTrackPosition };
 }

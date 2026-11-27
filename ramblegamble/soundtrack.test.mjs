@@ -26,7 +26,9 @@ test('three tracks; exact mode priority including silent games, pause, lock and 
   for(const v of ['overview','slot','contestants','host','contestant','hazel']) assert.equal(mode(v),'general');
   for(const v of ['roulette','trivia']) assert.equal(mode(v),'cards');
   for(const m of ['', 'menu','shop','quiplash','red-handed']) assert.equal(mode('card-table',m),'cards');
-  assert.equal(mode('card-table','smeemo'),null);
+  assert.equal(mode('card-table','smeemo'),'cards','a Smeemo mode label without an armed live round is not a blanket silence state');
+  assert.equal(mode('card-table','smeemo',{smeemoTable:true}),'smeemo');
+  assert.equal(mode('card-table','smeemo',{smeemoTable:false}),'cards');
   assert.equal(mode('overview','smeemo'),'general');
   // The Dice doorway is selected as a base track; the spatial zone fades it
   // to silence as the camera approaches instead of cutting it off by view ID.
@@ -48,8 +50,8 @@ test('shared songs are uninterrupted, fade in, switch on one media voice, and su
   mixer.sync(mode('roulette'));await flush();assert.match(media.src,/sonic_no_daifuugou_title_theme\.mp3$/);assert.equal(media.currentTime,0);
   const plays=log.filter(a=>a[0]==='play').length;
   mixer.sync(mode('card-table','red-handed'));assert.equal(log.filter(a=>a[0]==='play').length,plays);
-  mixer.sync(mode('card-table','smeemo'));assert.ok(media.paused);assert.equal(media.volume,0);
-  mixer.sync(mode('card-table','menu'));await flush();assert.ok(!media.paused);
+  mixer.sync(mode('card-table','smeemo',{smeemoTable:true}));await flush();assert.match(media.src,/smeemo_ambiance\.mp3$/);
+  mixer.sync(mode('card-table','menu'));await flush();assert.ok(!media.paused);assert.match(media.src,/sonic_no_daifuugou_title_theme\.mp3$/);
   mixer.dispose();assert.equal(media.src,'');assert.ok(media.paused);mixer.sync('general');assert.equal(media.src,'');assert.equal(f.created,1);
 });
 
@@ -74,12 +76,16 @@ test('autoplay rejection is retried only on user input; missing recording is not
 
 const js=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
 const section=(from,to)=>js.slice(js.indexOf(from),js.indexOf(to,js.indexOf(from)));
-test('actual main scene card mode events switch music even without camera movement; pending Dice changes do not leak music',()=>{
-  const calls=[],handlers={};const context={smeemoTable:{choose(){},observe(){}},pendingTrivia:false,pendingCardGameMode:'',cardMusicMode:'',sceneReady:true,diceModeOpen:false,gameStarted:true,pauseMenuOpen:false,cameraDetached:false,currentView:{kind:'card-table'},result:{hidden:false},crowdState:{react(){}},crowdClock:0,Event,window:{dispatchEvent:e=>calls.push(e.type),addEventListener:(name,fn)=>handlers[name]=fn},syncMusic:()=>calls.push(mode(context.currentView.kind,context.cardMusicMode,{dice:context.diceModeOpen})),transitionToView:view=>{context.currentView=view;context.syncMusic();}};
+test('actual main scene card mode events switch music only for an armed Smeemo round; cancellation returns to ordinary music',()=>{
+  const calls=[],handlers={};let armed=false;
+  const context={smeemoTable:{get active(){return armed;},choose(m){if(m!=='smeemo')armed=false;},observe(e){if(e.opened&&e.mode==='smeemo'&&e.status==='playing')armed=true;if(e.mode!=='smeemo'||e.status!=='playing')armed=false;},cancel(){armed=false;}},soundtrack:{resetTrackPosition(name){calls.push(`reset:${name}`);}},pendingTrivia:false,pendingCardGameMode:'',cardMusicMode:'',sceneReady:true,diceModeOpen:false,gameStarted:true,pauseMenuOpen:false,cameraDetached:false,currentView:{kind:'card-table'},result:{hidden:false},crowdState:{react(){}},crowdClock:0,Event,window:{dispatchEvent:e=>calls.push(e.type),addEventListener:(name,fn)=>handlers[name]=fn},syncMusic:()=>calls.push(mode(context.currentView.kind,context.cardMusicMode,{dice:context.diceModeOpen,smeemoTable:context.smeemoTable.active})),transitionToView:view=>{context.currentView=view;context.syncMusic();}};
   runInNewContext(section('  function activateCardGameMode(mode) {','  goButton.addEventListener'),context);
   const activate=m=>handlers['rg:card-game-active']({detail:{mode:m}});
-  activate('menu');assert.equal(calls.at(-1),'cards');activate('smeemo');assert.equal(calls.at(-1),null);activate('shop');assert.equal(calls.at(-1),'cards');
-  handlers['rg:close-card-games']();assert.equal(calls.at(-1),'general');
+  activate('menu');assert.equal(calls.at(-1),'cards');activate('smeemo');assert.equal(calls.at(-1),'cards','selection alone cannot arm a stale Smeemo session');
+  handlers['rg:smeemo-round-state']({detail:{id:'new-round',status:'playing',mode:'smeemo',opened:true}});activate('smeemo');assert.equal(calls.at(-1),'smeemo');
+  handlers['rg:close-card-games']();assert.equal(calls.at(-1),'general');assert.equal(armed,false);assert.ok(calls.includes('reset:smeemo'),'closing an active Smeemo round clears its saved position');
+  context.currentView={kind:'card-table'};handlers['rg:smeemo-round-state']({detail:{id:'another-round',status:'playing',mode:'smeemo',opened:true}});activate('smeemo');assert.equal(calls.at(-1),'smeemo');
+  activate('shop');assert.equal(calls.at(-1),'cards');assert.ok(calls.filter(x=>x==='reset:smeemo').length>=2,'switching to another game also clears the Smeemo session');
   context.diceModeOpen=true;activate('smeemo');assert.equal(context.pendingCardGameMode,'smeemo');assert.equal(calls.at(-1),'rg:close-dice-mode');
 });
 test('host lifecycle stops music before intro, resumes only after intro is paused, and cleans up independently of Foley',()=>{
@@ -106,16 +112,25 @@ test('Smeemo ambience is one resumable track and never a dancing clock',async()=
  mixer.sync(null);assert.ok(media.paused);assert.equal(mixer.playbackPosition(),null);
  mixer.sync('smeemo');await flush();assert.equal(media.currentTime,14.25);
 });
+test('a cancelled Smeemo session forgets its saved position instead of resuming an old encounter',async()=>{
+ const f=fixture(),{mixer,media}=f;
+ mixer.sync('smeemo');await flush();f.advance(300);mixer.sync('smeemo');media.currentTime=19.75;
+ mixer.sync('cards');await flush();assert.equal(media.currentTime,0);
+ mixer.resetTrackPosition('smeemo');
+ mixer.sync('smeemo');await flush();assert.equal(media.currentTime,0,'cancelled Smeemo starts fresh, not at the previous session offset');
+ media.currentTime=12.5;mixer.resetTrackPosition('smeemo');assert.equal(media.currentTime,0,'reset while playing also returns the active source to its beginning');
+ mixer.sync('cards');await flush();mixer.sync('smeemo');await flush();assert.equal(media.currentTime,0);
+});
 test('dance clock is unavailable until audible playback, and on buffering, pause, mute or seeking',async()=>{
  const f=fixture(),{mixer,media}=f;mixer.sync('general');assert.equal(mixer.playbackPosition(),null);await flush();assert.equal(mixer.playbackPosition(),null);f.advance(300);mixer.sync('general');media.currentTime=2.5;assert.deepEqual(mixer.playbackPosition(),{track:'general',seconds:2.5});
  for(const [k,v] of [['readyState',2],['paused',true],['muted',true],['seeking',true],['ended',true]]){const old=media[k];media[k]=v;assert.equal(mixer.playbackPosition(),null,k);media[k]=old;}
 });
 test('table horror has strict camera and mode priority',()=>{
- for(const cardMode of ['','menu','smeemo'])assert.equal(mode('card-table',cardMode,{smeemoTable:true}),'smeemo');
+ assert.equal(mode('card-table','smeemo',{smeemoTable:true}),'smeemo');
+ for(const cardMode of ['','menu','shop','red-handed','quiplash'])assert.equal(mode('card-table',cardMode,{smeemoTable:true}),'cards');
  for(const view of ['overview','slot','roulette','trivia','dice-door'])assert.notEqual(mode(view,'smeemo',{smeemoTable:true}),'smeemo');
- for(const m of ['shop','red-handed','quiplash'])assert.equal(mode('card-table',m,{smeemoTable:true}),'cards');
  for(const extra of [{muted:true},{active:false},{dice:true},{detached:true},{encounter:'stinger'}])assert.notEqual(mode('card-table','smeemo',{smeemoTable:true,...extra}),'smeemo');
- assert.equal(mode('card-table','smeemo',{smeemoTable:false}),null);
+ assert.equal(mode('card-table','smeemo',{smeemoTable:false}),'cards');
 });
 
 

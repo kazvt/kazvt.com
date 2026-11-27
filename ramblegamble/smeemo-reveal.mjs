@@ -27,20 +27,28 @@ export function createSmeemoStinger({root,video,skip,caption,muted=()=>false,onF
  return {start,step,cancel,get active(){return live;}};
 }
 
-// Table ambience survives camera navigation, but never survives a completed/reset round.
+// Table ambience belongs only to a newly opened, explicitly selected Smeemo
+// round. Merely returning to the card table, opening its menu, or restoring a
+// stale round must never arm it. Camera navigation does not cancel a live round;
+// an explicit mode change, dismissal, reset or completion does.
 export function createSmeemoTableSession(){
- let intro=false,roundId=null,status=null,armed=false;
+ let roundId=null,status=null,selected=false,armed=false;
+ const cancelledIds=new Set();
+ function cancel(){if(roundId)cancelledIds.add(roundId);selected=false;armed=false;}
  return {
-  begin(){intro=true;},
   observe(next={}){
-   const id=next.id??null, state=next.status??null;
-   if(id!==roundId){armed=false;if(id||roundId)intro=false;}
-   if(id===roundId&&state!==status&&roundId)intro=false;
-   if(next.opened&&id&&state==="playing"){armed=true;intro=false;}
+   const id=typeof next.id==='string'&&next.id?next.id:null;
+   const state=next.status??null;
+   const mode=next.mode??null;
+   if(id!==roundId){if(roundId)cancelledIds.add(roundId);selected=false;armed=false;}
+   if(!id||mode!=='smeemo'||state!=='playing'){
+    if(id)cancelledIds.add(id);
+    selected=false;armed=false;
+   }else if(next.opened===true&&!cancelledIds.has(id))armed=true;
    roundId=id;status=state;
-   if(status!=="playing")armed=false;
   },
-  choose(mode){if(mode&&mode!=="menu"&&mode!=="smeemo")intro=false;},
-  get active(){return intro||(armed&&status==="playing");},
+  choose(mode){if(mode==='smeemo')selected=true;else cancel();},
+  cancel,
+  get active(){return selected&&armed&&status==='playing';},
  };
 }

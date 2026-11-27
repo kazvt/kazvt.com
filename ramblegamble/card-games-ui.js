@@ -254,7 +254,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       smeemoPhaseTimer = 0;
       smeemoScheduledSignal = "";
     }
-    window.dispatchEvent(new CustomEvent("rg:smeemo-round-state", {detail:{id:state.smeemo?.id??null,status:state.smeemo?.status??null,opened:opened&&activeSmeemo}}));
+    window.dispatchEvent(new CustomEvent("rg:smeemo-round-state", {detail:{id:state.smeemo?.id??null,status:state.smeemo?.status??null,mode:activeSmeemo?"smeemo":null,opened:opened&&activeSmeemo}}));
     if (opened) {
       impact.stop(); // No tail from a previous round may leak into this one.
       foley.stop("card-menu-hover");

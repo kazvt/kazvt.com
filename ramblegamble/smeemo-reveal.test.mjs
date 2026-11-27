@@ -29,13 +29,44 @@ test('silent rotating spotlight emits no roll/reveal/hide sounds; slot celebrati
  s.toggle(cat,11000);s.step(15000);s.toggle(cat,15010);s.step(17000);assert.equal(events.filter(e=>e==='reveal').length,1);assert.equal(events.filter(e=>e==='hide').length,0);
  s.begin(table,18000,'slot');s.step(22000);s.hide(table,25000);assert.equal(events.filter(e=>e==='reveal').length,2);assert.equal(events.filter(e=>e==='hide').length,1);
 });
-test('music routes through one existing player, video is a silent-track override, normal game unchanged',()=>{const base={active:true,muted:false,dice:false,view:'card-table',cardMode:'smeemo'};assert.equal(soundtrackFor(base),null);assert.equal(soundtrackFor({...base,encounter:'smeemo'}),'smeemo');assert.equal(soundtrackFor({...base,encounter:'stinger'}),null);assert.equal(soundtrackFor({...base,encounter:'smeemo',active:false}),null);assert.equal(soundtrackFor({...base,encounter:'smeemo',dice:true}),null);});
-test('production hook checks scene occlusion, uses projected tag and arrow, preserves slow table return',()=>{const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');assert.match(src,/raycaster\.intersectObject\(cat,false\)/);assert.match(src,/blocker\.distance>=hit\.distance/);assert.match(src,/encounter\.finish\(\)\)\{smeemoTable\.begin\(\);cardMusicMode="";canvas\.focus\([^;]+;transitionToView\(\{kind:"card-table"\},\{encounterReturn:true\}\)/);assert.match(src,/duration: encounterReturn \? SMEEMO_RETURN_MS/);assert.match(src,/spooky: encounterReturn \|\| isSpookyView/);assert.match(src,/revealed:encounter\.revealed,quiet:encounter\.quiet/);assert.match(src,/roomVisible&&!encounter\.quiet/);assert.match(src,/if \(document.hidden\) \{\s*floatingSky\?\.suspend\(\);\s*resetEncounter\(\)/);});
-
-test('table session survives departure and return, but ends with committed completion or reset',()=>{
- const e=createSmeemoTableSession();assert.equal(e.active,false);e.begin();assert.equal(e.active,true);e.observe({id:null,status:null});assert.equal(e.active,true);e.choose('menu');assert.equal(e.active,true);
- e.observe({id:'a',status:'playing',opened:true});assert.equal(e.active,true);e.choose('shop');assert.equal(e.active,true);e.observe({id:'a',status:'complete'});assert.equal(e.active,false);
- e.observe({id:'b',status:'playing',opened:true});assert.equal(e.active,true);e.observe({id:null,status:null});assert.equal(e.active,false);e.begin();e.choose('shop');assert.equal(e.active,false);
+test('music routes through one existing player; encounter music is temporary and table music requires an active Smeemo round',()=>{
+ const base={active:true,muted:false,dice:false,view:'card-table',cardMode:'smeemo'};
+ assert.equal(soundtrackFor(base),'cards','a table mode label without an active Smeemo session uses the normal card theme');
+ assert.equal(soundtrackFor({...base,smeemoTable:true}),'smeemo');
+ assert.equal(soundtrackFor({...base,cardMode:'menu',smeemoTable:true}),'cards');
+ assert.equal(soundtrackFor({...base,cardMode:'',smeemoTable:true}),'cards');
+ assert.equal(soundtrackFor({...base,encounter:'smeemo'}),'smeemo');
+ assert.equal(soundtrackFor({...base,encounter:'stinger'}),null);
+ assert.equal(soundtrackFor({...base,encounter:'smeemo',active:false}),null);
+ assert.equal(soundtrackFor({...base,encounter:'smeemo',dice:true}),null);
+});
+test('production hook checks scene occlusion, uses projected tag and arrow, preserves slow return without arming table music',()=>{
+ const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
+ assert.match(src,/raycaster\.intersectObject\(cat,false\)/);assert.match(src,/blocker\.distance>=hit\.distance/);
+ assert.match(src,/if\(encounter\.finish\(\)\)\{cardMusicMode="";canvas\.focus\([^;]+;transitionToView\(\{kind:"card-table"\},\{encounterReturn:true\}\)/);
+ assert.doesNotMatch(src,/encounter\.finish\(\)\)\{smeemoTable\.begin\(\)/);
+ assert.match(src,/duration: encounterReturn \? SMEEMO_RETURN_MS/);assert.match(src,/spooky: encounterReturn \|\| isSpookyView/);
+ assert.match(src,/revealed:encounter\.revealed,quiet:encounter\.quiet/);assert.match(src,/roomVisible&&!encounter\.quiet/);
+ assert.match(src,/smeemoTable\.cancel\(\)/);assert.match(src,/soundtrack\.resetTrackPosition\("smeemo"\)/);
+ const ui=readFileSync(new URL('./card-games-ui.js',import.meta.url),'utf8');assert.match(ui,/mode:activeSmeemo\?"smeemo":null/);
+ assert.match(src,/if \(document.hidden\) \{\s*floatingSky\?\.suspend\(\);\s*resetEncounter\(\)/);
 });
 
-test('restored dismissed Smeemo game does not silently arm new ambience after page reload',()=>{const e=createSmeemoTableSession();e.observe({id:'old',status:'playing',opened:false});assert.equal(e.active,false);e.begin();assert.equal(e.active,true);e.observe({id:'old',status:'playing',opened:false});assert.equal(e.active,true);e.observe({id:'new',status:'playing',opened:true});assert.equal(e.active,true);e.observe({id:'new',status:'complete',opened:false});assert.equal(e.active,false);});
+test('table session requires an explicitly opened Smeemo round and survives camera navigation only while that round remains active',()=>{
+ const e=createSmeemoTableSession();assert.equal(e.active,false);
+ e.observe({id:'restored',status:'playing',mode:'smeemo',opened:false});e.choose('smeemo');assert.equal(e.active,false,'restored/dismissed rounds do not arm ambience');
+ e.observe({id:'new-a',status:'playing',mode:'smeemo',opened:true});assert.equal(e.active,false,'round opening is not enough until the Smeemo mode owns the table');
+ e.choose('smeemo');assert.equal(e.active,true);
+ e.observe({id:'new-a',status:'playing',mode:'smeemo',opened:false});assert.equal(e.active,true,'ordinary camera departure does not cancel the live round');
+ e.choose('menu');assert.equal(e.active,false,'opening the table menu cancels the Smeemo audio session');
+ e.choose('smeemo');assert.equal(e.active,false,'reselecting Smeemo cannot revive a cancelled round with the same ID');
+ e.observe({id:'new-b',status:'playing',mode:'smeemo',opened:true});e.choose('smeemo');assert.equal(e.active,true);
+ e.observe({id:'new-b',status:'complete',mode:'smeemo',opened:false});assert.equal(e.active,false);
+ e.observe({id:null,status:null,mode:null,opened:false});assert.equal(e.active,false);
+});
+
+test('explicit cancellation prevents a stale or repeated open event from restarting the same Smeemo ambience',()=>{
+ const e=createSmeemoTableSession();e.observe({id:'round-a',status:'playing',mode:'smeemo',opened:true});e.choose('smeemo');assert.equal(e.active,true);
+ e.cancel();assert.equal(e.active,false);e.observe({id:'round-a',status:'playing',mode:'smeemo',opened:true});e.choose('smeemo');assert.equal(e.active,false);
+ e.observe({id:'round-b',status:'playing',mode:'smeemo',opened:true});e.choose('smeemo');assert.equal(e.active,true);
+});

@@ -2,8 +2,8 @@
 // Euler rotation over time: every frame derives from the original transform.
 export const DANCE_CYCLE_MS=2000;
 export const DANCE_AMPLITUDE=.35; // ambient squash, shear and held shivers only
-export const DANCE_INTENSITY_MIN=.8;
-export const DANCE_INTENSITY_MAX=1.2;
+export const DANCE_INTENSITY_MIN=.5;
+export const DANCE_INTENSITY_MAX=1.5;
 const clamp=(n,min=0,max=1)=>Math.max(min,Math.min(max,n));
 const ease=n=>{const t=clamp(n);return t*t*(3-2*t);};
 

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createRoomAmbience } from './room-ambience.mjs';
+import { createRoomAmbience, VIP_WATER_GAIN } from './room-ambience.mjs';
 import { FOLEY_CUES } from './game-foley.mjs';
 function fixture({reject=false,deferred=false}={}) {
   const media=[], gains=[], resolutions=[], filters=[], sources=[];
@@ -42,10 +42,11 @@ test('cheer remains audible until emotion changes, suspense and shock duck the a
 
 test('VIP exterior water bypasses its filter; interior retains the filter, while all three crowd tracks become silent and pause',()=>{
  const f=fixture();f.sync(true,1,false,'cheer');f.sync(true,0,false,'cheer',.64,null);
- assert.deepEqual(f.gains.map(g=>g.value),[0,0,0,.28*.64]);assert.notEqual(f.sources[3].target,f.filters[0]);
+ assert.equal(VIP_WATER_GAIN,.28*1.5,'VIP droplets use exactly 1.5x the previous linear gain');
+ assert.deepEqual(f.gains.map(g=>g.value),[0,0,0,VIP_WATER_GAIN*.64]);assert.notEqual(f.sources[3].target,f.filters[0]);
  assert.equal(f.media[3].plays,1);assert.match(f.media[3].src,/vip-water-drips-cave-loop\.ogg$/);
  f.context.currentTime=1;f.sync(true,0,false,'cheer',1,3400);
- assert.ok(f.media.slice(0,3).every(m=>m.paused));assert.equal(f.filters[0].frequency.value,3400);assert.equal(f.sources[3].target,f.filters[0]);assert.equal(f.gains[3].value,.28);assert.equal(f.media[3].plays,1);
+ assert.ok(f.media.slice(0,3).every(m=>m.paused));assert.equal(f.filters[0].frequency.value,3400);assert.equal(f.sources[3].target,f.filters[0]);assert.equal(f.gains[3].value,VIP_WATER_GAIN);assert.equal(f.media[3].plays,1);
  for(let i=0;i<100;i++)f.sync(true,0,false,'cheer',1,3400);
  assert.deepEqual(f.media.map(m=>m.plays),[1,1,1,1]);
  f.sync(true,1,false,'cheer');assert.notEqual(f.sources[3].target,f.filters[0]);assert.deepEqual(f.media.map(m=>m.plays),[2,2,2,1]);f.context.currentTime=2;f.sync(true,1,false,'cheer');assert.ok(f.media[3].paused);

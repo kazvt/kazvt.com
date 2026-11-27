@@ -244,10 +244,13 @@ import {
   const smeemoTable = createSmeemoTableSession();
   const smeemoAura=document.getElementById("rg-smeemo-aura"), smeemoTag=document.getElementById("rg-smeemo-tag"), smeemoCount=document.getElementById("rg-smeemo-count");
   const stinger=createSmeemoStinger({root:document.getElementById("rg-smeemo-stinger"),video:document.getElementById("rg-smeemo-video"),skip:document.getElementById("rg-smeemo-skip"),caption:document.getElementById("rg-smeemo-stinger-caption"),muted:()=>foley.muted,onFinish:()=>{
-    if(encounter.finish()){smeemoTable.begin();cardMusicMode="";canvas.focus({preventScroll:true});transitionToView({kind:"card-table"},{encounterReturn:true});}
+    if(encounter.finish()){cardMusicMode="";canvas.focus({preventScroll:true});transitionToView({kind:"card-table"},{encounterReturn:true});}
   }});
   function resetEncounter(){
     if(encounter.phase==="hidden")return;
+    // A cancelled encounter must not resume its old ambience on a later visit.
+    // The post-return table phase is separate and may belong to a live Smeemo game.
+    if(encounter.phase!=="table")soundtrack.resetTrackPosition("smeemo");
     encounter.reset();stinger.cancel();smeemoTag.hidden=true;smeemoAura.hidden=true;preview.removeAttribute("data-smeemo-step");
     for(const channel of ["smeemo-encounter-drum","smeemo-encounter-rumble","smeemo-encounter-scare"])foley.stop(channel);
     stageShow?.dismiss(performance.now());syncMusic();
@@ -2372,18 +2375,28 @@ import {
       menuPresentation.sync();
     }
     cardMusicMode = mode;
+    const wasSmeemoActive=smeemoTable.active;
     smeemoTable.choose(mode);
+    if(wasSmeemoActive&&!smeemoTable.active)soundtrack.resetTrackPosition("smeemo");
     result.hidden = true;
     window.dispatchEvent(new Event("rg:close-host-panel"));
     if (cameraDetached || currentView.kind !== "card-table") { crowdState.react(mode === "menu" || mode === "shop" ? "idle" : "suspense",crowdClock); transitionToView({ kind: "card-table" }); }
     else syncMusic(); // Same camera, different card game (notably Smeemo).
   }
 
-  window.addEventListener("rg:smeemo-round-state", event => {smeemoTable.observe(event.detail);syncMusic();});
+  window.addEventListener("rg:smeemo-round-state", event => {
+    const wasSmeemoActive=smeemoTable.active;
+    smeemoTable.observe(event.detail);
+    if(wasSmeemoActive&&!smeemoTable.active)soundtrack.resetTrackPosition("smeemo");
+    syncMusic();
+  });
   window.addEventListener("rg:card-game-active", (event) => activateCardGameMode(event.detail?.mode));
   window.addEventListener("rg:close-card-games", () => {
+    const wasSmeemoTableMode=smeemoTable.active||cardMusicMode==="smeemo";
     pendingCardGameMode = "";
     cardMusicMode = "";
+    if(wasSmeemoTableMode)soundtrack.resetTrackPosition("smeemo");
+    smeemoTable.cancel();
     if (currentView.kind === "card-table") transitionToView({ kind: "overview" });
     else syncMusic();
   });
