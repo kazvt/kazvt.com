@@ -41,21 +41,20 @@ export function paintMenuSign(out,elapsed){
 
 // One lifecycle for the opening clip, CSS fallback and live neon idle. This is
 // independent of WebGL readiness, and never loops the recorded intro audio.
-export function createMenuMarquee({menu,video,plate,glow,motionButton,controls,reduced,doc=document,win=window}){
-  let phase='closed', elapsed=0,last=null,frame=0,active=false,unavailable=Boolean(video.error)||video.networkState===3,attempt=0,off=false,disposed=false,painted=false;
+export function createMenuMarquee({menu,video,plate,glow,controls,doc=document,win=window}){
+  let phase='closed', elapsed=0,last=null,frame=0,active=false,unavailable=Boolean(video.error)||video.networkState===3,attempt=0,disposed=false,painted=false;
   glow.width=W;glow.height=H;
   let ctx=null,image=null;
   try{ctx=glow.getContext('2d');image=ctx?.createImageData(W,H);}catch{}
   const clear=()=>{if(painted){ctx?.clearRect(0,0,W,H);painted=false;}};
   const allowed=()=>!menu.hidden&&!doc.hidden&&!doc.documentElement.hasAttribute('data-rg-host-locked')&&!controls.open;
-  const moving=()=>!off&&!reduced.matches;
   const resetVideo=()=>{++attempt;video.pause();try{video.currentTime=0;}catch{}};
   function setPhase(next){
     phase=next;elapsed=0;last=null;clear();menu.dataset.marqueePhase=next;
     video.hidden=next!=='video';plate.hidden=next==='video'||next==='closed';
   }
   function settle(){++attempt;video.pause();setPhase('settled');}
-  function fallback(){++attempt;video.pause();setPhase(moving()?'fallback':'settled');}
+  function fallback(){++attempt;video.pause();setPhase('fallback');}
   function failed(){unavailable=true;if(phase==='video')fallback();}
   function play(){
     const ticket=++attempt;
@@ -63,7 +62,7 @@ export function createMenuMarquee({menu,video,plate,glow,motionButton,controls,r
     catch{if(ticket===attempt&&active&&phase==='video')failed();}
   }
   function tick(time){
-    frame=0;if(!active||!allowed()||!moving()){sync();return;}
+    frame=0;if(!active||!allowed()){sync();return;}
     if(last!==null)elapsed+=Math.max(0,Math.min(250,time-last));last=time;
     if(phase==='video'&&elapsed>=9000)fallback(); // stalled media cannot strand a blank title
     else if(phase==='fallback'&&elapsed>=2200)settle();
@@ -74,25 +73,21 @@ export function createMenuMarquee({menu,video,plate,glow,motionButton,controls,r
     }
     schedule();
   }
-  function schedule(){if(!frame&&active&&moving())frame=win.requestAnimationFrame(tick);}
+  function schedule(){if(!frame&&active)frame=win.requestAnimationFrame(tick);}
   function sync(){
     if(disposed)return;
-    const animate=moving();motionButton.setAttribute('aria-pressed',String(animate));motionButton.textContent=animate?'MOTION: ON':'MOTION: OFF';
-    motionButton.disabled=reduced.matches;menu.dataset.motion=animate?'on':'off';
-    video.preload=animate?'auto':'none';
+    video.preload='auto';
     if(menu.hidden){if(phase!=='closed'){resetVideo();setPhase('closed');}}
     const wasActive=active;active=allowed();menu.dataset.menuActive=String(active);
-    if(!active||!animate){
+    if(!active){
       if(frame)win.cancelAnimationFrame(frame);frame=0;last=null;clear();
       if(wasActive){++attempt;video.pause();}
-      if(!animate&&phase!=='closed'&&phase!=='settled')settle();
-      if(!active)return;
+      return;
     }
     if(phase==='closed'){
-      if(!animate)settle();
-      else if(unavailable)fallback();
+      if(unavailable)fallback();
       else{resetVideo();setPhase('video');play();}
-    }else if(active&&!wasActive&&phase==='video'&&animate){if(video.ended)settle();else play();}
+    }else if(active&&!wasActive&&phase==='video'){if(video.ended)settle();else play();}
     schedule();
   }
   function ended(){if(phase==='video'&&video.ended){settle();schedule();}}
@@ -101,15 +96,13 @@ export function createMenuMarquee({menu,video,plate,glow,motionButton,controls,r
     try{const c=doc.createElement('canvas');c.width=c.height=1;const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(video,0,0,1,1);alpha=g.getImageData(0,0,1,1).data[3]<250;}catch{}
     video.classList.toggle('rg-marquee-matte',!alpha);
   }
-  function toggle(){off=!off;sync();}
   const observer=new win.MutationObserver(sync);
   observer.observe(menu,{attributes:true,attributeFilter:['hidden']});
   observer.observe(doc.documentElement,{attributes:true,attributeFilter:['data-rg-host-locked']});
   observer.observe(controls,{attributes:true,attributeFilter:['open']});
   video.addEventListener('ended',ended);video.addEventListener('error',failed);video.addEventListener('loadeddata',matte);
-  motionButton.addEventListener('click',toggle);doc.addEventListener('visibilitychange',sync);
-  if(reduced.addEventListener)reduced.addEventListener('change',sync);else reduced.addListener(sync);
+  doc.addEventListener('visibilitychange',sync);
   video.volume=Math.max(0,Math.min(1,video.volume*.2));
   setPhase('closed');sync();
-  return {sync,dispose(){disposed=true;observer.disconnect();if(frame)win.cancelAnimationFrame(frame);resetVideo();clear();video.removeEventListener('ended',ended);video.removeEventListener('error',failed);video.removeEventListener('loadeddata',matte);motionButton.removeEventListener('click',toggle);doc.removeEventListener('visibilitychange',sync);if(reduced.removeEventListener)reduced.removeEventListener('change',sync);else reduced.removeListener(sync);}};
+  return {sync,dispose(){disposed=true;observer.disconnect();if(frame)win.cancelAnimationFrame(frame);resetVideo();clear();video.removeEventListener('ended',ended);video.removeEventListener('error',failed);video.removeEventListener('loadeddata',matte);doc.removeEventListener('visibilitychange',sync);}};
 }

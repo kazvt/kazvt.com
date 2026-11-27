@@ -1,4 +1,4 @@
-import { createMenuMarquee } from "./menu-marquee.mjs?v=menu-neon-20261127-v1";
+import { createMenuMarquee } from "./menu-marquee.mjs?v=always-motion-20261127-v1";
 import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=hazel-balcony-20261127-v1";
 import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcony.mjs?v=hazel-balcony-20261127-v1";
 import { createSignGlow } from "./sign-glow.mjs?v=neon-focus-20261127-v1";
@@ -84,7 +84,7 @@ import {
   const controlsDialog = document.getElementById("rg-controls-dialog");
   const controlsCloseButton = document.getElementById("rg-controls-close");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const menuPresentation = createMenuMarquee({menu:pauseMenu,video:menuMarquee,plate:document.getElementById("rg-marquee-plate"),glow:document.getElementById("rg-marquee-neon"),motionButton:document.getElementById("rg-menu-motion"),controls:controlsDialog,reduced:reducedMotion});
+  const menuPresentation = createMenuMarquee({menu:pauseMenu,video:menuMarquee,plate:document.getElementById("rg-marquee-plate"),glow:document.getElementById("rg-marquee-neon"),controls:controlsDialog});
   const FORCED_THEME = "p2";
   const ROULETTE_PART_NAMES = new Set(["center", "wheel", "rim", "ball"]);
   const SLOT_PART_NAMES = new Set(["machine", "slot-reel-display", "arm", "button1", "button2", "button3", "button4", "button5"]);

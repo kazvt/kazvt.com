@@ -20,14 +20,14 @@ test('menu uses the stage mask and same letter and bulb envelopes with a genuine
  assert.equal(paintMenuSign(out,5000),false);assert.ok(out.every(x=>x===0));
  for(const t of [75,450,1950,3100,4400,7000]){paintMenuSign(out,t);const copy=out.slice();paintMenuSign(out,t+10000);assert.deepEqual(out,copy);}
 });
-function fixture({reduce=false,videoError=false,playResult=()=>Promise.resolve()}={}){
+function fixture({videoError=false,playResult=()=>Promise.resolve()}={}){
  class El extends EventTarget{hidden=false;dataset={};attributes={};setAttribute(k,v){this.attributes[k]=v;}}
  const menu=new El();menu.hidden=true;const video=new El();Object.assign(video,{volume:1,currentTime:0,ended:false,readyState:0,networkState:videoError?3:1,paused:true,plays:0,play(){this.plays++;this.paused=false;return playResult();},pause(){this.paused=true;}});
- const plate=new El(),glow=new El(),motionButton=new El(),controls=new El(),reduced=new El(),doc=new El();reduced.matches=reduce;doc.documentElement={hasAttribute:()=>doc.locked};
+ const plate=new El(),glow=new El(),controls=new El(),doc=new El();doc.documentElement={hasAttribute:()=>doc.locked};
  let paints=0,clears=0;glow.getContext=()=>({createImageData:()=>({data:bytes()}),putImageData(){paints++;},clearRect(){clears++;}});
  let cb=new Map(),counter=0,time=0;const win={MutationObserver:class{observe(){}disconnect(){}},requestAnimationFrame(fn){cb.set(++counter,fn);return counter;},cancelAnimationFrame(id){cb.delete(id);}};
- const fx=createMenuMarquee({menu,video,plate,glow,motionButton,controls,reduced,doc,win});
- return {menu,video,plate,motionButton,controls,reduced,doc,fx,get pending(){return cb.size;},get paints(){return paints;},get clears(){return clears;},get phase(){return menu.dataset.marqueePhase;},open(){menu.hidden=false;fx.sync();},close(){menu.hidden=true;fx.sync();},end(){video.ended=true;video.dispatchEvent(new Event('ended'));},step(ms){for(let t=0;t<ms;t+=50){time+=Math.min(50,ms-t);const callbacks=[...cb.values()];cb.clear();for(const fn of callbacks)fn(time);}}};
+ const fx=createMenuMarquee({menu,video,plate,glow,controls,doc,win});
+ return {menu,video,plate,controls,doc,fx,get pending(){return cb.size;},get paints(){return paints;},get clears(){return clears;},get phase(){return menu.dataset.marqueePhase;},open(){menu.hidden=false;fx.sync();},close(){menu.hidden=true;fx.sync();},end(){video.ended=true;video.dispatchEvent(new Event('ended'));},step(ms){for(let t=0;t<ms;t+=50){time+=Math.min(50,ms-t);const callbacks=[...cb.values()];cb.clear();for(const fn of callbacks)fn(time);}}};
 }
 test('intro plays once, then live light repeats without replaying the video; close and reopen resets',()=>{
  const f=fixture();assert.equal(f.phase,'closed');assert.equal(f.video.volume,.2);f.open();assert.equal(f.phase,'video');assert.equal(f.video.plays,1);assert.equal(f.plate.hidden,true);
@@ -39,8 +39,8 @@ test('lock, visibility and controls suspend both media and glow; stale play reje
  for(const [obj,key] of [[f.doc,'hidden'],[f.doc,'locked'],[f.controls,'open']]){obj[key]=true;f.fx.sync();assert.equal(f.pending,0);assert.equal(f.video.paused,true);obj[key]=false;f.fx.sync();assert.equal(f.video.paused,false);}
  f.end();f.step(400);const paints=f.paints;f.doc.locked=true;f.fx.sync();f.step(1000);assert.equal(f.paints,paints);assert.equal(f.pending,0);f.doc.locked=false;f.fx.sync();f.step(200);assert.ok(f.paints>paints);f.fx.dispose();
 });
-test('reduced motion and explicit motion toggle settle without replay and stop scheduling',()=>{
- const f=fixture({reduce:true});f.open();assert.equal(f.phase,'settled');assert.equal(f.video.plays,0);assert.equal(f.pending,0);assert.equal(f.motionButton.disabled,true);f.reduced.matches=false;f.fx.sync();f.step(500);assert.ok(f.paints>0);f.motionButton.dispatchEvent(new Event('click'));assert.equal(f.pending,0);assert.equal(f.motionButton.attributes['aria-pressed'],'false');f.step(1000);f.motionButton.dispatchEvent(new Event('click'));assert.equal(f.pending,1);assert.equal(f.video.plays,0);f.fx.dispose();
+test('menu animates without an optional motion control and remains animated after resync',()=>{
+ const f=fixture();f.open();assert.equal(f.phase,'video');assert.equal(f.video.plays,1);f.end();f.step(500);const paints=f.paints;f.fx.sync();f.step(500);assert.ok(f.paints>paints);assert.equal(f.pending,1);assert.equal(f.video.plays,1);f.fx.dispose();
 });
 test('rejected, missing and stalled media always end on the original logo and live neon',async()=>{
  for(const opts of [{videoError:true},{playResult:()=>Promise.reject(Error('blocked'))},{}]){
@@ -49,6 +49,6 @@ test('rejected, missing and stalled media always end on the original logo and li
 });
 test('actual markup and lifecycle wire the presentation without changing lock controls or logo artwork',()=>{
  const html=readFileSync(new URL('../rg/index.html',import.meta.url),'utf8'),js=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
- assert.match(html,/id="rg-marquee-plate" hidden/);assert.match(html,/assets\/provided\/sign\.png/);assert.match(html,/id="rg-menu-motion"[^>]+aria-pressed="true"/);assert.match(html,/data-host-lock type="button">LOCK HOST/);
+ assert.match(html,/id="rg-marquee-plate" hidden/);assert.match(html,/assets\/provided\/sign\.png/);assert.doesNotMatch(html,/rg-menu-motion|MOTION: (?:ON|OFF)/);assert.doesNotMatch(js,/motionButton:/);assert.match(html,/data-host-lock type="button">LOCK HOST/);
  assert.match(js,/createMenuMarquee\(\{menu:pauseMenu/);assert.match(js,/menuPresentation\.dispose\(\)/);assert.equal((js.match(/menuPresentation\.sync\(\)/g)||[]).length,4);
 });

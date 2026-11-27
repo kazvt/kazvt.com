@@ -82,10 +82,6 @@
 /* Keep numeric feedback and artwork unmodified; inert tiles gain relief. */
 .rg-player-stage main div.rg-live-tile { box-shadow:inset 0 1px #fff7,0 2px #170e2e; }
 .rg-player-stage main .rg-live-saved-choice { outline:3px solid #5cf0b2; outline-offset:-3px; }
-/* Keep the original page's control positions. The optional motion toggle is a
-   separate footer, never inside the round/form or over a game target. */
-.rg-player-stage > .rg-player-motion { position:relative; z-index:1; display:block; width:max-content; max-width:calc(100% - 24px); margin:0 auto 20px; min-height:44px;
-  background:#24183c; color:#fff1cc; border:1px solid var(--seat); box-shadow:0 3px #100a24; font-size:12px; }
 .rg-player-stage .rg-player-cursor { position:fixed; z-index:2; pointer-events:none; top:0;left:0; width:24px;height:24px; opacity:0;
   border:1px solid var(--seat); border-radius:50%; box-shadow:0 0 10px rgba(var(--seat-rgb),.65),inset 0 0 5px rgba(var(--seat-rgb),.3); }
 .rg-player-stage .rg-player-cursor.is-visible { opacity:.8; }
@@ -99,16 +95,11 @@
 @keyframes rg-player-title { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-1.5px)} }
 @keyframes rg-player-primary-glint { 0%,70%,100%{opacity:0} 82%{opacity:.6} 92%{opacity:0} }
 @keyframes rg-player-sheen { 0%{opacity:0} 40%{opacity:.65} 100%{opacity:0} }
-/* Disable both this skin and pre-existing question-deal motion on request. */
+/* Suspend decorative animation while the page is not visible. */
 .rg-player-stage:not([data-motion=on]) .rg-player-scenery > span,.rg-player-stage:not([data-motion=on]) > main::after { animation:none!important; }
 .rg-player-stage:not([data-motion=on]) main *, .rg-player-stage:not([data-motion=on]) main *::after { animation:none!important; transition:none!important; }
 .rg-player-stage:not([data-motion=on]) main button { transform:none!important; }
 .rg-player-stage:not([data-motion=on]) .rg-player-cursor { display:none; }
-@media(prefers-reduced-motion:reduce) {
-  .rg-player-stage .rg-player-scenery > span,.rg-player-stage > main::after,.rg-player-stage main *, .rg-player-stage main *::after { animation:none!important; transition:none!important; }
-  .rg-player-stage main button { transform:none!important; }
-  .rg-player-stage .rg-player-cursor { display:none; }
-}
 @media(forced-colors:active) {
   .rg-player-stage .rg-player-scenery,.rg-player-stage .rg-player-cursor,.rg-player-stage main::before,.rg-player-stage main::after,.rg-player-stage header::before,.rg-player-stage #player::after { display:none; }
   .rg-player-stage main,.rg-player-stage main button,.rg-player-stage #player { box-shadow:none;text-shadow:none; }

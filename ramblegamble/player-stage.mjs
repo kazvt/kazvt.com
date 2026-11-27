@@ -1,29 +1,17 @@
 // Presentation-only. No invitation access, transport, game events or answer data.
 const page = document.querySelector('body.rg-player-stage');
-const toggle = page?.querySelector('.rg-player-motion');
 const cursor = page?.querySelector('.rg-player-cursor');
-if (page && toggle && cursor) {
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+if (page && cursor) {
   const fine = matchMedia('(any-hover: hover) and (any-pointer: fine)');
-  let paused = false, frame = 0, point = null;
-  try { paused = sessionStorage.getItem('rg-player-motion') === 'off'; } catch {}
+  let frame = 0, point = null;
   function clearCursor() {
     if (frame) cancelAnimationFrame(frame);
     frame = 0; point = null; cursor.classList.remove('is-visible');
   }
   function sync() {
-    const off = paused || reduced.matches;
-    page.dataset.motion = off || document.hidden ? 'off' : 'on';
-    toggle.textContent = reduced.matches ? 'MOTION: SYSTEM REDUCED' : paused ? 'MOTION: OFF' : 'MOTION: ON';
-    toggle.setAttribute('aria-pressed', String(!off));
-    toggle.disabled = reduced.matches;
+    page.dataset.motion = document.hidden ? 'off' : 'on';
     clearCursor();
   }
-  toggle.addEventListener('click', () => {
-    paused = !paused;
-    try { sessionStorage.setItem('rg-player-motion', paused ? 'off' : 'on'); } catch {}
-    sync();
-  });
   function paint() {
     frame = 0;
     if (!point || page.dataset.motion !== 'on' || !fine.matches) return clearCursor();
@@ -45,8 +33,6 @@ if (page && toggle && cursor) {
   window.addEventListener('pagehide', clearCursor);
   window.addEventListener('pageshow', sync);
   document.addEventListener('visibilitychange', sync);
-  reduced.addEventListener('change', sync);
   fine.addEventListener('change', clearCursor);
-  toggle.hidden = false;
   sync();
 }

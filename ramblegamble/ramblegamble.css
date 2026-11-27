@@ -873,11 +873,11 @@ body.ramble-page *::after {
 }
 /* The entrance uses an independent translate channel, so hover/press keeps its
    own transform and the focused native button never becomes invisible. */
-.rg-pause-menu:not([hidden])[data-motion="on"] .rg-pause-actions .rg-menu-button {
+.rg-pause-menu:not([hidden]) .rg-pause-actions .rg-menu-button {
   animation: rg-menu-button-arrive 620ms cubic-bezier(.18,.8,.25,1.15) backwards;
 }
-.rg-pause-menu:not([hidden])[data-motion="on"] .rg-pause-actions .rg-menu-button:nth-child(2) { animation-delay:80ms; }
-.rg-pause-menu:not([hidden])[data-motion="on"] .rg-pause-actions .rg-menu-button:nth-child(3) { animation-delay:160ms; }
+.rg-pause-menu:not([hidden]) .rg-pause-actions .rg-menu-button:nth-child(2) { animation-delay:80ms; }
+.rg-pause-menu:not([hidden]) .rg-pause-actions .rg-menu-button:nth-child(3) { animation-delay:160ms; }
 @keyframes rg-menu-button-arrive {
   0% { translate:0 12px; opacity:.72; }
   72% { translate:0 -2px; opacity:1; }
@@ -892,7 +892,7 @@ body.ramble-page *::after {
   background: linear-gradient(100deg, transparent 25%, #fff2ba38 49%, transparent 73%);
   opacity: 0; z-index: -1;
 }
-.rg-pause-menu[data-marquee-phase="settled"][data-motion="on"] #rg-play::after {
+.rg-pause-menu[data-marquee-phase="settled"] #rg-play::after {
   animation: rg-menu-play-sheen 10s ease-in-out infinite;
 }
 @keyframes rg-menu-play-sheen {
@@ -912,19 +912,9 @@ body.ramble-page *::after {
   box-shadow: inset 0 2px #fff5ba70, inset 0 -3px #34266b80,
     0 2px #ab6fd6, 0 4px #42286d, 2px 5px #25163e;
 }
-.rg-menu-motion {
-  margin-top: 7px; padding: 5px 12px; min-height: 28px;
-  color: #fff2ba; background: #24163fc9; border: 1px solid #c9a4f0;
-  box-shadow: 2px 2px #211744; font-size: 11px; font-weight: 800;
-  letter-spacing: .09em; cursor: pointer;
-}
-.rg-menu-motion:focus-visible { outline: 3px dashed #fff09b; outline-offset: 3px; }
-.rg-menu-motion:disabled { cursor: default; }
 .rg-pause-menu[data-menu-active="false"] .rg-marquee-plate,
 .rg-pause-menu[data-menu-active="false"] #rg-play::after,
 .rg-pause-menu[data-menu-active="false"] .rg-pause-actions .rg-menu-button { animation-play-state: paused!important; }
-.rg-pause-menu[data-motion="off"] .rg-pause-actions .rg-menu-button { transition:none; }
-.rg-pause-menu[data-motion="off"] .rg-pause-actions .rg-menu-button:is(:hover,:focus-visible,:active) { transform:rotateX(7deg); }
 
 .rg-menu-button {
   min-height: clamp(46px, 6.5vh, 62px);
@@ -1018,16 +1008,9 @@ body.ramble-page *::after {
   .rg-marquee-stage { width:min(82vw, 300px, max(100px,calc((100dvh - 190px)*2))); }
   .rg-pause-actions .rg-menu-button { min-height:36px; }
   .rg-pause-menu { padding-block:8px; }
-  .rg-menu-motion { margin-top:4px; min-height:24px; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .rg-pause-menu .rg-marquee-plate, .rg-pause-menu #rg-play::after,
-  .rg-pause-menu .rg-pause-actions .rg-menu-button { animation:none!important; }
-  .rg-menu-button { transition:none; }
-  .rg-pause-actions .rg-menu-button:is(:hover,:focus-visible,:active) { transform:rotateX(7deg); transition:none; }
 }
 @media (forced-colors: active) {
-  .rg-pause-actions .rg-menu-button, .rg-menu-motion { border:2px solid ButtonText; color:ButtonText; background:ButtonFace; text-shadow:none; -webkit-text-stroke:0; }
+  .rg-pause-actions .rg-menu-button { border:2px solid ButtonText; color:ButtonText; background:ButtonFace; text-shadow:none; -webkit-text-stroke:0; }
   .rg-pause-actions #rg-play::after, .rg-pause-actions .rg-menu-button::before { display:none; }
 }
 
