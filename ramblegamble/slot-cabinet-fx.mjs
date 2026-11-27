@@ -5,7 +5,13 @@ const smooth = n => { n=clamp(n); return n*n*(3-2*n); };
 const REST = Object.freeze({x:0,y:0,roll:0,sx:1,sy:1});
 // Values are fractions of cabinet height, radians, and scale deltas.
 const poses = {
-  crank: [[0,0,0,0,0],[90,-.007,0,-.026,-.025],[235,.012,.045,.032,.025],[380,-.006,0,-.019,-.018],[510,0,0,0,0]],
+  // Crank: wind-up, skinny vertical stretch, heavy landing, then two
+  // progressively smaller malfunction hops. Keep lever/reels on the carrier.
+  crank: [[0,0,0,0,0],[85,-.008,0,-.019,-.09],[170,.003,.008,.012,.18],
+    [285,.009,.14,.026,.025],[410,-.009,0,-.022,-.13],
+    [510,-.006,.035,-.015,.135],[600,-.012,.105,-.034,.035],
+    [730,.008,0,.023,-.085],[830,.007,.07,.019,.065],
+    [960,-.004,0,-.012,-.045],[1080,0,0,0,0]],
   press: [[0,0,0,0,0],[70,.005,0,.018,-.022],[180,-.008,.032,-.023,.022],[300,.004,0,.014,-.012],[420,0,0,0,0]],
   tap: [[0,0,0,0,0],[75,0,0,.009,-.012],[170,0,.012,-.008,.009],[280,0,0,0,0]],
   win: [[0,0,0,0,0],[100,-.008,0,-.021,-.032],[285,.015,.068,.032,.027],[470,-.01,0,-.024,-.027],[590,.006,.033,.017,.015],[750,0,0,0,0]],
@@ -17,7 +23,7 @@ function keyPose(kind,elapsed) {
   const i=keys.findIndex(k=>k[0]>elapsed), a=keys[i-1], b=keys[i];
   const t=smooth((elapsed-a[0])/(b[0]-a[0]));
   const [x,y,roll,s]=a.slice(1).map((v,j)=>v+(b[j+1]-v)*t);
-  return {x,y,roll,sx:1-s*.65,sy:1+s};
+  return {x,y,roll,sx:1-s*(kind==='crank' ? 1.05 : .65),sy:1+s};
 }
 export function sampleCabinetPose(kind,elapsed,{rolling=false,brakeAge=Infinity}={}) {
   const p=keyPose(kind,elapsed);
@@ -30,11 +36,16 @@ export function sampleCabinetPose(kind,elapsed,{rolling=false,brakeAge=Infinity}
 }
 // Keep all corners above the floor and inside the measured bay, even on a
 // compressed/tilted pose. Z is untouched, so the rear wall clearance survives.
-export function fitCabinetPose(p,{width,height,bayWidth}) {
+export function fitCabinetPose(p,{width,height,bayWidth,maxHeight=3.0}) {
   const half=width/2, clearance=Math.max(0,(bayWidth-width)/2-.035);
-  const factor=clearance===0?0:Math.min(1,clearance/(height*Math.abs(p.x)+height*Math.abs(p.roll)*1.05+half*Math.max(0,p.sx-1)+1e-9));
-  const roll=p.roll*factor, sx=1+(p.sx-1)*factor, sy=p.sy;
-  return {x:p.x*height*factor,y:p.y*height+half*sx*Math.abs(Math.sin(roll)),roll,sx,sy};
+  const factor=clearance===0?0:Math.min(1,clearance/(height*Math.abs(p.x)+height*Math.abs(p.roll)*Math.max(1,p.sy)+half*Math.max(0,p.sx-1)+1e-9));
+  const roll=p.roll*factor, sx=p.sx<=1?p.sx:1+(p.sx-1)*factor;
+  const edge=half*sx*Math.abs(Math.sin(roll));
+  const y=Math.min(p.y*height+edge, Math.max(edge,maxHeight-height*.8-edge));
+  // The real curtain opening is 3.048 world units high. Leave clearance
+  // for the upper corners even at the highest jump and lean.
+  const sy=Math.min(p.sy,(Math.max(maxHeight,height)-y-edge)/(height*Math.cos(roll)));
+  return {x:p.x*height*factor,y,roll,sx,sy};
 }
 function makeSmokeTexture(THREE) {
   // Deliberately low-resolution, irregular cel-shaded soot, not luminous mist.
@@ -70,7 +81,7 @@ export function createSlotCabinetFX(THREE,rig,model,{bayWidth,foley,random=Math.
   // Actual cabinet's rear half and two side seams. The local +Z direction is
   // toward the back wall (the stage rig is turned 180 degrees).
   const backZ=rig.worldToLocal(new THREE.Vector3(center.x,center.y,bodyBounds.min.z)).z-pivot.z;
-  let kind='',started=0,rolling=false,brake=-Infinity,nextPuff=Infinity,serial=0,sounding=false,eligible=false;
+  let kind='',started=0,rolling=false,brake=-Infinity,nextPuff=Infinity,serial=0,crankImpact=0,sounding=false,eligible=false;
   function emit(time,side,back=false,force=1){
     const p=pool.find(p=>!p.sprite.visible)||pool.reduce((a,b)=>a.born<b.born?a:b);
     const s=side||1, r=random();
@@ -82,7 +93,7 @@ export function createSlotCabinetFX(THREE,rig,model,{bayWidth,foley,random=Math.
   function burst(time,count,force=1){for(let i=0;i<count;i++)emit(time+(i%3)*45,i%2?1:-1,i%3===2,force);}
   function stopSound(){if(!sounding)return;sounding=false;foley?.stop('slot-rattle');foley?.stop('slots');}
   function stopRolling(){rolling=false;nextPuff=Infinity;stopSound();}
-  function reset(){stopRolling();eligible=false;brake=-Infinity;kind='';carrier.position.copy(pivot);carrier.rotation.z=0;carrier.scale.set(1,1,1);carrier.updateMatrixWorld(true);for(const p of pool)p.sprite.visible=false;}
+  function reset(){stopRolling();eligible=false;brake=-Infinity;crankImpact=0;kind='';carrier.position.copy(pivot);carrier.rotation.z=0;carrier.scale.set(1,1,1);carrier.updateMatrixWorld(true);for(const p of pool)p.sprite.visible=false;}
   function begin(time,action,{active=true,reduced=false}={}){
     reset();if(!active)return;eligible=true;
     const spin=action!=='tap';rolling=spin;started=time;kind=reduced?'':action;
@@ -101,6 +112,15 @@ export function createSlotCabinetFX(THREE,rig,model,{bayWidth,foley,random=Math.
     const pose=fitCabinetPose(sampleCabinetPose(kind,time-started,{rolling:rolling&&Boolean(kind),brakeAge:time-brake}),{width:size.x,height:size.y,bayWidth});
     carrier.position.copy(pivot);carrier.position.x+=pose.x;carrier.position.y+=pose.y;carrier.rotation.z=pose.roll;carrier.scale.set(pose.sx,pose.sy,1);carrier.updateMatrixWorld(true);
     if(!rolling&&kind&&time-started>=poses[kind].at(-1)[0])kind='';
+    // Emit extra soot on actual crank landings; do not replay stale bursts
+    // after frame stalls, and do not alter the reel schedule or sound lifecycle.
+    if(rolling&&kind==='crank'){
+      const impacts=[410,730,960],age=time-started;
+      while(crankImpact<impacts.length&&age>=impacts[crankImpact]){
+        if(age-impacts[crankImpact]<130)burst(time,crankImpact===0?5:3,1.2-crankImpact*.15);
+        crankImpact++;
+      }
+    }
     if(rolling&&time>=nextPuff){emit(time,serial++%2?1:-1,serial%3===0);if(serial%3===0)emit(time,serial%2?1:-1,true,.75);nextPuff=time+170;}
     for(const p of pool){if(!p.sprite.visible)continue;const age=time-p.born,t=age/p.life;if(t>=1){p.sprite.visible=false;continue;}if(t<0)continue;
       p.sprite.position.copy(p.origin);p.sprite.position.x+=p.side*(.32+.32*p.force)*t+Math.sin(p.phase+t*4)*.055*t;p.sprite.position.y+=(.42+.38*p.force)*t;p.sprite.position.z-=.12*t;

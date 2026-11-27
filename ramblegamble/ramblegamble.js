@@ -1,6 +1,6 @@
 import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=balcony-music-20261127-v1";
 import { createMenuMarquee } from "./menu-marquee.mjs?v=marquee-crossfade-20261127-v1";
-import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=hazel-balcony-20261127-v1";
+import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=arrow-restored-20261127-v1";
 import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcony.mjs?v=hazel-balcony-20261127-v1";
 import { createSignGlow } from "./sign-glow.mjs?v=neon-focus-20261127-v1";
 import { selectedCharacterId, characterRenderPose, createCharacterSelection } from "./character-selection.mjs?v=compact-score-20261127-v1";
@@ -16,9 +16,9 @@ import { CHARACTER_SOURCE_SIZE, CHARACTER_YAW_LIMIT, characterYaw, standingChara
 import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { createExteriorMist, EXTERIOR_FLOOR } from "./exterior-mist.mjs?v=crowd-mist-20261127-v1";
-import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=slot-cabinet-20261127-v1";
-import { foley } from "./game-foley.mjs?v=slot-cabinet-20261127-v1";
-import { createSlotCabinetFX } from "./slot-cabinet-fx.mjs?v=slot-cabinet-20261127-v1";
+import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=crank-hop-20261127-v1";
+import { foley } from "./game-foley.mjs?v=crank-hop-20261127-v1";
+import { createSlotCabinetFX } from "./slot-cabinet-fx.mjs?v=crank-hop-20261127-v1";
 import {
   resolvePointClickAction,
   resolvePointClickBack,

@@ -1,6 +1,7 @@
 // One marker for the current camera destination, never a second cursor.
 export const FOCUS_ARROW_ANIMATION_MS = 3200;
 const assets='/ramblegamble/assets/provided/focus-arrow';
+const version='?v=arrow-restored-20261127-v1';
 const finite=p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y);
 export function focusArrowKey(view){
   if(view?.kind==='contestant')return ['faroe','erin','kaz'].includes(view.contestantId)?`contestant:${view.contestantId}`:null;
@@ -80,18 +81,28 @@ export function focusArrowPose(target,viewport){
 }
 export function createFocusArrow(layer){
   const image=document.createElement('img');image.className='rg-focus-arrow';image.alt='';image.setAttribute('aria-hidden','true');image.draggable=false;image.hidden=true;layer.append(image);
-  let key=null,started=0,animated=null;
+  let key=null,started=0,animated=null,failed=false,failedGif=false,wanted=false;
+  // If the animation fails, fall back to the bundled still. Never expose
+  // a broken-image rectangle if both files are unavailable.
+  image.addEventListener('load',()=>{image.hidden=!wanted||failed;});
+  image.addEventListener('error',()=>{
+    image.hidden=true;
+    if(animated===true){failedGif=true;animated=false;image.src=assets+'.png'+version;}
+    else {failed=true;image.hidden=true;}
+  });
   return {
     update(view,target,viewport,time,reduced){
       const next=focusArrowKey(view),pose=next&&focusArrowPose(target,viewport);
-      if(!pose){image.hidden=true;if(!next)key=null;return false;}
-      if(next!==key){key=next;started=time;animated=null;}
-      const moving=!reduced&&time-started<FOCUS_ARROW_ANIMATION_MS;
-      if(moving!==animated){image.src=assets+(moving?'.gif':'.png');animated=moving;}
+      if(!pose){wanted=false;image.hidden=true;if(!next)key=null;return false;}
+      if(next!==key){key=next;started=time;animated=null;failed=false;failedGif=false;}
+      const moving=!failedGif&&!reduced&&time-started<FOCUS_ARROW_ANIMATION_MS;
+      if(failed){wanted=false;image.hidden=true;return false;}
+      wanted=true;
+      if(moving!==animated){animated=moving;image.src=assets+(moving?'.gif':'.png')+version;}
       Object.assign(image.style,{left:`${pose.left}px`,top:`${pose.top}px`,width:`${pose.width}px`,height:`${pose.height}px`,transform:`rotate(${pose.angle}deg)`});
-      image.hidden=false;return moving;
+      image.hidden=!image.complete||!image.naturalWidth;return moving;
     },
-    hide(reset=false){image.hidden=true;if(reset)key=null;},
-    dispose(){image.remove();},
+    hide(reset=false){wanted=false;image.hidden=true;if(reset)key=null;},
+    dispose(){wanted=false;image.remove();},
   };
 }

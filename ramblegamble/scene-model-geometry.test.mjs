@@ -247,19 +247,19 @@ test('actual cabinet motion stays inside the authored bay and above the floor, i
   highest=Math.max(highest,p.y);lean=Math.max(lean,Math.abs(p.roll));
   for(const x of [-width/2,width/2])for(const y of [0,height]){
    const xx=p.x+x*p.sx*Math.cos(p.roll)-y*p.sy*Math.sin(p.roll), yy=p.y+x*p.sx*Math.sin(p.roll)+y*p.sy*Math.cos(p.roll);
-   assert.ok(Math.abs(xx)<=bayWidth/2-.0349999);assert.ok(yy>=-1e-9);
+   assert.ok(Math.abs(xx)<=bayWidth/2-.0349999);assert.ok(Math.abs(xx)<=3.81/2-.035);assert.ok(yy>=-1e-9);assert.ok(yy<=3.000001);
   }
  }
- assert.ok(highest>.19&&highest<.28);assert.ok(lean>.03&&lean<.06);
+ assert.ok(highest>.34&&highest<.44);assert.ok(lean>.03&&lean<.06);
 });
 test('moving cabinet keeps actual controls and reel corners in the viewport across sizes and focus orbit angles',()=>{
  const {points,cabinet,wp,spinButtons}=slotGeometry(),target=box(points).center;
  const pivot=[cabinet.center[0],cabinet.min[1],cabinet.center[2]],width=cabinet.max[0]-cabinet.min[0],height=cabinet.max[1]-cabinet.min[1];
- const samples=[['crank',235],['press',180],['win',285],['win',470],['loss',220],['loss',355],['crank',1720]];
- for(const [w,h] of [[803,395],[1014,576],[1920,1080],[360,640],[320,240],[2560,720],[575,480],[3840,2160],[1440,2560],[1280,800]])for(const yaw of [-focusLimits('slot')[0],0,focusLimits('slot')[0]])for(const pitch of [-focusLimits('slot')[1],0,focusLimits('slot')[1]]){
-  const authored=basis(-.08,.14),fit=fitSlotInteractionFrame(relative(points,target,authored),{width:w,height:h,cabinetMotion:true});
+ const samples=[...Array.from({length:73},(_,i)=>['crank',i*15]),['crank',235],['press',180],['win',285],['win',470],['loss',220],['loss',355],['crank',1720]];
+ for(const [w,h] of [[803,395],[1014,576],[1920,1080],[360,640],[320,240],[2560,720],[575,480],[3840,2160],[1440,2560],[1280,800]])for(const look of [-1,0,1])for(const yaw of [-focusLimits('slot')[0],0,focusLimits('slot')[0]])for(const pitch of [-focusLimits('slot')[1],0,focusLimits('slot')[1]]){
+  const authored=basis(-.08-look*.42,.14),fit=fitSlotInteractionFrame(relative(points,target,authored),{width:w,height:h,cabinetMotion:true});
   const aim=add(add(target,mul(authored.right,fit.shiftX)),mul(authored.up,fit.shiftY));
-  const b=basis(-.08+yaw,Math.sin(Math.asin(.14)+pitch)),f={distance:fit.distance,shiftX:0,shiftY:0};
+  const b=basis(-.08-look*.42+yaw,Math.sin(Math.asin(.14)+pitch)),f={distance:fit.distance,shiftX:0,shiftY:0};
   for(const [kind,t] of samples){
    const pose=fitCabinetPose(sampleCabinetPose(kind,t,{rolling:kind==='crank'||kind==='press'}),{width,height,bayWidth:5.34});
    const move=v=>{const [x,y,z]=sub(v,pivot),c=Math.cos(pose.roll),s=Math.sin(pose.roll);return add(pivot,[-pose.x+x*pose.sx*c+y*pose.sy*s,pose.y-x*pose.sx*s+y*pose.sy*c,z]);};

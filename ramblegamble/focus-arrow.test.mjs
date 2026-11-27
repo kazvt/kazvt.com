@@ -31,8 +31,8 @@ test('character projection respects the current visible plane and upper-plane oc
  const target=characterArrowTarget(entry,viewport,{contains:(e,x,y)=>e===entry&&x>460&&y>210});assert.ok(target);const p=focusArrowPose(target,viewport);assert.ok(p);assert.equal(p.aimX,target.aim.x);assert.equal(characterArrowTarget(entry,viewport,{contains:()=>false}),null);entry.panel.style.visibility='hidden';assert.equal(characterArrowTarget(entry,viewport,{contains:()=>true}),null);
 });
 test('single DOM pointer switches destination, stops animating, respects reduced motion and can be hidden',()=>{
- const original=globalThis.document;const img={style:{},setAttribute(){},remove(){this.removed=true}};globalThis.document={createElement:()=>img};let count=0;
- try{const marker=createFocusArrow({append(){count++}}),target={bounds};marker.update({kind:'host'},target,viewport,100,false);assert.match(img.src,/\.gif$/);assert.equal(img.hidden,false);marker.update({kind:'host'},target,viewport,100+FOCUS_ARROW_ANIMATION_MS,false);assert.match(img.src,/\.png$/);marker.update({kind:'slot'},target,viewport,5000,false);assert.match(img.src,/\.gif$/);marker.update({kind:'slot'},target,viewport,5100,true);assert.match(img.src,/\.png$/);marker.update({kind:'overview'},target,viewport,5200,false);assert.equal(img.hidden,true);marker.update({kind:'host'},target,viewport,5300,true);assert.equal(img.hidden,false);assert.match(img.src,/\.png$/);marker.hide(true);assert.equal(img.hidden,true);marker.dispose();assert.equal(img.removed,true);assert.equal(count,1);}finally{globalThis.document=original;}
+ const original=globalThis.document;const img={style:{},complete:true,naturalWidth:64,addEventListener(){},setAttribute(){},remove(){this.removed=true}};globalThis.document={createElement:()=>img};let count=0;
+ try{const marker=createFocusArrow({append(){count++}}),target={bounds};marker.update({kind:'host'},target,viewport,100,false);assert.match(img.src,/\.gif\?v=/);assert.equal(img.hidden,false);marker.update({kind:'host'},target,viewport,100+FOCUS_ARROW_ANIMATION_MS,false);assert.match(img.src,/\.png\?v=/);marker.update({kind:'slot'},target,viewport,5000,false);assert.match(img.src,/\.gif\?v=/);marker.update({kind:'slot'},target,viewport,5100,true);assert.match(img.src,/\.png\?v=/);marker.update({kind:'overview'},target,viewport,5200,false);assert.equal(img.hidden,true);marker.update({kind:'host'},target,viewport,5300,true);assert.equal(img.hidden,false);assert.match(img.src,/\.png\?v=/);marker.hide(true);assert.equal(img.hidden,true);marker.dispose();assert.equal(img.removed,true);assert.equal(count,1);}finally{globalThis.document=original;}
 });
 test('render integration targets actual scene objects and hides in non-focus modes',()=>{
  const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');const a=src.indexOf('  function updateFocusArrow('),b=src.indexOf('  function syncVipAmbience(',a);const code=src.slice(a,b);
@@ -46,4 +46,23 @@ test('VIP marker uses both dice body extents and pauses during rolling',()=>{
  const src=readFileSync(new URL('./dice-mode.js',import.meta.url),'utf8');const a=src.indexOf('  function updateDiceFocusArrow('),b=src.indexOf('  function render(time)',a);
  const actions=[];const c={rolling:false,modelReady:true,graphicsLost:false,isOpen:true,isClosing:false,dialog:{clientWidth:1000,clientHeight:700},camera:{updateMatrixWorld(){}},THREE:{Vector3:class{constructor(x,y,z){Object.assign(this,{x,y,z})}project(){return this}}},dieStates:[-.25,.25].map(shift=>({baseHalfExtents:[.1,.1,.1],group:{localToWorld:p=>Object.assign(p,{x:p.x+shift,y:p.y+.15})}})),projectedArrowTarget,reducedMotion:{matches:false},diceFocusArrow:{hide:()=>actions.push('hide'),update:(v,t)=>{actions.push([v,t]);return true;}}};
  runInNewContext(src.slice(a,b)+'\nthis.update=updateDiceFocusArrow;',c);assert.equal(c.update(0),true);assert.equal(actions.at(-1)[0].kind,'dice');assert.ok(actions.at(-1)[1].bounds.left<400);assert.ok(actions.at(-1)[1].bounds.right>600);c.rolling=true;assert.equal(c.update(1),false);assert.equal(actions.at(-1),'hide');c.rolling=false;c.graphicsLost=true;assert.equal(c.update(2),false);assert.equal(actions.at(-1),'hide');
+});
+
+test('bundled focus arrow assets exist with the original 64x32 transparent GIF and matching PNG dimensions',()=>{
+ const gif=readFileSync(new URL('./assets/provided/focus-arrow.gif',import.meta.url)),png=readFileSync(new URL('./assets/provided/focus-arrow.png',import.meta.url));
+ assert.equal(gif.toString('ascii',0,6),'GIF89a');assert.equal(gif.readUInt16LE(6),64);assert.equal(gif.readUInt16LE(8),32);
+ assert.equal(png.toString('hex',0,8),'89504e470d0a1a0a');assert.equal(png.readUInt32BE(16),64);assert.equal(png.readUInt32BE(20),32);
+});
+test('focus arrow hides while loading, falls back to the still, and never shows a missing image or a stale hidden view',()=>{
+ const original=globalThis.document,events={},img={style:{},complete:false,naturalWidth:0,addEventListener:(n,f)=>events[n]=f,setAttribute(){},remove(){}};
+ globalThis.document={createElement:()=>img};
+ try{const marker=createFocusArrow({append(){}}),target={bounds},host={kind:'host'};
+  marker.update(host,target,viewport,0,false);assert.equal(img.hidden,true);assert.match(img.src,/\.gif\?v=/);
+  events.error();assert.match(img.src,/\.png\?v=/);assert.equal(img.hidden,true);
+  img.complete=true;img.naturalWidth=64;events.load();assert.equal(img.hidden,false);
+  assert.equal(marker.update(host,target,viewport,100,false),false);assert.match(img.src,/\.png\?v=/);
+  marker.hide();events.load();assert.equal(img.hidden,true);
+  marker.update({kind:'slot'},target,viewport,200,false);events.error();events.error();assert.equal(img.hidden,true);
+  marker.update({kind:'slot'},target,viewport,250,false);assert.equal(img.hidden,true);
+ }finally{globalThis.document=original;}
 });

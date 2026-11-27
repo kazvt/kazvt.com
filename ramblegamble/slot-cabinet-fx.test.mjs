@@ -51,9 +51,9 @@ function fixture(){
   return {fx,rig,model,sample,rest,calls,smoke,carrier,update:(t,active=true,reduced=false)=>fx.update(t,{active,reduced}),puffs:()=>smoke.children.filter(p=>p.visible)};
 }
 test('cabinet key poses have anticipation, different win/loss reactions, bounded spin and exact rest',()=>{
- const rest={x:0,y:0,roll:0,sx:1,sy:1};for(const kind of ['crank','press','tap','win','loss']){assert.deepEqual(sampleCabinetPose(kind,0),rest);assert.deepEqual(sampleCabinetPose(kind,1000),rest);}
+ const rest={x:0,y:0,roll:0,sx:1,sy:1};for(const kind of ['crank','press','tap','win','loss']){assert.deepEqual(sampleCabinetPose(kind,0),rest);assert.deepEqual(sampleCabinetPose(kind,1200),rest);}
  assert.ok(sampleCabinetPose('win',285).y>sampleCabinetPose('loss',220).y);
- assert.ok(sampleCabinetPose('crank',90).sy<1);assert.ok(sampleCabinetPose('crank',235).sy>1);
+ assert.ok(sampleCabinetPose('crank',85).sy<.92);assert.ok(sampleCabinetPose('crank',170).sy>1.17);
  for(let t=0;t<4000;t+=3){const p=sampleCabinetPose('crank',t,{rolling:true,brakeAge:t%200});assert.ok(Math.abs(p.roll)<.07&&Math.abs(p.x)<.03&&p.y>=0);}
 });
 test('moving carrier preserves model at rest, projects cached world anchors, follows curtain travel',()=>{
@@ -76,4 +76,16 @@ test('hide/lock/off-view cancellation, reduced motion, manual taps and stale out
  f.fx.begin(600,'press',{reduced:true});f.update(800,true,true);assert.equal(f.puffs().length,0);vec(f.model.localToWorld(f.sample.clone()),f.rest);f.fx.result(1120,true,{reduced:true});assert.equal(f.puffs().length,0);
  const n=f.calls.length;f.fx.begin(1200,'tap');f.update(1370);assert.equal(f.puffs().length,0);assert.equal(f.calls.length,n);f.fx.result(1820,false,{wasRolling:false});f.update(2000);assert.equal(f.puffs().length,0);
  f.fx.begin(2100,'press');f.update(2280);f.update(2300,true,true);assert.equal(f.puffs().length,0);vec(f.model.localToWorld(f.sample.clone()),f.rest);f.update(2340);assert.equal(f.puffs().length,0);f.fx.dispose();assert.equal(f.smoke.parent,null);assert.ok(f.smoke.children.every(p=>p.material.disposed));
+});
+
+test('crank has a narrow tall windup and three distinct airborne arcs with decreasing height',()=>{
+ const pose=t=>sampleCabinetPose('crank',t);
+ assert.ok(pose(170).sx<.83&&pose(170).sy>1.17);
+ assert.ok(pose(285).y>.13&&pose(285).y>pose(600).y&&pose(600).y>pose(830).y);
+ for(const t of [410,730,960]){assert.equal(pose(t).y,0);assert.ok(pose(t).sy<1&&pose(t).sx>1);}
+});
+test('crank landing emits a bounded additional soot burst without restarting recorded audio',()=>{
+ const f=fixture();f.fx.begin(0,'crank');f.update(400);const before=f.puffs().length;f.update(410);
+ assert.equal(f.puffs().length,before+5);f.update(420);assert.equal(f.puffs().length,before+5);
+ assert.equal(f.calls.length,2);f.fx.reset();assert.equal(f.puffs().length,0);
 });
