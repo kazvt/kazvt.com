@@ -123,13 +123,13 @@ export function paintCrowd(ctx,width,height,people,frame,emotion) {
   ctx.fillStyle='#21192f';ctx.fillRect(0,height-13,width,13);
 }
 // A single quiet Easter egg behind the right-hand audience panel. The
-// original photograph stays untouched; the derived cutout is a 15x38 pixel
-// plum-palette version with no bright eyes, outline or emissive material.
+// original photograph stays untouched; the derived cutout is a 30x76 pixel
+// plum-palette version with muted eye detail and no outline or emissive material.
 export const CROWD_CAT_YAW_LIMIT=32*Math.PI/180;
 export const CROWD_CAT_YAW_WEIGHT=.65;
 export const CROWD_CAT=Object.freeze({
-  section:2, u:107/305, centerPixelY:51, height:38*4.3/180,
-  width:15*4.3/180, setback:.19,
+  section:2, u:107/305, centerPixelY:43, height:44*4.3/180,
+  width:(44*30/76)*4.3/180, setback:.19,
 });
 export function crowdCatAnchor(section=CROWD_SECTIONS[CROWD_CAT.section]) {
   const x=(CROWD_CAT.u-.5)*section.width;
@@ -154,10 +154,10 @@ export function crowdCatFacing(eye,anchor,section=CROWD_SECTIONS[CROWD_CAT.secti
 export function createCrowdCat(THREE,group) {
   const section=CROWD_SECTIONS[CROWD_CAT.section],anchor=crowdCatAnchor(section);
   let ready=false,disposed=false;
-  const tex=new THREE.TextureLoader().load(new URL('./assets/berries/smeemo-crowd.png',import.meta.url).href,
+  const tex=new THREE.TextureLoader().load(new URL('./assets/berries/smeemo-crowd.png?v=crowd-peek-20261127-v1',import.meta.url).href,
     ()=>{if(!disposed)ready=true;},undefined,()=>{ready=false;});
   tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestFilter;tex.generateMipmaps=false;tex.colorSpace=THREE.SRGBColorSpace;
-  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(CROWD_CAT.width,CROWD_CAT.height),new THREE.MeshBasicMaterial({map:tex,transparent:true,opacity:.7,alphaTest:.001,depthTest:true,depthWrite:false,side:THREE.FrontSide,toneMapped:false,fog:false}));
+  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(CROWD_CAT.width,CROWD_CAT.height),new THREE.MeshBasicMaterial({map:tex,transparent:true,opacity:.86,alphaTest:.001,depthTest:true,depthWrite:false,side:THREE.FrontSide,toneMapped:false,fog:false}));
   mesh.name='rg-audience-spectator';mesh.position.set(anchor.x,anchor.y,anchor.z);mesh.rotation.y=section.yaw;mesh.visible=false;
   // Draw behind the translucent silhouettes regardless of object-center sort.
   // The setback clears the panel at every allowed yaw; opaque scenery still
@@ -171,6 +171,7 @@ export function createCrowdCat(THREE,group) {
     mesh.rotation.y=yaw;
     const beat=frame/CROWD_FPS*2.1+1.7;
     const focused=!!dance?.focused&&!reduced;
+    mesh.material.opacity=dance?.focused ? .96 : .86;
     mesh.position.y=anchor.y+(focused||reduced?0:emotion==='cheer'?Math.max(0,Math.sin(beat))* .055:Math.sin(beat)*.018);
     mesh.matrixAutoUpdate=true;
     if(focused){const p=dancePose(dance.time,.78,.16),h=CROWD_CAT.height;

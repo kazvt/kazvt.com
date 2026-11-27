@@ -1,4 +1,4 @@
-import { createFloatingSky } from "./floating-sky.mjs?v=sky-soot-20261127-v1";
+import { createFloatingSky } from "./floating-sky.mjs?v=mesh-sky-20261127-v1";
 import { createStageDance, createDanceClock, dancePose } from "./stage-dance.mjs?v=ambient-tuning-20261127-v1";
 import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=corrective-review-20261127-v1";
 import { createMenuMarquee } from "./menu-marquee.mjs?v=corrective-review-20261127-v1";
@@ -12,7 +12,7 @@ import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state
 import { createCharacterOcclusion } from "./character-occlusion.mjs?v=stage-dance-20261127-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
-import { createAudienceRenderer, crowdCatAnchor } from "./audience-render.mjs?v=ambient-tuning-20261127-v1";
+import { createAudienceRenderer, crowdCatAnchor } from "./audience-render.mjs?v=mesh-sky-20261127-v1";
 import { createShowFX } from "./show-fx.mjs?v=sky-soot-20261127-v1";
 import { createRouletteCabinetFX } from "./roulette-cabinet-fx.mjs?v=sky-soot-20261127-v1";
 import { cameraTravelDuration, isSpookyView, suspenseEase, crowdCloseupPose } from "./spooky-camera.mjs?v=cartoon-machines-20261127-v1";

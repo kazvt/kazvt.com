@@ -10,7 +10,7 @@ from PIL import Image, ImageDraw, ImageFont
 from scipy.spatial.transform import Rotation
 import trimesh
 from sky_materials import mapped_parts
-from sky_physics import Body, Hull, box, compound, simulate, text_rotation
+from sky_physics import Body, Hull, box, compound, simulate, text_rotation, text_hulls
 
 HERE=Path(__file__).resolve().parent
 N=1024; FPS=20; SECONDS=20; TAU=math.tau
@@ -213,14 +213,11 @@ def main():
  text=text_sprite();assets['text']=text_mesh(text)
  bodies=[];phases=rng.uniform(0,TAU,(len(names),3))
  for i,(name,r) in enumerate(zip(names,radii)):
-  ang=phases[i];rot=Rotation.from_euler('xyz',[(1.12 if name.startswith('book') else -.18)+.35*math.sin(ang[0]),.55*math.sin(ang[1])+.28+(math.pi if name=='card2' else 0),.32*math.sin(ang[2])]);w=rng.uniform(-.8,.8,3)
+  ang=phases[i];rot=Rotation.from_euler('xyz',[(1.12 if name.startswith('book') else -.18)+.35*math.sin(ang[0]),.55*math.sin(ang[1])+.28+(math.pi if name=='card2' else 0),.32*math.sin(ang[2])]);w=rng.uniform(-1.65,1.65,3)
   if name=='orb':
    sphere=trimesh.creation.icosphere(subdivisions=2);hulls=[Hull(sphere.vertices*r)]
   elif name=='text':
-   alpha=np.asarray(text)[:,:,3];occupied=np.any(alpha>64,axis=0);edges=np.flatnonzero(np.diff(np.r_[False,occupied,False]));hulls=[]
-   for a,b in edges.reshape(-1,2):
-    ys=np.nonzero(alpha[:,a:b]>64)[0];scale=2*r/text.width;cx=(a+b-text.width)*scale/2;cy=(text.height-ys.min()-ys.max()-1)*scale/2
-    hulls.append(Hull(box(((b-a)*scale,(ys.max()-ys.min()+1)*scale,5),(cx,cy,0))))
+   hulls=text_hulls(np.asarray(text)[:,:,3],r)
    rot=text_rotation(0);w=np.zeros(3)
   else:hulls=compound(collision_assets[name],r)
   bodies.append(Body(hulls,[pos[i][0],-pos[i][1]+N,rng.uniform(-18,18)],[vel[i][0],-vel[i][1],rng.uniform(-9,9)],rot,w,r,text=name=='text'))

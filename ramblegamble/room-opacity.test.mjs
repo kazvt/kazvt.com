@@ -142,14 +142,15 @@ test('spectator follows camera on the same crowd frame, respects visibility and 
  const ctx=new Proxy({}, {get:(o,k)=>k==='createLinearGradient'?()=>({addColorStop(){}}):()=>{}});
  globalThis.document={createElement:()=>({getContext:()=>ctx})};
  let load,error;
- class DeferredLoader{load(url,onload,_progress,onerror){assert.ok(url.endsWith('/smeemo-crowd.png'));load=onload;error=onerror;return new Texture(url);}}
+ class DeferredLoader{load(url,onload,_progress,onerror){assert.ok(new URL(url).pathname.endsWith('/smeemo-crowd.png'));load=onload;error=onerror;return new Texture(url);}}
  try{
   const scene=new Group(),audience=createAudienceRenderer({...THREE,TextureLoader:DeferredLoader},scene);
   const cat=audience.group.children.find(m=>m.name==='rg-audience-spectator'),a=crowdCatAnchor(),section=CROWD_SECTIONS[CROWD_CAT.section];
   const eye={x:section.x-4,z:a.z};
   audience.update(0,'idle',false,eye);assert.equal(cat.visible,false);
   load();audience.update(0,'idle',false,eye);assert.equal(cat.visible,true);
-  assert.equal(cat.material.opacity,.7);assert.equal(cat.material.depthTest,true);assert.equal(cat.material.depthWrite,false);assert.equal(cat.material.side,THREE.FrontSide);assert.equal(cat.renderOrder,-1);
+  assert.equal(cat.material.opacity,.86);assert.equal(cat.material.depthTest,true);assert.equal(cat.material.depthWrite,false);assert.equal(cat.material.side,THREE.FrontSide);assert.equal(cat.renderOrder,-1);
+  audience.update(0,'idle',true,eye,{focused:true});assert.equal(cat.material.opacity,.96);audience.update(0,'idle',true,eye);assert.equal(cat.material.opacity,.86);
   const yaw=cat.rotation.y;audience.update(1,'idle',false,{...eye,z:a.z+8});assert.notEqual(cat.rotation.y,yaw);assert.equal(cat.rotation.x,0);assert.equal(cat.rotation.z,0);
   audience.update(1000,'cheer',true,eye);assert.equal(cat.position.y,a.y);
   for(let f=0;f<60;f++){audience.update(f*1000/CROWD_FPS,'cheer',false,eye);assert.ok(cat.position.y>=a.y&&cat.position.y<=a.y+.055+1e-12);}
@@ -165,9 +166,9 @@ test('local original and crowd sprite are separate PNGs, and the camera update f
  const dimensions=b=>[b.readUInt32BE(16),b.readUInt32BE(20)];
  assert.deepEqual(dimensions(png('smeemo.png')),[300,300]);
  assert.deepEqual(dimensions(png('smeemo_scramble.png')),[236,601]);
- assert.deepEqual(dimensions(png('smeemo-crowd.png')),[15,38]);
+ assert.deepEqual(dimensions(png('smeemo-crowd.png')),[30,76]);
  const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
- assert.match(src,/audience-render\.mjs\?v=ambient-tuning-20261127-v1/);
+ assert.match(src,/audience-render\.mjs\?v=mesh-sky-20261127-v1/);
  const animate=src.slice(src.indexOf('function animate(time)'));
  assert.ok(animate.indexOf('audience?.update(crowdClock,emotion,reducedMotion.matches,camera.position,')>animate.indexOf('focusOrbit.step(time'));
 });
@@ -193,6 +194,7 @@ test('crowd Smeemo only enters the anchored dance during focused close-up, retai
  const originalUpdate=Mesh.prototype.updateMatrix;Mesh.prototype.updateMatrix=function(){this.matrix=new Matrix();};
  try{const scene=new Group(),audience=createAudienceRenderer({...THREE,Matrix4:Matrix},scene),cat=audience.group.children.find(m=>m.name==='rg-audience-spectator'),a=crowdCatAnchor(),eye={x:a.x-4,z:a.z};
   audience.update(300,'idle',false,eye,{time:300,focused:false});assert.ok(cat.visible);assert.equal(cat.matrixAutoUpdate,true);
+  audience.update(0,'idle',true,eye,{focused:true});assert.equal(cat.material.opacity,.96);audience.update(0,'idle',true,eye);assert.equal(cat.material.opacity,.86);
   const yaw=cat.rotation.y;audience.update(300,'idle',false,eye,{time:300,focused:true});assert.equal(cat.matrixAutoUpdate,false);assert.equal(cat.position.y,a.y);assert.equal(cat.rotation.y,yaw);assert.ok(cat.matrix.a[0]<1);assert.ok(Math.abs(cat.matrix.a[1])<=.085);
   audience.update(400,'idle',false,eye,{time:400,focused:false});assert.equal(cat.matrixAutoUpdate,true);
   audience.update(400,'idle',true,eye,{time:400,focused:true});assert.equal(cat.matrixAutoUpdate,true);assert.equal(cat.position.y,a.y);audience.dispose();

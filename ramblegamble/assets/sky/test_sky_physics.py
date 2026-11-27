@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 import numpy as np
 from scipy.spatial.transform import Rotation
-from sky_physics import Body,Hull,box,sat,collide,simulate,text_rotation
+from sky_physics import Body,Hull,box,sat,collide,simulate,text_rotation,compound,text_hulls,MIN_SPIN,MAX_SPIN,MeshParts
 
 class PhysicsTests(unittest.TestCase):
  def test_narrowphase_rejects_broadphase_overlap(self):
@@ -30,6 +30,31 @@ class RenderTests(unittest.TestCase):
  def setUpClass(cls):
   import importlib.util
   spec=importlib.util.spec_from_file_location('render_sky',Path(__file__).with_name('render-sky.py'));cls.render=importlib.util.module_from_spec(spec);spec.loader.exec_module(cls.render)
+ def test_exact_authored_concave_mesh_does_not_fill_open_space(self):
+  r=self.render;i=np.eye(3);zero=np.zeros(3);probe=Hull(box((2,2,2)))
+  # These points lie well inside the OLD whole-component convex envelope,
+  # yet are far from any actual triangle of the authored chair or desk.
+  for name,point in [('chair',[-5.218,-19.725,0]),('chair2',[5.778,-20.410,-5.211]),('desk',[-12.618,-10.159,0])]:
+   parts=r.normalized(r.stage_assets()[name]);verts=np.concatenate([p[0].reshape(-1,3) for p in parts])*45
+   shapes=compound(parts,45);self.assertTrue(any(isinstance(h,MeshParts) for h in shapes))
+   test=probe.transform(point,i)
+   self.assertIsNotNone(sat(Hull(verts).transform(zero,i),test),name)
+   self.assertFalse(any(sat(h.transform(zero,i),test) for h in shapes),name)
+   # Contact still occurs at an actual triangle rather than disabling the prop.
+   face=parts[0][0][0]*45;on_face=probe.transform(face.mean(0),i)
+   self.assertTrue(any(sat(h.transform(zero,i),on_face) is not None for h in shapes),name)
+ def test_letter_counter_is_not_solid_rectangle(self):
+  alpha=np.ones((20,20),np.uint8)*255;alpha[5:15,5:15]=0
+  world=text_hulls(alpha,10)[0].transform(np.zeros(3),np.eye(3));probe=Hull(box((2,2,.5)))
+  self.assertIsNone(sat(world,probe.transform([0,0,0],np.eye(3))))
+  self.assertIsNotNone(sat(world,probe.transform([8,0,0],np.eye(3))))
+ def test_angular_motion_has_stronger_floor_and_cap(self):
+  h=Hull(box((8,8,8)));b=Body([h],[400,400,0],[0,0,0],Rotation.identity(),[0,0,0],8)
+  hist=simulate([b],1,20)
+  for (_,a),(_,z) in zip(hist,hist[1:]):
+   speed=Rotation.from_matrix(z[0]@a[0].T).magnitude()*20
+   self.assertAlmostEqual(speed,MIN_SPIN,places=7)
+  b.w=np.array([10.,10.,10.]);simulate([b],.1,20);self.assertAlmostEqual(np.linalg.norm(b.w),MAX_SPIN,places=7)
  def test_eye_does_not_follow_shell(self):
   r=self.render;eye=r.eye_sprite(0,0);a=r.orb_frame(np.eye(3),eye);b=r.orb_frame(Rotation.from_euler('xyz',[1.2,2.,.7]).as_matrix(),eye)
   # Central iris and sclera stay registered exactly while the shell changes.

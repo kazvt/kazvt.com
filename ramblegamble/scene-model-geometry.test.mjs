@@ -291,7 +291,7 @@ test('architectural pixel trim is supported by authored stage ledges',()=>{
 
 import { sampleRouletteCabinet, fitRouletteCabinet } from './roulette-cabinet-fx.mjs';
 import { crowdCloseupPose } from './spooky-camera.mjs';
-import { crowdCatAnchor, crowdCatFacing } from './audience-render.mjs';
+import { crowdCatAnchor, crowdCatFacing, CROWD_CAT } from './audience-render.mjs';
 function rouletteGeometry(){
  const m=model('rg_roulette');
  const points=m.d.nodes.filter(n=>n.mesh!==undefined).flatMap(n=>{
@@ -334,7 +334,7 @@ test('hidden spectator focus approaches from inside the crowd and remains readab
   for(const yaw of [-yc,0,yc])for(const pitch of [-pc,0,pc]){
    const eye=orbitPosition(p,pose.target,yaw,pitch),facing=crowdCatFacing(eye,anchor);assert.notEqual(facing,null);assert.ok(eye.x<anchor.x-.5);
    const b=basis(Math.atan2(eye.x-anchor.x,eye.z-anchor.z),Math.sin(Math.atan2(eye.y-anchor.y,Math.hypot(eye.x-anchor.x,eye.z-anchor.z)))),distance=Math.hypot(eye.x-anchor.x,eye.y-anchor.y,eye.z-anchor.z);
-   for(const [x,y,d] of project(relative([-.18,.18].flatMap(x=>[-.47,.47].map(y=>add(a,[Math.cos(facing)*x,y,-Math.sin(facing)*x]))),a,b),{distance,shiftX:0,shiftY:0},w,h))assert.ok(d>.1&&Math.abs(x)<.95&&Math.abs(y)<.95);
+   for(const [x,y,d] of project(relative([-CROWD_CAT.width/2,CROWD_CAT.width/2].flatMap(x=>[-CROWD_CAT.height/2,CROWD_CAT.height/2].map(y=>add(a,[Math.cos(facing)*x,y,-Math.sin(facing)*x]))),a,b),{distance,shiftX:0,shiftY:0},w,h))assert.ok(d>.1&&Math.abs(x)<.95&&Math.abs(y)<.95);
   }
  }
 });

@@ -1,13 +1,17 @@
 """Offline, zero-gravity compound convex contact solver (pixel-world units).
-Broad phase spheres/AABBs only reject pairs; SAT tests the actual component hulls.
-No runtime dependency. Mesh hulls approximate curved/concave surfaces, not triangle CCD.
+Broad phase spheres/AABBs only reject pairs. Closed convex render pieces retain
+all extremal vertices; concave/open meshes use their actual triangular surfaces.
+No runtime dependency or continuous collision detection.
 """
 import itertools
+import trimesh
 import numpy as np
 from scipy.spatial import ConvexHull
 from scipy.spatial.transform import Rotation
 
 DT=1/120
+MIN_SPIN=.42
+MAX_SPIN=4.2
 
 def directions(a):
  a=np.asarray(a).reshape(-1,3);n=np.linalg.norm(a,axis=1);a=a[n>1e-8]/n[n>1e-8,None]
@@ -23,32 +27,101 @@ class Hull:
   if len(s)<3 or s[-1]<1e-5:
    if len(v)<3:raise ValueError('degenerate collision component')
    axis=vt[-1]*.25;v=np.concatenate([v+axis,v-axis])
-  if len(v)>40:
-   # Directional support reduction for curved decorative meshes; keep extremal points.
-   axes=np.array([x for x in itertools.product(range(-2,3),repeat=3) if any(x)],float)
-   v=v[np.unique(np.argmax(v@axes.T,axis=0))]
-  h=ConvexHull(v);self.v=v[h.vertices];self.norm=directions(h.equations[:,:3]);f=v[h.simplices]
-  self.edge=directions(np.concatenate([f[:,1]-f[:,0],f[:,2]-f[:,1],f[:,0]-f[:,2]]))
+  # Retain every extremal vertex of the render mesh; never round the shape
+  # down to a small directional support set. Ignore coplanar triangulation
+  # diagonals when collecting true polyhedron edges for SAT.
+  h=ConvexHull(v);self.v=v[h.vertices];self.norm=directions(h.equations[:,:3]);edges=[]
+  for i,face in enumerate(h.simplices):
+   for k,j in enumerate(h.neighbors[i]):
+    if j<i or j<0:continue
+    if np.dot(h.equations[i,:3],h.equations[j,:3])>1-1e-8:continue
+    a,b=np.delete(face,k);edges.append(v[b]-v[a])
+  self.edge=directions(edges)
  def transform(self,p,r):
   v=self.v@r.T+p;return (v,self.norm@r.T,self.edge@r.T,v.min(0),v.max(0))
 
 def box(extents,center=(0,0,0)):
  return np.array(list(itertools.product((-1,1),repeat=3)))*np.array(extents)/2+center
 
+class MeshParts:
+ """Grouped exact triangular prisms or convex pieces; vectorized AABB pruning.
+ Thin/open surfaces get a subpixel thickness, not a volume-filling convex hull.
+ """
+ def __init__(self,hulls):
+  self.hulls=hulls
+  n=max(len(h.v) for h in hulls)
+  self.vertices=np.stack([np.pad(h.v,((0,n-len(h.v)),(0,0)),mode='edge') for h in hulls])
+  self.v=self.vertices.reshape(-1,3)
+ def transform(self,p,r):
+  v=self.vertices@r.T+p
+  return MeshWorld(self,p,r,v.min(1),v.max(1))
+
+class MeshWorld:
+ def __init__(self,mesh,p,r,lo,hi):
+  self.mesh=mesh;self.p=p.copy();self.r=r;self.lo=lo;self.hi=hi
+  self.bounds=(lo.min(0),hi.max(0))
+ def __getitem__(self,k):return self.bounds[k-3]
+ def piece(self,i):return self.mesh.hulls[i].transform(self.p,self.r)
+
+def triangle_prisms(tris):
+ # Opposite-winding front/back duplicates represent the same surface.
+ seen=set();out=[]
+ for tri in tris:
+  key=tuple(sorted(map(tuple,np.round(tri,6))))
+  if key in seen:continue
+  seen.add(key);normal=np.cross(tri[1]-tri[0],tri[2]-tri[0]);length=np.linalg.norm(normal)
+  if length<1e-7:continue
+  d=normal/length*.30
+  out.append(Hull(np.concatenate([tri+d,tri-d])))
+ return out
+
 def compound(parts,r):
  result=[]
  for vertices,*_ in parts:
-  # Preserve component gaps (chair legs, car wheels, book covers, cat limbs).
-  v=vertices.reshape(-1,3)*r
-  try:result.append(Hull(v))
-  except (ValueError,RuntimeError):continue
+  triangles=np.asarray(vertices)*r
+  mesh=trimesh.Trimesh(vertices=triangles.reshape(-1,3),faces=np.arange(triangles.size//3).reshape(-1,3),process=True)
+  for piece in mesh.split(only_watertight=False,repair=False):
+   if piece.is_watertight and piece.is_convex:
+    result.append(Hull(piece.vertices))
+   else:
+    # Authored chair/desk meshes include holes and concavities within a single
+    # material primitive. A convex envelope would bridge those empty spaces.
+    prisms=triangle_prisms(piece.triangles)
+    if prisms:result.append(MeshParts(prisms))
  if not result:raise ValueError('no collision geometry')
  return result
 
+def text_hulls(alpha,r):
+ # Raster silhouette runs preserve spaces and letter counters rather than
+ # treating an entire connected word as a rectangle. Merge identical runs.
+ h,w=alpha.shape;scale=2*r/w;active={};rects=[]
+ for y in range(h+1):
+  row=alpha[y]>64 if y<h else np.zeros(w,bool)
+  edges=np.flatnonzero(np.diff(np.r_[False,row,False]));runs=set(map(tuple,edges.reshape(-1,2)))
+  for run,start in list(active.items()):
+   if run not in runs:rects.append((*run,start,y));del active[run]
+  for run in runs:active.setdefault(run,y)
+ return [MeshParts([Hull(box(((b-a)*scale,(d-c)*scale,1.),((a+b-w)*scale/2,(h-c-d)*scale/2,0))) for a,b,c,d in rects])]
+
 def sat(a,b):
+ if np.any(a[4]<b[3]) or np.any(b[4]<a[3]):return None
+ if not isinstance(a,MeshWorld) and not isinstance(b,MeshWorld):return convex_sat(a,b)
+ if isinstance(a,MeshWorld) and isinstance(b,MeshWorld):
+  pairs=np.argwhere(np.all(a.hi[:,None,:]>=b.lo[None,:,:],axis=2)&np.all(b.hi[None,:,:]>=a.lo[:,None,:],axis=2))
+  hits=(convex_sat(a.piece(i),b.piece(j)) for i,j in pairs)
+ elif isinstance(a,MeshWorld):
+  ids=np.flatnonzero(np.all(a.hi>=b[3],axis=1)&np.all(b[4]>=a.lo,axis=1));hits=(convex_sat(a.piece(i),b) for i in ids)
+ else:
+  ids=np.flatnonzero(np.all(b.hi>=a[3],axis=1)&np.all(a[4]>=b.lo,axis=1));hits=(convex_sat(a,b.piece(i)) for i in ids)
+ return max((h for h in hits if h is not None),key=lambda h:h[0],default=None)
+
+def convex_sat(a,b):
  va,na,ea,alo,ahi=a;vb,nb,eb,blo,bhi=b
  if np.any(ahi<blo) or np.any(bhi<alo):return None
- axes=np.concatenate([na,nb,np.cross(ea[:,None,:],eb[None,:,:]).reshape(-1,3)])
+ # Cheap face-axis rejection first; only build edge axes on surviving pairs.
+ faces=np.concatenate([na,nb]);pa=va@faces.T;pb=vb@faces.T
+ if np.any(pa.max(0)<=pb.min(0)) or np.any(pb.max(0)<=pa.min(0)):return None
+ axes=np.concatenate([faces,np.cross(ea[:,None,:],eb[None,:,:]).reshape(-1,3)])
  n=np.linalg.norm(axes,axis=1);axes=axes[n>1e-7]/n[n>1e-7,None]
  pa=va@axes.T;pb=vb@axes.T;amin=pa.min(0);amax=pa.max(0);bmin=pb.min(0);bmax=pb.max(0)
  plus=amax-bmin;minus=bmax-amin;over=np.minimum(plus,minus)
@@ -98,8 +171,8 @@ def simulate(bodies,seconds,fps):
    if b.text:b.rot=text_rotation(t+DT);b.w=(text_rotation(t+DT)*text_rotation(t).inv()).as_rotvec()/DT
    else:
     speed=np.linalg.norm(b.w)
-    if speed<.12:b.w=b.w*.12/speed if speed>1e-8 else np.array([.08,.08,.08])
-    if speed>2.4:b.w*=2.4/speed
+    if speed<MIN_SPIN:b.w=b.w*MIN_SPIN/speed if speed>1e-8 else np.full(3,MIN_SPIN/np.sqrt(3))
+    if speed>MAX_SPIN:b.w*=MAX_SPIN/speed
     b.rot=Rotation.from_rotvec(b.w*DT)*b.rot;min_spin=min(min_spin,np.linalg.norm(b.w))
    # Keep the sparse composition inside a shallow zero-gravity volume. Wall impacts
    # use the actual rotated compound extrema rather than the bounding sphere.
@@ -115,7 +188,9 @@ def simulate(bodies,seconds,fps):
     # Deepest component contact once per pair per substep, avoiding duplicate impulses
     # on overlapping compound pieces. Subsequent fixed substeps resolve remaining contacts.
     hits=[c for h in worlds[i] for k in worlds[j] if (c:=sat(h,k)) is not None]
-    if hits and collide(a,b,max(hits,key=lambda c:c[0])):contacts+=1;pair_contacts.add((i,j))
+    if hits:
+     if collide(a,b,max(hits,key=lambda c:c[0])):contacts+=1;pair_contacts.add((i,j))
+     worlds[i]=a.world();worlds[j]=b.world()
    # A corrected body may have moved; refresh before subsequent pair checks.
    worlds[i]=a.world()
  print(f'compound collision impulses: {contacts}; unique pairs: {len(pair_contacts)}; minimum spin: {min_spin:.3f} rad/s',flush=True)
