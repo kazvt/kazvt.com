@@ -1,3 +1,4 @@
+import { createFloatingSky } from "./floating-sky.mjs?v=floating-sky-20261127-v1";
 import { createStageDance, createDanceClock, dancePose } from "./stage-dance.mjs?v=stage-dance-20261127-v1";
 import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=stage-dance-20261127-v1";
 import { createMenuMarquee } from "./menu-marquee.mjs?v=marquee-crossfade-20261127-v1";
@@ -164,7 +165,7 @@ import {
   let slotCabinetFX;
   let rouletteCabinetFX;
   let cardTableModel;
-  let skyRoot;
+  let skyRoot, floatingSky;
   let exteriorMist;
   let skyStars;
   let skyStarsMesh;
@@ -242,7 +243,7 @@ import {
     if (event.isTrusted) syncMusic(true);
   }, { capture: true, passive: true });
   document.getElementById("rg-foley-enabled")?.addEventListener("change", () => syncMusic(true));
-  new MutationObserver(() => syncMusic()).observe(document.documentElement, { attributes: true, attributeFilter: ["data-rg-host-locked"] });
+  new MutationObserver(() => { syncMusic(); if (document.documentElement.hasAttribute("data-rg-host-locked")) floatingSky?.suspend(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-rg-host-locked"] });
   const triviaLayer = document.getElementById("rg-live-trivia");
   let skyRandomState = 0x4b415a56;
 
@@ -951,6 +952,8 @@ import {
     renderer.shadowMap.enabled = false;
 
     createSkybox();
+    try { floatingSky = createFloatingSky({ THREE, scene }); }
+    catch (error) { scene.getObjectByName("rg-floating-video-sky")?.removeFromParent(); console.warn("Floating sky unavailable", error); }
 
     rouletteRig = new THREE.Group();
     rouletteRig.visible = !pauseMenuOpen;
@@ -2188,6 +2191,7 @@ import {
   }
 
   function setMenuSceneVisibility(visible) {
+    if (!visible) floatingSky?.suspend();
     for (const object of [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group, stageShow?.group, characterSelection?.group]) {
       if (object) object.visible = visible;
     }
@@ -2510,6 +2514,7 @@ import {
     }
     updateLiquidPortal();
     if (open) {
+      floatingSky?.suspend();
       rouletteCabinetFX?.reset();
       focusDrag.clearHover(); lastScenePointer = null; stopRouletteSettlement();
       diceModeVisibility = [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group, stageShow?.group, characterSelection?.group]
@@ -2869,6 +2874,7 @@ import {
     }
     if (!canShowRouletteCabinet() || reducedMotion.matches) rouletteCabinetFX?.reset();
     slotCabinetFX?.update(time, { active: canShowCabinetFX(), reduced: reducedMotion.matches });
+    floatingSky?.update(camera, roomVisible && !diceModeOpen);
     updateSkyAnimations(time);
     updateLiquidPortal(time);
     if (diceModeOpen) {
@@ -3076,6 +3082,7 @@ import {
   document.addEventListener("visibilitychange", () => {
     syncMusic();
     if (document.hidden) {
+      floatingSky?.suspend();
       characterSelection?.hide();
       slotCabinetFX?.reset();
       rouletteCabinetFX?.reset();
@@ -3099,6 +3106,7 @@ import {
     resizeObserver?.disconnect();
     liquidPortal?.dispose();
     exteriorMist?.dispose();
+    floatingSky?.dispose();
     menuPresentation.dispose();
     soundtrack.dispose();
     stageDance?.dispose();
