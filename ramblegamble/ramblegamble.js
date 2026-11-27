@@ -1,5 +1,5 @@
 import { createSlotMarquee } from "./slot-marquee.mjs?v=slot-marquee-20261128-v1";
-import { createSmeemoEncounter, createSmeemoStinger, createSmeemoTableSession, SMEEMO_RETURN_MS } from "./smeemo-reveal.mjs?v=music-sync-20261127-v1";
+import { createSmeemoEncounter, createSmeemoStinger, createSmeemoTableSession, SMEEMO_RETURN_MS } from "./smeemo-reveal.mjs?v=smeemo-cinema-20261128-v1";
 import { createFloatingSky } from "./floating-sky.mjs?v=sky-variety-20261127-v1";
 import { createStageDance, createDanceClock, createDanceIntensitySampler, dancePose } from "./stage-dance.mjs?v=music-intensity-20261128-v1";
 import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=music-zone-fade-20261128-v1";
@@ -10,7 +10,7 @@ import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcon
 import { createSignGlow } from "./sign-glow.mjs?v=neon-focus-20261127-v1";
 import { selectedCharacterId, characterRenderPose, createCharacterSelection } from "./character-selection.mjs?v=stage-dance-20261127-v1";
 import { sampleVipAmbience } from "./vip-atmosphere.mjs?v=sky-soot-20261127-v1";
-import { createStageShow } from "./stage-show.mjs?v=smeemo-return-blackout-20261128-v1";
+import { createStageShow } from "./stage-show.mjs?v=smeemo-cinema-20261128-v1";
 import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state.mjs?v=all-curtain-20261127-v1";
 import { createCharacterOcclusion } from "./character-occlusion.mjs?v=stage-dance-20261127-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
@@ -263,6 +263,7 @@ import {
     smeemoCount.textContent=`${count}/5`;preview.dataset.smeemoStep=String(count);
     smeemoTag.classList.remove("rg-smeemo-pulse");void smeemoTag.offsetWidth;smeemoTag.classList.add("rg-smeemo-pulse");
     smeemoAura.classList.remove("rg-smeemo-aura-pulse");void smeemoAura.offsetWidth;smeemoAura.classList.add("rg-smeemo-aura-pulse");
+    if(count===1)stinger.prepare();
     if(count===2){foley.setRoomAmbience(false);foley.stopAll();crowdState.react("idle",crowdClock);stageShow?.silent(crowdCatAnchor(),performance.now());}
     foley.start("smeemo-encounter-drum","stageDrumHit",{rate:1-count*.075,volume:.36+count*.075});
     if(count===3||count===4)stageShow?.silent(crowdCatAnchor(),performance.now());

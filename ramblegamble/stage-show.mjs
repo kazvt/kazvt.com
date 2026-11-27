@@ -3,6 +3,7 @@ import { curtainLayout, createCurtainProfile, curtainVertex } from './stage-curt
 // Unlit GLTF art deliberately stays unlit outside a show. A world-space cone
 // mask illuminates the original texels rather than replacing all room materials.
 export function installStageLighting(THREE, roots, uniforms){
+  uniforms.rgHorror ??= {value:0};
   const materials=new Set();
   for(const root of roots)root?.traverse(o=>{if(o.isMesh)for(const m of Array.isArray(o.material)?o.material:[o.material])if(m?.isMeshBasicMaterial)materials.add(m);});
   for(const m of materials){
@@ -12,7 +13,7 @@ export function installStageLighting(THREE, roots, uniforms){
       shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 rgWorld;').replace('#include <begin_vertex>','#include <begin_vertex>\nrgWorld=(modelMatrix*vec4(transformed,1.0)).xyz;');
       shader.fragmentShader=shader.fragmentShader.replace('#include <common>',`#include <common>
 varying vec3 rgWorld;
-uniform float rgShow; uniform vec3 rgLamp[3]; uniform vec3 rgAim[3];
+uniform float rgShow; uniform float rgHorror; uniform vec3 rgLamp[3]; uniform vec3 rgAim[3];
 float rgBeam(vec3 origin, vec3 aim){
   vec3 delta=rgWorld-origin; float d=max(length(delta),0.001);
   float axis=dot(delta/d,normalize(aim-origin));
@@ -20,12 +21,13 @@ float rgBeam(vec3 origin, vec3 aim){
 }`).replace('#include <opaque_fragment>',`if(rgShow>0.0001){
  float lit=max(rgBeam(rgLamp[0],rgAim[0]),max(rgBeam(rgLamp[1],rgAim[1]),rgBeam(rgLamp[2],rgAim[2])));
  outgoingLight*=mix(1.0,0.17+0.93*lit,rgShow);
+ outgoingLight*=mix(vec3(1.0),vec3(1.0,0.19+0.11*lit,0.16+0.10*lit),rgHorror*rgShow);
 }
 #include <opaque_fragment>`);
     };
     m.customProgramCacheKey=()=>cache()+'|rg-theatre-v1';m.needsUpdate=true;
   }
-  return ()=>{uniforms.rgShow.value=0;};
+  return ()=>{uniforms.rgShow.value=0;uniforms.rgHorror.value=0;};
 }
 export function createStageShow(THREE,scene,{slotRig,slotsModel,roots,foley,onEmotion=()=>{},reduced=()=>false}){
   const bounds=new THREE.Box3().setFromObject(slotsModel), center=bounds.getCenter(new THREE.Vector3());
@@ -92,18 +94,21 @@ export function createStageShow(THREE,scene,{slotRig,slotsModel,roots,foley,onEm
     if(!active||reduced()){if(wasActive||state.open!==open)reset(open);wasActive=false;group.visible=active;return;}
     wasActive=true;
     group.visible=true;
-    const s=state.step(time);
+    const s=state.step(state.owner==='silent'&&!state.busy?Math.floor(time/100)*100:time);
     if(s.curtain!==lastPose||s.travel!==lastTravel||s.busy){updateCurtains(s.curtain,s.travel,time);lastPose=s.curtain;lastTravel=s.travel;}
+    const horror=s.owner==='silent';
+    const lightTime=horror?Math.floor(time/100)*100:time;
     uniforms.rgShow.value=s.strength;
+    uniforms.rgHorror.value=horror?1:0;
     if(s.target){
       lightTarget??=new THREE.Vector3(s.target.x,s.target.y,s.target.z);lightTarget.set(s.target.x,s.target.y,s.target.z);
       for(let i=0;i<3;i++){
-        const a=i*Math.PI*2/3, phase=time*.001*(.8+i*.13)+i*2.3;
+        const a=i*Math.PI*2/3, phase=lightTime*.001*(.8+i*.13)+i*2.3;
         const lamp=uniforms.rgLamp.value[i],aim=uniforms.rgAim.value[i];
         lamp.set(lightTarget.x+Math.cos(a)*3.4,Math.max(4.3,lightTarget.y+3.1),lightTarget.z+Math.sin(a)*3.4);
         const radius=s.search*2.0+.14;
         aim.set(lightTarget.x+Math.cos(phase)*radius,lightTarget.y+.12*Math.sin(phase*1.3),lightTarget.z+Math.sin(phase*1.13)*radius);
-        const beam=beams[i];delta.copy(lamp).sub(aim);beam.position.copy(lamp).add(aim).multiplyScalar(.5);beam.quaternion.setFromUnitVectors(up,delta.clone().normalize());
+        const beam=beams[i];beam.material.color?.set?.(horror?0xd5192d:palette[i]);delta.copy(lamp).sub(aim);beam.position.copy(lamp).add(aim).multiplyScalar(.5);beam.quaternion.setFromUnitVectors(up,delta.clone().normalize());
         beam.scale.set(delta.length()*.38,delta.length(),delta.length()*.38);beam.material.opacity=s.strength*(.055+.025*s.search);beam.visible=s.strength>.01;
       }
     }else for(const b of beams)b.visible=false;
@@ -116,7 +121,7 @@ export function createStageShow(THREE,scene,{slotRig,slotsModel,roots,foley,onEm
   function dismiss(time){lastTime=time;return state.dismiss(time);}
   // Hard blackout for camera travel: unlike dismiss(), this does not leave a
   // 1.2 s spotlight tail visible while the Smeemo return teleport is underway.
-  function clearLight(){state.clearLight();lightTarget=null;burst=null;confetti.visible=false;uniforms.rgShow.value=0;for(const b of beams)b.visible=false;}
+  function clearLight(){state.clearLight();lightTarget=null;burst=null;confetti.visible=false;uniforms.rgShow.value=0;uniforms.rgHorror.value=0;for(const b of beams)b.visible=false;}
   function silent(point,time){lastTime=time;burst=null;confetti.visible=false;for(const key of ['stage-roll','stage-hit','stage-cheer'])foley.stop(key);lightTarget=new THREE.Vector3(point.x,point.y,point.z);return state.begin(point,time,'silent',reduced());}
   function brightnessAt(point){
     const strength=uniforms.rgShow.value;if(!strength)return 1;let lit=0;

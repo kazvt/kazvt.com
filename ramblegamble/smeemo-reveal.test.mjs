@@ -70,3 +70,11 @@ test('explicit cancellation prevents a stale or repeated open event from restart
  e.cancel();assert.equal(e.active,false);e.observe({id:'round-a',status:'playing',mode:'smeemo',opened:true});e.choose('smeemo');assert.equal(e.active,false);
  e.observe({id:'round-b',status:'playing',mode:'smeemo',opened:true});e.choose('smeemo');assert.equal(e.active,true);
 });
+
+test('stinger suppresses duplicate caption on successful playback and reveals fallback only on failure',()=>{
+ const f=fixture();f.player.start();assert.equal(f.caption.hidden,true);f.video.dispatchEvent(new Event('error'));assert.equal(f.caption.hidden,false);assert.equal(f.caption.textContent,'SMEEMO • 5/5');f.advance(1500);assert.equal(f.finishes,1);
+});
+
+test('preload is silent and invisible on first encounter click; start reuses buffered source and cancellation clears it',()=>{
+ const f=fixture();let loads=0;const load=f.video.load.bind(f.video);f.video.load=()=>{loads++;load();};f.player.prepare();assert.equal(f.root.hidden,true);assert.equal(f.video.src,SMEEMO_STINGER);assert.equal(f.video.paused,true);assert.equal(loads,1);f.player.prepare();assert.equal(loads,1);f.player.start();assert.equal(loads,1);assert.equal(f.root.hidden,false);f.player.cancel();assert.equal(f.video.src,'');assert.equal(loads,2);assert.equal(f.finishes,0);
+});

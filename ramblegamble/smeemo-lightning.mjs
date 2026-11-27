@@ -4,10 +4,10 @@ const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 const mix = (a,b,t) => a+(b-a)*t;
 const smooth = n => { n=clamp(n,0,1); return n*n*(3-2*n); };
 const PALETTES = [
-  {glow:'#935aff', edge:'#b78aff', core:'#fff0ff'},
-  {glow:'#d64fdc', edge:'#ffa4eb', core:'#fff4df'},
-  {glow:'#626bff', edge:'#b1c8ff', core:'#f0faff'},
-  {glow:'#a45eff', edge:'#ffd29a', core:'#fff7df'},
+  {glow:'#a20d19', edge:'#ed3440', core:'#ff8b85'},
+  {glow:'#790410', edge:'#d51d2a', core:'#ff766e'},
+  {glow:'#b50b26', edge:'#ff4c43', core:'#ff9a90'},
+  {glow:'#94051c', edge:'#e52a37', core:'#ff817a'},
 ];
 // Midpoint displacement: decreasing irregularity at each subdivision. The
 // final polyline is stable for the lifetime of the strike (no frame noise).
@@ -83,14 +83,17 @@ export function paintLightning(ctx, width,height, samples) {
       const radius=Math.min(width,height)*(.11+.11*impact);
       const halo=ctx.createRadialGradient(x,y,0,x,y,radius);
       halo.addColorStop(0,palette.edge);halo.addColorStop(.32,palette.glow);halo.addColorStop(1,'transparent');
-      ctx.globalAlpha=.25*glow;ctx.fillStyle=halo;ctx.fillRect(x-radius,y-radius,radius*2,radius*2);
+      ctx.globalAlpha=.40*glow;ctx.fillStyle=halo;ctx.fillRect(x-radius,y-radius,radius*2,radius*2);
       ctx.strokeStyle=palette.edge;ctx.lineWidth=2*scale;ctx.globalAlpha=.62*glow;
-      ctx.beginPath();ctx.ellipse(x,y,(12+impact*96)*scale,(4+impact*24)*scale,0,0,Math.PI*2);ctx.stroke();
+      ctx.beginPath();ctx.ellipse(x,y,(12+impact*110)*scale,(4+impact*28)*scale,0,0,Math.PI*2);ctx.stroke();
+      // A second, dimmer expanding pressure front plus rising hot cinders.
+      ctx.globalAlpha=.26*glow*(1-impact);ctx.lineWidth=4*scale;ctx.beginPath();ctx.ellipse(x,y,(20+impact*170)*scale,(6+impact*45)*scale,0,0,Math.PI*2);ctx.stroke();
       for(const s of strike.sparks) {
         const t=impact/s.life;if(t>=1)continue;
         const px=x+s.dx*width*t,py=y+s.dy*height*t+.10*height*t*t;
         ctx.globalAlpha=(1-t)*glow*.9;ctx.fillStyle=palette.core;
         ctx.fillRect(px,py,s.size*scale,(s.size+2)*scale);
+        ctx.strokeStyle=palette.edge;ctx.lineWidth=Math.max(.6,s.size*.48)*scale;ctx.globalAlpha=(1-t)*glow*.52;ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px-s.dx*width*.065,py-s.dy*height*.065);ctx.stroke();
       }
     }
     for(const f of strike.forks) beam(ctx,f.points,width,height,clamp((progress-f.root)*2.7,0,1),strike.width*f.width*scale,palette,core*.72,glow*.82);

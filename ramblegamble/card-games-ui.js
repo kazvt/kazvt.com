@@ -1,7 +1,8 @@
+import { cardStains, stainUrl, mountSmeemoHorror } from "./smeemo-horror.mjs?v=smeemo-cinema-20261128-v1";
 import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { showBurst, voteFlight, purchaseFlight } from "./show-ui-fx.mjs?v=shop-motion-20261127-v1";
-import { createSmeemoImpact, smeemoImpactTransition } from "./smeemo-impact.mjs?v=smeemo-storm-20261127-v1";
-import { createLightningLayer } from "./smeemo-lightning.mjs?v=smeemo-storm-20261127-v1";
+import { createSmeemoImpact, smeemoImpactTransition } from "./smeemo-impact.mjs?v=smeemo-cinema-20261128-v1";
+import { createLightningLayer } from "./smeemo-lightning.mjs?v=smeemo-cinema-20261128-v1";
 import { applyCardShowAction } from "./card-show-actions.mjs?v=card-polish-20261127-v1";
 import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia, writeLiveTriviaDraft } from "./live-trivia.mjs?v=match-number-20261127-v1";
 import { activeCardStage, cardStageChange } from "./card-stage-state.mjs?v=wildcard-shared-20261126-v1";
@@ -93,9 +94,10 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
   let smeemoPresentation = { id: null, revealed: new Set() };
   const preview = $(".rg-preview");
   const lightning = createLightningLayer(preview);
+  mountSmeemoHorror({preview, layer, header, reduced:reducedMotion});
   const impact = createSmeemoImpact({
     requestFrame: fn => window.requestAnimationFrame(fn), cancelFrame: id => window.cancelAnimationFrame(id),
-    now: () => performance.now(),
+    now: () => performance.now(), frameMs:100,
     canRun: () => !document.hidden && !document.documentElement?.hasAttribute("data-rg-host-locked")
       && !dismissedActive && !menuOpen && !layer.hidden && state.smeemo
       && !["is-menu", "is-dice-mode", "is-freecam", "is-freecam-detached"].some(c => preview.classList.contains(c)),
@@ -337,10 +339,14 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
   }
 
   // The stable outer button owns hit testing; only its visual carrier tilts.
-  function bindCardTilt(button) {
-    const reset = () => { button.style.removeProperty("--tilt-x"); button.style.removeProperty("--tilt-y"); };
+  function bindCardTilt(button, frameMs = 0) {
+    let lastTilt = -Infinity;
+    const reset = () => { lastTilt=-Infinity; button.style.removeProperty("--tilt-x"); button.style.removeProperty("--tilt-y"); };
     button.addEventListener("pointermove", event => {
       if (reducedMotion.matches || event.pointerType === "touch" || event.buttons || button.disabled) return reset();
+      const now = performance.now();
+      if (now-lastTilt<frameMs) return;
+      lastTilt=now;
       const rect = button.getBoundingClientRect();
       if (!rect.width || !rect.height) return;
       const x = Math.max(-1, Math.min(1, (event.clientX - rect.left) / rect.width * 2 - 1));
@@ -733,15 +739,17 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       const ticks = Array.from({length:9}, () => element("span", "rg-smeemo-progress-tick"));
       progress.append(...ticks);
       view = { id: game.id, board, rail, status, ticks, cards: new Map(), order: order.map(c => c.id), pulse: 0 };
+      const stains = cardStains(game.id, game.cards.map(c=>c.id));
       for (const [index, card] of order.entries()) {
         const button = element("button", "rg-smeemo-card");
         button.type = "button";
         button.dataset.foley = "off";
-        bindCardTilt(button);
+        bindCardTilt(button,100);
+        button.style.setProperty("--blood-stain",stainUrl(stains.get(card.id)));
         button.style.setProperty("--card-index", String(index));
-        button.style.setProperty("--stack-delay", `${index * 38}ms`);
-        button.style.setProperty("--deal-delay", `${index * 54}ms`);
-        button.style.setProperty("--flip-delay", `${index * 48 + 90}ms`);
+        button.style.setProperty("--stack-delay", `${Math.round(index * .38)*100}ms`);
+        button.style.setProperty("--deal-delay", `${Math.round(index * .54)*100}ms`);
+        button.style.setProperty("--flip-delay", `${Math.round(index * .48+.9)*100}ms`);
         button.style.setProperty("--home-rotation", `${((index % 3) - 1) * 1.4}deg`);
         button.style.setProperty("--stack-column", String(4-index));
         button.style.setProperty("--stack-grid-column", String(1-index%3));
@@ -824,7 +832,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       }
       const origin = view.cards.get(fresh.at(-1).id)?.index ?? 4;
       for (const {button,index} of view.cards.values()) {
-        button.style.setProperty("--impact-delay", `${Math.abs(index-origin)*24}ms`);
+        button.style.setProperty("--impact-delay", `${Math.round(Math.abs(index-origin)*.24)*100}ms`);
         button.style.setProperty("--impact-direction", index < origin ? "-1" : "1");
       }
       view.pulse++;
