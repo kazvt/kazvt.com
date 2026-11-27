@@ -1,4 +1,4 @@
-import {createMenuKaraoke} from './menu-karaoke.mjs?v=curtain-karaoke-20261128-v1';
+import {createMenuKaraoke} from './menu-karaoke.mjs?v=retro-karaoke-20261128-v1';
 import {signPhase, SIGN_CYCLE_MS, SIGN_ACTIVE_MS} from './sign-glow.mjs?v=neon-focus-20261127-v1';
 import {signMaskBytes, SIGN_BULB_COUNT} from './sign-glow-mask.mjs?v=neon-focus-20261127-v1';
 

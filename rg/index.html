@@ -9,7 +9,7 @@
     <title>Ramble Gamble - kazvt</title>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
     <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=exterior-hands-20261128-v1">
-    <link rel="stylesheet" href="/ramblegamble/menu-karaoke.css?v=menu-karaoke-20261128-v1">
+    <link rel="stylesheet" href="/ramblegamble/menu-karaoke.css?v=menu-karaoke-retro-20261128-v1">
     <link rel="stylesheet" href="/ramblegamble/show-finale.css?v=show-finale-20261128-v1">
     <link rel="stylesheet" href="/ramblegamble/host-console.css?v=freecam-depth-20261127-v1">
     <link rel="stylesheet" href="/ramblegamble/trivia-live.css?v=all-curtain-20261127-v1">
@@ -24,7 +24,7 @@
       }
     </script>
     <link rel="stylesheet" href="/ramblegamble/host-access.css?v=host-toggle-20261126-v1">
-    <script type="module" src="/ramblegamble/host-access.mjs?v=curtain-karaoke-20261128-v1"></script>
+    <script type="module" src="/ramblegamble/host-access.mjs?v=retro-karaoke-20261128-v1"></script>
       <link rel="stylesheet" href="/ramblegamble/show-energy.css?v=compact-score-20261127-v1">
   </head>
   <body class="ramble-page" data-theme="p2">
@@ -80,13 +80,9 @@
     <section class="rg-pause-menu" id="rg-pause-menu" aria-label="Pause menu" data-marquee-phase="closed" hidden>
       <div class="rg-menu-karaoke" id="rg-menu-karaoke" aria-label="Theme song lyrics" hidden>
         <div class="rg-karaoke-particles" aria-hidden="true"></div>
-        <div class="rg-karaoke-ribbon"><span class="rg-karaoke-label"></span></div>
-        <div class="rg-karaoke-deck">
-          <div class="rg-karaoke-lead"></div>
-          <div class="rg-karaoke-response" hidden></div>
-          <div class="rg-karaoke-next" aria-hidden="true" hidden></div>
-        </div>
-        <div class="rg-karaoke-track" aria-hidden="true"><span class="rg-karaoke-progress"></span></div>
+        <span class="rg-karaoke-ball" aria-hidden="true" hidden></span>
+        <div class="rg-karaoke-lead"></div>
+        <div class="rg-karaoke-response" hidden></div>
       </div>
       <div class="rg-pause-stack">
         <div class="rg-marquee-stage" aria-hidden="true">
@@ -112,7 +108,7 @@
             <canvas class="rg-marquee-neon" id="rg-marquee-neon" width="120" height="30" aria-hidden="true"></canvas>
           </div>
         </div>
-        <audio id="rg-menu-theme" src="/ramblegamble/assets/music/ramble-gamble-theme.mp3?v=show-finale-20261128-v2" preload="auto" loop hidden></audio>
+        <audio id="rg-menu-theme" src="/ramblegamble/assets/music/ramble-gamble-theme.mp3?v=show-finale-20261128-v1" preload="auto" loop hidden></audio>
         <nav class="rg-pause-actions" aria-label="Pause menu actions">
           <button class="rg-menu-button" id="rg-play" type="button">PLAY!</button>
           <button class="rg-menu-button" id="rg-controls-open" type="button">CONTROLS!</button>
@@ -154,7 +150,7 @@
       <div class="rg-credits-card rg-credits-finale" aria-hidden="true">
         <p class="rg-credits-heart">♥ ♥ ♥</p><p>THANK YOU EVERYONE!</p><h2>SEE YOU IN<br>RAMBLE GAMBLE 2!</h2><p class="rg-credits-eyebrow">✦ FOREVER A MEMORY ✦</p>
       </div>
-      <audio src="/ramblegamble/assets/music/ramble-gamble-theme.mp3?v=show-finale-20261128-v2" preload="none" hidden></audio>
+      <audio src="/ramblegamble/assets/music/ramble-gamble-theme.mp3?v=show-finale-20261128-v1" preload="none" hidden></audio>
       <nav class="rg-credits-controls" aria-label="Credits playback">
         <progress max="1" value="0" aria-label="Credits progress"></progress>
         <button type="button" data-credits-pause>PAUSE</button>

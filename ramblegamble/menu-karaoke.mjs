@@ -14,8 +14,8 @@ export function readKaraokeCalibration(win){
 }
 const clamp = x => Math.max(0, Math.min(1, x));
 const noop=()=>({update(){},hide(){},dispose(){}});
-const colors = ['#ffe68c','#ff8ee4','#93f8dc','#bda4ff','#ffd2ad'];
-const symbols = ['✿','✦','❀','♦','✧','♡','✿','♣'];
+const colors = ['#ffe000','#008cff','#ff3030'];
+const symbols = ['♪','♫','♩','♬'];
 export function validateKaraokeCues(cues, duration=198.288) {
   if (!Array.isArray(cues) || !cues.length) throw new Error('Empty karaoke cue list');
   let previous=0;
@@ -41,79 +41,91 @@ export function karaokeFrame(time,cues=MENU_KARAOKE_CUES) {
   const progress=word<0?0:clamp((time-cue.words[word][1])/(cue.words[word][2]-cue.words[word][1]));
   return {index,word,progress};
 }
+// Land on each word onset and travel toward the next word on the same visual
+// row. On a line break relaunch above the new row rather than crossing text.
+export function karaokeBounce(progress,from,to,amplitude=12){
+  const p=clamp(progress),u=clamp((p-.16)/.84),sameRow=to&&Math.abs(to.y-from.y)<3;
+  const travel=sameRow?u*u*(3-2*u):0;
+  return {x:from.x+(sameRow?to.x-from.x:0)*travel,y:from.y-Math.sin(Math.PI*u)*amplitude,
+    sx:1+.28*Math.max(0,1-p/.14),sy:1-.32*Math.max(0,1-p/.14)};
+}
+export function karaokeWordPose(progress){
+  const p=clamp(progress),hit=Math.max(0,1-p/.16),stretch=Math.sin(Math.PI*clamp((p-.10)/.38));
+  return {sx:1+.17*hit-.045*stretch,sy:1-.21*hit+.12*stretch};
+}
 export function createMenuKaraoke({root,menu,theme,doc=document,win=window,cues}) {
   if(!root) return noop();
   cues??=readKaraokeCalibration(win);
-  try{validateKaraokeCues(cues);}catch(error){console.warn("Menu karaoke cues unavailable",error);root.hidden=true;return noop();}
-  const lead=root.querySelector('.rg-karaoke-lead'),back=root.querySelector('.rg-karaoke-response'),next=root.querySelector('.rg-karaoke-next'),particles=root.querySelector('.rg-karaoke-particles'),bar=root.querySelector('.rg-karaoke-progress'),label=root.querySelector('.rg-karaoke-label');
-  if(!lead||!back||!next||!particles||!bar||!label){root.hidden=true;return noop();}
-  let index=-2, nodes=[],last=NaN,lastWord=-2,visible=false,anchorX=0,anchorY=0;
+  try{validateKaraokeCues(cues);}catch(error){console.warn('Menu karaoke cues unavailable',error);root.hidden=true;return noop();}
+  const lead=root.querySelector('.rg-karaoke-lead'),back=root.querySelector('.rg-karaoke-response'),particles=root.querySelector('.rg-karaoke-particles'),ball=root.querySelector('.rg-karaoke-ball');
+  if(!lead||!back||!particles||!ball){root.hidden=true;return noop();}
+  let index=-2,nodes=[],anchors=[],last=NaN,lastWord=-2,visible=false,dirty=true,wasReduced=false,disposed=false;
   const mot=win.matchMedia?.('(prefers-reduced-motion: reduce)');
-  const fx=Array.from({length:24},(_,i)=>{const n=doc.createElement('span');n.textContent=symbols[i%symbols.length];n.style.color=colors[i%colors.length];particles.append(n);return n;});
-  function hide(){if(visible){root.hidden=true;menu.dataset.karaokeActive='false';visible=false;}index=-2;last=NaN;lastWord=-2;}
-  function populate(cue,i){
-    lead.replaceChildren();back.replaceChildren();nodes=[];lastWord=-2;
+  const fx=Array.from({length:8},(_,i)=>{const n=doc.createElement('span');n.textContent=symbols[i%symbols.length];n.style.color=colors[i%colors.length];particles.append(n);return n;});
+  const clearFX=()=>{ball.hidden=true;for(const n of fx)n.style.opacity='0';};
+  const invalidate=()=>{dirty=true;};
+  // Only inner ink squashes; stable outer word boxes are measured on cue
+  // changes and resizes, never on an ordinary animation frame.
+  const observer=typeof win.ResizeObserver==='function'?new win.ResizeObserver(invalidate):null;
+  observer?.observe(root);observer?.observe(lead);observer?.observe(back);
+  win.addEventListener?.('resize',invalidate);
+  function measure(){
+    const r=root.getBoundingClientRect?.();
+    anchors=r?nodes.map(n=>{const w=n.getBoundingClientRect?.();return w?{x:w.left+w.width/2-r.left,y:w.top-r.top-3,h:w.height,w:w.width}:null;}):[];
+    dirty=false;
+  }
+  function hide(){if(visible){root.hidden=true;menu.dataset.karaokeActive='false';visible=false;}index=-2;last=NaN;lastWord=-2;dirty=true;clearFX();}
+  function populate(cue){
+    lead.replaceChildren();back.replaceChildren();nodes=[];lastWord=-2;dirty=true;clearFX();
     root.dataset.section=cue.section;
-    root.style.setProperty('--rg-karaoke-hue',colors[i%colors.length]);
-    label.textContent=cue.section==='instrumental'?'♪  INSTRUMENTAL  ♪':cue.section==='scat'?'✦  SCAT FINALE  ✦':'✿  RAMBLE GAMBLE  •  SING ALONG  ✿';
     let response=false;
-    if(!cue.words.length){lead.textContent='♫';}
+    if(!cue.words.length){lead.textContent='♪ ♫ ♪';}
     for(const [word] of cue.words){
       if(word.startsWith('('))response=true;
-      const n=doc.createElement('span');n.className='rg-karaoke-word';n.textContent=word;n.dataset.word=word;
-      n.style.setProperty('--sweep','0%');n.style.setProperty('--word-hue',response?['#8ef7d8','#a7d7ff','#ffe5a0'][nodes.length%3]:colors[(i+nodes.length)%colors.length]);(response?back:lead).append(n);nodes.push(n);
+      const n=doc.createElement('span'),ink=doc.createElement('span');n.className='rg-karaoke-word';n.dataset.word=word;
+      ink.className='rg-karaoke-ink';ink.textContent=word;ink.dataset.word=word;n.append(ink);
+      n.style.setProperty('--sweep','0%');(response?back:lead).append(n);nodes.push(n);
       if(word.endsWith(')'))response=false;
     }
     back.hidden=!back.childElementCount;
-    const upcoming=cues.slice(i+1).find(c=>c.words.length);
-    next.textContent=upcoming?upcoming.words.map(w=>w[0]).join(' '):'';
-    // The instrumental uses a small centered note instead of displaying lyrics early.
-    next.hidden=!upcoming||cue.section==='instrumental';
   }
   function update(allowed=true){
+    if(disposed)return;
     if(!allowed||theme.paused||theme.ended||theme.error||theme.readyState<2||!Number.isFinite(theme.currentTime)){hide();return;}
-    const t=theme.currentTime;
-    if(!visible){visible=true;root.hidden=false;menu.dataset.karaokeActive='true';}
+    const t=theme.currentTime,reduced=Boolean(mot?.matches);
+    if(!visible){visible=true;root.hidden=false;menu.dataset.karaokeActive='true';dirty=true;}
     const state=karaokeFrame(t,cues);
-    if(state.index<0){if(index!==-1){index=-1;lead.replaceChildren();back.replaceChildren();back.hidden=true;next.hidden=true;label.textContent='♪  RAMBLE GAMBLE  ♪';bar.style.transform='scaleX(0)';for(const n of fx)n.style.opacity='0';}return;}
+    if(state.index<0){if(index!==-1){index=-1;lastWord=-2;last=NaN;lead.replaceChildren();back.replaceChildren();back.hidden=true;clearFX();}return;}
     const cue=cues[state.index],changed=state.index!==index;
-    if(changed){index=state.index;populate(cue,index);}
-    if(!changed&&t===last)return;
-    last=t;
-    // No independent elapsed clock. Native looping, buffering, rate changes and
-    // seeks automatically update the lyric and all visual effect phases.
-    const progress=clamp((t-cue.start)/(cue.end-cue.start));
-    bar.style.transform=`scaleX(${progress})`;
-    const wordChanged=state.word!==lastWord||changed;
-    if(wordChanged){
+    if(changed){index=state.index;populate(cue);}
+    if(!changed&&!dirty&&t===last&&reduced===wasReduced)return;
+    if(dirty)measure();
+    last=t;wasReduced=reduced;
+    if(state.word!==lastWord||changed||state.word<0){
       for(let j=0;j<nodes.length;j++){
         const w=cue.words[j],n=nodes[j];n.dataset.state=t>=w[2]?'done':j===state.word?'active':'waiting';
-        n.style.setProperty('--sweep',t>=w[2]?'100%':'0%');n.style.setProperty('--hop','0px');
+        n.style.setProperty('--sweep',t>=w[2]?'100%':'0%');n.style.setProperty('--sx','1');n.style.setProperty('--sy','1');
       }
       lastWord=state.word;
-      if(state.word>=0&&nodes[state.word].getBoundingClientRect&&root.getBoundingClientRect){
-        const r=root.getBoundingClientRect(),w=nodes[state.word].getBoundingClientRect();
-        anchorX=w.left+w.width/2-r.left-r.width/2;anchorY=w.top+w.height/2-r.top-r.height/2;
-      }else{anchorX=0;anchorY=0;}
     }
-    if(state.word>=0){const n=nodes[state.word];n.style.setProperty('--sweep',`${(state.progress*100).toFixed(1)}%`);n.style.setProperty('--hop',mot?.matches?'0px':`${(-Math.sin(Math.PI*clamp(state.progress*2))*3).toFixed(2)}px`);}
-    // Bounded reusable sprites. Phase driven by audio, no per-frame allocation or timers.
-    const beat=t/ (60/92),frac=beat-Math.floor(beat);
-    root.style.setProperty('--beat-glow',String(.35+.25*Math.sin(Math.PI*frac)));
-    if(!mot?.matches){
-      const local=state.word>=0?t-cue.words[state.word][1]:t-cue.start;
-      for(let j=0;j<fx.length;j++){
-        const n=fx[j],phase=(local*(.9+(j%4)*.1)+j*.137)%1;
-        const side=j%2===0?-1:1,spread=12+(j%6)*6;
-        const burst=j<10&&state.word>=0;
-        const age=clamp(local/.72),angle=j*2.39996,radius=17+age*(22+j%4*9);
-        const x=burst?`${anchorX+Math.cos(angle)*radius}px`:`${side*(14+phase*spread)}vw`;
-        const y=burst?anchorY-18+Math.sin(angle)*radius*.55-14*age:6-27*phase+Math.sin(j*2.1)*9;
-        n.style.transform=`translate(${x},${y}px) rotate(${side*(phase*110+j*11)}deg) scale(${.65+.45*Math.sin(Math.PI*phase)})`;
-        n.style.opacity=String(burst?Math.sin(Math.PI*age)*.75:Math.sin(Math.PI*phase)*(.34+(j%3)*.16));
-      }
+    if(state.word<0){clearFX();return;}
+    const n=nodes[state.word],p=state.progress,pose=reduced?{sx:1,sy:1}:karaokeWordPose(p);
+    const a=anchors[state.word],b=anchors[state.word+1];
+    // Cap lateral overshoot by glyph height so even a very long scat token
+    // cannot expand over neighbouring words. Keep the strong vertical squash.
+    if(a?.w>0)pose.sx=Math.min(pose.sx,1+a.h*.14/a.w);
+    n.style.setProperty('--sweep',`${(p*100).toFixed(1)}%`);n.style.setProperty('--sx',pose.sx.toFixed(4));n.style.setProperty('--sy',pose.sy.toFixed(4));
+    if(reduced||!a){clearFX();return;}
+    const hop=karaokeBounce(p,a,b,Math.min(11,a.h*.27));
+    ball.hidden=false;ball.style.transform=`translate3d(${hop.x}px,${hop.y}px,0) translate(-50%,-100%) scale(${hop.sx},${hop.sy})`;
+    // Bounded reusable music glyphs; phase follows actual media playback.
+    const age=clamp((t-cue.words[state.word][1])/.5);
+    for(let j=0;j<fx.length;j++){
+      const side=j%2===0?-1:1,spread=13+(j%4)*9,x=a.x+side*(8+age*spread),y=Math.max(14,a.y-4-age*(6+(j%3)*5));
+      fx[j].style.transform=`translate3d(${x}px,${y}px,0) translate(-50%,-100%) rotate(${side*(12+age*32)}deg) scale(${.7+.3*Math.sin(Math.PI*age)})`;
+      fx[j].style.opacity=String(Math.sin(Math.PI*age)*.96);
     }
   }
-  function dispose(){hide();particles.replaceChildren();lead.replaceChildren();back.replaceChildren();}
+  function dispose(){hide();disposed=true;observer?.disconnect();win.removeEventListener?.('resize',invalidate);particles.replaceChildren();lead.replaceChildren();back.replaceChildren();}
   return {update,hide,dispose};
 }

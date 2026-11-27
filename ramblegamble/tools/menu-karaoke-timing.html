@@ -5,7 +5,7 @@
 </style>
 <h1>Ramble Gamble — word timing editor</h1>
 <p>The included timings are provisional. Listen to the original recording and tap at each sung word. The editor does not modify your game, song, or database. Export the replacement cue module after checking the timings.</p>
-<audio id="song" controls preload="metadata" src="../assets/music/ramble-gamble-theme.mp3?v=show-finale-20261128-v2"></audio>
+<audio id="song" controls preload="metadata" src="../assets/music/ramble-gamble-theme.mp3?v=show-finale-20261128-v1"></audio>
 <p><label>Playback rate <select id="rate"><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option></select></label> · Time: <output id="clock">0.000</output> s</p>
 <div id="preview" aria-label="Current lyric"></div>
 <fieldset><legend>Choose a phrase</legend><select id="cue" aria-label="Phrase"></select>
@@ -18,7 +18,7 @@
 <fieldset><legend>Apply or export</legend><p><button id="applyLocal">Apply timing to this browser</button> <button id="clearLocal">Remove browser override</button></p><small>Apply saves only validated lyric timing locally for this exact recording. Reload Ramble Gamble in this browser to use it; other hosts are unaffected. No deployment is needed to test a correction.</small><p><label>Shift selected phrase (seconds) <input id="shiftAmount" type="number" step="0.05" value="0"></label> <button id="shift">Shift phrase</button></p><button id="save">Validate and download menu-karaoke-cues.mjs</button> <button id="resetAll">Reset to bundled timing</button><p id="status" role="status"></p><small>Replace ramblegamble/menu-karaoke-cues.mjs with the downloaded file and refresh its version query in menu-karaoke.mjs (or hard refresh). Keep the original cue module as a backup. The editor requires a local static server or deployed copy of this project, not a database.</small></fieldset>
 <script type="module">
 import {MENU_KARAOKE_CUES,MENU_KARAOKE_DURATION} from '../menu-karaoke-cues.mjs?v=curtain-karaoke-20261128-v1';
-import {validateKaraokeCues,karaokeFrame,validateKaraokeCalibration,readKaraokeCalibration,KARAOKE_CALIBRATION_KEY} from '../menu-karaoke.mjs?v=curtain-karaoke-20261128-v1';
+import {validateKaraokeCues,karaokeFrame,validateKaraokeCalibration,readKaraokeCalibration,KARAOKE_CALIBRATION_KEY} from '../menu-karaoke.mjs?v=retro-karaoke-20261128-v1';
 const $=id=>document.getElementById(id),song=$('song'),cueSelect=$('cue'),status=$('status'),table=$('words'),preview=$('preview');
 let cues=structuredClone(readKaraokeCalibration(window)),i=0,tapIndex=0,previewKey='';
 const time=()=>Math.round(song.currentTime*1000)/1000;
