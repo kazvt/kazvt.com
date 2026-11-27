@@ -1,28 +1,28 @@
-import { createFloatingSky } from "./floating-sky.mjs?v=sky-inertia-20261127-v1";
+import { createFloatingSky } from "./floating-sky.mjs?v=sky-soot-20261127-v1";
 import { createStageDance, createDanceClock, dancePose } from "./stage-dance.mjs?v=ambient-tuning-20261127-v1";
 import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=corrective-review-20261127-v1";
 import { createMenuMarquee } from "./menu-marquee.mjs?v=corrective-review-20261127-v1";
-import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=ambient-tuning-20261127-v1";
+import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=sky-soot-20261127-v1";
 import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcony.mjs?v=hazel-balcony-20261127-v1";
 import { createSignGlow } from "./sign-glow.mjs?v=neon-focus-20261127-v1";
 import { selectedCharacterId, characterRenderPose, createCharacterSelection } from "./character-selection.mjs?v=stage-dance-20261127-v1";
-import { sampleVipAmbience } from "./vip-atmosphere.mjs?v=vip-atmosphere-20261127-v1";
+import { sampleVipAmbience } from "./vip-atmosphere.mjs?v=sky-soot-20261127-v1";
 import { createStageShow } from "./stage-show.mjs?v=all-curtain-20261127-v1";
 import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state.mjs?v=all-curtain-20261127-v1";
 import { createCharacterOcclusion } from "./character-occlusion.mjs?v=stage-dance-20261127-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { createAudienceRenderer, crowdCatAnchor } from "./audience-render.mjs?v=ambient-tuning-20261127-v1";
-import { createShowFX } from "./show-fx.mjs?v=stage-dance-20261127-v1";
-import { createRouletteCabinetFX } from "./roulette-cabinet-fx.mjs?v=cartoon-machines-20261127-v1";
+import { createShowFX } from "./show-fx.mjs?v=sky-soot-20261127-v1";
+import { createRouletteCabinetFX } from "./roulette-cabinet-fx.mjs?v=sky-soot-20261127-v1";
 import { cameraTravelDuration, isSpookyView, suspenseEase, crowdCloseupPose } from "./spooky-camera.mjs?v=cartoon-machines-20261127-v1";
 import { CHARACTER_SOURCE_SIZE, CHARACTER_YAW_LIMIT, characterYaw, standingCharacterPose, projectCharacterQuad, pointInCharacterQuad } from "./character-billboards.mjs?v=stage-dance-20261127-v1";
 import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { createExteriorMist, EXTERIOR_FLOOR } from "./exterior-mist.mjs?v=crowd-mist-20261127-v1";
 import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=crank-hop-20261127-v1";
-import { foley } from "./game-foley.mjs?v=cartoon-machines-20261127-v1";
-import { createSlotCabinetFX } from "./slot-cabinet-fx.mjs?v=cartoon-machines-20261127-v1";
+import { foley } from "./game-foley.mjs?v=sky-soot-20261127-v1";
+import { createSlotCabinetFX } from "./slot-cabinet-fx.mjs?v=sky-soot-20261127-v1";
 import {
   resolvePointClickAction,
   resolvePointClickBack,
@@ -299,6 +299,7 @@ import {
 
   function finishTurn({ settled = false, audible = false } = {}) {
     foley.stop("roulette");
+    foley.stop("roulette-rattle");
     const visible = gameStarted && !pauseMenuOpen && !diceModeOpen && !document.hidden
       && currentView.kind === "roulette" && !document.documentElement.hasAttribute("data-rg-host-locked");
     // This is a completed spin, not a claim that a player won points.
@@ -368,6 +369,7 @@ import {
     showFX?.clearRoulette(); if(gameStarted&&!pauseMenuOpen&&!document.hidden&&currentView.kind==="roulette")crowdState.react("suspense",crowdClock);
     foley.play("switch");
     foley.start("roulette", "wheel", { loop: true });
+    foley.start("roulette-rattle", "slotRattle", { loop: true, volume: .64 });
     if (!wheelPivot || !ballPivot || !ballOrbitObject) {
       wheelMotion = { started: performance.now(), duration: 700, wheelFrom: 0, wheelTo: 0, ballFrom: 0, ballTo: 0 };
       return;
@@ -1505,7 +1507,7 @@ import {
   function transitionToView(nextView, { immediate = false } = {}) {
     hideGameCursor(); lastScenePointer = null;
     freecam?.stop();
-    if (nextView.kind !== "roulette") {stopRouletteSettlement(); rouletteCabinetFX?.reset(); showFX?.clearRoulette();}
+    if (nextView.kind !== "roulette") {foley.stop("roulette-rattle"); stopRouletteSettlement(); rouletteCabinetFX?.reset(); showFX?.clearRoulette();}
     const viewChanged=currentView.kind!==nextView.kind||currentView.contestantId!==nextView.contestantId;
     if(stageShow?.busy&&!viewChanged&&nextView.kind==="slot"&&!immediate)return;
     if (selectedCharacterId(nextView) && (viewChanged || cameraDetached) && !immediate) characterSelectedAt=performance.now();
@@ -2948,6 +2950,8 @@ import {
       wheelMotion = null;
       finishTurn();
     }
+
+    if (!wheelMotion) rouletteCabinetFX?.update(time,1,canShowRouletteCabinet()&&!reducedMotion.matches);
 
     if (leverMotion && lever) {
       const progress = Math.min(1, (time - leverMotion.started) / leverMotion.duration);

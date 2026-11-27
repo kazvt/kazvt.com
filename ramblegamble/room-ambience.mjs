@@ -30,10 +30,10 @@ export function createRoomAmbience({ createMedia = () => new Audio(), random = M
         // Only the VIP track passes through an occlusion filter; all other
         // ambience and the separate gameplay foley bus retain their sound.
         const filter = track.water ? context.createBiquadFilter() : null;
-        if (filter) { filter.type = 'lowpass'; filter.frequency.value = 480; filter.Q.value = .1; source.connect(filter); filter.connect(gain); }
-        else source.connect(gain);
+        if (filter) { filter.type = 'lowpass'; filter.frequency.value = 3400; filter.Q.value = .1; filter.connect(gain); }
+        source.connect(gain); // Outside: genuine unfiltered path. Interior retains its existing filter.
         gain.connect(master);
-        const entry = { media, gain, source, track, context, requested: false, blocked: false, failed: false, generation: 0, level: null, filter, cutoff: null, silentSince: null };
+        const entry = { media, gain, source, track, context, requested: false, blocked: false, failed: false, generation: 0, level: null, filter, filtered: false, cutoff: null, silentSince: null };
         media.addEventListener('error', () => { entry.failed = true; pause(entry); });
         media.addEventListener('loadedmetadata', () => {
           if (Number.isFinite(media.duration) && media.duration > 4) {
@@ -45,7 +45,7 @@ export function createRoomAmbience({ createMedia = () => new Audio(), random = M
       } catch { /* unavailable media API: no ambience, no gameplay impact */ }
     }
   }
-  function sync({ active, context, master, level = 1, emotion = "idle", waterLevel = 0, waterCutoff = 480, retry = false }) {
+  function sync({ active, context, master, level = 1, emotion = "idle", waterLevel = 0, waterCutoff = null, retry = false }) {
     if (!active || !context || !master || context.state !== 'running') { stop(); return; }
     setup(context, master);
     for (const entry of entries) {
@@ -55,8 +55,12 @@ export function createRoomAmbience({ createMedia = () => new Audio(), random = M
         ? Math.max(0, Math.min(1, Number.isFinite(waterLevel) ? waterLevel : 0))
         : mood * Math.max(0, Math.min(1, Number.isFinite(level) ? level : 1)));
       if (entry.filter) {
-        const cutoff = Math.max(200,Math.min(8000,Number.isFinite(waterCutoff)?waterCutoff:480));
-        if (entry.cutoff !== cutoff) {
+        const filtered = Number.isFinite(waterCutoff);
+        const cutoff = filtered ? Math.max(200,Math.min(8000,waterCutoff)) : null;
+        if (entry.filtered !== filtered) {
+          entry.source.disconnect(); entry.source.connect(filtered ? entry.filter : entry.gain); entry.filtered = filtered;
+        }
+        if (filtered && entry.cutoff !== cutoff) {
           const p=entry.filter.frequency,t=context.currentTime;
           p.cancelScheduledValues(t); p.setTargetAtTime(cutoff,t,.13);entry.cutoff=cutoff;
         }

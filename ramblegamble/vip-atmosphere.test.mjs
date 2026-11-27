@@ -15,7 +15,7 @@ test('VIP sound zone reaches absolute silence near the real aperture, not the en
 });
 test('modal state and authored doorway framing reliably mute crowd, even for portrait views',()=>{
  assert.deepEqual(sampleVipAmbience(position(100),door,{inside:true}),{room:0,water:1,cutoff:3400});
- assert.deepEqual(sampleVipAmbience(position(100),door,{focused:true}),{room:0,water:.14,cutoff:480});
+ assert.deepEqual(sampleVipAmbience(position(100),door,{focused:true}),{room:0,water:.64,cutoff:null});
  assert.equal(sampleVipAmbience(position(100),door).water,0);
 });
 test('every particle starts within aperture, travels toward room, and resets invisibly',()=>{

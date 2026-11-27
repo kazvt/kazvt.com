@@ -1,6 +1,6 @@
 // Recorded samples only. This module never generates an oscillator/noise signal.
 // All assets are same-origin, installed by assets/sfx/install-foley.py.
-import { createRoomAmbience } from "./room-ambience.mjs?v=vip-water-gain-20261127-v3";
+import { createRoomAmbience } from "./room-ambience.mjs?v=sky-soot-20261127-v1";
 const ROOT = new URL("./assets/sfx/foley/", import.meta.url);
 export const FOLEY_CUES = Object.freeze({
   switch: { files: ["switch.mp3"], fallback: ["click-1.ogg"], volume: .44 },
@@ -69,14 +69,14 @@ export function createFoley({
 } = {}) {
   let context = null, master = null, muted = false, epoch = 0, requestCount = 0;
   const buffers = new Map(), channels = new Map(), voices = new Set(), previous = new Map();
-  let ambienceEnabled = true, roomActive = false, roomLevel = 1, roomEmotion = "idle", waterLevel = 0, waterCutoff = 480;
+  let ambienceEnabled = true, roomActive = false, roomLevel = 1, roomEmotion = "idle", waterLevel = 0, waterCutoff = null;
   const room = createRoomAmbience({ createMedia, random });
   try { muted = storage?.getItem(STORAGE_KEY) === "1"; ambienceEnabled = storage?.getItem(AMBIENCE_KEY) !== "0"; } catch {}
   function syncRoom(retry = false) {
     room.sync({ active: roomActive && ambienceEnabled && !muted && !isHidden(), context, master,
       emotion: roomEmotion, level: roomLevel * (channels.get("smeemo-win")?.voice ? .22 : 1), waterLevel, waterCutoff, retry });
   }
-  function setRoomAmbience(active, level = 1, emotion = "idle", water = 0, cutoff = 480) { roomActive = Boolean(active); roomLevel = level; roomEmotion = emotion; waterLevel = water; waterCutoff = cutoff; syncRoom(); }
+  function setRoomAmbience(active, level = 1, emotion = "idle", water = 0, cutoff = null) { roomActive = Boolean(active); roomLevel = level; roomEmotion = emotion; waterLevel = water; waterCutoff = cutoff; syncRoom(); }
   function setAmbienceEnabled(value) {
     ambienceEnabled = Boolean(value);
     try { storage?.setItem(AMBIENCE_KEY, ambienceEnabled ? "1" : "0"); } catch {}

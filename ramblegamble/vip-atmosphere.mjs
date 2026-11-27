@@ -1,7 +1,7 @@
 // Presentation-only spatial audio and particles, based on the actual doorway.
 const clamp01 = n => Math.max(0, Math.min(1, n));
 const smooth = n => { const t = clamp01(n); return t*t*(3-2*t); };
-export const VIP_ZONE = Object.freeze({ silentDistance: 3.65, fadeDistance: 6.2, outsideDrip: .14, outsideCutoff: 480, insideCutoff: 3400 });
+export const VIP_ZONE = Object.freeze({ silentDistance: 3.65, fadeDistance: 6.2, outsideDrip: .64, outsideCutoff: null, insideCutoff: 3400 });
 
 export function portalDistance(position, door) {
   if (!position || ![position.x,position.y,position.z].every(Number.isFinite)) return Infinity;

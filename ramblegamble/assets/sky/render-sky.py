@@ -9,6 +9,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from scipy.spatial.transform import Rotation
 import trimesh
+from sky_materials import mapped_parts
 from sky_physics import Body, Hull, box, compound, simulate, text_rotation
 
 HERE=Path(__file__).resolve().parent
@@ -186,7 +187,7 @@ def raster_triangle(canvas,depth,points,z,color,uv,tex,shade):
 
 def render_mesh(canvas,depth,parts,center,radius,rot,zoffset=0):
  for verts,colors,uv,tex in parts:
-  vv=verts@rot.T;normal=np.cross(vv[:,1]-vv[:,0],vv[:,2]-vv[:,0]);norm=np.linalg.norm(normal,axis=1);normal/=np.maximum(1e-9,norm[:,None]);lights=.66+.35*np.maximum(0,normal@np.array([-.38,.55,.74]));p=vv[:,:,:2]*[radius,-radius]+center
+  vv=verts@rot.T;normal=np.cross(vv[:,1]-vv[:,0],vv[:,2]-vv[:,0]);norm=np.linalg.norm(normal,axis=1);normal/=np.maximum(1e-9,norm[:,None]);lights=.52+.49*np.maximum(0,normal@np.array([-.38,.55,.74]))+.10*np.maximum(0,normal@np.array([.75,-.35,.55]));p=vv[:,:,:2]*[radius,-radius]+center
   # Back-face culling is essential for authored cards whose front and back
   # share coplanar vertices. A depth buffer removes interpenetration artefacts.
   for i in np.flatnonzero(normal[:,2]>1e-7):raster_triangle(canvas,depth,p[i],vv[i,:,2]*radius+zoffset,colors[i],None if uv is None else uv[i],tex,lights[i])
@@ -202,11 +203,12 @@ def main():
   for k in list(assets):
    path=args.models/(k+'.glb')
    if path.is_file():assets[k]=override(path,PALETTE[0])
- assets={k:normalized(v) for k,v in assets.items()};photo=np.asarray(Image.open(args.eye).convert('RGB')) if args.eye else None
+ assets={k:normalized(v) for k,v in assets.items()}; collision_assets=assets; assets={k:mapped_parts(k,v) for k,v in assets.items()};photo=np.asarray(Image.open(args.eye).convert('RGB')) if args.eye else None
  # Sparse clusters with ample negative space. No model is a live scene object.
- names=['chair','book','orb','boat','card1','cat','car','desk','die','text','orb','book2','chair2','card2','cat2','car2','table']
- radii=[60,51,73,59,50,49,55,67,39,95,64,43,48,48,45,50,49]
- pos=[(180,180),(350,140),(580,220),(810,145),(210,365),(398,363),(760,370),(155,650),(410,595),(560,450),(830,650),(610,720),(330,820),(190,835),(830,855),(565,870),(102,490)]
+ names=['chair','book','orb','boat','card1','cat','car','desk','die','text','orb','book2','chair2','card2','cat2','car2','table',
+        'chair','desk','book2','boat','cat2','card1','die','car2','table','orb','chair2','book','car','cat','card2','die','orb']
+ radii=[round(r*.86) for r in [60,51,73,59,50,49,55,67,39,95,64,43,48,48,45,50,49,53,62,46,54,44,48,40,50,54,64,50,48,53,45,48,38,65]]
+ pos=[(85+(i%6)*166+((i//6)%2)*12,85+(i//6)*166) for i in range(len(names))]
  vel=rng.uniform(-34,34,(len(names),2));vel[0]=[27,13];vel[1]=[-27,14];vel[6]=[24,25];vel[10]=[-26,-24]
  text=text_sprite();assets['text']=text_mesh(text)
  bodies=[];phases=rng.uniform(0,TAU,(len(names),3))
@@ -220,7 +222,7 @@ def main():
     ys=np.nonzero(alpha[:,a:b]>64)[0];scale=2*r/text.width;cx=(a+b-text.width)*scale/2;cy=(text.height-ys.min()-ys.max()-1)*scale/2
     hulls.append(Hull(box(((b-a)*scale,(ys.max()-ys.min()+1)*scale,5),(cx,cy,0))))
    rot=text_rotation(0);w=np.zeros(3)
-  else:hulls=compound(assets[name],r)
+  else:hulls=compound(collision_assets[name],r)
   bodies.append(Body(hulls,[pos[i][0],-pos[i][1]+N,rng.uniform(-18,18)],[vel[i][0],-vel[i][1],rng.uniform(-9,9)],rot,w,r,text=name=='text'))
  blend=FPS*2;history=simulate(bodies,SECONDS+blend/FPS,FPS);eye_cache={}
  def frame(f):

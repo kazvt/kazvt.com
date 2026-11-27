@@ -1,5 +1,4 @@
 // One marker for the current camera destination, never a second cursor.
-export const FOCUS_ARROW_ANIMATION_MS = 3200;
 const assets='/ramblegamble/assets/provided/focus-arrow';
 const version='?v=arrow-restored-20261127-v1';
 const finite=p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y);
@@ -87,7 +86,7 @@ export function focusArrowPose(target,viewport){
 }
 export function createFocusArrow(layer){
   const image=document.createElement('img');image.className='rg-focus-arrow';image.alt='';image.setAttribute('aria-hidden','true');image.draggable=false;image.hidden=true;layer.append(image);
-  let key=null,started=0,animated=null,failed=false,failedGif=false,wanted=false;
+  let key=null,animated=null,failed=false,failedGif=false,wanted=false;
   // If the animation fails, fall back to the bundled still. Never expose
   // a broken-image rectangle if both files are unavailable.
   image.addEventListener('load',()=>{image.hidden=!wanted||failed;});
@@ -100,8 +99,8 @@ export function createFocusArrow(layer){
     update(view,target,viewport,time,reduced){
       const next=focusArrowKey(view),pose=next&&focusArrowPose(target,viewport);
       if(!pose){wanted=false;image.hidden=true;if(!next)key=null;return false;}
-      if(next!==key){key=next;started=time;animated=null;failed=false;failedGif=false;}
-      const moving=!failedGif&&!reduced&&time-started<FOCUS_ARROW_ANIMATION_MS;
+      if(next!==key){key=next;animated=null;failed=false;failedGif=false;}
+      const moving=!failedGif&&!reduced;
       if(failed){wanted=false;image.hidden=true;return false;}
       wanted=true;
       if(moving!==animated){animated=moving;image.src=assets+(moving?'.gif':'.png')+version;}

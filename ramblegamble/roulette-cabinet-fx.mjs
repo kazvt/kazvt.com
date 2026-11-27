@@ -1,4 +1,27 @@
-import {createCartoonCueTrack, ROULETTE_CARTOON_CUES} from './cartoon-cues.mjs?v=cartoon-machines-20261127-v1';
+import {createCartoonCueTrack, ROULETTE_CARTOON_CUES} from './cartoon-cues.mjs?v=sky-soot-20261127-v1';
+import {makeSmokeTexture} from './slot-cabinet-fx.mjs?v=sky-soot-20261127-v1';
+// A small independent soot pool. Smoke is emitted in rig space so existing
+// puffs don't follow subsequent cabinet jumps or cover the spinning center.
+export function createRouletteSoot(THREE,rig,carrier,dimensions,random=Math.random){
+ const texture=makeSmokeTexture(THREE),group=new THREE.Group();group.name='rg-roulette-soot';rig.add(group);
+ const pool=Array.from({length:28},()=>{const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,transparent:true,opacity:0,depthWrite:false,depthTest:true,toneMapped:false}));sprite.visible=false;sprite.raycast=()=>{};group.add(sprite);return {sprite,born:-Infinity,origin:new THREE.Vector3()};});
+ const {width,height,depth}=dimensions,unit=Math.min(width,depth),size=Math.min(.16,unit*.095);
+ let next=Infinity,serial=0;
+ function emit(time){const p=pool.find(p=>!p.sprite.visible)||pool.reduce((a,b)=>a.born<b.born?a:b);const side=serial++%2?1:-1,back=serial%3===0;
+  p.origin.set(side*width*(back?.28:.49),height*(.26+random()*.18),back?depth*.49:(random()-.5)*depth*.48);
+  carrier.localToWorld(p.origin);rig.worldToLocal(p.origin);
+  Object.assign(p,{born:time,side,back,life:850+random()*400,phase:random()*Math.PI*2,spin:(random()-.5)*1.3});p.sprite.position.copy(p.origin);p.sprite.scale.setScalar(size);p.sprite.material.opacity=0;p.sprite.visible=true;
+ }
+ function begin(time){clear();next=time;}
+ function update(time,rolling){if(rolling&&time>=next){emit(time);if(serial%3===0)emit(time);next=time+135;}
+  for(const p of pool){if(!p.sprite.visible)continue;const t=(time-p.born)/p.life;if(t>=1){p.sprite.visible=false;continue;}if(t<0)continue;
+   p.sprite.position.copy(p.origin);p.sprite.position.x+=p.side*unit*.25*t+Math.sin(p.phase+t*4)*unit*.025*t;p.sprite.position.y+=height*.65*t;p.sprite.position.z+=(p.back?1:0)*unit*.14*t;
+   p.sprite.scale.setScalar(size*(1+2.4*t));p.sprite.material.rotation=p.spin*t;p.sprite.material.opacity=.68*smooth(t/.15)*(1-smooth((t-.35)/.65));
+  }
+ }
+ function clear(){next=Infinity;for(const p of pool)p.sprite.visible=false;}
+ return {begin,update,clear,dispose(){clear();for(const p of pool)p.sprite.material.dispose();texture.dispose();group.removeFromParent();}};
+}
 const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
 const smooth=x=>{x=clamp(x);return x*x*(3-2*x);};
 // The whole assembly moves together. Phase is normalized to the existing spin,
@@ -44,13 +67,15 @@ export function createRouletteCabinetFX(THREE,rig,model,{foley}={}){
  const inverse=carrier.matrixWorld.clone().invert();
  const cues=createCartoonCueTrack(foley,'roulette-cartoon');let running=false;
  const dimensions={width:size.x,height:size.y,depth:size.z};
- function reset(){if(!running)return;cues.clear();running=false;carrier.position.copy(pivot);carrier.scale.set(1,1,1);carrier.rotation.set(0,0,0);carrier.updateWorldMatrix(true,true);}
- function begin(time,duration,{active=true,reduced=false}={}){reset();if(!active||reduced)return;running=true;cues.begin(time,ROULETTE_CARTOON_CUES,duration);}
- function update(time,progress,active){if(!running)return;if(!active||progress>=1){reset();return;}const p=fitRouletteCabinet(sampleRouletteCabinet(progress),dimensions);carrier.position.copy(pivot);carrier.position.x+=p.x;carrier.position.y+=p.y;carrier.scale.set(p.s,p.sy,p.s);carrier.rotation.set(p.pitch,0,p.roll);carrier.updateWorldMatrix(true,true);cues.update(time);}
+ let soot=null;try{soot=createRouletteSoot(THREE,rig,carrier,dimensions);}catch(error){console.warn("Roulette soot unavailable",error);}
+
+ function reset(clearSmoke=true){if(clearSmoke)soot?.clear();if(!running)return;cues.clear();running=false;carrier.position.copy(pivot);carrier.scale.set(1,1,1);carrier.rotation.set(0,0,0);carrier.updateWorldMatrix(true,true);}
+ function begin(time,duration,{active=true,reduced=false}={}){reset();if(!active||reduced)return;running=true;soot?.begin(time);cues.begin(time,ROULETTE_CARTOON_CUES,duration);}
+ function update(time,progress,active){if(!active){reset();return;}if(!running){soot?.update(time,false);return;}if(progress>=1){reset(false);soot?.update(time,false);return;}const p=fitRouletteCabinet(sampleRouletteCabinet(progress),dimensions);carrier.position.copy(pivot);carrier.position.x+=p.x;carrier.position.y+=p.y;carrier.scale.set(p.s,p.sy,p.s);carrier.rotation.set(p.pitch,0,p.roll);carrier.updateWorldMatrix(true,true);soot?.update(time,true);cues.update(time);}
  // Convert rest-world ring / orbit positions into the live cabinet transform.
  function worldPoint(point){return point.clone().applyMatrix4(inverse).applyMatrix4(carrier.matrixWorld);}
  // A fixed framing envelope, not a camera that chases the wobble. The sum
  // bounds vertical stretch, maximum hop, tilt, and floor correction.
  const framing=bounds.clone();framing.max.y+=size.y*.76+(size.x+size.z)*.14;
- return {begin,update,reset,worldPoint,framing,carrier,dispose:reset};
+ return {begin,update,reset,worldPoint,framing,carrier,dispose(){reset();soot?.dispose();}};
 }

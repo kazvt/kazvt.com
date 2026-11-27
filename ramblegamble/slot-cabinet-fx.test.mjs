@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {createRouletteSoot} from './roulette-cabinet-fx.mjs';
 import { sampleCabinetPose, createSlotCabinetFX } from './slot-cabinet-fx.mjs';
 
 // Minimal affine scene fixture; actual authored glTF bounds/projection are
@@ -88,4 +89,13 @@ test('crank landing emits a bounded additional soot burst without restarting rec
  const f=fixture();f.fx.begin(0,'crank');f.update(400);const before=f.puffs().length;f.update(410);
  assert.equal(f.puffs().length,before+5);f.update(420);assert.equal(f.puffs().length,before+5);
  assert.equal(f.calls.filter(c=>c[1]!=='slot-cartoon').length,2);assert.ok(f.calls.some(c=>c[1]==='slot-cartoon'&&c[2]==='cartoonClang'));f.fx.reset();assert.equal(f.puffs().length,0);
+});
+
+test('roulette soot reuses bounded non-interactive sprites, rises outside rim, drains and disposes',()=>{
+ const f=fixture(),saved=globalThis.document;globalThis.document={createElement:()=>({getContext:()=>({beginPath(){},arc(){},fill(){},fillRect(){}})})};let fx;
+ try{fx=createRouletteSoot(THREE,f.rig,f.carrier,{width:2,height:.8,depth:2},()=>.5);}finally{globalThis.document=saved;}
+ const group=f.rig.getObjectByName('rg-roulette-soot'),active=()=>group.children.filter(x=>x.visible);assert.equal(group.children.length,28);assert.equal(active().length,0);
+ fx.begin(0);fx.update(0,true);const first=active()[0],y=first.position.y,size=first.scale.x;fx.update(150,true);assert.ok(first.position.y>y&&first.scale.x>size&&first.material.opacity>0);assert.equal(first.raycast(),undefined);
+ for(let t=165;t<=3900;t+=15){fx.update(t,true);assert.ok(active().length<=28);}
+ assert.ok(active().length>0);fx.update(4100,false);assert.ok(active().length>0);fx.update(5300,false);assert.equal(active().length,0);fx.begin(6000);fx.update(6000,true);fx.clear();assert.equal(active().length,0);fx.dispose();assert.equal(group.parent,null);assert.ok(group.children.every(x=>x.material.disposed));
 });

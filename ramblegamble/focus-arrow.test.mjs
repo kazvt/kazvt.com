@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
-import {focusArrowKey,screenBounds,projectedArrowTarget,characterArrowTarget,focusArrowPose,createFocusArrow,FOCUS_ARROW_ANIMATION_MS} from './focus-arrow.mjs';
+import {focusArrowKey,screenBounds,projectedArrowTarget,characterArrowTarget,focusArrowPose,createFocusArrow} from './focus-arrow.mjs';
 const viewport={width:1280,height:720},bounds={left:400,right:800,top:180,bottom:620};
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
 test('semantic destinations cover both keyboard and clicked targets, never overview or invalid ids',()=>{
@@ -30,9 +30,9 @@ test('character projection respects the current visible plane and upper-plane oc
  const entry={panel:{style:{visibility:'visible'}},projectedQuad:{corners:[{x:400,y:200},{x:800,y:160},{x:810,y:620},{x:380,y:640}]}};
  const target=characterArrowTarget(entry,viewport,{contains:(e,x,y)=>e===entry&&x>460&&y>210});assert.ok(target);const p=focusArrowPose(target,viewport);assert.ok(p);assert.equal(p.aimX,target.aim.x);assert.equal(characterArrowTarget(entry,viewport,{contains:()=>false}),null);entry.panel.style.visibility='hidden';assert.equal(characterArrowTarget(entry,viewport,{contains:()=>true}),null);
 });
-test('single DOM pointer switches destination, stops animating, respects reduced motion and can be hidden',()=>{
+test('single DOM pointer loops indefinitely, respects reduced motion and can be hidden',()=>{
  const original=globalThis.document;const img={style:{},complete:true,naturalWidth:64,addEventListener(){},setAttribute(){},remove(){this.removed=true}};globalThis.document={createElement:()=>img};let count=0;
- try{const marker=createFocusArrow({append(){count++}}),target={bounds};marker.update({kind:'host'},target,viewport,100,false);assert.match(img.src,/\.gif\?v=/);assert.equal(img.hidden,false);marker.update({kind:'host'},target,viewport,100+FOCUS_ARROW_ANIMATION_MS,false);assert.match(img.src,/\.png\?v=/);marker.update({kind:'slot'},target,viewport,5000,false);assert.match(img.src,/\.gif\?v=/);marker.update({kind:'slot'},target,viewport,5100,true);assert.match(img.src,/\.png\?v=/);marker.update({kind:'overview'},target,viewport,5200,false);assert.equal(img.hidden,true);marker.update({kind:'host'},target,viewport,5300,true);assert.equal(img.hidden,false);assert.match(img.src,/\.png\?v=/);marker.hide(true);assert.equal(img.hidden,true);marker.dispose();assert.equal(img.removed,true);assert.equal(count,1);}finally{globalThis.document=original;}
+ try{const marker=createFocusArrow({append(){count++}}),target={bounds};marker.update({kind:'host'},target,viewport,100,false);assert.match(img.src,/\.gif\?v=/);assert.equal(img.hidden,false);marker.update({kind:'host'},target,viewport,100+120000,false);assert.match(img.src,/\.gif\?v=/);marker.update({kind:'slot'},target,viewport,5000,false);assert.match(img.src,/\.gif\?v=/);marker.update({kind:'slot'},target,viewport,5100,true);assert.match(img.src,/\.png\?v=/);marker.update({kind:'overview'},target,viewport,5200,false);assert.equal(img.hidden,true);marker.update({kind:'host'},target,viewport,5300,true);assert.equal(img.hidden,false);assert.match(img.src,/\.png\?v=/);marker.hide(true);assert.equal(img.hidden,true);marker.dispose();assert.equal(img.removed,true);assert.equal(count,1);}finally{globalThis.document=original;}
 });
 test('render integration targets actual scene objects and hides in non-focus modes',()=>{
  const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');const a=src.indexOf('  function updateFocusArrow('),b=src.indexOf('  function syncVipAmbience(',a);const code=src.slice(a,b);

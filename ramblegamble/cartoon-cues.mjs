@@ -7,8 +7,10 @@ export const SLOT_CARTOON_CUES = Object.freeze({
   loss: [[220,'cartoonClatter',.84],[355,'cartoonClang',.72]],
 });
 export const ROULETTE_CARTOON_CUES = Object.freeze([
-  [.045,'cartoonTwang',1],[.145,'cartoonClang',.9],[.29,'cartoonClatter',.85],
-  [.46,'cartoonTwang',.65],[.69,'cartoonClatter',.63],[.90,'cartoonClang',.72],
+  [.045,'cartoonTwang',1],[.095,'cartoonClatter',.68],[.145,'cartoonClang',.9],
+  [.19,'cartoonTwang',.72],[.29,'cartoonClatter',.85],[.36,'cartoonClang',.66],
+  [.46,'cartoonTwang',.65],[.56,'cartoonClatter',.78],[.69,'cartoonClang',.63],
+  [.76,'cartoonTwang',.55],[.90,'cartoonClang',.72],
 ]);
 export function createCartoonCueTrack(foley,channel) {
   let cues=[], index=0, started=0, armed=false;

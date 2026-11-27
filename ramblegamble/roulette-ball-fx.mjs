@@ -1,6 +1,6 @@
 // Violet voxel embers use the same palette/shape vocabulary as the VIP portal.
 // The bounded emitter samples the real ball world position AFTER wheel motion.
-import { portalParticleSeed } from './vip-atmosphere.mjs?v=vip-atmosphere-20261127-v1';
+import { portalParticleSeed } from './vip-atmosphere.mjs?v=sky-soot-20261127-v1';
 export const BALL_EMBER_RATE=40, BALL_EMBER_CAP=40, BALL_IDLE_INTENSITY=.2;
 const clamp=n=>Math.max(0,Math.min(1,n));
 export function ballEmissionRate(moving){return BALL_EMBER_RATE*(moving?1:BALL_IDLE_INTENSITY);}

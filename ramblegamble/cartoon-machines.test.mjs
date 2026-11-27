@@ -21,5 +21,7 @@ test('scary arrivals are slower than every ordinary navigation including curtain
  let previous=0;for(let i=0;i<=100;i++){const value=suspenseEase(i/100);assert.ok(value>=previous&&value<=1);previous=value;}assert.equal(previous,1);assert.ok(suspenseEase(.1)<.01);assert.ok(suspenseEase(.9)>.99);
 });
 test('all game foley imports use the same mixer cache key',()=>{
- for(const file of ['ramblegamble.js','dice-mode.js','trivia-ui.js','card-games-ui.js','trivia-live-view.mjs','card-room-player.mjs','trivia-client-page.js'])assert.match(readFileSync(new URL(file,import.meta.url),'utf8'),/game-foley\.mjs\?v=cartoon-machines-20261127-v1/);
+ for(const file of ['ramblegamble.js','dice-mode.js','trivia-ui.js','card-games-ui.js','trivia-live-view.mjs','card-room-player.mjs','trivia-client-page.js'])assert.match(readFileSync(new URL(file,import.meta.url),'utf8'),/game-foley\.mjs\?v=sky-soot-20261127-v1/);
 });
+
+test('roulette mechanical bed starts once per accepted spin and stops on completion or leaving focus',()=>{const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');assert.match(src,/if \(!beginTurn\("wheel"\)\) return;[\s\S]*?foley.start\("roulette-rattle", "slotRattle", \{ loop: true, volume: \.64 \}\)/);assert.match(src,/function finishTurn[^\n]*\n\s*foley.stop\("roulette"\);\s*foley.stop\("roulette-rattle"\);/);assert.match(src,/if \(nextView.kind !== "roulette"\) \{foley.stop\("roulette-rattle"\)/);assert.equal(ROULETTE_CARTOON_CUES.length,11);});

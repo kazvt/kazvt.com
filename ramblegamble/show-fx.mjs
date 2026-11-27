@@ -1,6 +1,6 @@
-import { createBallAtmosphere } from './roulette-ball-fx.mjs?v=stage-dance-20261127-v1';
+import { createBallAtmosphere } from './roulette-ball-fx.mjs?v=sky-soot-20261127-v1';
 import { createRoomLightTrim } from "./room-light-trim.mjs?v=compact-score-20261127-v1";
-import { createPortalParticles } from "./vip-atmosphere.mjs?v=vip-atmosphere-20261127-v1";
+import { createPortalParticles } from "./vip-atmosphere.mjs?v=sky-soot-20261127-v1";
 // Render-only world accents. No physics, point calculation, hit targets or camera pose changes.
 export function createShowFX(THREE,scene,{wheel, wheelPivot,ball,door,wheelPoint,wheelCarrier}) {
   const group=new THREE.Group();group.name='rg-show-fx';scene.add(group);

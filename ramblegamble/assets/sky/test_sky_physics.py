@@ -39,4 +39,15 @@ class RenderTests(unittest.TestCase):
  def test_alpha_dissolve_uses_premultiplication(self):
   r=self.render;a=np.array([[[250,100,50,255]]],np.uint8);b=np.zeros_like(a);np.testing.assert_array_equal(r.crossfade(a,b,.5),[[[250,100,50,128]]]);np.testing.assert_array_equal(r.crossfade(a,b,0),a);np.testing.assert_array_equal(r.crossfade(a,b,1),b)
 
+class MaterialTests(unittest.TestCase):
+ def test_material_maps_are_distinct_bounded_and_repeatable(self):
+  from sky_materials import material_map
+  maps=[material_map(k,12) for k in ('wood','fabric','paper','metal','rubber','fur','glass','paint')]
+  for m in maps:self.assertEqual(m.shape,(256,256));self.assertTrue(np.isfinite(m).all());self.assertGreater(m.std(),.02);self.assertGreaterEqual(m.min(),.54);self.assertLessEqual(m.max(),1.41)
+  np.testing.assert_array_equal(maps[0],material_map('wood',12));self.assertFalse(np.array_equal(maps[0],maps[1]))
+ def test_face_uv_and_existing_art(self):
+  from sky_materials import mapped_parts
+  v=np.array([[[0,0,0],[1,0,0],[0,1,0]]],float);c=np.array([[200,150,100]],float);parts=mapped_parts('chair',[(v,c,None,None)]);self.assertEqual(parts[0][2].shape,(1,3,2));self.assertGreater(parts[0][3][:,:,:3].std(),0)
+  tex=np.ones((8,8,4),np.uint8)*255;uv=np.zeros((1,3,2));self.assertIs(mapped_parts('card1',[(v,c,uv,tex)])[0][3],tex)
+
 if __name__=='__main__':unittest.main()

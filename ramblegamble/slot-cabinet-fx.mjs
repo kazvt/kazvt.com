@@ -1,4 +1,4 @@
-import {createCartoonCueTrack,SLOT_CARTOON_CUES} from "./cartoon-cues.mjs?v=cartoon-machines-20261127-v1";
+import {createCartoonCueTrack,SLOT_CARTOON_CUES} from "./cartoon-cues.mjs?v=sky-soot-20261127-v1";
 // Presentation only: no game state, RNG, storage, or reel scheduling.
 const TAU = Math.PI * 2;
 const clamp = (n, a=0, b=1) => Math.max(a, Math.min(b,n));
@@ -48,7 +48,7 @@ export function fitCabinetPose(p,{width,height,bayWidth,maxHeight=3.0}) {
   const sy=Math.min(p.sy,(Math.max(maxHeight,height)-y-edge)/(height*Math.cos(roll)));
   return {x:p.x*height*factor,y,roll,sx,sy};
 }
-function makeSmokeTexture(THREE) {
+export function makeSmokeTexture(THREE) {
   // Deliberately low-resolution, irregular cel-shaded soot, not luminous mist.
   const canvas=document.createElement('canvas');canvas.width=canvas.height=48;
   const c=canvas.getContext('2d'); if(!c) throw Error('Smoke canvas unavailable');
