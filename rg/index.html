@@ -9,6 +9,7 @@
     <title>Ramble Gamble - kazvt</title>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
     <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=exterior-hands-20261128-v1">
+    <link rel="stylesheet" href="/ramblegamble/menu-karaoke.css?v=menu-karaoke-20261128-v1">
     <link rel="stylesheet" href="/ramblegamble/host-console.css?v=freecam-depth-20261127-v1">
     <link rel="stylesheet" href="/ramblegamble/trivia-live.css?v=all-curtain-20261127-v1">
     <link rel="stylesheet" href="/ramblegamble/card-games.css?v=smeemo-arrival-20261128-v1">
@@ -22,7 +23,7 @@
       }
     </script>
     <link rel="stylesheet" href="/ramblegamble/host-access.css?v=host-toggle-20261126-v1">
-    <script type="module" src="/ramblegamble/host-access.mjs?v=stand-lift-20261128-v1"></script>
+    <script type="module" src="/ramblegamble/host-access.mjs?v=menu-karaoke-20261128-v1"></script>
       <link rel="stylesheet" href="/ramblegamble/show-energy.css?v=compact-score-20261127-v1">
   </head>
   <body class="ramble-page" data-theme="p2">
@@ -76,6 +77,16 @@
     </section>
 
     <section class="rg-pause-menu" id="rg-pause-menu" aria-label="Pause menu" data-marquee-phase="closed" hidden>
+      <div class="rg-menu-karaoke" id="rg-menu-karaoke" aria-label="Theme song lyrics" hidden>
+        <div class="rg-karaoke-particles" aria-hidden="true"></div>
+        <div class="rg-karaoke-ribbon"><span class="rg-karaoke-label"></span></div>
+        <div class="rg-karaoke-deck">
+          <div class="rg-karaoke-lead"></div>
+          <div class="rg-karaoke-response" hidden></div>
+          <div class="rg-karaoke-next" aria-hidden="true" hidden></div>
+        </div>
+        <div class="rg-karaoke-track" aria-hidden="true"><span class="rg-karaoke-progress"></span></div>
+      </div>
       <div class="rg-pause-stack">
         <div class="rg-marquee-stage" aria-hidden="true">
           <video

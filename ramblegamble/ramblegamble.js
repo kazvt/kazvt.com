@@ -7,7 +7,7 @@ import { createFloatingSky } from "./floating-sky.mjs?v=sky-solid-lettering-2026
 import { createStageDance, createDanceClock, createDanceIntensitySampler, dancePose } from "./stage-dance.mjs?v=music-intensity-20261128-v1";
 import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=freecam-music-20261128-v1";
 import { createVipInteriorTracker, sampleMusicZoneGain } from "./music-zones.mjs?v=music-zone-fade-20261128-v1";
-import { createMenuMarquee } from "./menu-marquee.mjs?v=menu-theme-20261128-v1";
+import { createMenuMarquee } from "./menu-marquee.mjs?v=menu-karaoke-20261128-v1";
 import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=smeemo-reveal-20261127-v1";
 import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcony.mjs?v=hazel-balcony-20261127-v1";
 import { createSignGlow } from "./sign-glow.mjs?v=neon-focus-20261127-v1";
@@ -98,7 +98,7 @@ import {
   const controlsDialog = document.getElementById("rg-controls-dialog");
   const controlsCloseButton = document.getElementById("rg-controls-close");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const menuPresentation = createMenuMarquee({menu:pauseMenu,video:menuMarquee,theme:menuTheme,plate:document.getElementById("rg-marquee-plate"),glow:document.getElementById("rg-marquee-neon"),controls:controlsDialog});
+  const menuPresentation = createMenuMarquee({menu:pauseMenu,video:menuMarquee,theme:menuTheme,karaokeRoot:document.getElementById("rg-menu-karaoke"),plate:document.getElementById("rg-marquee-plate"),glow:document.getElementById("rg-marquee-neon"),controls:controlsDialog});
   const FORCED_THEME = "p2";
   const ROULETTE_PART_NAMES = new Set(["center", "wheel", "rim", "ball"]);
   const SLOT_PART_NAMES = new Set(["machine", "slot-reel-display", "arm", "button1", "button2", "button3", "button4", "button5"]);

@@ -1,3 +1,4 @@
+import {createMenuKaraoke} from './menu-karaoke.mjs?v=menu-karaoke-20261128-v1';
 import {signPhase, SIGN_CYCLE_MS, SIGN_ACTIVE_MS} from './sign-glow.mjs?v=neon-focus-20261127-v1';
 import {signMaskBytes, SIGN_BULB_COUNT} from './sign-glow-mask.mjs?v=neon-focus-20261127-v1';
 
@@ -45,7 +46,7 @@ export function paintMenuSign(out,elapsed){
 // One lifecycle for the opening clip, CSS fallback and live neon idle. This is
 // independent of WebGL readiness. The recorded intro plays once, then the
 // separate menu theme loops until the menu closes.
-export function createMenuMarquee({menu,video,theme,plate,glow,controls,doc=document,win=window}){
+export function createMenuMarquee({menu,video,theme,karaokeRoot,plate,glow,controls,doc=document,win=window}){
   let phase='closed', elapsed=0,last=null,frame=0,active=false,unavailable=Boolean(video.error)||video.networkState===3,attempt=0,disposed=false,painted=false,pageSuspended=false;
   glow.width=W;glow.height=H;
   let ctx=null,image=null;
@@ -54,10 +55,11 @@ export function createMenuMarquee({menu,video,theme,plate,glow,controls,doc=docu
   const allowed=()=>!pageSuspended&&!menu.hidden&&!doc.hidden&&!doc.documentElement.hasAttribute('data-rg-host-locked')&&!controls.open;
   // One menu music voice, never audible alongside the opening video. A play
   // rejection is retried only on a trusted gesture or a fresh activation.
+  const karaoke=createMenuKaraoke({root:karaokeRoot,menu,theme,doc,win});
   let themeRequested=false,themeBlocked=false,themeFailed=Boolean(theme.error),themeEpoch=0;
   theme.loop=true;theme.volume=.20;
   function stopTheme(reset=false){
-    ++themeEpoch;themeRequested=false;themeBlocked=false;theme.pause();
+    ++themeEpoch;themeRequested=false;themeBlocked=false;theme.pause();karaoke.hide();
     if(reset)try{theme.currentTime=0;}catch{}
   }
   function themeError(){themeFailed=true;stopTheme();}
@@ -75,6 +77,7 @@ export function createMenuMarquee({menu,video,theme,plate,glow,controls,doc=docu
   }
   const resetVideo=()=>{++attempt;video.pause();try{video.currentTime=0;}catch{}};
   function setPhase(next){
+    if(next!=='handoff'&&next!=='settled')karaoke.hide();
     phase=next;elapsed=0;last=null;clear();menu.dataset.marqueePhase=next;
     video.hidden=next!=='video'&&next!=='handoff';plate.hidden=next==='video'||next==='closed';
     video.style.opacity=next==='video'?'0':'1';
@@ -111,6 +114,7 @@ export function createMenuMarquee({menu,video,theme,plate,glow,controls,doc=docu
       if(elapsed<SIGN_ACTIVE_MS){paintMenuSign(image.data,elapsed);ctx.putImageData(image,0,0);painted=true;}
       else clear();
     }
+    karaoke.update(phase==='handoff'||phase==='settled');
     schedule();
   }
   function schedule(){if(!frame&&active)frame=win.requestAnimationFrame(tick);}
@@ -128,7 +132,7 @@ export function createMenuMarquee({menu,video,theme,plate,glow,controls,doc=docu
       if(unavailable)fallback();
       else{resetVideo();setPhase('video');play();}
     }else if(active&&!wasActive&&phase==='video'){if(video.ended)handoff();else play();}
-    syncTheme();schedule();
+    syncTheme();karaoke.update(phase==='handoff'||phase==='settled');schedule();
   }
   function ended(){if(phase==='video'&&video.ended){handoff();schedule();}}
   function matte(){
@@ -145,5 +149,5 @@ export function createMenuMarquee({menu,video,theme,plate,glow,controls,doc=docu
   doc.addEventListener('visibilitychange',sync);
   video.volume=Math.max(0,Math.min(1,video.volume*.2));
   setPhase('closed');sync();
-  return {sync,retryTheme(){syncTheme(true);},setPageSuspended(value){pageSuspended=Boolean(value);sync();},dispose(){disposed=true;observer.disconnect();if(frame)win.cancelAnimationFrame(frame);stopTheme(true);theme.removeEventListener('error',themeError);resetVideo();setPhase('closed');video.removeEventListener('ended',ended);video.removeEventListener('error',failed);video.removeEventListener('loadeddata',matte);doc.removeEventListener('visibilitychange',sync);}};
+  return {sync,retryTheme(){syncTheme(true);},setPageSuspended(value){pageSuspended=Boolean(value);sync();},dispose(){disposed=true;observer.disconnect();if(frame)win.cancelAnimationFrame(frame);stopTheme(true);karaoke.dispose();theme.removeEventListener('error',themeError);resetVideo();setPhase('closed');video.removeEventListener('ended',ended);video.removeEventListener('error',failed);video.removeEventListener('loadeddata',matte);doc.removeEventListener('visibilitychange',sync);}};
 }

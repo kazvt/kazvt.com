@@ -1,0 +1,17 @@
+# Ramble Gamble menu karaoke
+
+The owner-supplied `ramble gamble final.mp3` is unchanged at `assets/music/ramble-gamble-theme.mp3` (198.288 s; SHA-256 `4103b336d65ec96680500f60bc2c79d82ae6cf63dceea4e787810bccd9d73feb`). The 240 whitespace-delimited lyric tokens are retained exactly, including all backing responses and the scat ending; the long last line is split into three readable phrases. Opening, instrumental and outro have an instrumental note display, not prematurely displayed lyrics.
+
+## Timing confidence — read before treating this as finished karaoke
+
+The cue module is **provisional**, not a verified vocal transcription. Local PocketSphinx speech recognition, constrained lyric grammars on raw and center/recurrence-filtered audio, and spectral recurrence/beat analysis were used. The recording has a strong approximately 92 BPM period and recurrent musical passages separated by about 41.74 s. Some phrase/word onsets were recoverable, particularly in the opening, but most sung words (and especially scat) could not be reliably forced-aligned; the strict whole-song grammar failed. Unavailable model weights and disabled network downloads prevented use of a stronger singing/vocal-alignment model. Several word boundaries are interpolated from provisional phrase intervals and syllable weights. The cue sheet may require substantial per-phrase or per-word adjustment. Browser tests verify synchronization to the cue sheet, not its acoustic correctness. Do not claim perfect lyric alignment.
+
+## Calibrate without changing gameplay
+
+Open `/ramblegamble/tools/menu-karaoke-timing.html` on your existing deployed or local HTTP server. Choose a phrase, listen from one second before it, use 0.5×/0.75× speed if needed, and tap each word onset in order, then the phrase end. Each tap closes the previous word. Edit individual onset/end values or neighbouring phrase boundaries, and check the live word preview. Export the validated `menu-karaoke-cues.mjs` and replace the existing `ramblegamble/menu-karaoke-cues.mjs`. Increment the cue module query version in `menu-karaoke.mjs` and propagate the import cache chain (or hard refresh for local testing). No server or SQL storage is involved. The editor is a separate static tool, not linked from the host controls; it writes a local download only. It is not a new authentication boundary.
+
+## Runtime design
+
+`createMenuMarquee` owns the overlay lifecycle. Lyrics are rendered only after the original opening clip hands off to the actually playing menu MP3, or the existing fallback sign settles. `theme.currentTime` is the single clock; the menu's existing RAF drives word selection, fill, hop, progress and bounded 24 reusable flower/suit/diamond particles. No second music player, media timer, runtime ASR, new external assets, SQL, or WebGL pass. The menu's established lock, controls, hidden tab, page suspension, mute, Play/rewind, error and native loop paths are preserved. A muted but advancing theme still displays lyrics. Reduced-motion settings remove particle and bounce effects. Forced-colors keeps text emphasis. Instrumental effects are low-key; the renderer stops updating when the menu is inactive. Invalid timing or absent markup disables karaoke without breaking Play.
+
+Reference: W3C Media Timed Events (https://www.w3.org/TR/media-timed-events/), MDN HTMLMediaElement.currentTime (https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/currentTime), and MDN prefers-reduced-motion (https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion).
