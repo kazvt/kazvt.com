@@ -10,7 +10,7 @@ From the repository root on your own Internet-connected computer, run:
 python3 ramblegamble/assets/sfx/install-foley.py
 ```
 
-Commit the resulting `ramblegamble/assets/sfx/foley/` directory to GitHub Pages. Do not commit a Freesound API token. Existing valid files are preserved. To check the inventory without downloading, use `--check`. Reload the deployed pages after committing new samples. The patch authoring environment could not download or audition new binary audio; the installer downloads the actual source files. The site uses same-origin audio only, never hotlinks the stock sites.
+All runtime foley outputs described below are present in the current source tree, including the room, thunder, stage-drum, cave-drip and cartoon mechanical recordings. To check the inventory without downloading, run `python3 ramblegamble/assets/sfx/install-foley.py --check`. The install scripts remain available to rebuild assets from their credited sources. Do not commit a Freesound API token. The site uses same-origin audio only, never hotlinks stock sites.
 
 If Freesound's public page does not expose the preview URL, use the free API token as `FREESOUND_API_TOKEN` in your shell environment. Alternatively download from the source pages below and put MP3 copies in a private staging directory with the listed names. Convert if necessary with `ffmpeg -i ORIGINAL.wav -c:a libmp3lame -q:a 2 OUTPUT.mp3` (conversion, not synthesis). You can also download both Kenney ZIPs manually and run:
 
@@ -54,9 +54,9 @@ Playback uses local decoded buffers, per-cue gain, alternating variants, bounded
 
 Design references: [MDN Web Audio best practices](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Best_practices), [MDN audio for web games](https://developer.mozilla.org/en-US/docs/Games/Techniques/Audio_for_Web_Games), [MDN autoplay guide](https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Autoplay), [Kenney Casino Audio](https://kenney.nl/assets/casino-audio), [Kenney Interface Sounds](https://kenney.nl/assets/interface-sounds). Event-specific cue routing and variations follow the common game-audio event/asset separation rather than tying playback to frame rendering.
 
-### Room ambience and Smeemo discovery (installation required)
+### Room ambience and Smeemo discovery (installed)
 
-The following independently recorded sources are downloaded locally by `install-room-audio.py`, which verifies their published Commons SHA-1 checksums before use. The source bytes could not be retrieved in the patch-authoring environment; **do not deploy the sound patch until the installer has succeeded**. No generated audio or remote runtime hotlinks are used. On an internet-connected checkout with Python 3, FFmpeg and FFprobe on PATH, run `python ramblegamble/assets/sfx/install-room-audio.py` from the project root. If the network blocks the installer, download the original files from the three source pages into a directory and use `--downloads DIRECTORY`. Original filenames must match those in the installer. Commit the resulting three files under `ramblegamble/assets/sfx/foley/` alongside the patch. Neither Python nor FFmpeg is needed on the deployed static site.
+These independently recorded sources are installed locally by `install-room-audio.py`, which verifies their published Commons SHA-1 checksums. The three output files are present under `ramblegamble/assets/sfx/foley/` in the current source tree. No generated audio or remote runtime hotlinks are used. To rebuild them, run `python ramblegamble/assets/sfx/install-room-audio.py` from an internet-connected project root with Python 3, FFmpeg and FFprobe available; `--downloads DIRECTORY` accepts the exact original filenames when needed. Neither Python nor FFmpeg is needed on the deployed static site.
 
 | Output | Source | License / edit |
 | --- | --- | --- |
@@ -68,21 +68,21 @@ Two independently looping HTML media streams feed low-gain channels into the exi
 
 ### Audience emotes
 
-`audience-cheer.mp3` is an in-game derivative of the already bundled Mixkit #476 conference audience applause (`cheer.ogg`, license above). It is band-limited for distance, edited with a 1.2-second wrap crossfade, and encoded as MP3. The cheer layer fades with the active emote, alongside the two independently looping real crowd beds; all layers share the ambience toggle, visibility/mute lifecycle and master compressor. It is a short applause recording, not a new long crowd recording. No synthetic audio or runtime hotlinks. Install the two original long beds and Smeemo scream using the previous installer if not already present.
+`audience-cheer.mp3` is an in-game derivative of the already bundled Mixkit #476 conference audience applause (`cheer.ogg`, license above). It is band-limited for distance, edited with a 1.2-second wrap crossfade, and encoded as MP3. The cheer layer fades with the active emote, alongside the two independently looping real crowd beds; all layers share the ambience toggle, visibility/mute lifecycle and master compressor. It is a short applause recording, not a new long crowd recording. No synthetic audio or runtime hotlinks. The two long beds and Smeemo scream are installed in the current source tree.
 
 ### Theatrical drum cues (install-stage-drums.py)
 - `foley/stage-drum-roll.ogg`: [Drum Roll Intro.ogg](https://commons.wikimedia.org/wiki/File:Drum_Roll_Intro.ogg), Iwan Sounds and DIY, CC0 1.0; edited for short attack/end fades, original SHA-1 `e5109afea058cbc4a631fb6d05c72353bfa54ac3`.
 - `foley/stage-drum-hit.ogg`: [Snare drum unmuffled.ogg](https://commons.wikimedia.org/wiki/File:Snare_drum_unmuffled.ogg), Clngre~commonswiki, [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/); first recorded strike trimmed and faded, adapted audio remains CC BY-SA 3.0; original SHA-1 `d8d5767eb1b289f25a8d29d0e53f2522347b6e73`.
 - `foley/cheer.ogg` cue continues to use the project's existing `assets/sfx/cheer.ogg` licensed recording; no generated audio.
-- Run `python3 ramblegamble/assets/sfx/install-stage-drums.py` from the project root before deployment. If downloads are unavailable, save the exact originals from the Commons pages into a local directory and use `--downloads DIRECTORY`. No drum substitute is played if files are absent.
+- Both drum outputs are installed under `foley/` in the current source tree. To rebuild them, run `python3 ramblegamble/assets/sfx/install-stage-drums.py` from the project root; if downloads are unavailable, save the exact originals from the Commons pages into a local directory and use `--downloads DIRECTORY`. No drum substitute is played if files are absent.
 
 ### VIP doorway ambience
 
 - `foley/vip-water-drips-cave-loop.ogg`: [Dripping water loop — Independent.nu, submitted by qubodup](https://opengameart.org/content/dripping-water-loop), [CC0](https://creativecommons.org/publicdomain/zero/1.0/). OpenGameArt tags it as a looping cave/cellar drip. The installer downloads and SHA-1-checks its 20.06-second stereo FLAC, then creates a ~17-second crossfaded, filtered Ogg loop; the runtime applies an additional low-pass filter near the doorway. Run `python3 ramblegamble/assets/sfx/install-vip-water.py` from the project root. No login or API key is needed, and no synthetic fallback is used.
 
-### Smeemo lightning (recorded thunder; installation required)
+### Smeemo lightning (recorded thunder; installed)
 
-Run `python3 ramblegamble/assets/sfx/install-smeemo-thunder.py` from the project root on an internet-connected machine with Python 3 and FFmpeg. The two audio originals could not be retrieved in the patch environment (DNS/network and binary-fetch restrictions); neither edited file is bundled. The installer downloads the exact Wikimedia Commons originals, validates published SHA-1 checksums, trims a 4.2-second excerpt of each recording with a short fade and limiter, and installs the two Ogg files. If downloads are blocked, download the exact originals from the source pages below and pass `--downloads DIRECTORY`. The edited recordings remain **CC BY-SA 4.0**; retain this attribution and the license link when distributing. Do not deploy expecting thunder until both files have been installed and committed. No remote audio fetch occurs in the game; without these recordings the existing rumble/sting/scream still work, but there is no thunder substitute.
+Both edited Ogg files are present under `foley/` in the current source tree. To rebuild them, run `python3 ramblegamble/assets/sfx/install-smeemo-thunder.py` from an internet-connected project root with Python 3 and FFmpeg; the installer validates source checksums and trims, fades and limits the recordings. If downloads are blocked, provide the exact originals using `--downloads DIRECTORY`. The edited recordings remain **CC BY-SA 4.0**; retain this attribution and license link when distributing. No remote audio fetch occurs in the game.
 
 | Output | Recording / license / changes |
 | --- | --- |
@@ -91,9 +91,9 @@ Run `python3 ramblegamble/assets/sfx/install-smeemo-thunder.py` from the project
 
 The same foley mixer alternates recordings and varies playback rate slightly, replacing the preceding thunder voice rather than stacking unbounded claps. The existing recorded discovery scream remains separate. The clips need an actual in-game listening check after installation; no synthesized foley is included.
 
-### Cartoon mechanical accents (optional instrument downloads)
+### Cartoon mechanical accents (installed)
 
-Timed accents in Slots and Roulette use one replaceable voice per machine, at cue gains .11–.14 before the shared master. The existing spin loops, music, mute and gameplay settlement sounds remain independent. The new recordings are **not bundled**: network DNS blocked their retrieval. Until installed, the cues use the already bundled recorded latch, chip collisions, snare and dice impacts listed above. No synthesized sound or remote runtime audio URL is used.
+Timed accents in Slots and Roulette use one replaceable voice per machine, at cue gains .11–.14 before the shared master. The existing spin loops, music, mute and gameplay settlement sounds remain independent. All three credited recordings below are installed in `foley/` in the current source tree; `install-foley.py` verifies them and skips valid files. No synthesized sound or remote runtime audio URL is used.
 
 | Local output in `foley/` | Source | License |
 | --- | --- | --- |
@@ -101,4 +101,4 @@ Timed accents in Slots and Roulette use one replaceable voice per machine, at cu
 | `cartoon-cowbell.mp3` | [Cowbell_OS_3.aif — timgormly](https://freesound.org/people/timgormly/sounds/159758/) | CC0 |
 | `cartoon-vibraslap.mp3` | [Vibraslap 1_2 — Joao_Janz](https://freesound.org/people/Joao_Janz/sounds/482633/) | CC0 |
 
-Run `python3 ramblegamble/assets/sfx/install-foley.py` from the project root; existing valid audio is skipped. If the preview endpoint requires authentication, use a Freesound API token in the `FREESOUND_API_TOKEN` environment variable, or download the exact recordings above and convert them to the indicated MP3 filenames in a directory passed via `--recordings DIRECTORY`. Commit the resulting local assets. Check the actual instrument mix after installation; cue durations are bounded at playback. The existing fallback files were decoded during validation, not the unavailable new recordings.
+Run `python3 ramblegamble/assets/sfx/install-foley.py` from the project root to check or refresh the assets; existing valid audio is skipped. If a source preview requires authentication, use a Freesound API token in the `FREESOUND_API_TOKEN` environment variable, or download the exact recordings above and convert them to the indicated MP3 filenames in a directory passed via `--recordings DIRECTORY`. Cue durations are bounded at playback; listen to the in-game mix when convenient.

@@ -9,7 +9,7 @@ The runtime uses only these two files beside this README. It never contacts Disc
 
 Dice, the VIP doorway, and Smeemo have no soundtrack. The title/pause menu retains its original marquee audio, and the new music starts only in the actual arcade. Existing room ambience and gameplay sound effects are independent of the music player. The existing Game sounds checkbox mutes the soundtrack too. Both tracks loop at an initial conservative 20% volume with a 300 ms incoming ramp; changes stop the previous track first. Shared contexts do not restart their song.
 
-The two MP3s were requested by the project owner via Discord attachments, but could not be retrieved in the editing environment (DNS/download failure). The patch does **not** contain either recording. Use the original attachments in Discord to obtain fresh links if needed. Only install/publish recordings you have the rights to use.
+Both owner-supplied MP3s are installed beside this README in the current source tree and were validated as nonempty MP3 audio. The installer below remains available if the local files need to be rebuilt from the originals. Only install or publish recordings you have the rights to use.
 
 ## Installation
 
