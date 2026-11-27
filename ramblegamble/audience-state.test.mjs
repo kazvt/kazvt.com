@@ -58,7 +58,7 @@ test('about half the audience forms deterministic adjacent pairs with synchroniz
     }
   }}
  }
- assert.equal(total,399);assert.equal(dancers,200);
+ assert.equal(total,427);assert.equal(dancers,214);
 });
 test('only the cheer painter uses paired dance; all other emotions retain exactly their old geometry',()=>{
  const people=crowdPeople(396,19),old=people.map(({dance,...p})=>p);
@@ -75,7 +75,7 @@ test('rear and side panels meet exactly with no overlap; feather only exposed fr
  const point=(p,u)=>[p.x+(u-.5)*p.width*Math.cos(p.yaw),p.z-(u-.5)*p.width*Math.sin(p.yaw)];
  const near=(a,b)=>assert.ok(Math.hypot(a[0]-b[0],a[1]-b[1])<1e-12);
  near(point(rear,1),point(left,0));near(point(rear,0),point(right,1));
- near(point(left,1),[CROWD_BOUNDARY.left,CROWD_BOUNDARY.front]);near(point(right,0),[CROWD_BOUNDARY.right,CROWD_BOUNDARY.front]);
+ near(point(left,1),[CROWD_BOUNDARY.left,CROWD_BOUNDARY.leftFront]);near(point(right,0),[CROWD_BOUNDARY.right,CROWD_BOUNDARY.front]);
  for(let i=0;i<=100;i++)assert.equal(crowdEdgeAlpha(rear,i/100),1);
  for(const p of [left,right]){
   const u=d=>p.fade==='left'?d/p.width:1-d/p.width;
@@ -99,4 +99,25 @@ test('edge mask is cached, monotonic and isolated from normal crowd painting',()
   applyCrowdEdgeMask(ctx,305,180,mask);applyCrowdEdgeMask(ctx,305,180,mask);
   assert.deepEqual(calls,[[0,0,305,0],'save',['destination-in',0,0,305,180],'restore','save',['destination-in',0,0,305,180],'restore']);
  }
+});
+
+test('only stage-left audience extends toward the stage, preserving physical fade length and pixel density',()=>{
+ const [rear,left,right]=CROWD_SECTIONS;
+ assert.equal(CROWD_BOUNDARY.front,-.45);
+ assert.equal(CROWD_BOUNDARY.leftFront,-3.95);
+ assert.ok(Math.abs(left.width-right.width-3.5)<1e-12);
+ assert.equal(CROWD_FADE_WIDTH,2.5);
+ assert.equal(left.x,CROWD_BOUNDARY.left);
+ assert.equal(right.x,CROWD_BOUNDARY.right);
+ assert.ok(Math.abs(rear.width-18.7)<1e-12);
+ const oldWidth=Math.round(right.width*22),newWidth=Math.round(left.width*22);
+ assert.ok(newWidth>oldWidth);
+ const old=crowdPeople(oldWidth,left.seed),expanded=crowdPeople(newWidth,left.seed);
+ assert.ok(expanded.length>old.length);
+ for(const d of [0,.25,.5,1,1.25,2,2.5,3]){
+  assert.ok(Math.abs(crowdEdgeAlpha(left,1-d/left.width)-crowdEdgeAlpha(right,d/right.width))<1e-12);
+ }
+ // The old end is now fully opaque, and the new end fades to zero.
+ assert.equal(crowdEdgeAlpha(left,1-3.5/left.width),1);
+ assert.equal(crowdEdgeAlpha(left,1),0);
 });

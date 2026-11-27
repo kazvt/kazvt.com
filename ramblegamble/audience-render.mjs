@@ -3,12 +3,12 @@
 export const CROWD_FPS=6;
 // Three inward-facing panels share exact world-space corner coordinates.
 // Local +X points toward -Z on the left panel and +Z on the right panel.
-export const CROWD_BOUNDARY=Object.freeze({left:-1.85,right:16.85,front:-.45,back:13.4});
+export const CROWD_BOUNDARY=Object.freeze({left:-1.85,right:16.85,front:-.45,leftFront:-3.95,back:13.4});
 export const CROWD_FADE_WIDTH=2.5;
-const {left,right,front,back}=CROWD_BOUNDARY;
+const {left,right,front,leftFront,back}=CROWD_BOUNDARY;
 export const CROWD_SECTIONS=Object.freeze([
   Object.freeze({x:(left+right)/2,z:back,width:right-left,yaw:Math.PI,seed:19,fade:null}),
-  Object.freeze({x:left,z:(front+back)/2,width:back-front,yaw:Math.PI/2,seed:31,fade:'right'}),
+  Object.freeze({x:left,z:(leftFront+back)/2,width:back-leftFront,yaw:Math.PI/2,seed:31,fade:'right'}),
   Object.freeze({x:right,z:(front+back)/2,width:back-front,yaw:-Math.PI/2,seed:47,fade:'left'}),
 ]);
 export function crowdEdgeAlpha(section,u) {
