@@ -797,64 +797,134 @@ body.ramble-page *::after {
   text-shadow: 3px 3px 0 #6254db, 6px 6px 0 #df54bd;
 }
 
-.rg-marquee-visual {
-  display: block;
-  width: min(86vw, 760px);
-  max-height: 44dvh;
+/* Keep the full 2:1 clip footprint. The final frame's 114x24 sign is at
+   (120,272) in the 1152x576 clip; its live replacement uses that exact rect. */
+.rg-pause-menu {
+  overflow: auto;
+  align-items: safe center;
+  isolation: isolate;
+  background: radial-gradient(ellipse at 50% 44%, #c97aff24, transparent 46%),
+    radial-gradient(ellipse at 50% 83%, #28124c65, transparent 62%);
+}
+.rg-pause-stack { gap: clamp(10px, 2.2dvh, 24px); }
+.rg-marquee-stage {
+  position: relative;
+  flex: none;
+  width: min(92vw, 860px, 104dvh);
   aspect-ratio: 2 / 1;
-  object-fit: contain;
-  image-rendering: pixelated;
+  pointer-events: none;
 }
-
-.rg-marquee-logo {
-  width: min(84vw, 456px);
-  height: auto;
-  max-height: 30dvh;
-  aspect-ratio: auto;
-  object-fit: contain;
-  image-rendering: pixelated;
+.rg-marquee-visual { display: block; image-rendering: pixelated; }
+.rg-marquee-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.rg-marquee-video.rg-marquee-matte { mix-blend-mode: screen; }
+.rg-marquee-plate {
+  position: absolute;
+  left: 10.4166667%; top: 47.2222222%; width: 79.1666667%;
+  aspect-ratio: 114 / 24;
+  isolation: isolate;
 }
-
-.rg-marquee-animated .rg-marquee-logo {
-  animation: rg-original-wordmark-arrive 2.2s cubic-bezier(.2, .74, .18, 1) both;
+.rg-marquee-plate::before {
+  content: ''; position: absolute; z-index: -1; inset: 0;
+  background: #392376;
+  box-shadow: 0 2px #6c54c6, 2px 4px #463083, 4px 6px #352257,
+    6px 8px #291a48, 8px 10px #1c1433, 0 16px 28px #180c3890,
+    0 0 34px #eaa2ff60;
 }
-
+.rg-marquee-logo { width: 100%; height: 100%; object-fit: contain; }
+.rg-marquee-neon {
+  position: absolute; pointer-events: none; image-rendering: pixelated;
+  left: -2.63157895%; top: -12.5%; width: 105.2631579%; height: 125%;
+  filter: drop-shadow(0 0 5px #e3a3ff70);
+}
+.rg-marquee-visual[hidden], .rg-marquee-plate[hidden] { display:none!important; }
+.rg-pause-menu[data-marquee-phase="fallback"] .rg-marquee-plate {
+  animation: rg-original-wordmark-arrive 2.2s cubic-bezier(.2,.74,.18,1) both;
+}
 @keyframes rg-original-wordmark-arrive {
-  0% {
-    opacity: 0;
-    transform: translateY(-15px) scale(.94);
-  }
-  32% {
-    opacity: .72;
-    transform: translateY(3px) scale(1.015);
-  }
-  48% {
-    opacity: 1;
-    transform: translateY(-2px);
-  }
-  66% {
-    transform: translateY(1px);
-  }
-  82%,
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  0% { opacity:0; transform:translateY(-15px) scale(.94); }
+  32% { opacity:.72; transform:translateY(3px) scale(1.015); }
+  48% { opacity:1; transform:translateY(-2px); }
+  66% { transform:translateY(1px); }
+  82%,100% { opacity:1; transform:translateY(0); }
 }
-
-.rg-marquee-visual[hidden] {
-  display: none !important;
-}
-
-.rg-marquee-video.rg-marquee-matte {
-  mix-blend-mode: screen;
-}
-
 .rg-pause-actions {
-  display: grid;
-  width: min(260px, 78vw);
-  gap: clamp(8px, 1.4vh, 13px);
+  display: grid; width: min(340px, 78vw); gap: clamp(12px, 2.3dvh, 21px);
+  perspective: 720px;
 }
+.rg-pause-actions .rg-menu-button {
+  position: relative; isolation: isolate;
+  min-height: clamp(46px, 7.3dvh, 68px);
+  border: 3px solid #fff09b;
+  border-right-color: #d5adff; border-bottom-color: #c38aec;
+  background: linear-gradient(180deg, #9c86ff 0%, #7663ed 13%, #6251d9 65%, #5440b6 100%);
+  box-shadow: inset 0 3px #e7bdff80, inset 0 -4px #34266b80,
+    0 3px #b46bea, 0 6px #7452b8, 0 9px #41286d,
+    3px 10px #25163e, 4px 12px #e15ab5, 0 15px 22px #160d4070;
+  transform: rotateX(7deg);
+  transform-origin: center bottom;
+  transition: transform 180ms cubic-bezier(.2,.85,.25,1.4), box-shadow 160ms ease, background-color 160ms ease;
+}
+.rg-pause-actions .rg-menu-button::before {
+  content: ''; position: absolute; pointer-events: none; z-index: -1; inset: 5px;
+  border: 1px solid #f4d4ff50;
+  background: radial-gradient(circle at 9px 50%, #fff09b 0 2px, #a68afe 2px 4px, transparent 4px),
+    radial-gradient(circle at calc(100% - 9px) 50%, #fff09b 0 2px, #a68afe 2px 4px, transparent 4px),
+    linear-gradient(110deg,transparent 20%,#fff3ff1f 45%,transparent 65%);
+}
+/* The entrance uses an independent translate channel, so hover/press keeps its
+   own transform and the focused native button never becomes invisible. */
+.rg-pause-menu:not([hidden])[data-motion="on"] .rg-pause-actions .rg-menu-button {
+  animation: rg-menu-button-arrive 620ms cubic-bezier(.18,.8,.25,1.15) backwards;
+}
+.rg-pause-menu:not([hidden])[data-motion="on"] .rg-pause-actions .rg-menu-button:nth-child(2) { animation-delay:80ms; }
+.rg-pause-menu:not([hidden])[data-motion="on"] .rg-pause-actions .rg-menu-button:nth-child(3) { animation-delay:160ms; }
+@keyframes rg-menu-button-arrive {
+  0% { translate:0 12px; opacity:.72; }
+  72% { translate:0 -2px; opacity:1; }
+  100% { translate:0 0; opacity:1; }
+}
+.rg-pause-actions #rg-play {
+  background: linear-gradient(180deg,#d694ff 0%,#9774ff 15%,#7455e3 70%,#6241c0 100%);
+  border-color: #fff1a1; text-shadow: 2px 2px #211744, 4px 4px #f277cd;
+}
+.rg-pause-actions #rg-play::after {
+  content: ''; position: absolute; pointer-events: none; inset: 4px;
+  background: linear-gradient(100deg, transparent 25%, #fff2ba38 49%, transparent 73%);
+  opacity: 0; z-index: -1;
+}
+.rg-pause-menu[data-marquee-phase="settled"][data-motion="on"] #rg-play::after {
+  animation: rg-menu-play-sheen 10s ease-in-out infinite;
+}
+@keyframes rg-menu-play-sheen {
+  0%, 70%, 100% {opacity:0; transform:translateX(-12%);}
+  78% {opacity:1;}
+  88% {opacity:0; transform:translateX(12%);}
+}
+.rg-pause-actions .rg-menu-button:is(:hover,:focus-visible) {
+  background: linear-gradient(180deg,#bc9bff,#826af5 26%,#6d50d9 100%);
+  transform: translateY(-3px) rotateX(-5deg) scale(1.025);
+  box-shadow: inset 0 3px #fff5ba80, inset 0 -4px #34266b80,
+    0 4px #c78bff, 0 8px #8955c6, 0 12px #482c75,
+    3px 13px #25163e, 4px 15px #f58dd6, 0 0 25px #e9a5ff65;
+}
+.rg-pause-actions .rg-menu-button:active {
+  transform: translateY(5px) rotateX(3deg) scale(.985);
+  box-shadow: inset 0 2px #fff5ba70, inset 0 -3px #34266b80,
+    0 2px #ab6fd6, 0 4px #42286d, 2px 5px #25163e;
+}
+.rg-menu-motion {
+  margin-top: 7px; padding: 5px 12px; min-height: 28px;
+  color: #fff2ba; background: #24163fc9; border: 1px solid #c9a4f0;
+  box-shadow: 2px 2px #211744; font-size: 11px; font-weight: 800;
+  letter-spacing: .09em; cursor: pointer;
+}
+.rg-menu-motion:focus-visible { outline: 3px dashed #fff09b; outline-offset: 3px; }
+.rg-menu-motion:disabled { cursor: default; }
+.rg-pause-menu[data-menu-active="false"] .rg-marquee-plate,
+.rg-pause-menu[data-menu-active="false"] #rg-play::after,
+.rg-pause-menu[data-menu-active="false"] .rg-pause-actions .rg-menu-button { animation-play-state: paused!important; }
+.rg-pause-menu[data-motion="off"] .rg-pause-actions .rg-menu-button { transition:none; }
+.rg-pause-menu[data-motion="off"] .rg-pause-actions .rg-menu-button:is(:hover,:focus-visible,:active) { transform:rotateX(7deg); }
 
 .rg-menu-button {
   min-height: clamp(46px, 6.5vh, 62px);
@@ -938,35 +1008,27 @@ body.ramble-page *::after {
 }
 
 @media (max-height: 560px) {
-  .rg-marquee-visual {
-    width: min(72vw, 480px);
-    max-height: 30dvh;
-  }
-
-  .rg-marquee-logo {
-    width: min(72vw, 384px);
-  }
-
-  .rg-pause-stack {
-    gap: 8px;
-  }
-
-  .rg-menu-button {
-    min-height: 40px;
-    font-size: clamp(15px, 3.6vh, 21px);
-  }
+  .rg-marquee-stage { width:min(82vw, 480px, 94dvh); }
+  .rg-pause-stack { gap: 8px; }
+  .rg-menu-button { min-height:40px; font-size:clamp(15px,3.6vh,21px); }
+  .rg-pause-actions { gap:10px; }
+  .rg-pause-actions .rg-menu-button { min-height:40px; }
 }
-
+@media (max-height: 360px) {
+  .rg-marquee-stage { width:min(82vw, 300px, max(100px,calc((100dvh - 190px)*2))); }
+  .rg-pause-actions .rg-menu-button { min-height:36px; }
+  .rg-pause-menu { padding-block:8px; }
+  .rg-menu-motion { margin-top:4px; min-height:24px; }
+}
 @media (prefers-reduced-motion: reduce) {
-  .rg-marquee-animated .rg-marquee-logo {
-    animation: none;
-    opacity: 1;
-    transform: none;
-  }
-
-  .rg-menu-button {
-    transition: none;
-  }
+  .rg-pause-menu .rg-marquee-plate, .rg-pause-menu #rg-play::after,
+  .rg-pause-menu .rg-pause-actions .rg-menu-button { animation:none!important; }
+  .rg-menu-button { transition:none; }
+  .rg-pause-actions .rg-menu-button:is(:hover,:focus-visible,:active) { transform:rotateX(7deg); transition:none; }
+}
+@media (forced-colors: active) {
+  .rg-pause-actions .rg-menu-button, .rg-menu-motion { border:2px solid ButtonText; color:ButtonText; background:ButtonFace; text-shadow:none; -webkit-text-stroke:0; }
+  .rg-pause-actions #rg-play::after, .rg-pause-actions .rg-menu-button::before { display:none; }
 }
 
 /* Dice show HUD: roll and result stay visible; face editing is opt-in. */
@@ -1047,3 +1109,12 @@ body.ramble-page *::after {
 /* If depth clipping hides a seat, preserve the legacy all-player points HUD
    but move it away from the remaining top-anchored nameplates. */
 .rg-billboard-layer.rg-group-stats-partial ~ .rg-points-hud {top:auto;bottom:max(12px,env(safe-area-inset-bottom));}
+
+/* Focus indicator: a decorative overlay, independent of cursor and controls.
+   Keep the supplied animated pixels intact; tint at presentation time. */
+.rg-focus-arrow {position:absolute;z-index:12;pointer-events:none;user-select:none;transform-origin:96.875% 50%;image-rendering:pixelated;filter:hue-rotate(150deg) saturate(.85) brightness(1.65) drop-shadow(1px 1px 0 #241039) drop-shadow(-1px -1px 0 #241039);}
+.rg-focus-arrow[hidden],.rg-preview:is(.is-menu,.is-dice-mode,.is-freecam,.is-freecam-detached) .rg-focus-arrow,html[data-rg-host-locked] .rg-focus-arrow {display:none!important;}
+
+/* The VIP top-layer has its own marker; keep it below the staff controls. */
+.rg-dice-dialog > .rg-focus-arrow {z-index:1;}
+.rg-dice-dialog:not([open]) > .rg-focus-arrow,.rg-dice-dialog.rg-dice-exiting > .rg-focus-arrow {display:none!important;}

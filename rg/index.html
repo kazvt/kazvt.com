@@ -8,7 +8,7 @@
     <link rel="canonical" href="https://kazvt.com/rg/">
     <title>Ramble Gamble - kazvt</title>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
-    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=vip-object-focus-20261127-v1">
+    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=menu-neon-20261127-v1">
     <link rel="stylesheet" href="/ramblegamble/host-console.css?v=freecam-depth-20261127-v1">
     <link rel="stylesheet" href="/ramblegamble/trivia-live.css?v=all-curtain-20261127-v1">
     <link rel="stylesheet" href="/ramblegamble/card-games.css?v=smeemo-float-20261127-v1">
@@ -22,7 +22,7 @@
       }
     </script>
     <link rel="stylesheet" href="/ramblegamble/host-access.css?v=host-toggle-20261126-v1">
-    <script type="module" src="/ramblegamble/host-access.mjs?v=smeemo-float-20261127-v1"></script>
+    <script type="module" src="/ramblegamble/host-access.mjs?v=menu-neon-20261127-v1"></script>
       <link rel="stylesheet" href="/ramblegamble/show-energy.css?v=standing-characters-20261127-v1">
   </head>
   <body class="ramble-page" data-theme="p2">
@@ -69,32 +69,37 @@
       </div>
     </section>
 
-    <section class="rg-pause-menu" id="rg-pause-menu" aria-label="Pause menu" hidden>
+    <section class="rg-pause-menu" id="rg-pause-menu" aria-label="Pause menu" data-marquee-phase="closed" data-motion="on" hidden>
       <div class="rg-pause-stack">
-        <video
-          class="rg-marquee-visual rg-marquee-video"
-          id="rg-marquee-video"
-          poster="/ramblegamble/assets/marquee/ramble-gamble-marquee-first-frame.png?v=marquee-visible-sign-palette-20261120-v1"
-          preload="auto"
-          playsinline
-          aria-hidden="true"
-        >
-          <source src="/ramblegamble/assets/marquee/ramble-gamble-marquee-alpha.webm?v=marquee-visible-sign-palette-20261120-v1" type='video/webm; codecs="vp8, opus"'>
-          <source src="/ramblegamble/assets/marquee/ramble-gamble-marquee.mp4?v=marquee-visible-sign-palette-20261120-v1" type="video/mp4">
-        </video>
-        <img
-          class="rg-marquee-visual rg-marquee-logo"
-          id="rg-marquee-still"
-          src="/ramblegamble/assets/provided/sign.png?v=original-scene-wordmark-20261120-v1"
-          alt=""
-          aria-hidden="true"
-          hidden
-        >
+        <div class="rg-marquee-stage" aria-hidden="true">
+          <video
+            class="rg-marquee-visual rg-marquee-video"
+            id="rg-marquee-video"
+            poster="/ramblegamble/assets/marquee/ramble-gamble-marquee-first-frame.png?v=marquee-visible-sign-palette-20261120-v1"
+            preload="auto"
+            playsinline
+            aria-hidden="true"
+          >
+            <source src="/ramblegamble/assets/marquee/ramble-gamble-marquee-alpha.webm?v=marquee-visible-sign-palette-20261120-v1" type='video/webm; codecs="vp8, opus"'>
+            <source src="/ramblegamble/assets/marquee/ramble-gamble-marquee.mp4?v=marquee-visible-sign-palette-20261120-v1" type="video/mp4">
+          </video>
+          <div class="rg-marquee-plate" id="rg-marquee-plate" hidden>
+            <img
+              class="rg-marquee-visual rg-marquee-logo"
+              id="rg-marquee-still"
+              src="/ramblegamble/assets/provided/sign.png?v=original-scene-wordmark-20261120-v1"
+              alt=""
+              aria-hidden="true"
+            >
+            <canvas class="rg-marquee-neon" id="rg-marquee-neon" width="120" height="30" aria-hidden="true"></canvas>
+          </div>
+        </div>
         <nav class="rg-pause-actions" aria-label="Pause menu actions">
           <button class="rg-menu-button" id="rg-play" type="button">PLAY!</button>
           <button class="rg-menu-button" id="rg-controls-open" type="button">CONTROLS!</button>
           <button class="rg-menu-button" data-host-lock type="button">LOCK HOST</button>
         </nav>
+        <button class="rg-menu-motion" id="rg-menu-motion" type="button" aria-label="Menu animation" aria-pressed="true">MOTION: ON</button>
       </div>
     </section>
 

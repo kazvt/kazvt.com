@@ -1,3 +1,4 @@
+import { createMenuMarquee } from "./menu-marquee.mjs?v=menu-neon-20261127-v1";
 import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=hazel-balcony-20261127-v1";
 import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcony.mjs?v=hazel-balcony-20261127-v1";
 import { createSignGlow } from "./sign-glow.mjs?v=neon-focus-20261127-v1";
@@ -15,7 +16,7 @@ import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { createExteriorMist, EXTERIOR_FLOOR } from "./exterior-mist.mjs?v=crowd-mist-20261127-v1";
 import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=standing-characters-20261127-v1";
-import { foley } from "./game-foley.mjs?v=vip-water-gain-20261127-v3";
+import { foley } from "./game-foley.mjs?v=smeemo-storm-20261127-v1";
 import {
   resolvePointClickAction,
   resolvePointClickBack,
@@ -77,14 +78,12 @@ import {
   const goButton = document.getElementById("rg-go");
   const pauseMenu = document.getElementById("rg-pause-menu");
   const menuMarquee = document.getElementById("rg-marquee-video");
-  const marqueeStill = document.getElementById("rg-marquee-still");
   const playButton = document.getElementById("rg-play");
   const controlsOpenButton = document.getElementById("rg-controls-open");
   const controlsDialog = document.getElementById("rg-controls-dialog");
   const controlsCloseButton = document.getElementById("rg-controls-close");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  // Keep the supplied marquee cue, but play it at one fifth of its current level.
-  menuMarquee.volume = Math.max(0, Math.min(1, menuMarquee.volume * 0.2));
+  const menuPresentation = createMenuMarquee({menu:pauseMenu,video:menuMarquee,plate:document.getElementById("rg-marquee-plate"),glow:document.getElementById("rg-marquee-neon"),motionButton:document.getElementById("rg-menu-motion"),controls:controlsDialog,reduced:reducedMotion});
   const FORCED_THEME = "p2";
   const ROULETTE_PART_NAMES = new Set(["center", "wheel", "rim", "ball"]);
   const SLOT_PART_NAMES = new Set(["machine", "slot-reel-display", "arm", "button1", "button2", "button3", "button4", "button5"]);
@@ -194,7 +193,6 @@ import {
   let playing = false;
   let gameStarted = false;
   let pauseMenuOpen = false;
-  let marqueeVideoUnavailable = false;
   let sceneReady = false;
   let liquidPortal = null;
   let diceModeOpen = false;
@@ -2136,58 +2134,6 @@ import {
     delete canvas.dataset.rgCursor;
   }
 
-  function updateMarqueeMatteFallback() {
-    if (menuMarquee.readyState < 2) return;
-    let frameHasAlpha = false;
-    try {
-      const probe = document.createElement("canvas");
-      probe.width = 1;
-      probe.height = 1;
-      const context = probe.getContext("2d", { willReadFrequently: true });
-      context.drawImage(menuMarquee, 0, 0, 1, 1);
-      frameHasAlpha = context.getImageData(0, 0, 1, 1).data[3] < 250;
-    } catch {
-      frameHasAlpha = false;
-    }
-    menuMarquee.classList.toggle("rg-marquee-matte", !frameHasAlpha);
-  }
-
-  function updateMarqueeMotionPreference() {
-    const useStill = reducedMotion.matches || marqueeVideoUnavailable;
-    menuMarquee.hidden = useStill;
-    marqueeStill.hidden = !useStill;
-    pauseMenu.classList.toggle("rg-marquee-animated", useStill && !reducedMotion.matches && pauseMenuOpen);
-    menuMarquee.preload = useStill ? "none" : "auto";
-    if (useStill) {
-      menuMarquee.pause();
-      try { menuMarquee.currentTime = 0; } catch {}
-      return;
-    }
-    if (pauseMenuOpen) {
-      menuMarquee.pause();
-      try { menuMarquee.currentTime = 0; } catch {}
-      const playback = menuMarquee.play();
-      if (playback?.catch) playback.catch((error) => {
-        marqueeVideoUnavailable = true;
-        updateMarqueeMotionPreference();
-        console.warn("Marquee animation could not play:", error);
-      });
-    }
-  }
-
-  menuMarquee.addEventListener("loadeddata", updateMarqueeMatteFallback);
-  menuMarquee.addEventListener("error", () => {
-    marqueeVideoUnavailable = true;
-    menuMarquee.classList.add("rg-marquee-matte");
-    updateMarqueeMotionPreference();
-  });
-  if (typeof reducedMotion.addEventListener === "function") {
-    reducedMotion.addEventListener("change", updateMarqueeMotionPreference);
-  } else {
-    reducedMotion.addListener(updateMarqueeMotionPreference);
-  }
-  updateMarqueeMotionPreference();
-
   function setMenuSceneVisibility(visible) {
     for (const object of [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group, stageShow?.group, characterSelection?.group]) {
       if (object) object.visible = visible;
@@ -2216,7 +2162,7 @@ import {
     hideGameCursor();
     if (!document.hidden && renderer && !animationFrame) animationFrame = requestAnimationFrame(animate);
 
-    updateMarqueeMotionPreference();
+    menuPresentation.sync();
     playButton.focus({ preventScroll: true });
   }
 
@@ -2226,11 +2172,9 @@ import {
     pauseMenuOpen = false;
     gameStarted = true;
     pauseMenu.hidden = true;
-    pauseMenu.classList.remove("rg-marquee-animated");
     preview.classList.remove("is-menu");
     setMenuSceneVisibility(true);
-    menuMarquee.pause();
-    try { menuMarquee.currentTime = 0; } catch {}
+    menuPresentation.sync();
     canvas.focus({ preventScroll: true });
   }
 
@@ -2238,8 +2182,7 @@ import {
     if (!sceneReady || diceModeOpen) { pendingTrivia=true; if(diceModeOpen)window.dispatchEvent(new Event("rg:close-dice-mode")); return; }
     pendingTrivia=false; pendingCardGameMode="";
     if (!gameStarted) {
-      gameStarted=true;pauseMenuOpen=false;readyScreen.hidden=true;pauseMenu.hidden=true;preview.classList.remove("is-menu");setMenuSceneVisibility(true);menuMarquee.pause();
-      try{menuMarquee.currentTime=0;}catch{}
+      gameStarted=true;pauseMenuOpen=false;readyScreen.hidden=true;pauseMenu.hidden=true;preview.classList.remove("is-menu");setMenuSceneVisibility(true);menuPresentation.sync();
     }
     hideResult();hideGameCursor();
     window.dispatchEvent(new Event("rg:trivia-stage-open"));
@@ -2263,8 +2206,7 @@ import {
       pauseMenu.hidden = true;
       preview.classList.remove("is-menu");
       setMenuSceneVisibility(true);
-      menuMarquee.pause();
-      try { menuMarquee.currentTime = 0; } catch {}
+      menuPresentation.sync();
     }
     result.hidden = true;
     window.dispatchEvent(new Event("rg:close-host-panel"));
@@ -3060,6 +3002,7 @@ import {
     resizeObserver?.disconnect();
     liquidPortal?.dispose();
     exteriorMist?.dispose();
+    menuPresentation.dispose();
     focusArrow.dispose(); characterOcclusion?.dispose(); characterSelection?.dispose(); signGlow?.dispose(); audience?.dispose(); showFX?.dispose(); stageShow?.dispose();
     renderer?.dispose();
   }, { once: true });
