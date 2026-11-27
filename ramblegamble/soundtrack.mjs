@@ -42,7 +42,10 @@ export function createSoundtrack({ createMedia = () => new Audio(), now = () => 
       // The previous source is paused before the element receives another URL.
       // No crossfade or second element can make two songs audible at once.
       track = wanted;
-      try { media.src = new URL(SOUNDTRACK_FILES[track], base).href; }
+      try {
+        const file = track === 'smeemo' ? `${SOUNDTRACK_FILES[track]}?v=smeemo-theme-20261127-v1` : SOUNDTRACK_FILES[track];
+        media.src = new URL(file, base).href;
+      }
       catch { failed.add(track); return; }
     }
     if (retry) {

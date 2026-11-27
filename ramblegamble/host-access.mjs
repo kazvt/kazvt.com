@@ -20,7 +20,7 @@ let promptOpen=false;
 let access, booted=false, bootPromise=null, busy=false, locked=true, inertBefore=new Map();
 const isConsole=location.pathname.replace(/\/$/,'').endsWith('/console');
 const appModules=isConsole? ['/rg/console/console.js?v=sky-soot-20261127-v1'] : [
-  '/ramblegamble/ramblegamble.js?v=smeemo-reveal-20261127-v1',
+  '/ramblegamble/ramblegamble.js?v=sky-refresh-20261127-v3',
   '/ramblegamble/dice-mode.js?v=sky-soot-20261127-v1',
   '/ramblegamble/trivia-ui.js?v=sky-soot-20261127-v1',
   '/ramblegamble/card-games-ui.js?v=sky-soot-20261127-v1',

@@ -34,6 +34,12 @@ test('three tracks; exact mode priority including silent games, pause, lock and 
   assert.equal(mode('smeemo-crowd','',{encounter:'smeemo'}),'smeemo');assert.equal(mode('card-table','smeemo',{encounter:'smeemo'}),'smeemo');assert.equal(mode('smeemo-crowd','',{encounter:'stinger'}),null);assert.equal(mode('smeemo-crowd','',{encounter:'smeemo',muted:true}),null);
 });
 
+test('Smeemo theme uses a fresh same-origin URL after installation',async()=>{
+  const f=fixture();f.mixer.sync('smeemo');await flush();
+  assert.match(f.media.src,/assets\/music\/smeemo_theme\.mp3\?v=smeemo-theme-20261127-v1$/);
+  f.mixer.dispose();
+});
+
 test('shared songs are uninterrupted, fade in, switch on one media voice, and suspend/resume without rewinding',async()=>{
   const f=fixture();const {mixer,media,log}=f;
   mixer.sync(null);assert.equal(f.created,0);
