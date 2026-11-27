@@ -2,7 +2,7 @@
 // shares a single muted video decoder and texture. World X/Z never follow
 // the camera; only the height can rise to enforce the overhead clearance.
 export const SKY_TILE=Object.freeze({size:36,overlap:.16,ring:3,nearFade:42,farFade:76,baseY:15,clearance:3,pixels:1024});
-export const SKY_VIDEO_URL='/ramblegamble/assets/sky/floating-sky-matte.mp4?v=mesh-sky-20261127-v1';
+export const SKY_VIDEO_URL='/ramblegamble/assets/sky/floating-sky-matte.mp4?v=sky-text-20261127-v1';
 export const skyHeight=y=>Math.max(SKY_TILE.baseY,Number.isFinite(y)?y+SKY_TILE.clearance:SKY_TILE.baseY);
 export const skyStride=SKY_TILE.size*(1-SKY_TILE.overlap);
 export function tileRotation(ix,iz){return (((Math.imul(ix,73856093)^Math.imul(iz,19349663))>>>0)&3)*Math.PI/2;}

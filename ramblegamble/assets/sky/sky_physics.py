@@ -157,8 +157,8 @@ def collide(a,b,contact):
  return True
 
 def text_rotation(t):
- # Slower, gentle three-axis tumble, with the front always directed downward.
- return Rotation.from_euler('xyz',np.deg2rad([7*np.sin(t*.71),6*np.cos(t*.83),9*np.sin(t*.51+.8)]))
+ # Bounded three-axis tumble: more expressive, but the front stays directed downward.
+ return Rotation.from_euler('xyz',np.deg2rad([20*np.sin(t*.71),18*np.cos(t*.83),28*np.sin(t*.51+.8)]))
 
 def simulate(bodies,seconds,fps):
  steps=round(seconds/DT);stride=round(1/(fps*DT));history=[];contacts=0;pair_contacts=set();min_spin=1e9

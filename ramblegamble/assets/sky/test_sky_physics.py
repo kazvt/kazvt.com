@@ -23,7 +23,11 @@ class PhysicsTests(unittest.TestCase):
   h=Hull(box((8,8,8)));b=Body([h],[400,400,0],[12,0,0],Rotation.identity(),[0,0,0],8)
   hist=simulate([b],1,20);self.assertEqual(len(hist),21)
   for (p,r),(p1,r1) in zip(hist,hist[1:]):self.assertGreater(np.linalg.norm(r1-r),.001);np.testing.assert_allclose(p1-p,[[.6,0,0]],atol=1e-8)
-  for t in np.linspace(0,22,401):self.assertGreater(text_rotation(t).as_matrix()[2,2],.98)
+  poses=[text_rotation(t) for t in np.linspace(0,22,401)]
+  angles=np.array([pose.as_euler('xyz',degrees=True) for pose in poses])
+  np.testing.assert_allclose(np.max(np.abs(angles),axis=0),[20,18,28],atol=.05)
+  for pose in poses:self.assertGreaterEqual(pose.as_matrix()[2,2],np.cos(np.deg2rad(20))*np.cos(np.deg2rad(18))-1e-10)
+  self.assertGreater(min((b*a.inv()).magnitude() for a,b in zip(poses,poses[1:])),.001)
 
 class RenderTests(unittest.TestCase):
  @classmethod
