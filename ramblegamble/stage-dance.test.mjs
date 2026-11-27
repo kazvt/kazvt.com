@@ -115,3 +115,56 @@ test('the same sampler feeds stage rigs, Fugi billboards and focused Smeemo with
  assert.doesNotMatch(frame,/Math\.random/,'randomness is assigned at setup, never sampled during animation frames');
  rig.dispose();
 });
+
+// Stand tests use the same decoded original glTF and stage-dance fixture as
+// above; the lift parent is an independently composed affine transform.
+import {createContestantStands,standPose,standMotion,STAND_DOWN,STAND_NODES,standHitAllowed} from './contestant-stands.mjs';
+V.prototype.set=function(x,y,z){Object.assign(this,{x,y,z});return this;};
+V.prototype.setScalar=function(v){return this.set(v,v,v);};
+Box.prototype.isEmpty=function(){return this.min.x>this.max.x||this.min.y>this.max.y||this.min.z>this.max.z;};
+Box.prototype.getSize=function(v){return v.set(this.max.x-this.min.x,this.max.y-this.min.y,this.max.z-this.min.z);};
+class LiftGroup extends O{
+ constructor(){super('group');this.position=new V();this.scale=new V(1,1,1);this.rotation={};}
+ updateMatrixWorld(){const p=this.position,s=this.scale;this.base=new M([s.x,0,0,p.x,0,s.y,0,p.y,0,0,s.z,p.z,0,0,0,1]);super.updateMatrixWorld();}
+}
+class LiftMesh extends LiftGroup{constructor(geometry,material){super();this.geometry=geometry;this.material=material;this.isMesh=true;}}
+class LiftGeometry{constructor(width,height,depth){this.parameters={width,height,depth};}dispose(){this.disposed=true;}}
+class LiftMaterial{constructor(options){Object.assign(this,options);}dispose(){this.disposed=true;}}
+const liftTHREE={...THREE,Group:LiftGroup,Mesh:LiftMesh,MeshBasicMaterial:LiftMaterial,BoxGeometry:LiftGeometry,RingGeometry:LiftGeometry,DoubleSide:2};
+function liftVertices(root){const out=[];root.traverse(o=>{if(o.isMesh)out.push(...worldVertices(o));});return out;}
+function standFixture(){const f=fixture(),sounds=[],foley={start:(...a)=>sounds.push(['start',...a]),stop:(...a)=>sounds.push(['stop',...a])};const dance=createStageDance(THREE,f.stage,f.associations,createDanceIntensitySampler(42));const before=Object.fromEntries(Object.entries(STAND_NODES).map(([id,ns])=>[id,ns.flatMap(n=>liftVertices(f.nodes[n]))]));const lifts=createContestantStands(liftTHREE,f.stage,f.associations,{foley});return {...f,dance,lifts,sounds,before};}
+test('all three original stands and nameplates collapse around their true floor base; original transforms and untouched chairs are retained',()=>{
+ const f=standFixture();const r=f.lifts.records.get('kaz'),other=f.lifts.records.get('erin');
+ const vertices=id=>STAND_NODES[id].flatMap(n=>liftVertices(f.nodes[n]));
+ const chairBefore=liftVertices(f.nodes[10]);
+ for(const id of Object.keys(STAND_NODES))assert.deepEqual(vertices(id),f.before[id]);
+ assert.equal(r.carrier.visible,true);assert.equal(r.cap.visible,false);
+ assert.ok(f.lifts.toggle('kaz',100));f.lifts.update(500,true,false);assert.ok(r.height<1&&r.height>STAND_DOWN);assert.ok(r.cap.visible&&r.ring.visible);
+ const yMin=Math.min(...f.before.kaz.map(p=>p[1]));
+ for(const [i,p] of vertices('kaz').entries()){const q=f.before.kaz[i];near(p[0],q[0]);near(p[2],q[2]);near(p[1],yMin+(q[1]-yMin)*r.height);}
+ f.lifts.update(1100,true,false);assert.equal(r.height,STAND_DOWN);assert.equal(r.carrier.visible,false);assert.equal(r.cap.visible,true);assert.equal(r.ring.visible,false);assert.ok(r.sparks.every(s=>!s.visible));
+ assert.ok(Math.max(...vertices('kaz').map(p=>p[1]))<.309);assert.equal(other.height,1);assert.deepEqual(vertices('erin'),f.before.erin);assert.deepEqual(liftVertices(f.nodes[10]),chairBefore);
+ f.lifts.toggle('kaz',1200);f.lifts.update(2200,true,false);assert.equal(r.carrier.visible,true);assert.equal(r.cap.visible,false);assert.deepEqual(vertices('kaz'),f.before.kaz);
+ f.lifts.dispose();f.dance.dispose();assert.equal(f.nodes[3].parent,f.nodes[7]);assert.equal(f.nodes[1].parent,f.nodes[7]);
+});
+test('stand parent composes with the unchanged beat-synced child deformation and reverses without discontinuity',()=>{
+ const f=standFixture(),r=f.lifts.records.get('faroe');f.dance.update(300,true);f.stage.updateMatrixWorld();const before=STAND_NODES.faroe.flatMap(n=>liftVertices(f.nodes[n]));
+ f.lifts.toggle('faroe',0);f.lifts.update(400,true,false);const mid=r.height,ys=STAND_NODES.faroe.flatMap(n=>liftVertices(f.nodes[n]));const bottom=Math.min(...f.before.faroe.map(v=>v[1]));
+ for(let i=0;i<ys.length;i++)close(ys[i],[before[i][0],bottom+(before[i][1]-bottom)*mid,before[i][2]]);
+ f.lifts.toggle('faroe',400);near(r.height,mid);f.lifts.update(1400,true,false);assert.equal(r.height,1);const restored=STAND_NODES.faroe.flatMap(n=>liftVertices(f.nodes[n]));restored.forEach((p,i)=>close(p,before[i]));
+ f.dance.update(0,false);f.stage.updateMatrixWorld();assert.deepEqual(STAND_NODES.faroe.flatMap(n=>liftVertices(f.nodes[n])),f.before.faroe);
+});
+test('lift motion is bounded, settles exactly, accepts rapid reversals and has immediate reduced-motion endpoints',()=>{
+ for(const down of [true,false])for(const from of [STAND_DOWN,.2,.5,1,1.05]){const m=standMotion(from,down,100);let last=standPose(m,100);near(last.height,from);for(let t=101;t<=100+m.duration;t++){const p=standPose(m,t);assert.ok(p.height>=STAND_DOWN-1e-9&&p.height<=1.11);assert.ok(Math.abs(p.height-last.height)<.02);last=p;}assert.deepEqual(last,{height:down?STAND_DOWN:1,pulse:0,done:true});assert.equal(standPose(standMotion(from,down,0,true),0).done,true);}
+ const f=standFixture();const r=f.lifts.records.get('erin');f.lifts.toggle('erin',0,true);assert.equal(r.height,STAND_DOWN);assert.equal(r.motion,null);assert.equal(r.carrier.visible,false);assert.equal(f.sounds.filter(s=>s[0]==='start'&&s[2]==='slotRattle').length,0);
+ f.lifts.toggle('erin',100);f.lifts.suspend();assert.equal(r.height,1);assert.equal(r.motion,null);assert.equal(f.sounds.filter(s=>s[0]==='start'&&s[2]==='pocket').length,0);assert.ok(f.sounds.some(s=>s[0]==='stop'&&s[1]==='stand-erin-motor'));
+});
+test('return footprints preserve other characters and reject hidden/occluded stands, but same-seat clicks restore them',()=>{
+ const f=standFixture(),r=f.lifts.records.get('kaz'),other=f.lifts.records.get('erin');
+ const candidate={id:'kaz',distance:2,proxy:true};assert.equal(standHitAllowed({candidate,character:{machine:'contestant',contestantId:'kaz'}}),true);assert.equal(standHitAllowed({candidate,character:{machine:'contestant',contestantId:'erin'}}),false);assert.equal(standHitAllowed({candidate,character:{machine:'host'}}),false);assert.equal(standHitAllowed({candidate,blocker:{distance:1,owner:'erin'}}),false);assert.equal(standHitAllowed({candidate,blocker:{distance:1,owner:'kaz'}}),true);assert.equal(standHitAllowed({candidate:{...candidate,proxy:false},character:{machine:'contestant',contestantId:'kaz'}}),false);
+ let blocker=[],target=r.objects[1],hitProxy=false;
+ const ray={intersectObjects:(objects)=>objects[0]===f.stage?blocker:objects.includes(target)?[{object:target,distance:2}]:[],intersectObject:o=>o===r.proxy&&hitProxy?[{object:o,distance:2}]:[]};
+ assert.equal(f.lifts.pick(ray,null,[f.stage]).contestantId,'kaz');f.lifts.toggle('kaz',0,true);assert.equal(f.lifts.pick(ray,null,[f.stage]),null);hitProxy=true;assert.equal(f.lifts.pick(ray,{machine:'contestant',contestantId:'kaz'},[f.stage]).contestantId,'kaz');assert.equal(f.lifts.pick(ray,{machine:'contestant',contestantId:'erin'},[f.stage]),null);
+ target=other.objects[1];target.material={};blocker=[{object:target,distance:1}];assert.equal(f.lifts.pick(ray,{machine:'contestant',contestantId:'kaz'},[f.stage]),null);
+ f.stage.visible=false;assert.equal(f.lifts.pick(ray,null,[f.stage]),null);assert.equal(f.lifts.toggle('kaz',10),false);
+});

@@ -166,3 +166,12 @@ test('real focused slot click sends exact cell, never invokes random column plac
   ctx.stageShow.busy=true;ctx.click(600,300);assert.deepEqual(placed,Array.from({length:15},(_,i)=>i));
   ctx.stageShow.busy=false;ctx.cameraDetached=true;let dock;ctx.transitionToView=v=>dock=v;ctx.click(600,300);assert.equal(dock.kind,"slot");assert.equal(placed.length,15);
 });
+
+test('stand clicks toggle the addressed stand without docking, spinning, selecting or changing camera, including detached view',()=>{
+ const calls=[];let interaction={machine:'contestant-stand',contestantId:'kaz'};
+ const ctx={encounter:{phase:'hidden'},document:{documentElement:{hasAttribute:()=>false}},cameraDetached:false,stageShow:{busy:false},freecam:{active:false},gameStarted:true,pauseMenuOpen:false,sceneReady:true,diceModeOpen:false,cameraTransition:null,camera:{},currentView:{kind:'contestant',contestantId:'kaz'},preview:{getBoundingClientRect:()=>({left:0,top:0,width:1366,height:668})},getSceneInteractionAt:()=>interaction,resolveSceneNavigationZone,resolvePointClickAction,canGoBack:()=>true,transitionToView:()=>assert.fail('stand click must not dock'),goBack:()=>assert.fail('stand click must not navigate'),contestantStands:{toggle:(...args)=>calls.push(args)},performance:{now:()=>42},reducedMotion:{matches:false}};
+ runInNewContext(roomSection('  function pointClickAt(', '  const canFreecam =')+'\nthis.click=pointClickAt;',ctx);
+ ctx.click(600,300);ctx.cameraDetached=true;interaction={machine:'contestant-stand',contestantId:'faroe'};ctx.reducedMotion.matches=true;ctx.click(600,300);
+ ctx.stageShow.busy=true;ctx.click(600,300);ctx.stageShow.busy=false;ctx.freecam.active=true;ctx.click(600,300);ctx.freecam.active=false;ctx.document.documentElement.hasAttribute=()=>true;ctx.click(600,300);
+ assert.deepEqual(calls,[['kaz',42,false],['faroe',42,true]]);
+});

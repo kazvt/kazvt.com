@@ -1,3 +1,4 @@
+import { createContestantStands } from "./contestant-stands.mjs?v=stand-lift-20261128-v1";
 import { horrorRenderScale, HORROR_FRAME_MS } from "./smeemo-horror.mjs?v=smeemo-arrival-20261128-v1";
 import { readCardGames } from "./card-games-store.mjs?v=show-stage-20261126-v1";
 import { createSlotMarquee } from "./slot-marquee.mjs?v=slot-marquee-20261128-v1";
@@ -141,7 +142,7 @@ import {
     label: "Lillie - Host",
     source: "https://reactive.fugi.tech/basic/185073584211755008",
   };
-  let audience, showFX, stageShow, signGlow, characterSelection, stageDance, slotMarquee;
+  let audience, showFX, stageShow, signGlow, characterSelection, stageDance, slotMarquee, contestantStands;
   const danceClock=createDanceClock();
   const danceIntensity=createDanceIntensitySampler();
   let danceTime=NaN;
@@ -357,7 +358,7 @@ import {
   window.addEventListener("storage", event => {
     if (event.key === "ramblegamble.foley.muted.v1" || event.key === null) syncMusic();
   });
-  new MutationObserver(() => { syncMusic(); if (document.documentElement.hasAttribute("data-rg-host-locked")) { resetEncounter(); floatingSky?.suspend(); slotMarquee?.suspend(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-rg-host-locked"] });
+  new MutationObserver(() => { syncMusic(); if (document.documentElement.hasAttribute("data-rg-host-locked")) { resetEncounter(); floatingSky?.suspend(); slotMarquee?.suspend(); contestantStands?.suspend(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-rg-host-locked"] });
   const triviaLayer = document.getElementById("rg-live-trivia");
   let skyRandomState = 0x4b415a56;
 
@@ -2161,14 +2162,17 @@ import {
   }
 
   function getSceneInteractionAt(clientX, clientY) {
-    // Browser-source characters are composited above WebGL. Their actual
-    // visible panel is the natural click target, not objects behind it.
+    // Preserve visible live-character picking except for the same seat's
+    // explicitly reserved stand-return footprint.
     const visibleCharacter = getBillboardAtScreen(clientX, clientY);
-    if (visibleCharacter) return visibleCharacter;
     const bounds = canvas.getBoundingClientRect();
+    if (!bounds.width || !bounds.height) return null;
     pointer.x = ((clientX - bounds.left) / bounds.width) * 2 - 1;
     pointer.y = -((clientY - bounds.top) / bounds.height) * 2 + 1;
     raycaster.setFromCamera(pointer, camera);
+    const standHit=contestantStands?.pick(raycaster,visibleCharacter,[stageModel,rouletteModel,slotsModel?.visible?slotsModel:null,...(stageShow?.curtains||[])]);
+    if(standHit)return standHit;
+    if(visibleCharacter)return visibleCharacter;
     const cat=audience?.cat;
     if(cat?.visible&&audience.group.visible){
       const hit=raycaster.intersectObject(cat,false)[0];
@@ -2339,6 +2343,7 @@ import {
   function setMenuSceneVisibility(visible) {
     if (!visible) floatingSky?.suspend();
     if (!visible) slotMarquee?.suspend();
+    if (!visible) contestantStands?.suspend();
     for (const object of [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group, stageShow?.group, characterSelection?.group, exteriorHands?.group]) {
       if (object) object.visible = visible;
     }
@@ -2491,6 +2496,10 @@ import {
     if (zone === "back") return goBack();
     if (!interaction) return;
     if(interaction.machine==="smeemo-crowd"){clickSmeemo();return;}
+    if(interaction.machine==="contestant-stand"){
+      contestantStands?.toggle(interaction.contestantId,performance.now(),reducedMotion.matches);
+      return;
+    }
     // A free camera has no focused controls. A scene click deliberately docks
     // at the selected object; it never spends a berry or spins a machine.
     if (cameraDetached) {
@@ -2691,6 +2700,7 @@ import {
     if (open) {
       floatingSky?.suspend();
       slotMarquee?.suspend();
+      contestantStands?.suspend();
       rouletteCabinetFX?.reset();
       focusDrag.clearHover(); lastScenePointer = null; stopRouletteSettlement();
       diceModeVisibility = [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group, stageShow?.group, characterSelection?.group, exteriorHands?.group]
@@ -3061,6 +3071,7 @@ import {
     danceTime=Math.floor(danceClock.step(time,roomVisible&&!diceModeOpen&&!reducedMotion.matches,soundtrack.playbackPosition())/poseInterval)*poseInterval;
     if(horrorActive!==lastHorrorScaleMode)syncHorrorRenderScale();
     stageDance?.update(danceTime,Number.isFinite(danceTime));
+    contestantStands?.update(time,roomVisible&&!diceModeOpen,reducedMotion.matches);
     audience?.update(crowdClock,emotion,reducedMotion.matches,camera.position,{time:danceTime,catIntensity:danceIntensity("crowd-cat:smeemo"),focused:encounter.phase==="focused"&&currentView.kind==="smeemo-crowd"&&!cameraTransition&&!cameraDetached&&!freecam?.active,revealed:encounter.revealed,quiet:encounter.quiet,hideCrowd:encounter.hideCrowd});
     updateSmeemoEncounter(time,roomVisible);
     preview.classList.toggle("is-trivia",!cameraDetached && currentView.kind === "trivia");
@@ -3212,6 +3223,8 @@ import {
       scene.add(stageModel);
       try { stageDance=createStageDance(THREE,stageModel,stageGltf.parser.associations,danceIntensity); }
       catch(error){console.warn("Stage dance unavailable",error);}
+      try { contestantStands=createContestantStands(THREE,stageModel,stageGltf.parser.associations,{foley}); }
+      catch(error){console.warn("Contestant stand lifts unavailable",error);}
       carveDiceDoorway(stageModel);
       if (liquidPortalFrame && liquidPortalLayer) {
         liquidPortal = createLiquidPortal({
@@ -3291,6 +3304,7 @@ import {
     if (document.hidden) {
       floatingSky?.suspend();
       resetEncounter();
+      contestantStands?.suspend();
       slotMarquee?.suspend();
       characterSelection?.hide();
       slotCabinetFX?.reset();
@@ -3321,6 +3335,7 @@ import {
 
   window.addEventListener("pagehide", event => {
     resetEncounter();
+    contestantStands?.suspend();
     cancelAnimationFrame(animationFrame);
     animationFrame = 0;
     if (event.persisted) {
@@ -3345,6 +3360,7 @@ import {
     slotMarquee?.dispose();
     menuPresentation.dispose();
     soundtrack.dispose();
+    contestantStands?.dispose();
     stageDance?.dispose();
     slotCabinetFX?.dispose();
     rouletteCabinetFX?.dispose();

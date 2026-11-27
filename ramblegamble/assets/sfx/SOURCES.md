@@ -102,3 +102,7 @@ Timed accents in Slots and Roulette use one replaceable voice per machine, at cu
 | `cartoon-vibraslap.mp3` | [Vibraslap 1_2 — Joao_Janz](https://freesound.org/people/Joao_Janz/sounds/482633/) | CC0 |
 
 Run `python3 ramblegamble/assets/sfx/install-foley.py` from the project root to check or refresh the assets; existing valid audio is skipped. If a source preview requires authentication, use a Freesound API token in the `FREESOUND_API_TOKEN` environment variable, or download the exact recordings above and convert them to the indicated MP3 filenames in a directory passed via `--recordings DIRECTORY`. Cue durations are bounded at playback; listen to the in-game mix when convenient.
+
+### Contestant stand lifts
+
+The lift uses the already-installed recorded latch (`lever.mp3`, xkeril, CC0), spinning ratchet (`reel.mp3`, alexarje, CC BY 4.0; existing 1.28 s loop cue), hard-object impacts (`chips-collide-3/4.ogg`, Kenney, CC0), and cowbell (`cartoon-cowbell.mp3`, timgormly, CC0) with the existing semantic foley mixer. Reduced motion uses the short mechanical switch recording instead of the ratchet. No synthesized sound, remote hotlink, or additional install step. New downloads were not available in the patch environment; the local recordings are reused unmodified. Each seat has independent replaceable channels; motion audio stops on reversal, completion, pause, lock, visibility loss and disposal.
