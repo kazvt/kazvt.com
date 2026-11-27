@@ -20,7 +20,7 @@ const makeFixture=()=>{
  const entries=[entry(),entry()];const camera={matrixWorld:new Matrix(),projectionMatrix:new Matrix()};return {root,opaque,transparent,renderer,originalTarget,entries,camera,view:{width:8,height:6}};
 };
 test('bounded mask resolution, bottom-up bit decoding and clipped bounds',()=>{
- assert.deepEqual(maskSize(1920,1080),[1920,1080]);assert.deepEqual(maskSize(1366,668,1.6),[1920,939]);assert.deepEqual(maskSize(3840,2160),[1920,1080]);assert.deepEqual(maskSize(480,800),[480,800]);assert.deepEqual(maskSize(1,0),[1,1]);assert.equal(CHARACTER_BITS.reduce((a,b)=>a+b),240);
+ assert.deepEqual(maskSize(1920,1080),[1920,1080]);assert.deepEqual(maskSize(1366,668,1.6),[1920,939]);assert.deepEqual(maskSize(3840,2160),[1920,1080]);assert.deepEqual(maskSize(480,800),[480,800]);assert.deepEqual(maskSize(1,0),[1,1]);assert.equal(CHARACTER_BITS.reduce((a,b)=>a+b),248);
  const p=new Uint8Array(2*2*4);p[0]=16;p[12]=32;assert.equal(maskPixel(p,2,2,16,0,1),true);assert.equal(maskPixel(p,2,2,32,1,0),true);assert.equal(maskPixel(p,2,2,32,-1,0),false);
  assert.deepEqual(maskBounds([{x:-10,y:-5},{x:20,y:12}],8,6,{width:16,height:12}),{left:0,top:0,right:8,bottom:6});
  for(const key of ['visible','colorWrite','depthTest','depthWrite'])assert.equal(isDepthOccluder({[key]:false}),false);assert.equal(isDepthOccluder({transparent:true}),false);assert.equal(isDepthOccluder({alphaTest:.5}),true);
@@ -73,4 +73,23 @@ test('a selection bounce updates the depth plane even with an unchanged camera a
  actor.renderPose={anchor:{x:0,y:1.1,z:0},worldHeight:1.2,worldWidth:1/1.2};mask.update([actor],view,camera);
  assert.equal(renderer.reads,2);assert.equal(mesh.scale.y,1.2);assert.equal(mesh.position.y,1.1);assert.equal(actor.anchor.y,1);assert.equal(actor.worldHeight,1);
  mask.update([actor],view,camera);assert.equal(renderer.reads,2);delete actor.renderPose;mask.update([actor],view,camera);assert.equal(renderer.reads,3);assert.equal(mesh.scale.y,1);mask.dispose();
+});
+
+test('five independently addressable live planes retain the existing four bit values and never saturate',()=>{
+ const {root,renderer,camera,view}=makeFixture();const entries=Array.from({length:5},entry);
+ assert.deepEqual(CHARACTER_BITS.slice(0,4),[16,32,64,128]);
+ assert.equal(new Set(CHARACTER_BITS).size,5);assert.ok(CHARACTER_BITS.every(b=>(b&(b-1))===0));
+ // Every possible overlap combination, including all five on the same pixel.
+ for(let subset=0;subset<32;subset++){
+  const sum=CHARACTER_BITS.reduce((s,b,i)=>s+((subset>>i&1)?b:0),0);
+  const pixels=Uint8Array.of(sum,0,0,255);
+  for(let i=0;i<5;i++)assert.equal(maskPixel(pixels,1,1,CHARACTER_BITS[i],0,0),Boolean(subset>>i&1));
+ }
+ renderer.readRenderTargetPixels=(t,x,y,w,h,pixels)=>{for(let i=0;i<w*h;i++)pixels[i*4]=240+(i%w>=w/2?8:0);};
+ const masks=createCharacterOcclusion(THREE,renderer,[root],entries);masks.update(entries,view,camera);
+ const guest=entries[4];assert.equal(guest.panel.style.visibility,'visible');assert.equal(masks.contains(guest,1,2),false);assert.equal(masks.contains(guest,6,2),true);
+ assert.equal(guest.panel.parentElement.style.clipPath,'path("M4 0H8V6H4Z")');
+ for(const e of entries.slice(0,4)){assert.equal(masks.contains(e,1,2),true);assert.equal(e.panel.parentElement.style.clipPath,'none');}
+ assert.equal(renderer.rendered.children.at(-1).material.uniforms.value.value,8/255);
+ masks.update(entries.slice(0,4),view,camera);assert.equal(guest.panel.style.visibility,'hidden');assert.equal(masks.contains(guest,6,2),false);masks.dispose();
 });

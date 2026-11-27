@@ -6,6 +6,7 @@ export function resolveArcadeShortcut(key) {
   if (shortcut === "d") return "dice-door";
   if (shortcut === "4" || shortcut === "h") return "host";
   if (shortcut === "5") return "card-table";
+  if (shortcut === "8") return "hazel";
   if (shortcut === "c") return "cheer";
   return "";
 }
@@ -48,6 +49,7 @@ export function resolvePointClickAction({ zone = "", machine = "", part = "", fo
   if (zone === "right") return "look-right";
   if (zone === "back") return canGoBack ? "back" : "";
   if (machine === "host") return focused ? "" : "focus-host";
+  if (machine === "hazel") return focused ? "" : "focus-hazel";
   if (machine === "contestant") return focused ? "" : "focus-contestant";
   if (machine === "card-table") return focused ? "open-card-games" : "focus-card-table";
   if (machine === "roulette" && ROULETTE_MENU_PARTS.has(part)) return "show-trivia";

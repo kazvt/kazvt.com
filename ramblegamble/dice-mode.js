@@ -1,7 +1,8 @@
+import { createFocusArrow, projectedArrowTarget } from "./focus-arrow.mjs?v=hazel-balcony-20261127-v1";
 import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { VIP_LIQUID_SOURCE } from "./vip-liquid-preset.mjs?v=vip-black-liquid-20261126-v1";
-import { foley } from "./game-foley.mjs?v=vip-water-gain-20261127-v1";
+import { foley } from "./game-foley.mjs?v=neon-focus-20261127-v1";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import {
@@ -25,6 +26,7 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
   "use strict";
 
   const dialog = document.getElementById("rg-dice-dialog");
+  const diceFocusArrow = createFocusArrow(dialog);
   const canvas = document.getElementById("rg-dice-canvas");
   const liquid = document.getElementById("rg-dice-liquid");
   const returnButton = document.getElementById("rg-dice-return");
@@ -44,6 +46,10 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
   let frame = 0;
   let previousFrameTime = null;
   let loadPromise = null;
+  let modelReady = false;
+  let loadFailed = false;
+  let rendererSize = null;
+  let entryGeneration = 0;
   let rolling = false;
   let lastImpactAt = -Infinity;
   let effects = null;
@@ -51,6 +57,7 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
   let previousImpulses = new Map();
   let rollElapsed = 0;
   let graphicsLost = false;
+  let preLossStatus = null;
   let lastFaces = null;
   let activeRolls = [];
   let isOpen = false;
@@ -251,10 +258,16 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
     }
 
     effects = createDiceEffects(THREE, scene, dieStates);
-    window.addEventListener("resize", resizeRenderer, { passive: true });
+    for (const die of dieStates) die.effectChildren = [...die.group.children];
+    window.addEventListener("resize", () => { if (resizeRenderer()) ensureRenderLoop(); }, { passive: true });
+    // Dialog layout can change independently of the window (mobile viewport,
+    // top-layer entry, host visibility). Never resize a hidden drawing buffer.
+    if (typeof ResizeObserver === "function") new ResizeObserver(() => { if (resizeRenderer()) ensureRenderLoop(); }).observe(dialog);
     canvas.addEventListener("webglcontextlost", (event) => {
       event.preventDefault();
       graphicsLost = true;
+      diceFocusArrow.hide();
+      preLossStatus = modelReady ? {state:status.dataset.state,nodes:[...status.childNodes]} : null;
       cancelAnimationFrame(frame); frame = 0; previousFrameTime = null;
       foley.stop("dice-grab"); foley.stop("dice-impact"); foley.stop("dice-settlement");
       rollButton.disabled = true;
@@ -264,18 +277,26 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
     canvas.addEventListener("webglcontextrestored", () => {
       graphicsLost = false;
       if (rolling) abortRoll();
-      else { status.textContent = ""; status.dataset.state = "idle"; effects?.clear(); lastFaces=null; }
-      rollButton.disabled = !dieStates.every(d => d.body);
+      else if (modelReady) { status.replaceChildren(...(preLossStatus?.nodes || [])); status.dataset.state = preLossStatus?.state || "idle"; effects?.clear(); if (lastFaces) lastFaces.forEach(({face,asset},i)=>effects?.land(i,face,asset,true,true)); }
+      else if (loadFailed) showLoadFailure();
+      else { status.textContent = "LOADING"; status.dataset.state = "loading"; }
+      rollButton.disabled = !modelReady && !loadFailed;
+      preLossStatus = null;
+      rendererSize = null;
+      resizeRenderer();
       ensureRenderLoop();
     });
   }
 
   function resizeRenderer() {
-    if (!renderer || !camera) return;
-    const width = Math.max(1, dialog.clientWidth);
-    const height = Math.max(1, dialog.clientHeight);
-    const compact = width < 760;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, compact ? 1.25 : 1.5));
+    if (!renderer || !camera || !isOpen || isClosing || !dialog.open || document.hidden || graphicsLost) return false;
+    const width = dialog.clientWidth, height = dialog.clientHeight;
+    if (width < 2 || height < 2) return false;
+    const ratio = Math.min(window.devicePixelRatio || 1, width < 760 ? 1.25 : 1.5);
+    const key = `${width}:${height}:${ratio}`;
+    if (rendererSize === key && canvas.width === Math.floor(width * ratio) && canvas.height === Math.floor(height * ratio)) return true;
+    rendererSize = key;
+    if (renderer.getPixelRatio() !== ratio) renderer.setPixelRatio(ratio);
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     // Only reframe the camera: resizing or rotating the screen must never move
@@ -286,7 +307,7 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
     diceBase = {x:0,y:camera.position.y,z:camera.position.z};
     camera.lookAt(0,diceTarget.y,0);
     camera.updateProjectionMatrix();
-    if (isOpen && scene) ensureRenderLoop();
+    return true;
   }
 
   function cryptoRandomUnit() {
@@ -348,7 +369,7 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
   }
 
   function startRoll() {
-    if (rolling || !isOpen || isClosing || graphicsLost || !renderer || !CANNON || !physicsWorld
+    if (rolling || !isOpen || isClosing || graphicsLost || !modelReady || !renderer || !CANNON || !physicsWorld
       || dieStates.some(({ body, stickers }) => !body || stickers.length !== DICE_FACE_ORDER.length)) return;
     foley.stop("dice-settlement");
     rolling = true; lastFaces = null;
@@ -430,9 +451,25 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
     status.dataset.state="idle"; status.textContent="ROLL AGAIN";
   }
 
+  function updateDiceFocusArrow(time) {
+    if(rolling||!modelReady||graphicsLost||!isOpen||isClosing){diceFocusArrow.hide();return false;}
+    const viewport={width:dialog.clientWidth,height:dialog.clientHeight},points=[];
+    camera.updateMatrixWorld(true);
+    for(const {group,baseHalfExtents:half} of dieStates){
+      if(!half||!group)continue;
+      for(const x of [-half[0],half[0]])for(const y of [-half[1],half[1]])for(const z of [-half[2],half[2]]){
+        const p=group.localToWorld(new THREE.Vector3(x,y,z)).project(camera);
+        if(!Number.isFinite(p.z)||p.z< -1||p.z>1){diceFocusArrow.hide();return false;}
+        points.push({x:(p.x+1)*viewport.width/2,y:(1-p.y)*viewport.height/2});
+      }
+    }
+    return diceFocusArrow.update({kind:"dice"},projectedArrowTarget(points,viewport),viewport,time,reducedMotion.matches);
+  }
+
   function render(time) {
     frame = 0;
     if (!isOpen || isClosing || !dialog.open || document.hidden || graphicsLost || !renderer || !scene || !camera) return;
+    if (!resizeRenderer()) { previousFrameTime = null; diceFocusArrow.hide(); return; }
     const deltaSeconds = previousFrameTime === null ? 0 : Math.min(0.05, Math.max(0, (time - previousFrameTime) / 1000));
     previousFrameTime = time;
     updateRoll(deltaSeconds);
@@ -440,15 +477,51 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
     if (diceBase) { const pos=orbitPosition(diceBase,diceTarget,orbit.yaw,orbit.pitch);camera.position.set(pos.x,pos.y,pos.z);camera.lookAt(0,diceTarget.y,0); }
     const effectsMoving = effects?.update(deltaSeconds, rolling, reducedMotion.matches);
     renderer.render(scene, camera);
-    if (rolling || orbit.moving || effectsMoving) frame = requestAnimationFrame(render);
+    const pointerMoving=updateDiceFocusArrow(time);
+    if (rolling || orbit.moving || effectsMoving || pointerMoving) frame = requestAnimationFrame(render);
   }
 
   function ensureRenderLoop() {
-    if (isOpen && !isClosing && dialog.open && !graphicsLost && !document.hidden && !frame) frame = requestAnimationFrame(render);
+    if (isOpen && !isClosing && dialog.open && !graphicsLost && !document.hidden && renderer && modelReady && !frame) frame = requestAnimationFrame(render);
+  }
+
+  function showLoadFailure() {
+    status.dataset.state = "error";
+    status.textContent = "THE DICE MODEL COULD NOT LOAD";
+    rollButton.textContent = "RETRY";
+    rollButton.setAttribute("aria-label", "Retry loading dice");
+    rollButton.disabled = graphicsLost;
+  }
+
+  // A failed partial assembly must not leave duplicate models or colliders on retry.
+  function clearIncompleteModel() {
+    const geometries = new Set(), materials = new Set(), textures = new Set();
+    for (const die of dieStates) {
+      const added = die.group?.children.filter(child => !die.effectChildren?.includes(child)) || [];
+      for (const child of added) child.traverse(object => {
+        if (object.geometry) geometries.add(object.geometry);
+        for (const material of (Array.isArray(object.material) ? object.material : [object.material])) {
+          if (!material) continue;
+          materials.add(material);
+          for (const value of Object.values(material)) if (value?.isTexture) textures.add(value);
+        }
+      });
+      for (const child of added) die.group.remove(child);
+      die.group?.position.set(die.side === "left" ? -1.4 : 1.4, 0, 0);
+      die.stickers = []; die.body = null; die.throwOrigin = null; die.baseHalfExtents = null;
+    }
+    for (const geometry of geometries) geometry.dispose();
+    for (const material of materials) material.dispose();
+    for (const texture of textures) texture.dispose();
+    physicsWorld = null; CANNON = null;
   }
 
   async function loadDiceModel() {
     if (loadPromise) return loadPromise;
+    loadFailed = false;
+    rollButton.textContent = "ROLL";
+    rollButton.setAttribute("aria-label", "Roll both dice");
+    rollButton.disabled = true;
     loadPromise = (async () => {
       createDiceRenderer();
       resizeRenderer();
@@ -491,15 +564,21 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
           collectDiceContact(pendingImpacts, event.contact, physicsWorld.stepnumber);
         });
       }
+      modelReady = true;
       rollButton.disabled = graphicsLost;
-      status.textContent = "";
-      status.dataset.state = "idle";
+      if (!graphicsLost) { status.textContent = ""; status.dataset.state = "idle"; }
+      resizeRenderer();
       ensureRenderLoop();
     })().catch((error) => {
       console.error("Ramble Gamble dice model failed to load:", error);
-      status.dataset.state = "error";
-      status.textContent = "THE DICE MODEL COULD NOT LOAD";
-      rollButton.disabled = true;
+      clearIncompleteModel();
+      // Renderer construction can fail before its scene/effects are ready.
+      // Do not cache a partially initialized renderer as a successful setup.
+      if (renderer && (!scene || !camera || !effects)) {
+        renderer.dispose(); renderer = null; scene = null; camera = null; rendererSize = null;
+      }
+      modelReady = false; loadFailed = true;
+      showLoadFailure();
       loadPromise = null;
     });
     return loadPromise;
@@ -509,6 +588,8 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
     if (!isClosing) return;
     isClosing = false;
     isOpen = false;
+    diceFocusArrow.hide(true);
+    entryGeneration++;
     if (closeFadeTimeout) window.clearTimeout(closeFadeTimeout);
     closeFadeTimeout = 0;
     dialog.removeEventListener("transitionend", onDiceDialogTransitionEnd);
@@ -533,7 +614,10 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
 
   function openDiceMode(event) {
     if (isOpen && !dialog.open) { isClosing=true; finishClosingDiceMode(); }
+    if (isOpen && isClosing) finishClosingDiceMode();
     if (isOpen) { if(event?.detail?.staff) setStaffVisible(true); return; }
+    if (document.documentElement.hasAttribute("data-rg-host-locked")) return;
+    const generation = ++entryGeneration;
     setStaffVisible(Boolean(event?.detail?.staff));
     diceOrbit.reset("dice"); diceDrag.reset();
     foley.play("portal");
@@ -546,11 +630,13 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
     liquid.src = VIP_LIQUID_SOURCE;
     window.dispatchEvent(new CustomEvent("rg:dice-mode-state", { detail: { open: true } }));
     loadDiceModel();
+    resizeRenderer();
     if (!rolling && lastFaces) lastFaces.forEach(({face,asset},index)=>effects?.land(index,face,asset,true,true));
     ensureRenderLoop();
 
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      if (!isOpen || isClosing) return;
+      if (!isOpen || isClosing || generation !== entryGeneration) return;
+      resizeRenderer(); ensureRenderLoop();
       dialog.classList.remove("rg-dice-entering");
       returnButton.focus({ preventScroll: true });
     }));
@@ -560,6 +646,7 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
     if (!isOpen || isClosing) return;
     const wasEntering = dialog.classList.contains("rg-dice-entering");
     isClosing = true;
+    diceFocusArrow.hide(true);
     effects?.clear(); pendingImpacts.clear(); previousImpulses.clear();
     foley.stop("dice-grab");
     foley.stop("dice-impact");
@@ -578,7 +665,10 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
   preloadBerryImages();
   buildFacePickers();
   returnButton.addEventListener("click", closeDiceMode);
-  rollButton.addEventListener("click", startRoll);
+  rollButton.addEventListener("click", () => {
+    if (loadFailed && isOpen && !isClosing && !graphicsLost) loadDiceModel();
+    else startRoll();
+  });
   dialog.addEventListener("contextmenu", event => {
     if (!isOpen || isClosing) return;
     event.preventDefault(); setStaffVisible(!dialog.classList.contains("is-staff"));
@@ -601,6 +691,7 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
   window.addEventListener("rg:close-dice-mode", closeDiceMode);
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
+      diceFocusArrow.hide();
       diceDrag.clearHover();
       cancelAnimationFrame(frame);
       frame = 0;
@@ -609,6 +700,7 @@ import { createDiceEffects, collectDiceContact, collectDiceReimpacts, diceCamera
       foley.stop("dice-grab"); foley.stop("dice-impact"); foley.stop("dice-settlement");
     } else {
       previousFrameTime = null;
+      resizeRenderer();
       ensureRenderLoop();
     }
   });

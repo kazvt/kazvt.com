@@ -15,7 +15,7 @@ test('selection squashes horizontally and stretches vertically before exact reco
  assert.ok(stretch&&squash);assert.deepEqual(characterRenderPose(entry,SELECTION_MS),base);assert.deepEqual(entry,base);
 });
 test('selection is only the individual focused character, not group, machine or trivia views',()=>{
- assert.equal(selectedCharacterId({kind:'host'}),'lillie-host');for(const id of ['faroe','erin','kaz'])assert.equal(selectedCharacterId({kind:'contestant',contestantId:id}),id);
+ assert.equal(selectedCharacterId({kind:'host'}),'lillie-host');assert.equal(selectedCharacterId({kind:'hazel'}),'hazel');for(const id of ['faroe','erin','kaz'])assert.equal(selectedCharacterId({kind:'contestant',contestantId:id}),id);
  for(const kind of ['contestants','overview','slot','roulette','trivia','dice-door'])assert.equal(selectedCharacterId({kind}),null);
 });
 test('world-space marker and nameplate track selected character, hide on occlusion and remain in reduced motion',()=>{
@@ -37,12 +37,14 @@ test('world-space marker and nameplate track selected character, hide on occlusi
   const fx=createCharacterSelection(THREE,scene,layer,{subscribePoints:fn=>{points=fn;fn({faroe:1234,erin:0,kaz:27});return()=>stopped++;},subscribeStars:fn=>{stars=fn;fn({faroe:0,erin:2,kaz:5});return()=>stopped++;}}),entry={id:'faroe',anchor:{x:4,y:1.5,z:-2},worldWidth:1.8,worldHeight:1.8,panel:{style:{visibility:'visible'}},projectedQuad:{corners:[{x:120,y:75},{x:280,y:80},{x:270,y:300},{x:130,y:300}]}},view={width:400,height:360};
   const tags=Object.fromEntries(layer.children.map(tag=>[tag.children[0].textContent,tag]));
   const values=tag=>tag.children[1].children.map(row=>row.children[2].textContent);
-  assert.deepEqual(values(tags.FAROE),['1,234','0']);assert.deepEqual(values(tags.ERIN),['0','2']);assert.deepEqual(values(tags.KAZ),['27','5']);assert.equal(tags.LILLIE.children.length,1);
+  assert.deepEqual(values(tags.FAROE),['1,234','0']);assert.deepEqual(values(tags.ERIN),['0','2']);assert.deepEqual(values(tags.KAZ),['27','5']);assert.equal(tags.LILLIE.children.length,1);assert.equal(tags.HAZEL.children.length,1);
   assert.equal(tags.FAROE.children[1].children[0].children[0].src,'/ramblegamble/assets/berries/points-chip.png');
   assert.equal(tags.FAROE.children[1].children[1].children[0].src,'/ramblegamble/assets/berries/star.png');
   for(const [id,name] of [['faroe','FAROE'],['erin','ERIN'],['kaz','KAZ'],['lillie-host','LILLIE']]){
    entry.id=id;fx.update(entry,100,100,false,view,{contains:()=>true});assert.equal(tags[name].hidden,false);assert.equal(layer.children.filter(t=>!t.hidden).length,1);assert.ok(fx.group.visible);assert.ok(Math.abs(fx.group.position.y-(1.5-.9+.018))<1e-9);assert.ok(fx.group.children.every(m=>m.material.depthTest&&m.material.depthWrite===false));
   }
+  const guest={...entry,id:'hazel',seated:true};fx.update(guest,100,100,false,view,{contains:()=>true});assert.equal(tags.HAZEL.hidden,false);assert.equal(fx.group.visible,false);assert.equal(layer.children.filter(t=>!t.hidden).length,1);
+  assert.deepEqual(characterRenderPose(guest,100),characterRenderPose(guest,Infinity));
   stars({faroe:3,erin:2,kaz:5});points({faroe:9007199254740991,erin:0,kaz:27});assert.deepEqual(values(tags.FAROE),['9,007,199,254,740,991','3']);
   fx.update(entry,1000,1000,true,view,{contains:()=>true});assert.equal(fx.group.children.at(-1).visible,false);assert.equal(fx.group.children[2].rotation.z,0);assert.equal(tags.LILLIE.hidden,false);
   fx.update(entry,1000,1000,true,view,{contains:()=>false});assert.equal(tags.LILLIE.hidden,true);

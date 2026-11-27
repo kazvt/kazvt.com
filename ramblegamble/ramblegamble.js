@@ -1,9 +1,11 @@
+import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=hazel-balcony-20261127-v1";
+import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcony.mjs?v=hazel-balcony-20261127-v1";
 import { createSignGlow } from "./sign-glow.mjs?v=neon-focus-20261127-v1";
-import { selectedCharacterId, characterRenderPose, createCharacterSelection } from "./character-selection.mjs?v=player-stats-20261127-v1";
+import { selectedCharacterId, characterRenderPose, createCharacterSelection } from "./character-selection.mjs?v=hazel-balcony-20261127-v1";
 import { sampleVipAmbience } from "./vip-atmosphere.mjs?v=vip-atmosphere-20261127-v1";
 import { createStageShow } from "./stage-show.mjs?v=all-curtain-20261127-v1";
 import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state.mjs?v=all-curtain-20261127-v1";
-import { createCharacterOcclusion } from "./character-occlusion.mjs?v=neon-focus-20261127-v1";
+import { createCharacterOcclusion } from "./character-occlusion.mjs?v=hazel-balcony-20261127-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { createAudienceRenderer } from "./audience-render.mjs?v=crowd-left-20261127-v1";
@@ -13,7 +15,7 @@ import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { createExteriorMist, EXTERIOR_FLOOR } from "./exterior-mist.mjs?v=crowd-mist-20261127-v1";
 import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=standing-characters-20261127-v1";
-import { foley } from "./game-foley.mjs?v=vip-water-gain-20261127-v1";
+import { foley } from "./game-foley.mjs?v=neon-focus-20261127-v1";
 import {
   resolvePointClickAction,
   resolvePointClickBack,
@@ -22,7 +24,7 @@ import {
   resolveArcadeShortcut,
   resolveSlotContextCell,
   resolveHostContextAction,
-} from "./point-click-routing.js?v=host-cell-cards-20261127-v1";
+} from "./point-click-routing.js?v=hazel-balcony-20261127-v1";
 import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
 import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-door-wall-target-20261120-v1";
 import { readPointScores, subscribePointScores, subscribeStarScores, writePointScores, withPointScoresLock } from "./points-store.mjs?v=player-stats-20261127-v1";
@@ -61,6 +63,7 @@ import {
   let THREE;
   let GLTFLoader;
   const preview = document.getElementById("rg-preview");
+  const focusArrow = createFocusArrow(preview);
   const canvas = document.getElementById("rg-canvas");
   const liquidPortalLayer = document.getElementById("rg-liquid-portal-layer");
   const liquidPortalFrame = document.getElementById("rg-liquid-portal-frame");
@@ -202,6 +205,7 @@ import {
   const unlitMaterialCache = new WeakMap();
   let contestants = [];
   let hostBillboard = null;
+  let hazelBillboard = null;
   let billboards = [];
   let contestantTargets = [];
   let hostTargets = [];
@@ -1252,6 +1256,11 @@ import {
   }
 
   function getCameraPoseForView(view, aspect) {
+    if (view.kind === "hazel" && hazelBillboard) {
+      const [yawCap,pitchCap]=focusLimits(view.kind);
+      const frame=hazelCameraFrame(hazelBillboard,aspect,camera.fov,camera.near,yawCap,pitchCap);
+      return {target:new THREE.Vector3().copy(frame.target),position:new THREE.Vector3().copy(frame.position)};
+    }
     if (view.kind === "trivia") {
       // The actual uninterrupted back-wall panels run x=4.51..9.14, z=-6.16.
       // Face the central panel squarely, above the nearby raised-floor lip.
@@ -1722,6 +1731,7 @@ import {
     hostTargets = [];
     contestants = [];
     hostBillboard = null;
+    hazelBillboard = null;
     billboards = [];
     billboardLayer?.replaceChildren();
     rouletteModel?.traverse((object) => {
@@ -1854,9 +1864,10 @@ import {
     }).filter(Boolean);
     billboards = [...contestants];
     setupHostBillboard();
+    setupHazelBillboard();
     billboardLayer.setAttribute(
       "aria-label",
-      `Host and contestant browser-source billboards, ${billboards.length} screens`,
+      `Host, contestant and balcony guest browser-source billboards, ${billboards.length} screens`,
     );
   }
 
@@ -1905,6 +1916,15 @@ import {
       worldHeight,
     };
     billboards.push(hostBillboard);
+  }
+
+  function setupHazelBillboard() {
+    const pose=hazelBalconyPose();
+    hazelBillboard={...HAZEL_SOURCE,...pose,anchor:new THREE.Vector3().copy(pose.anchor),
+      panel:createBillboardPanel(HAZEL_SOURCE,"guest"), seated:true};
+    // A visible, depth-masked panel is the only pick target: an invisible
+    // box behind the balcony would steal clicks through the wall.
+    billboards.push(hazelBillboard);
   }
 
   function getNamedPart(hit, model, knownNames) {
@@ -2004,7 +2024,7 @@ import {
   }
 
   function getBillboardAtScreen(clientX, clientY) {
-    if (diceModeOpen || pauseMenuOpen || (!cameraDetached && !["overview","host","contestant","contestants"].includes(currentView.kind))
+    if (diceModeOpen || pauseMenuOpen || (!cameraDetached && !["overview","host","contestant","contestants","hazel"].includes(currentView.kind))
       || billboardLayer.classList.contains("rg-billboards-fading")) return null;
     const rect = billboardLayer.getBoundingClientRect();
     if (!rect.width || !rect.height) return null;
@@ -2022,6 +2042,7 @@ import {
     }).sort((a,b)=>Number(b.entry.panel.parentElement.style.zIndex)-Number(a.entry.panel.parentElement.style.zIndex) || a.distance-b.distance);
     const entry = hits[0]?.entry;
     if (!entry) return null;
+    if (entry.id === "hazel") return {machine:"hazel"};
     return entry === hostBillboard ? {machine:"host",hostId:entry.id} : {machine:"contestant",contestantId:entry.id};
   }
 
@@ -2096,6 +2117,7 @@ import {
     });
     const sameFocusedTarget = !cameraDetached && (interaction?.machine === "host"
       ? currentView.kind === "host"
+      : interaction?.machine === "hazel" ? currentView.kind === "hazel"
       : interaction?.machine === "contestant"
         && currentView.kind === "contestant"
         && currentView.contestantId === interaction.contestantId);
@@ -2171,6 +2193,7 @@ import {
       if (object) object.visible = visible;
     }
     characterSelection?.hide();
+    focusArrow.hide();
     billboardLayer.classList.toggle("rg-billboards-fading", !visible);
   }
 
@@ -2295,7 +2318,7 @@ import {
     // at the selected object; it never spends a berry or spins a machine.
     if (cameraDetached) {
       const kind=interaction.machine;
-      if (["host","contestant","card-table","slot","roulette","dice-door"].includes(kind))
+      if (["host","contestant","hazel","card-table","slot","roulette","dice-door"].includes(kind))
         transitionToView({kind,...(kind==="contestant"?{contestantId:interaction.contestantId}:{})});
       return;
     }
@@ -2317,6 +2340,12 @@ import {
       const focused = !cameraDetached && currentView.kind === "contestant" && currentView.contestantId === interaction.contestantId;
       const action = resolvePointClickAction({ machine: "contestant", focused });
       if (action === "focus-contestant") transitionToView({kind:"contestant", contestantId:interaction.contestantId});
+      return;
+    }
+
+    if (interaction.machine === "hazel") {
+      const action = resolvePointClickAction({machine:"hazel",focused:currentView.kind==="hazel"});
+      if (action === "focus-hazel") transitionToView({kind:"hazel"});
       return;
     }
 
@@ -2404,7 +2433,7 @@ import {
   function spotlightAt(clientX,clientY){
     if(!stageShow||!canFreecam()||freecam.active||cameraTransition)return;
     const character=getBillboardAtScreen(clientX,clientY);
-    const entry=character?.machine==="host"?hostBillboard:character?.machine==="contestant"?contestants.find(c=>c.id===character.contestantId):null;
+    const entry=character?.machine==="hazel"?hazelBillboard:character?.machine==="host"?hostBillboard:character?.machine==="contestant"?contestants.find(c=>c.id===character.contestantId):null;
     let point=entry?.anchor;
     if(!point){
       const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return;
@@ -2525,6 +2554,10 @@ import {
       }
     }
     else if (shortcut === "host") transitionToView({ kind: "host" });
+    else if (shortcut === "hazel") {
+      if (!event.repeat && sceneReady && hazelBillboard && !document.documentElement.hasAttribute("data-rg-host-locked"))
+        transitionToView({kind:"hazel"});
+    }
     else if (shortcut === "card-table") transitionToView({ kind: "card-table" });
     else if (key === "b" && event.shiftKey) window.dispatchEvent(new CustomEvent("rg:open-host-panel", {detail:{tab:"card-games"}}));
     else if (shortcut === "cheer") {
@@ -2715,6 +2748,61 @@ import {
     cardLayer.style.setProperty("--table-y", `${Math.max(halfHeight, Math.min(height - halfHeight, (1 - center.y) * height / 2))}px`);
   }
 
+  function updateFocusArrow(time, roomVisible) {
+    if (!roomVisible || diceModeOpen || cameraDetached || freecam?.active || cameraTransition || !focusArrowKey(currentView) || document.querySelector("dialog[open]")) {
+      focusArrow.hide(!focusArrowKey(currentView) || cameraDetached || freecam?.active);
+      return;
+    }
+    const viewport={width:preview.clientWidth,height:preview.clientHeight};
+    const kind=currentView.kind;
+    const id=selectedCharacterId(currentView);
+    let target=null;
+    if(id || kind==="contestants") {
+      const entries=id?billboards.filter(entry=>entry.id===id):contestants;
+      target=entries.map(entry=>characterArrowTarget(entry,viewport,characterOcclusion)).filter(Boolean).sort((a,b)=>a.bounds.left-b.bounds.left)[0]||null;
+    } else {
+      // A presented question/card stage is the visible objective, not the
+      // physical table or wall behind its controls.
+      const overlay=kind==="card-table"&&!cardLayer?.hidden&&!cardLayer?.classList.contains("is-off-table")?cardLayer.firstElementChild:
+        kind==="trivia"&&!triviaLayer?.hidden?triviaLayer.querySelector(".rg-live-stage-content"):null;
+      if(overlay){
+        const rect=overlay.getBoundingClientRect(),base=preview.getBoundingClientRect();
+        if(rect.width>0&&rect.height>0)target={bounds:{left:rect.left-base.left,right:rect.right-base.left,top:rect.top-base.top,bottom:rect.bottom-base.top}};
+      }
+      if(!target){
+        let points=[];
+        if(kind==="slot"){
+          const {left,right,top,bottom}=SLOT_DISPLAY_PIXELS;
+          for(const x of [left,(left+right)/2,right])for(const y of [top,(top+bottom)/2,bottom])points.push(slotWorldPoint(x,y));
+        }
+        else if(kind==="dice-door"){
+          const door=ARCADE_REFERENCE_LAYOUT.diceDoor;
+          for(const y of [door.minY,door.maxY])for(const z of [door.minZ,door.maxZ])points.push(new THREE.Vector3(door.wallX-door.interactionOffset,y,z));
+        } else if(kind==="trivia"){
+          for(const x of [4.51,9.14])for(const y of [.45,2.7])points.push(new THREE.Vector3(x,y,-6.10));
+        } else {
+          const object=kind==="roulette"?rouletteModel?.getObjectByName("rim")||rouletteRig:kind==="card-table"?cardTableModel:null;
+          if(object?.visible){
+            const box=new THREE.Box3().setFromObject(object);
+            if(!box.isEmpty()){
+              if(kind==="roulette"){
+                const center=box.getCenter(new THREE.Vector3());
+                for(let i=0;i<32;i++){const a=i*Math.PI/16;points.push(new THREE.Vector3(center.x+Math.cos(a)*(box.max.x-box.min.x)/2,box.max.y,center.z+Math.sin(a)*(box.max.z-box.min.z)/2));}
+              }else for(const x of [box.min.x,box.max.x])for(const z of [box.min.z,box.max.z])points.push(new THREE.Vector3(x,box.max.y,z));
+            }
+          }
+        }
+        if(kind==="slot"&&(!slotsModel?.visible||stageShow?.busy))points=[];
+        camera.updateMatrixWorld(true);
+        const projected=points.map(point=>point.clone().project(camera));
+        if(projected.length&&projected.every(p=>Number.isFinite(p.z)&&p.z>=-1&&p.z<=1)){
+          target=projectedArrowTarget(projected.map(p=>({x:(p.x+1)*viewport.width/2,y:(1-p.y)*viewport.height/2})),viewport);
+        }
+      }
+    }
+    focusArrow.update(currentView,target,viewport,time,reducedMotion.matches);
+  }
+
   function syncVipAmbience(roomVisible, emotion=crowdState.active) {
     const mix=sampleVipAmbience(camera?.position,DICE_DOOR_OPENING,{
       inside:diceModeOpen,focused:!cameraDetached&&!freecam?.active&&!cameraTransition&&currentView.kind==="dice-door",
@@ -2732,7 +2820,7 @@ import {
     const emotion=crowdState.step(crowdClock); updateCrowdStatus();
     if(audience){audience.group.visible=roomVisible&&!diceModeOpen;audience.update(crowdClock,emotion,reducedMotion.matches);}
     signGlow?.update(time,roomVisible&&!diceModeOpen,reducedMotion.matches);
-    if(!roomVisible||diceModeOpen)characterSelection?.hide();
+    if(!roomVisible||diceModeOpen){characterSelection?.hide();focusArrow.hide();}
     if(diceModeOpen)showFX?.update(time,{active:false});
     freecam.step(time);
     if (!freecam.active) updateCameraTransition(time);
@@ -2856,6 +2944,7 @@ import {
 
     showFX?.update(time,{active:roomVisible,spinning:Boolean(wheelMotion),view:currentView,reduced:reducedMotion.matches});
     if (sceneReady && roomVisible) updateBillboardProjection(time);
+    updateFocusArrow(time,roomVisible);
     renderer.render(scene, camera);
   }
 
@@ -2951,6 +3040,7 @@ import {
   }
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
+      focusArrow.hide();
       stageShow?.reset(currentView.kind==="slot");
       crowdLastFrame=null;
       showFX?.clearRoulette();
@@ -2970,7 +3060,7 @@ import {
     resizeObserver?.disconnect();
     liquidPortal?.dispose();
     exteriorMist?.dispose();
-    characterOcclusion?.dispose(); characterSelection?.dispose(); signGlow?.dispose(); audience?.dispose(); showFX?.dispose(); stageShow?.dispose();
+    focusArrow.dispose(); characterOcclusion?.dispose(); characterSelection?.dispose(); signGlow?.dispose(); audience?.dispose(); showFX?.dispose(); stageShow?.dispose();
     renderer?.dispose();
   }, { once: true });
 })();

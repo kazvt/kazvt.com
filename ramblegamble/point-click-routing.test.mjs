@@ -21,6 +21,7 @@ test("participant and host aliases coexist with their number shortcuts, and C is
   assert.equal(resolveArcadeShortcut("h"), "host");
   assert.equal(resolveArcadeShortcut("H"), "host");
   assert.equal(resolveArcadeShortcut("5"), "card-table");
+  assert.equal(resolveArcadeShortcut("8"), "hazel");
   assert.equal(resolveArcadeShortcut("c"), "cheer");
   assert.equal(resolveArcadeShortcut("C"), "cheer");
   assert.equal(resolveArcadeShortcut("x"), "");
@@ -73,6 +74,8 @@ test("first machine or contestant click focuses its target; focused machines kee
   assert.equal(resolvePointClickAction({ machine: "contestant" }), "focus-contestant");
   assert.equal(resolvePointClickAction({ machine: "contestant", focused: true }), "");
   assert.equal(resolvePointClickAction({ machine: "host" }), "focus-host");
+  assert.equal(resolvePointClickAction({ machine: "hazel" }), "focus-hazel");
+  assert.equal(resolvePointClickAction({ machine: "hazel", focused: true }), "");
   assert.equal(resolvePointClickAction({ machine: "host", focused: true }), "");
   assert.equal(resolvePointClickAction({ machine: "card-table" }), "focus-card-table");
   assert.equal(resolvePointClickAction({ machine: "card-table", focused: true }), "open-card-games");
@@ -139,9 +142,10 @@ test('visible character artwork is directly clickable, respects overlap order, a
  runInNewContext(roomSection('  function getBillboardAtScreen(', '  function getSeatAtScreen(')+'\nthis.pick=getBillboardAtScreen;',ctx);
  assert.equal(ctx.pick(180,180).machine,'host');assert.equal(ctx.pick(90,180),null);
  ctx.characterOcclusion.contains=entry=>entry!==host;assert.equal(ctx.pick(180,180).contestantId,'faroe');host.panel.style.visibility='hidden';assert.equal(ctx.pick(180,180).contestantId,'faroe');
- for(const kind of ['host','contestant','contestants']){ctx.currentView.kind=kind;assert.equal(ctx.pick(180,180).contestantId,'faroe');}
+ for(const kind of ['host','contestant','contestants','hazel']){ctx.currentView.kind=kind;assert.equal(ctx.pick(180,180).contestantId,'faroe');}
  for(const kind of ['slot','roulette','card-table','dice-door','trivia']){ctx.currentView.kind=kind;assert.equal(ctx.pick(180,180),null);}
  ctx.cameraDetached=true;ctx.currentView.kind='slot';assert.equal(ctx.pick(180,180).contestantId,'faroe');ctx.characterOcclusion.contains=()=>false;assert.equal(ctx.pick(180,180),null);ctx.cameraDetached=false;ctx.currentView.kind='overview';ctx.diceModeOpen=true;assert.equal(ctx.pick(180,180),null);ctx.diceModeOpen=false;ctx.pauseMenuOpen=true;assert.equal(ctx.pick(180,180),null);
+ ctx.pauseMenuOpen=false;const hazel={id:'hazel',panel:panel('visible',5),projectedQuad};ctx.billboards.push(hazel);ctx.characterOcclusion.contains=e=>e===hazel;assert.equal(ctx.pick(180,180).machine,'hazel');ctx.characterOcclusion.contains=()=>false;assert.equal(ctx.pick(180,180),null);ctx.characterOcclusion.contains=e=>e===hazel;ctx.currentView.kind='slot';assert.equal(ctx.pick(180,180),null);ctx.cameraDetached=true;assert.equal(ctx.pick(180,180).machine,'hazel');
 });
 test('real point-click handler selects the clicked contestant on the first click, retains group back and host focus',()=>{
  const transitions=[];let interaction;
@@ -150,6 +154,8 @@ test('real point-click handler selects the clicked contestant on the first click
  for(const id of ['faroe','erin','kaz']){interaction={machine:'contestant',contestantId:id};ctx.click(600,300);assert.equal(ctx.currentView.kind,'contestant');assert.equal(ctx.currentView.contestantId,id);const count=transitions.length;ctx.click(600,300);assert.equal(transitions.length,count);}
  interaction=null;ctx.click(600,660);assert.equal(ctx.currentView.kind,'contestants');interaction={machine:'contestant',contestantId:'erin'};ctx.click(600,300);assert.equal(ctx.currentView.contestantId,'erin');
  interaction={machine:'host'};ctx.click(600,300);assert.equal(ctx.currentView.kind,'host');
+ interaction={machine:'hazel'};ctx.click(600,300);assert.equal(ctx.currentView.kind,'hazel');const count=transitions.length;ctx.click(600,300);assert.equal(transitions.length,count);
+ interaction=null;ctx.click(600,660);assert.equal(ctx.currentView.kind,'overview');ctx.cameraDetached=true;interaction={machine:'hazel'};ctx.click(600,300);assert.equal(ctx.currentView.kind,'hazel');
 });
 
 test('real focused slot click sends exact cell, never invokes random column placement',()=>{

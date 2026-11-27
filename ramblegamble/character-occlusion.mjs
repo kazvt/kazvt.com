@@ -1,12 +1,12 @@
 // Fugi is a cross-origin iframe; the WebGL scene cannot sample its pixels.
 // Render a small visibility buffer instead, preserving the original opaque and
 // alpha-tested geometry, then apply a synchronous per-plane geometric clip to its DOM wrapper.
-// Each of the four standees owns one bit in the red channel. They do not occlude
+// Each live standee owns one bit in the red channel. They do not occlude
 // one another here: their transparent pixels are composited by DOM paint order.
 // Keep the target at display resolution where practical; do not multisample
 // the packed ID bits. Only read back the union of visible character bounds.
 export const OCCLUSION_LIMIT = 1920;
-export const CHARACTER_BITS = [16,32,64,128];
+export const CHARACTER_BITS = [16,32,64,128,8];
 export function maskSize(width,height,pixelRatio=1){
  const scale=Math.min(Math.max(1,Math.min(1.6,pixelRatio||1)),OCCLUSION_LIMIT/Math.max(1,width,height));
  return [Math.max(1,Math.round(width*scale)),Math.max(1,Math.round(height*scale))];

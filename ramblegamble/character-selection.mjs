@@ -1,9 +1,9 @@
 // Area-preserving squash/stretch, anchored at the same world-space foot point.
 // The base pose is immutable: framing never follows the temporary deformation.
 export const SELECTION_MS=720;
-const names={faroe:'FAROE',erin:'ERIN',kaz:'KAZ','lillie-host':'LILLIE'};
-const colors={faroe:0x64e5a0,erin:0xc6a0ff,kaz:0xffe567,'lillie-host':0xff8cce};
-export function selectedCharacterId(view){return view?.kind==='host'?'lillie-host':view?.kind==='contestant'?view.contestantId:null;}
+const names={faroe:'FAROE',erin:'ERIN',kaz:'KAZ','lillie-host':'LILLIE',hazel:'HAZEL'};
+const colors={faroe:0x64e5a0,erin:0xc6a0ff,kaz:0xffe567,'lillie-host':0xff8cce,hazel:0xd2adff};
+export function selectedCharacterId(view){return view?.kind==='host'?'lillie-host':view?.kind==='hazel'?'hazel':view?.kind==='contestant'?view.contestantId:null;}
 export function selectionScale(age,reduced=false){
   if(reduced||!Number.isFinite(age)||age<=0||age>=SELECTION_MS)return {x:1,y:1};
   const t=age/SELECTION_MS;
@@ -11,7 +11,7 @@ export function selectionScale(age,reduced=false){
   return {x:1/y,y};
 }
 export function characterRenderPose(entry,age,reduced=false){
-  const scale=selectionScale(age,reduced),worldHeight=entry.worldHeight*scale.y,worldWidth=entry.worldWidth*scale.x;
+  const scale=selectionScale(age,reduced||entry.seated),worldHeight=entry.worldHeight*scale.y,worldWidth=entry.worldWidth*scale.x;
   return {anchor:{x:entry.anchor.x,y:entry.anchor.y+(worldHeight-entry.worldHeight)/2,z:entry.anchor.z},worldHeight,worldWidth};
 }
 const contestants=['faroe','erin','kaz'];
@@ -92,7 +92,9 @@ export function createCharacterSelection(THREE,scene,layer,{subscribePoints,subs
     if(entry?.projectedQuad&&entry.panel.style.visibility==='visible'){
       const id=entry.id,color=colors[id]||0xffffff;
       if(lastId!==id){lastId=id;for(const m of group.children)m.material.color.setHex(color);}
-      group.visible=true;
+      // A floor ring would float or intersect the balcony; use the nameplate
+      // and focus arrow only for the seated guest.
+      group.visible=!entry.seated;
       group.position.set(entry.anchor.x,entry.anchor.y-entry.worldHeight/2+.018,entry.anchor.z);
       inner.position.y=.002;arc.position.y=.004;pulse.position.y=.006;
       arc.rotation.z=reduced?0:time*.0019;
