@@ -86,7 +86,7 @@ test('roulette launch, actual-pocket impact, delayed two-wave confetti and clean
  const fx=createShowFX(THREE,new Group(),{wheel:{},wheelPivot:pivot,ball,door:{wallX:1,minY:0,maxY:2,minZ:0,maxZ:1}});
  const find=n=>fx.group.children.find(m=>m instanceof InstancedMesh&&m.count===n);
  const confetti=find(216),orbit=find(32),sparks=find(24);const view={kind:'roulette'};
- fx.update(100,{view,spinning:true});fx.update(450,{view,spinning:true});assert.equal(orbit.visible,true);assert.equal(confetti.visible,false);assert.notEqual(pivot.position.y,.4);
+ fx.update(100,{view,spinning:true});fx.update(450,{view,spinning:true});assert.equal(orbit.visible,true);assert.equal(confetti.visible,false);assert.equal(pivot.position.y,.4, "rotor must remain at authored height relative to shared cabinet");
  fx.impact(450);fx.update(500,{view,spinning:true});assert.equal(sparks.visible,true);assert.equal(confetti.visible,false);
  fx.impact(600,true);fx.update(800,{view});assert.equal(confetti.visible,true);assert.equal(pivot.position.y,.4);assert.ok(confetti.matrices[0].scale.x>0);assert.equal(confetti.matrices[144].scale.x,0);assert.ok(confetti.matrices[0].position.y<1.5);
  fx.update(1300,{view});assert.ok(confetti.matrices[144].scale.x>0);for(const m of confetti.matrices)for(const v of [...Object.values(m.position),...Object.values(m.scale),...Object.values(m.rotation)])assert.ok(Number.isFinite(v));

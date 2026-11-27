@@ -111,7 +111,7 @@ test('closer roulette camera retains the entire supplied wheel across viewport s
  });
  const wheel=box(points),tan=Math.tan(42*Math.PI/360);
  const source=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
- assert.match(source,/if \(view.kind === "roulette" && rouletteRig\) \{\s*bounds.setFromObject\(rouletteRig\);[^}]*return bounds.expandByScalar\(0\.06\)/);
+ assert.match(source,/if \(view.kind === "roulette" && rouletteRig\) \{\s*if\(rouletteCabinetFX\)bounds.copy\(rouletteCabinetFX.framing\);\s*else bounds.setFromObject\(rouletteRig\);[^}]*return bounds.expandByScalar\(0\.06\)/);
  assert.match(source,/view.kind === "roulette" \? 1\.06 : 1\.18/);
  for(const [w,h] of [[1366,668],[803,395],[1920,1080],[360,640],[320,240],[2560,720]]) for(const look of [-1,0,1]){
   const b=basis(-.38-look*.42,.86),p=relative(points,wheel.center,b);
@@ -287,4 +287,62 @@ test('architectural pixel trim is supported by authored stage ledges',()=>{
  for(const p of m.d.meshes[n.mesh].primitives){const points=m.values(p.attributes.POSITION).map(v=>add(rotateQuaternion(v,n.rotation),n.translation||[0,0,0]));const indices=m.values(p.indices).flat();for(let i=0;i<indices.length;i+=3)triangles.push(indices.slice(i,i+3).map(j=>points[j]));}
  const contains=(p,t)=>{if(!t.every(v=>Math.abs(v[1]-p[1])<.0002))return false;const [a,b,c]=t.map(v=>[v[0],v[2]]),q=[p[0],p[2]],u=sub(b,a),v=sub(c,a),w=sub(q,a),det=u[0]*v[1]-u[1]*v[0];if(Math.abs(det)<1e-10)return false;const s=(w[0]*v[1]-w[1]*v[0])/det,r=(u[0]*w[1]-u[1]*w[0])/det;return s>=-.0001&&r>=-.0001&&s+r<=1.0001;};
  for(const path of TRIM_PATHS)for(let i=0;i<path.count;i++){const p=add(path.a,mul(sub(path.b,path.a),(i+.5)/path.count));assert.ok(triangles.some(t=>contains(p,t)),`Unsupported trim at ${p}`);}
+});
+
+import { sampleRouletteCabinet, fitRouletteCabinet } from './roulette-cabinet-fx.mjs';
+import { crowdCloseupPose } from './spooky-camera.mjs';
+import { crowdCatAnchor, crowdCatFacing } from './audience-render.mjs';
+function rouletteGeometry(){
+ const m=model('rg_roulette');
+ const points=m.d.nodes.filter(n=>n.mesh!==undefined).flatMap(n=>{
+  const index=m.d.nodes.indexOf(n),parent=m.d.nodes.find(p=>p.children?.includes(index));
+  return nodePoints(m,n).map(p=>mul(add(rotateQuaternion(p,parent?.rotation),parent?.translation||[0,0,0]),.13));
+ });
+ const bounds=box(points),pivot=[bounds.center[0],bounds.min[1],bounds.center[2]],local=bounds.corners.map(p=>sub(p,pivot));
+ return {bounds,pivot,local,width:bounds.max[0]-bounds.min[0],height:bounds.max[1]-bounds.min[1],depth:bounds.max[2]-bounds.min[2]};
+}
+function moveRouletteCorner([x,y,z],p){
+ const [a,b,c]=[x*p.s,y*p.sy,z*p.s],cp=Math.cos(p.pitch),sp=Math.sin(p.pitch),cr=Math.cos(p.roll),sr=Math.sin(p.roll);
+ return [p.x+cr*a-sr*(cp*b-sp*c),p.y+sr*a+cr*(cp*b-sp*c),sp*b+cp*c];
+}
+test('cartoon roulette poses preserve the full authored recess footprint, floor, and static framing envelope',()=>{
+ const g=rouletteGeometry(),{width,height,depth}=g;let peakHop=0,peakStretch=0,peakLean=0,smallest=1;
+ for(let i=0;i<=4000;i++){
+  const pose=sampleRouletteCabinet(i/4000),p=fitRouletteCabinet(pose,g);peakHop=Math.max(peakHop,p.y);peakStretch=Math.max(peakStretch,p.sy);peakLean=Math.max(peakLean,Math.abs(p.roll));smallest=Math.min(smallest,p.s);
+  for(const c of g.local){const [x,y,z]=moveRouletteCorner(c,p);assert.ok(Math.abs(x)<=width/2+1e-9);assert.ok(Math.abs(z)<=depth/2+1e-9);assert.ok(y>=-1e-9);assert.ok(y<=height*1.76+(width+depth)*.14+1e-9);}
+ }
+ assert.ok(peakHop>height*.4);assert.ok(peakStretch>1.30);assert.ok(peakLean>.1);assert.ok(smallest>.65&&smallest<.9);
+ assert.deepEqual(fitRouletteCabinet(sampleRouletteCabinet(0),g),{x:0,y:0,sy:1,s:1,pitch:0,roll:0});
+ assert.deepEqual(fitRouletteCabinet(sampleRouletteCabinet(1),g),{x:0,y:0,sy:1,s:1,pitch:0,roll:0});
+});
+test('animated roulette envelope stays fully visible for 10 viewports and all 9 focus orbit extremes',()=>{
+ const g=rouletteGeometry(),{width,height,depth}=g,top=height*1.76+(width+depth)*.14;
+ const target=[0,top/2,0],envelope=[-width/2-.06,width/2+.06].flatMap(x=>[-.06,top+.06].flatMap(y=>[-depth/2-.06,depth/2+.06].map(z=>[x,y,z]))),tan=Math.tan(42*Math.PI/360);
+ const samples=Array.from({length:161},(_,i)=>g.local.map(c=>moveRouletteCorner(c,fitRouletteCabinet(sampleRouletteCabinet(i/160),g)))).flat();
+ for(const [w,h] of [[320,240],[360,640],[390,844],[803,395],[1014,576],[1366,668],[1920,1080],[2560,720],[3840,2160],[768,1024]])for(const look of [-1,0,1]){
+  const b=basis(-.38-look*.42,.86),corners=relative(envelope,target,b),distance=Math.max(1,...corners.map(p=>Math.max(Math.abs(p.x)/(tan*w/h),Math.abs(p.y)/tan)+p.z))*1.06;
+  const [yc,pc]=focusLimits('roulette');
+  for(const yaw of [-yc,0,yc])for(const pitch of [-pc,0,pc])for(const [x,y,d] of project(relative(samples,target,basis(-.38-look*.42+yaw,Math.sin(Math.asin(.86)+pitch))),{distance,shiftX:0,shiftY:0},w,h))assert.ok(d>.1&&Math.abs(x)<1&&Math.abs(y)<1,`${w}x${h}, look=${look}, orbit=${yaw}/${pitch}: ${x},${y}`);
+ }
+});
+test('hidden spectator focus approaches from inside the crowd and remains readable across responsive orbit',()=>{
+ const anchor=crowdCatAnchor();const a=[anchor.x,anchor.y,anchor.z];
+ // The spectator is still subject to the original constrained billboard logic.
+ const [yc,pc]=focusLimits('smeemo-crowd');
+ for(const [w,h] of [[320,240],[360,640],[390,844],[803,395],[1920,1080],[3840,2160],[2560,720]]){
+  const pose=crowdCloseupPose(anchor,w/h,42),p=pose.position;
+  for(const yaw of [-yc,0,yc])for(const pitch of [-pc,0,pc]){
+   const eye=orbitPosition(p,pose.target,yaw,pitch),facing=crowdCatFacing(eye,anchor);assert.notEqual(facing,null);assert.ok(eye.x<anchor.x-.5);
+   const b=basis(Math.atan2(eye.x-anchor.x,eye.z-anchor.z),Math.sin(Math.atan2(eye.y-anchor.y,Math.hypot(eye.x-anchor.x,eye.z-anchor.z)))),distance=Math.hypot(eye.x-anchor.x,eye.y-anchor.y,eye.z-anchor.z);
+   for(const [x,y,d] of project(relative([-.18,.18].flatMap(x=>[-.47,.47].map(y=>add(a,[Math.cos(facing)*x,y,-Math.sin(facing)*x]))),a,b),{distance,shiftX:0,shiftY:0},w,h))assert.ok(d>.1&&Math.abs(x)<.95&&Math.abs(y)<.95);
+  }
+ }
+});
+test('hidden spectator close-up has a clear center ray through the actual opaque stage mesh',()=>{
+ const m=model('rg_stage'),n=m.d.nodes[0],tris=[];
+ for(const p of m.d.meshes[n.mesh].primitives){const pts=m.values(p.attributes.POSITION).map(v=>add(rotateQuaternion(v,n.rotation),n.translation||[0,0,0]));const ids=m.values(p.indices).flat();for(let i=0;i<ids.length;i+=3)tris.push(ids.slice(i,i+3).map(j=>pts[j]));}
+ const anchor=crowdCatAnchor(),a=[anchor.x,anchor.y,anchor.z], [yc,pc]=focusLimits('smeemo-crowd');
+ for(const aspect of [.45,.5625,1,16/9,3.55]){const p=crowdCloseupPose(anchor,aspect,42);for(const yaw of [-yc,0,yc])for(const pitch of [-pc,0,pc]){const e=orbitPosition(p.position,p.target,yaw,pitch),eye=[e.x,e.y,e.z],d=sub(a,eye);
+  const blocked=tris.some(([v0,v1,v2])=>{const e1=sub(v1,v0),e2=sub(v2,v0),h=cross(d,e2),det=dot(e1,h);if(Math.abs(det)<1e-9)return false;const s=sub(eye,v0),u=dot(s,h)/det;if(u<0||u>1)return false;const q=cross(s,e1),v=dot(d,q)/det;if(v<0||u+v>1)return false;const t=dot(e2,q)/det;return t>.0001&&t<.9999;});assert.ok(!blocked,`opaque stage blocks cat center at aspect ${aspect}, ${yaw}/${pitch}`);
+ }}
 });

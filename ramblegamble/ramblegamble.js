@@ -10,15 +10,17 @@ import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state
 import { createCharacterOcclusion } from "./character-occlusion.mjs?v=hazel-balcony-20261127-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
-import { createAudienceRenderer } from "./audience-render.mjs?v=hidden-spectator-20261127-v1";
-import { createShowFX } from "./show-fx.mjs?v=compact-score-20261127-v1";
+import { createAudienceRenderer, crowdCatAnchor } from "./audience-render.mjs?v=hidden-spectator-20261127-v1";
+import { createShowFX } from "./show-fx.mjs?v=cartoon-machines-20261127-v1";
+import { createRouletteCabinetFX } from "./roulette-cabinet-fx.mjs?v=cartoon-machines-20261127-v1";
+import { cameraTravelDuration, isSpookyView, suspenseEase, crowdCloseupPose } from "./spooky-camera.mjs?v=cartoon-machines-20261127-v1";
 import { CHARACTER_SOURCE_SIZE, CHARACTER_YAW_LIMIT, characterYaw, standingCharacterPose, projectCharacterQuad, pointInCharacterQuad } from "./character-billboards.mjs?v=fugi-stable-20261127-v1";
 import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { createExteriorMist, EXTERIOR_FLOOR } from "./exterior-mist.mjs?v=crowd-mist-20261127-v1";
 import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=crank-hop-20261127-v1";
-import { foley } from "./game-foley.mjs?v=crank-hop-20261127-v1";
-import { createSlotCabinetFX } from "./slot-cabinet-fx.mjs?v=crank-hop-20261127-v1";
+import { foley } from "./game-foley.mjs?v=cartoon-machines-20261127-v1";
+import { createSlotCabinetFX } from "./slot-cabinet-fx.mjs?v=cartoon-machines-20261127-v1";
 import {
   resolvePointClickAction,
   resolvePointClickBack,
@@ -27,7 +29,7 @@ import {
   resolveArcadeShortcut,
   resolveSlotContextCell,
   resolveHostContextAction,
-} from "./point-click-routing.js?v=hazel-balcony-20261127-v1";
+} from "./point-click-routing.js?v=cartoon-machines-20261127-v1";
 import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
 import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-door-wall-target-20261120-v1";
 import { readPointScores, subscribePointScores, subscribeStarScores, writePointScores, withPointScoresLock } from "./points-store.mjs?v=player-stats-20261127-v1";
@@ -157,6 +159,7 @@ import {
   let rouletteRig;
   let slotRig;
   let slotCabinetFX;
+  let rouletteCabinetFX;
   let cardTableModel;
   let skyRoot;
   let exteriorMist;
@@ -344,6 +347,12 @@ import {
     foley.stop("roulette-landing"); foley.stop("roulette-settlement");
   }
 
+  function canShowRouletteCabinet() {
+    return gameStarted && !pauseMenuOpen && !diceModeOpen && !document.hidden
+      && !document.documentElement.hasAttribute("data-rg-host-locked")
+      && currentView.kind === "roulette" && !cameraDetached && !freecam?.active && !cameraTransition;
+  }
+
   function startWheelSpin() {
     if (!beginTurn("wheel")) return;
     stopRouletteSettlement();
@@ -370,6 +379,7 @@ import {
       pocketSector: null, lastPocketSound: -Infinity,
     };
     wheelMotion.ballTo = alignBallToPocket(wheelMotion.ballTo, wheelMotion.wheelTo, wheelMotion.ballAngle);
+    rouletteCabinetFX?.begin(wheelMotion.started, wheelMotion.duration, {active:canShowRouletteCabinet(),reduced:reducedMotion.matches});
   }
 
   function prepareRouletteBall() {
@@ -1280,6 +1290,10 @@ import {
   }
 
   function getCameraPoseForView(view, aspect) {
+    if (view.kind === "smeemo-crowd") {
+      const pose=crowdCloseupPose(crowdCatAnchor(),aspect,camera.fov);
+      return {target:new THREE.Vector3().copy(pose.target),position:new THREE.Vector3().copy(pose.position)};
+    }
     if (view.kind === "hazel") {
       const [yawCap,pitchCap]=focusLimits(view.kind);
       const frame=hazelCameraFrame(hazelBillboard ?? hazelBalconyPose(),aspect,camera.fov,camera.near,yawCap,pitchCap);
@@ -1437,8 +1451,9 @@ import {
       return bounds.expandByScalar(0.35);
     }
     if (view.kind === "roulette" && rouletteRig) {
-      bounds.setFromObject(rouletteRig);
-      // A tighter close-up keeps the whole wheel in frame without excess floor.
+      if(rouletteCabinetFX)bounds.copy(rouletteCabinetFX.framing);
+      else bounds.setFromObject(rouletteRig);
+      // A stable envelope includes the wheel's airborne poses.
       return bounds.expandByScalar(0.06);
     }
     if (view.kind === "card-table" && cardTableModel) {
@@ -1479,7 +1494,7 @@ import {
   function transitionToView(nextView, { immediate = false } = {}) {
     hideGameCursor(); lastScenePointer = null;
     freecam?.stop();
-    if (nextView.kind !== "roulette") {stopRouletteSettlement(); showFX?.clearRoulette();}
+    if (nextView.kind !== "roulette") {stopRouletteSettlement(); rouletteCabinetFX?.reset(); showFX?.clearRoulette();}
     const viewChanged=currentView.kind!==nextView.kind||currentView.contestantId!==nextView.contestantId;
     if(stageShow?.busy&&!viewChanged&&nextView.kind==="slot"&&!immediate)return;
     if (selectedCharacterId(nextView) && (viewChanged || cameraDetached) && !immediate) characterSelectedAt=performance.now();
@@ -1512,7 +1527,8 @@ import {
 
     cameraTransition = {
       started: performance.now(),
-      duration: stageShow&&(openingSlot||closingSlot) ? (openingSlot?REVEAL_MS:RETRACT_MS) : 520,
+      duration: cameraTravelDuration(nextView.kind, stageShow&&(openingSlot||closingSlot) ? (openingSlot?REVEAL_MS:RETRACT_MS) : 0),
+      spooky: isSpookyView(nextView.kind),
       theatre: Boolean(stageShow&&(openingSlot||closingSlot)),
       fromPosition: camera.position.clone(),
       fromTarget: cameraTarget.clone(),
@@ -2183,6 +2199,7 @@ import {
     stageShow?.reset(currentView.kind==="slot");
     foley.setRoomAmbience(false);
     foley.stopAll();
+    rouletteCabinetFX?.reset();
     focusDrag?.clearHover(); lastScenePointer = null;
     foley.play("close");
     gameStarted = false;
@@ -2490,6 +2507,7 @@ import {
     }
     updateLiquidPortal();
     if (open) {
+      rouletteCabinetFX?.reset();
       focusDrag.clearHover(); lastScenePointer = null; stopRouletteSettlement();
       diceModeVisibility = [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group, stageShow?.group, characterSelection?.group]
         .filter(Boolean)
@@ -2541,6 +2559,11 @@ import {
     else if (shortcut === "hazel") {
       if (!event.repeat && sceneReady && !document.documentElement.hasAttribute("data-rg-host-locked"))
         transitionToView({kind:"hazel"});
+    }
+    else if (shortcut === "smeemo-crowd") {
+      // Deliberately unlisted Easter-egg shortcut; no visible marker or hover hint.
+      if (!event.repeat && sceneReady && audience && !document.documentElement.hasAttribute("data-rg-host-locked")
+          && (cameraDetached || currentView.kind !== "smeemo-crowd")) transitionToView({kind:"smeemo-crowd"});
     }
     else if (shortcut === "card-table") transitionToView({ kind: "card-table" });
     else if (key === "b" && event.shiftKey) window.dispatchEvent(new CustomEvent("rg:open-host-panel", {detail:{tab:"card-games"}}));
@@ -2594,7 +2617,7 @@ import {
     if (!cameraTransition) return;
     const transition = cameraTransition;
     const progress = Math.min(1, (time - transition.started) / transition.duration);
-    const eased = transition.theatre ? theatreEase(progress) : 1 - Math.pow(1 - progress, 3);
+    const eased = transition.spooky ? suspenseEase(progress) : transition.theatre ? theatreEase(progress) : 1 - Math.pow(1 - progress, 3);
     camera.position.lerpVectors(transition.fromPosition, transition.toPosition, eased);
     cameraTarget.lerpVectors(transition.fromTarget, transition.toTarget, eased);
     camera.lookAt(cameraTarget);
@@ -2834,6 +2857,7 @@ import {
       else if (isSlotWinFinished(slotWinCelebration.animation, time)) endSlotCelebration();
       else drawSlotReelDisplay(time);
     }
+    if (!canShowRouletteCabinet() || reducedMotion.matches) rouletteCabinetFX?.reset();
     slotCabinetFX?.update(time, { active: canShowCabinetFX(), reduced: reducedMotion.matches });
     updateSkyAnimations(time);
     updateLiquidPortal(time);
@@ -2845,6 +2869,7 @@ import {
 
     if (wheelMotion && wheelPivot && ballPivot && ballOrbitObject && Number.isFinite(wheelMotion.ballAngle)) {
       const progress = Math.min(1, (time - wheelMotion.started) / wheelMotion.duration);
+      rouletteCabinetFX?.update(time,progress,canShowRouletteCabinet()&&!reducedMotion.matches);
       const ease = 1 - Math.pow(1 - progress, 4.6);
       wheelPivot.rotation.y = THREE.MathUtils.lerp(wheelMotion.wheelFrom, wheelMotion.wheelTo, ease);
       ballPivot.rotation.y = THREE.MathUtils.lerp(
@@ -2885,6 +2910,7 @@ import {
         finishTurn({ settled: true, audible });
       }
     } else if (wheelMotion && time - wheelMotion.started >= wheelMotion.duration) {
+      rouletteCabinetFX?.reset();
       wheelMotion = null;
       finishTurn();
     }
@@ -2999,7 +3025,9 @@ import {
       captureSlotFocusPoints();
       try { audience=createAudienceRenderer(THREE,scene); audience.group.visible=!pauseMenuOpen; }
       catch(error){scene.getObjectByName("rg-audience")?.removeFromParent(); console.warn("Audience presentation unavailable",error);}
-      try { showFX=createShowFX(THREE,scene,{wheel:rouletteModel,wheelPivot,ball:ballOrbitObject,door:DICE_DOOR_OPENING}); showFX.group.visible=!pauseMenuOpen; }
+      try { rouletteCabinetFX=createRouletteCabinetFX(THREE,rouletteRig,rouletteModel,{foley}); }
+      catch(error){console.warn("Roulette cabinet effects unavailable",error);}
+      try { showFX=createShowFX(THREE,scene,{wheel:rouletteModel,wheelPivot,ball:ballOrbitObject,door:DICE_DOOR_OPENING,wheelPoint:rouletteCabinetFX?.worldPoint,wheelCarrier:rouletteCabinetFX?.carrier}); showFX.group.visible=!pauseMenuOpen; }
       catch(error){scene.getObjectByName("rg-show-fx")?.removeFromParent(); console.warn("Show effects unavailable",error);}
       applyTheme();
       sceneReady = true;
@@ -3038,6 +3066,7 @@ import {
     if (document.hidden) {
       characterSelection?.hide();
       slotCabinetFX?.reset();
+      rouletteCabinetFX?.reset();
       focusArrow.hide();
       stageShow?.reset(currentView.kind==="slot");
       crowdLastFrame=null;
@@ -3061,6 +3090,7 @@ import {
     menuPresentation.dispose();
     soundtrack.dispose();
     slotCabinetFX?.dispose();
+    rouletteCabinetFX?.dispose();
     focusArrow.dispose(); characterOcclusion?.dispose(); characterSelection?.dispose(); signGlow?.dispose(); audience?.dispose(); showFX?.dispose(); stageShow?.dispose();
     renderer?.dispose();
   }, { once: true });

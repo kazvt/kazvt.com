@@ -57,6 +57,9 @@ RECORDINGS = {
     "reel.mp3": ("alexarje", 863094, "licenses/by/4.0/"),
     "wheel.mp3": ("Stagno", 705775, "publicdomain/zero/1.0/"),
     "spinner.mp3": ("klc777", 562114, "publicdomain/zero/1.0/"),
+    "cartoon-jaw-harp.mp3": ("reelworldstudio", 161122, "publicdomain/zero/1.0/"),
+    "cartoon-cowbell.mp3": ("timgormly", 159758, "publicdomain/zero/1.0/"),
+    "cartoon-vibraslap.mp3": ("Joao_Janz", 482633, "publicdomain/zero/1.0/"),
     "jackpot.mp3": ("Qvantor", 878618, "publicdomain/zero/1.0/"),
 }
 LIMIT = 20 * 1024 * 1024

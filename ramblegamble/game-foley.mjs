@@ -10,6 +10,11 @@ export const FOLEY_CUES = Object.freeze({
   lever: { files: ["lever.mp3"], fallback: ["switch.mp3"], volume: .46 },
   reel: { files: ["spinner.mp3"], fallback: ["reel.mp3"], volume: .28 },
   slotRattle: { files: ["reel.mp3"], volume: .38, loopStart: 1.28, loopEnd: 4.95 },
+  // Optional CC0 instrument recordings, with already-installed physical
+  // recordings as immediate fallbacks. These are deliberately below the roll bed.
+  cartoonTwang: { files: ["cartoon-jaw-harp.mp3"], fallback: ["lever.mp3"], volume: .11, maxDuration: .72 },
+  cartoonClang: { files: ["cartoon-cowbell.mp3"], fallback: ["chips-collide-3.ogg", "chips-collide-4.ogg"], volume: .14, maxDuration: .48 },
+  cartoonClatter: { files: ["cartoon-vibraslap.mp3"], fallback: ["stage-drum-hit.ogg", "die-throw-1.ogg"], volume: .12, maxDuration: .65 },
   slotMelody: { files: ["spinner.mp3"], volume: .28 },
   stop: { files: ["tick-1.ogg", "tick-2.ogg"], fallback: ["switch.mp3"], volume: .42 },
   place: { files: ["card-place-1.ogg", "card-place-2.ogg"], volume: .45 },

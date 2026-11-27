@@ -1,7 +1,7 @@
 import { createRoomLightTrim } from "./room-light-trim.mjs?v=compact-score-20261127-v1";
 import { createPortalParticles } from "./vip-atmosphere.mjs?v=vip-atmosphere-20261127-v1";
 // Render-only world accents. No physics, point calculation, hit targets or camera pose changes.
-export function createShowFX(THREE,scene,{wheel, wheelPivot,ball,door}) {
+export function createShowFX(THREE,scene,{wheel, wheelPivot,ball,door,wheelPoint,wheelCarrier}) {
   const group=new THREE.Group();group.name='rg-show-fx';scene.add(group);
   const basic=(color,opacity=1)=>new THREE.MeshBasicMaterial({color,transparent:true,opacity,depthWrite:false,toneMapped:false,fog:false,side:THREE.DoubleSide});
   const ring=(radius,width,color)=>{const m=new THREE.Mesh(new THREE.RingGeometry(radius-width,radius,48),basic(color));m.rotation.x=-Math.PI/2;group.add(m);m.visible=false;return m;};
@@ -10,12 +10,14 @@ export function createShowFX(THREE,scene,{wheel, wheelPivot,ball,door}) {
   const wheelBounds=new THREE.Box3().setFromObject(wheel),center=wheelBounds.getCenter(new THREE.Vector3()),radius=Math.min(wheelBounds.max.x-wheelBounds.min.x,wheelBounds.max.z-wheelBounds.min.z)*.5;
   const rim=wheel.getObjectByName?.('rim');
   center.y=(rim?new THREE.Box3().setFromObject(rim).max.y:wheelBounds.max.y)+.015;
+  const restCenter=center.clone();
   const halo=ring(radius*1.04,.035,0xffe66a);ringAt(halo,center);
   const outer=ring(radius*1.13,.017,0xc7a3ff);ringAt(outer,center);
   const pocket=ring(.15,.035,0xffe66a),wave=ring(.16,.022,0xff80cd);
   const beam=new THREE.Mesh(new THREE.CylinderGeometry(.48,.09,1.4,32,1,true),basic(0xffe6a0,.14));beam.visible=false;group.add(beam);
   const winnerEcho=ring(.27,.022,0xfff4c1);
   const launchWave=ring(radius*1.01,.035,0xffa3d8), victoryWaves=[ring(radius*.66,.055,0xffe66a),ring(radius*.66,.04,0xff86cb),ring(radius*.66,.025,0xd3b3ff)];
+  const ringRotation=wheelCarrier?halo.quaternion.clone():null;
   const orbitCount=32,orbitGeo=new THREE.BoxGeometry(.055,.055,.055),orbitMaterial=basic(0xffffff,.9);
   const orbit=new THREE.InstancedMesh(orbitGeo,orbitMaterial,orbitCount);orbit.visible=false;orbit.frustumCulled=false;group.add(orbit);
   const colors=[0xffe567,0xff79c9,0xc6a0ff,0x61e4a4,0xfff5d6];
@@ -48,12 +50,17 @@ export function createShowFX(THREE,scene,{wheel, wheelPivot,ball,door}) {
       halo.visible=outer.visible=spinning||winning;
       const e=spinning?.58+.18*Math.sin(time/145):Math.max(0,1-since/3300);
       halo.material.opacity=.7*e;outer.material.opacity=.5*e;
-      const wobble=spinning?.006*Math.sin(time/30):0;if(wheelPivot)wheelPivot.position.y=wheelRestY+(spinning? .055*Math.sin(time/37):0);halo.scale.setScalar(1+wobble);outer.scale.setScalar(1-wobble);
+      // The entire machine is now animated as one unit, including the ball.
+      // Never lift just the rotor (that detached the ball from its pocket).
+      if(wheelPivot)wheelPivot.position.y=wheelRestY;
+      const wobble=spinning?.006*Math.sin(time/30):0,radial=wheelCarrier?.scale.x??1;
+      if(wheelPoint){center.copy(wheelPoint(restCenter));for(const r of [halo,outer,launchWave]){r.position.copy(center);r.quaternion.copy(wheelCarrier.quaternion).multiply(ringRotation);}}
+      halo.scale.setScalar(radial*(1+wobble));outer.scale.setScalar(radial*(1-wobble));
       launchWave.visible=spinning&&spinAge>=0&&spinAge<900;
-      if(launchWave.visible){const p=spinAge/900;ringAt(launchWave,center);launchWave.scale.setScalar(.8+.55*p);launchWave.material.opacity=.75*(1-p);}
+      if(launchWave.visible){const p=spinAge/900;ringAt(launchWave,center);launchWave.scale.setScalar(radial*(.8+.55*p));launchWave.material.opacity=.75*(1-p);}
       orbit.visible=spinning||winning;
       if(orbit.visible){const age=spinning?spinAge:since;const fade=spinning?Math.min(1,Math.max(0,age/300)):Math.max(0,1-since/3300);orbitMaterial.opacity=.82*fade;
-        for(let i=0;i<orbitCount;i++){const a=i*Math.PI*2/orbitCount+time*.0032;const r=radius*(1.04+.06*Math.sin(time*.004+i*.55));const size=.55+.45*(.5+.5*Math.sin(i*.9-time*.012));matrix.position.set(center.x+Math.cos(a)*r,center.y+.04+.065*Math.sin(a*5+time*.008),center.z+Math.sin(a)*r);matrix.quaternion.identity();matrix.scale.setScalar(size*fade);matrix.updateMatrix();orbit.setMatrixAt(i,matrix.matrix);}orbit.instanceMatrix.needsUpdate=true;}
+        for(let i=0;i<orbitCount;i++){const a=i*Math.PI*2/orbitCount+time*.0032;const r=radius*(1.04+.06*Math.sin(time*.004+i*.55));const size=.55+.45*(.5+.5*Math.sin(i*.9-time*.012));matrix.position.set(restCenter.x+Math.cos(a)*r,restCenter.y+.04+.065*Math.sin(a*5+time*.008),restCenter.z+Math.sin(a)*r);if(wheelPoint)matrix.position.copy(wheelPoint(matrix.position));matrix.quaternion.identity();matrix.scale.setScalar(size*fade);matrix.updateMatrix();orbit.setMatrixAt(i,matrix.matrix);}orbit.instanceMatrix.needsUpdate=true;}
       if(spinning&&ball&&time-lastTrail>=16){lastTrail=time;ball.getWorldPosition(temp);trailPoints.unshift(temp.clone());trailPoints.length=Math.min(trailPoints.length,trailCount);}
       if(!spinning)trailPoints.length=0;
       trail.visible=trailPoints.length>1;trail.count=Math.max(0,trailPoints.length-1);

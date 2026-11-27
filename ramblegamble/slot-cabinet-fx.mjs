@@ -1,3 +1,4 @@
+import {createCartoonCueTrack,SLOT_CARTOON_CUES} from "./cartoon-cues.mjs?v=cartoon-machines-20261127-v1";
 // Presentation only: no game state, RNG, storage, or reel scheduling.
 const TAU = Math.PI * 2;
 const clamp = (n, a=0, b=1) => Math.max(a, Math.min(b,n));
@@ -92,22 +93,24 @@ export function createSlotCabinetFX(THREE,rig,model,{bayWidth,foley,random=Math.
   }
   function burst(time,count,force=1){for(let i=0;i<count;i++)emit(time+(i%3)*45,i%2?1:-1,i%3===2,force);}
   function stopSound(){if(!sounding)return;sounding=false;foley?.stop('slot-rattle');foley?.stop('slots');}
-  function stopRolling(){rolling=false;nextPuff=Infinity;stopSound();}
+  const cartoon=createCartoonCueTrack(foley,"slot-cartoon");
+  function stopRolling(){cartoon.clear();rolling=false;nextPuff=Infinity;stopSound();}
   function reset(){stopRolling();eligible=false;brake=-Infinity;crankImpact=0;kind='';carrier.position.copy(pivot);carrier.rotation.z=0;carrier.scale.set(1,1,1);carrier.updateMatrixWorld(true);for(const p of pool)p.sprite.visible=false;}
   function begin(time,action,{active=true,reduced=false}={}){
     reset();if(!active)return;eligible=true;
     const spin=action!=='tap';rolling=spin;started=time;kind=reduced?'':action;
     if(spin){sounding=true;foley?.start('slot-rattle','slotRattle',{loop:true,volume:action==='crank'?1:.78});foley?.start('slots','slotMelody',{loop:true,volume:.64});}
-    if(spin&&!reduced){burst(time,3,.75);nextPuff=time+200;}
+    if(spin&&!reduced){cartoon.begin(time,SLOT_CARTOON_CUES[action]);burst(time,3,.75);nextPuff=time+200;}
   }
   function result(time,won,{active=true,reduced=false,wasRolling=true}={}){
     stopRolling();if(!eligible||!active||reduced){reset();return;}eligible=false;
     if(!won&&!wasRolling)return;
-    kind=won?'win':'loss';started=time;burst(time,won?5:8,won?.85:1.25);
+    kind=won?'win':'loss';started=time;cartoon.begin(time,SLOT_CARTOON_CUES[kind]);burst(time,won?5:8,won?.85:1.25);
   }
   function update(time,{active,reduced}){
     if(!active){if(eligible||kind||rolling||sounding||pool.some(p=>p.sprite.visible))reset();return;}
-    if(reduced){if(!kind&&!pool.some(p=>p.sprite.visible))return;kind='';nextPuff=Infinity;for(const p of pool)p.sprite.visible=false;carrier.position.copy(pivot);carrier.rotation.z=0;carrier.scale.set(1,1,1);carrier.updateMatrixWorld(true);return;}
+    if(reduced){cartoon.clear();if(!kind&&!pool.some(p=>p.sprite.visible))return;kind='';nextPuff=Infinity;for(const p of pool)p.sprite.visible=false;carrier.position.copy(pivot);carrier.rotation.z=0;carrier.scale.set(1,1,1);carrier.updateMatrixWorld(true);return;}
+    cartoon.update(time);
     if(!kind&&!pool.some(p=>p.sprite.visible))return;
     const pose=fitCabinetPose(sampleCabinetPose(kind,time-started,{rolling:rolling&&Boolean(kind),brakeAge:time-brake}),{width:size.x,height:size.y,bayWidth});
     carrier.position.copy(pivot);carrier.position.x+=pose.x;carrier.position.y+=pose.y;carrier.rotation.z=pose.roll;carrier.scale.set(pose.sx,pose.sy,1);carrier.updateMatrixWorld(true);

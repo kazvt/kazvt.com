@@ -7,6 +7,7 @@ export function resolveArcadeShortcut(key) {
   if (shortcut === "4" || shortcut === "h") return "host";
   if (shortcut === "5") return "card-table";
   if (shortcut === "8") return "hazel";
+  if (shortcut === "9") return "smeemo-crowd";
   if (shortcut === "c") return "cheer";
   return "";
 }

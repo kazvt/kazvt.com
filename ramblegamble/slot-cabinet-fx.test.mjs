@@ -67,7 +67,7 @@ test('spin smoke rises and expands on both sides, caps allocation, stops on sett
  const first=initial[0],start=first.position.clone(),scale=first.scale.x;
  f.update(400);assert.ok(first.position.y>start.y&&first.scale.x>scale);assert.ok(first.material.opacity>0);assert.ok(f.puffs().some(p=>p.position.x>f.carrier.position.x));assert.ok(f.puffs().some(p=>p.position.x<f.carrier.position.x));
  for(let t=420;t<2100;t+=16){f.update(t);assert.ok(f.puffs().length<=36);}
- f.fx.stopRolling();assert.deepEqual(f.calls.map(c=>c.slice(0,2)),[['start','slot-rattle'],['start','slots'],['stop','slot-rattle'],['stop','slots']]);
+ f.fx.stopRolling();assert.deepEqual(f.calls.filter(c=>c[1]!=='slot-cartoon').map(c=>c.slice(0,2)),[['start','slot-rattle'],['start','slots'],['stop','slot-rattle'],['stop','slots']]);
  f.fx.result(2100,false);f.update(2320);assert.ok(f.puffs().length>0);f.update(4000);assert.equal(f.puffs().length,0);vec(f.model.localToWorld(f.sample.clone()),f.rest);
 });
 test('hide/lock/off-view cancellation, reduced motion, manual taps and stale outcomes are safe',()=>{
@@ -87,5 +87,5 @@ test('crank has a narrow tall windup and three distinct airborne arcs with decre
 test('crank landing emits a bounded additional soot burst without restarting recorded audio',()=>{
  const f=fixture();f.fx.begin(0,'crank');f.update(400);const before=f.puffs().length;f.update(410);
  assert.equal(f.puffs().length,before+5);f.update(420);assert.equal(f.puffs().length,before+5);
- assert.equal(f.calls.length,2);f.fx.reset();assert.equal(f.puffs().length,0);
+ assert.equal(f.calls.filter(c=>c[1]!=='slot-cartoon').length,2);assert.ok(f.calls.some(c=>c[1]==='slot-cartoon'&&c[2]==='cartoonClang'));f.fx.reset();assert.equal(f.puffs().length,0);
 });

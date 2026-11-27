@@ -20,10 +20,10 @@ let promptOpen=false;
 let access, booted=false, bootPromise=null, busy=false, locked=true, inertBefore=new Map();
 const isConsole=location.pathname.replace(/\/$/,'').endsWith('/console');
 const appModules=isConsole? ['/rg/console/console.js?v=player-stats-20261127-v1'] : [
-  '/ramblegamble/ramblegamble.js?v=crank-hop-20261127-v1',
-  '/ramblegamble/dice-mode.js?v=arrow-restored-20261127-v1',
-  '/ramblegamble/trivia-ui.js?v=compact-score-20261127-v1',
-  '/ramblegamble/card-games-ui.js?v=compact-score-20261127-v1',
+  '/ramblegamble/ramblegamble.js?v=cartoon-machines-20261127-v1',
+  '/ramblegamble/dice-mode.js?v=cartoon-machines-20261127-v1',
+  '/ramblegamble/trivia-ui.js?v=cartoon-machines-20261127-v1',
+  '/ramblegamble/card-games-ui.js?v=cartoon-machines-20261127-v1',
 ];
 function renderLockedGate({focus=false}={}) {
   const setup=access?.profile()===null;

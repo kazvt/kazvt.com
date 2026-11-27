@@ -90,3 +90,15 @@ Run `python3 ramblegamble/assets/sfx/install-smeemo-thunder.py` from the project
 | `foley/smeemo-thunder-westport.ogg` | [Thunder Claps.ogg — Jonathan Hunt (Interactii), 12 August 2016](https://commons.wikimedia.org/wiki/File:Thunder_Claps.ogg), [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Original SHA-1 `7a4b3422c73f34e96a614a8513e2896c5df5a908`; trim from 3.55 s near documented first clap, high-pass, fade, limit, Ogg encode. |
 
 The same foley mixer alternates recordings and varies playback rate slightly, replacing the preceding thunder voice rather than stacking unbounded claps. The existing recorded discovery scream remains separate. The clips need an actual in-game listening check after installation; no synthesized foley is included.
+
+### Cartoon mechanical accents (optional instrument downloads)
+
+Timed accents in Slots and Roulette use one replaceable voice per machine, at cue gains .11–.14 before the shared master. The existing spin loops, music, mute and gameplay settlement sounds remain independent. The new recordings are **not bundled**: network DNS blocked their retrieval. Until installed, the cues use the already bundled recorded latch, chip collisions, snare and dice impacts listed above. No synthesized sound or remote runtime audio URL is used.
+
+| Local output in `foley/` | Source | License |
+| --- | --- | --- |
+| `cartoon-jaw-harp.mp3` | [Cartoon Boing.wav — reelworldstudio](https://freesound.org/people/reelworldstudio/sounds/161122/) | CC0 |
+| `cartoon-cowbell.mp3` | [Cowbell_OS_3.aif — timgormly](https://freesound.org/people/timgormly/sounds/159758/) | CC0 |
+| `cartoon-vibraslap.mp3` | [Vibraslap 1_2 — Joao_Janz](https://freesound.org/people/Joao_Janz/sounds/482633/) | CC0 |
+
+Run `python3 ramblegamble/assets/sfx/install-foley.py` from the project root; existing valid audio is skipped. If the preview endpoint requires authentication, use a Freesound API token in the `FREESOUND_API_TOKEN` environment variable, or download the exact recordings above and convert them to the indicated MP3 filenames in a directory passed via `--recordings DIRECTORY`. Commit the resulting local assets. Check the actual instrument mix after installation; cue durations are bounded at playback. The existing fallback files were decoded during validation, not the unavailable new recordings.
