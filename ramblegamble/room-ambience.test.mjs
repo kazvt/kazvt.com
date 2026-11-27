@@ -43,7 +43,7 @@ test('cheer remains audible until emotion changes, suspense and shock duck the a
 test('VIP water has its own filter and gain, while all three crowd tracks become silent and pause',()=>{
  const f=fixture();f.sync(true,1,false,'cheer');f.sync(true,0,false,'cheer',.14,480);
  assert.deepEqual(f.gains.map(g=>g.value),[0,0,0,.22*.14]);assert.equal(f.filters[0].frequency.value,480);
- assert.equal(f.media[3].plays,1);assert.match(f.media[3].src,/vip-water-drips-cc0-loop\.ogg$/);
+ assert.equal(f.media[3].plays,1);assert.match(f.media[3].src,/vip-water-drips-cave-loop\.ogg$/);
  f.context.currentTime=1;f.sync(true,0,false,'cheer',1,3400);
  assert.ok(f.media.slice(0,3).every(m=>m.paused));assert.equal(f.filters[0].frequency.value,3400);assert.equal(f.gains[3].value,.22);assert.equal(f.media[3].plays,1);
  for(let i=0;i<100;i++)f.sync(true,0,false,'cheer',1,3400);
