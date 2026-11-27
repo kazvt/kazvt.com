@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {MENU_KARAOKE_CUES as cues,MENU_KARAOKE_DURATION as duration} from './menu-karaoke-cues.mjs';
-import {karaokeFrame,validateKaraokeCues,createMenuKaraoke} from './menu-karaoke.mjs';
+import {karaokeFrame,validateKaraokeCues,createMenuKaraoke,readKaraokeCalibration,validateKaraokeCalibration,KARAOKE_CALIBRATION_KEY} from './menu-karaoke.mjs';
 
 test('theme cue sheet has valid monotonic word timing and the entire supplied lyric in order',()=>{
  assert.equal(validateKaraokeCues(cues,duration),cues);assert.equal(cues[0].start,0);assert.equal(cues.at(-1).end,duration);assert.equal(cues.length,34);
@@ -39,4 +39,19 @@ test('the renderer is a safe optional feature and production menu uses existing 
  const no=createMenuKaraoke({root:null,menu:null,theme:null,doc:{},win:{}});no.update();no.hide();no.dispose();
  const html=readFileSync(new URL('../rg/index.html',import.meta.url),'utf8'),main=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8'),marquee=readFileSync(new URL('./menu-marquee.mjs',import.meta.url),'utf8');
  assert.match(html,/id="rg-menu-karaoke"[^>]*hidden/);assert.match(html,/menu-karaoke\.css\?v=menu-karaoke/);assert.match(main,/karaokeRoot:document.getElementById\("rg-menu-karaoke"\)/);assert.match(marquee,/theme\.pause\(\);karaoke\.hide\(\)/);assert.match(marquee,/karaoke\.update\(phase==='handoff'\|\|phase==='settled'\)/);assert.match(marquee,/stopTheme\(true\);karaoke\.dispose\(\)/);
+});
+
+test('revised final-mix acoustic anchor estimates are represented, with full lyric and duration invariants',()=>{
+ assert.equal(cues[1].words[0][1],1.81);assert.equal(cues[1].words[5][1],5.81);
+ assert.equal(cues[5].words[7][1],20.73);assert.equal(cues[17].words[7][1],62.47);
+ assert.ok(Math.abs((cues[17].words[7][1]-cues[5].words[7][1])-41.74)<.001);
+ assert.equal(cues[26].start,153.4);assert.equal(cues[27].start,159.67);
+});
+test('optional browser calibration is exact-recording scoped, validated, and fails safely',()=>{
+ assert.deepEqual(readKaraokeCalibration({}),cues);assert.deepEqual(readKaraokeCalibration({get localStorage(){throw Error('blocked')}}),cues);
+ const revised=structuredClone(cues);revised[1].words[0][2]=4.26;revised[1].words[1][1]=4.26;
+ const win={localStorage:{getItem:k=>{assert.equal(k,KARAOKE_CALIBRATION_KEY);return JSON.stringify(revised)}}};
+ assert.deepEqual(readKaraokeCalibration(win),revised);assert.equal(validateKaraokeCalibration(revised),revised);
+ revised[1].words[1][0]='different';assert.throws(()=>validateKaraokeCalibration(revised),/preserve/);assert.deepEqual(readKaraokeCalibration(win),cues);
+ revised[1].words[1][0]=cues[1].words[1][0];revised[1].words[1][1]=-1;assert.deepEqual(readKaraokeCalibration(win),cues);
 });

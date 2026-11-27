@@ -1,5 +1,5 @@
 import { createStageShowState } from './stage-show-state.mjs?v=smeemo-reveal-20261127-v1';
-import { curtainLayout, createCurtainProfile, curtainVertex } from './stage-curtain.mjs?v=all-curtain-20261127-v1';
+import { curtainLayout, createCurtainProfile, curtainVertex } from './stage-curtain.mjs?v=curtain-wind-20261128-v1';
 // Unlit GLTF art deliberately stays unlit outside a show. A world-space cone
 // mask illuminates the original texels rather than replacing all room materials.
 export function installStageLighting(THREE, roots, uniforms){
@@ -56,7 +56,7 @@ export function createStageShow(THREE,scene,{slotRig,slotsModel,roots,foley,onEm
   const temp=new THREE.Object3D(), up=new THREE.Vector3(0,1,0), delta=new THREE.Vector3();
   const confettiColors=[0xffe567,0xff76c9,0xc5a0ff,0x60e3a8,0xfff5d6];
   const pieces=Array.from({length:180},(_,i)=>{const a=i*2.39996323;const r=.4+((i*37)%101)/101*2;confetti.setColorAt(i,new THREE.Color(confettiColors[i%5]));return {a,r,vy:1.1+((i*71)%97)/97*2.1,spin:1+((i*19)%17)/5,phase:i*.45};});
-  let burst=null,lastTime=0,lightTarget=null,lastPose=-1,lastTravel=-1,lastClothPose=-1,wasActive=true;
+  let burst=null,lastTime=0,lightTarget=null,lastTravel=-1,lastClothPose=-1,lastClothTime=NaN,lastClothWind=false,wasActive=true;
   function cue(name){
     if(name==='stop-roll'){foley.stop('stage-roll');return;}
     if(name==='roll'){foley.stop('stage-hit');foley.stop('stage-cheer');foley.start('stage-roll','stageDrumRoll',{maxDelay:450});onEmotion('suspense');return;}
@@ -67,25 +67,25 @@ export function createStageShow(THREE,scene,{slotRig,slotsModel,roots,foley,onEm
     }
   }
   const state=createStageShowState({cue});
-  function updateCurtains(p,travel,time){
-    slotRig.position.copy(base);slotRig.position.z-=retract*(1-travel);slotRig.updateMatrixWorld(true);
+  function updateCurtains(p,travel,time,wind=true){
+    if(travel!==lastTravel){slotRig.position.copy(base);slotRig.position.z-=retract*(1-travel);slotRig.updateMatrixWorld(true);lastTravel=travel;}
     // Only hide after BOTH the cabinet and the cloth reach the closed pose.
     // Opening begins with the fully recessed cabinet already visible.
     slotsModel.visible=p>0||travel>0;
-    if(p===lastClothPose&&(p===0||p===1))return;
-    lastClothPose=p;
+    if(p===lastClothPose&&wind===lastClothWind&&(!wind||time===lastClothTime))return;
+    lastClothPose=p;lastClothTime=time;lastClothWind=wind;
     for(const {mesh,side,colors} of curtains){
       const pos=mesh.geometry.attributes.position;
       for(let i=0;i<pos.count;i++){
         const u=(i%(segments+1))/segments,v=Math.floor(i/(segments+1))/rows;
-        const {x,y,z,shade}=curtainVertex(profile,side,u,v,p,time);
+        const {x,y,z,shade}=curtainVertex(profile,side,u,v,p,time,wind);
         pos.setXYZ(i,x,y,z);colors[i*3]=colors[i*3+1]=colors[i*3+2]=shade;
       }
-      pos.needsUpdate=true;mesh.geometry.attributes.color.needsUpdate=true;mesh.geometry.computeBoundingSphere();
+      pos.needsUpdate=true;mesh.geometry.attributes.color.needsUpdate=true;mesh.geometry.computeBoundingSphere();if(mesh.geometry.boundingBox)mesh.geometry.computeBoundingBox();
     }
   }
   function slot(open,time){lastTime=time;
-    if(!state.cabinet(open,time,reduced())){if(reduced()){const s=state.step(time);updateCurtains(s.curtain,s.travel,time);}return;}
+    if(!state.cabinet(open,time,reduced())){if(reduced()){const s=state.step(time);updateCurtains(s.curtain,s.travel,time,false);}return;}
     if(open){lightTarget=center.clone();state.begin(center,time,'slot');}
     else {lightTarget=center.clone();state.hide(center,time);}
   }
@@ -95,7 +95,11 @@ export function createStageShow(THREE,scene,{slotRig,slotsModel,roots,foley,onEm
     wasActive=true;
     group.visible=true;
     const s=state.step(state.owner==='silent'&&!state.busy?Math.floor(time/100)*100:time);
-    if(s.curtain!==lastPose||s.travel!==lastTravel||s.busy){updateCurtains(s.curtain,s.travel,time);lastPose=s.curtain;lastTravel=s.travel;}
+    // Keep the existing full-rate traveler; idle ripples need only 30 Hz (10 Hz
+    // during the existing horror lighting mode). Geometry, not a shader-only
+    // offset, is updated so pointer occlusion and raycasts see the actual cloth.
+    const clothTime=s.busy?time:Math.floor(time/(s.owner==='silent'?100:1000/30))*(s.owner==='silent'?100:1000/30);
+    updateCurtains(s.curtain,s.travel,clothTime);
     const horror=s.owner==='silent';
     const lightTime=horror?Math.floor(time/100)*100:time;
     uniforms.rgShow.value=s.strength;
@@ -116,7 +120,7 @@ export function createStageShow(THREE,scene,{slotRig,slotsModel,roots,foley,onEm
       if(confetti.visible){for(let i=0;i<pieces.length;i++){const p=pieces[i],t=Math.max(0,age-(i%6)*.025);temp.position.set(burst.at.x+Math.cos(p.a)*p.r*t,burst.at.y+.55+p.vy*t-1.75*t*t,burst.at.z+Math.sin(p.a)*p.r*t+.5);temp.rotation.set(p.phase+t*p.spin,t*p.spin*1.3,p.a+t*p.spin);temp.scale.setScalar(t>0?Math.min(1,(2.4-age)*2.5):0);temp.updateMatrix();confetti.setMatrixAt(i,temp.matrix);}confetti.instanceMatrix.needsUpdate=true;}else burst=null;
     }else confetti.visible=false;
   }
-  function reset(open){state.reset(open);foley.stop('stage-hit');foley.stop('stage-cheer');burst=null;confetti.visible=false;lightTarget=null;restoreLighting();for(const b of beams)b.visible=false;const s=state.step(lastTime);updateCurtains(s.curtain,s.travel,lastTime);lastPose=s.curtain;lastTravel=s.travel;}
+  function reset(open){state.reset(open);foley.stop('stage-hit');foley.stop('stage-cheer');burst=null;confetti.visible=false;lightTarget=null;restoreLighting();for(const b of beams)b.visible=false;const s=state.step(lastTime);updateCurtains(s.curtain,s.travel,lastTime,false);}
   function toggle(point,time){lastTime=time;lightTarget=new THREE.Vector3(point.x,point.y,point.z);return state.toggle(point,time,reduced());}
   function dismiss(time){lastTime=time;return state.dismiss(time);}
   // Hard blackout for camera travel: unlike dismiss(), this does not leave a

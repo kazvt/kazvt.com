@@ -1,5 +1,17 @@
-import {MENU_KARAOKE_CUES} from './menu-karaoke-cues.mjs?v=menu-karaoke-20261128-v1';
+import {MENU_KARAOKE_CUES} from './menu-karaoke-cues.mjs?v=curtain-karaoke-20261128-v1';
 
+// Per-recording opt-in calibration. Never read a correction for a different
+// mix or accept changed lyric text/sections. Storage may be blocked in private mode.
+export const KARAOKE_CALIBRATION_KEY='rg.menu-karaoke.calibration.7485aa4feaf5557e2688b1ecf4fe448d96ec7e33d2388842096cd4d319258ec5.v2';
+export function validateKaraokeCalibration(cues){
+  validateKaraokeCues(cues);
+  if(cues.length!==MENU_KARAOKE_CUES.length||cues.some((c,i)=>c.section!==MENU_KARAOKE_CUES[i].section||c.words.length!==MENU_KARAOKE_CUES[i].words.length||c.words.some((w,j)=>w[0]!==MENU_KARAOKE_CUES[i].words[j][0])))throw new Error('Calibration must preserve the supplied lyrics and sections');
+  return cues;
+}
+export function readKaraokeCalibration(win){
+  try{const value=win?.localStorage?.getItem(KARAOKE_CALIBRATION_KEY);if(value)return validateKaraokeCalibration(JSON.parse(value));}catch{}
+  return MENU_KARAOKE_CUES;
+}
 const clamp = x => Math.max(0, Math.min(1, x));
 const noop=()=>({update(){},hide(){},dispose(){}});
 const colors = ['#ffe68c','#ff8ee4','#93f8dc','#bda4ff','#ffd2ad'];
@@ -29,8 +41,9 @@ export function karaokeFrame(time,cues=MENU_KARAOKE_CUES) {
   const progress=word<0?0:clamp((time-cue.words[word][1])/(cue.words[word][2]-cue.words[word][1]));
   return {index,word,progress};
 }
-export function createMenuKaraoke({root,menu,theme,doc=document,win=window,cues=MENU_KARAOKE_CUES}) {
+export function createMenuKaraoke({root,menu,theme,doc=document,win=window,cues}) {
   if(!root) return noop();
+  cues??=readKaraokeCalibration(win);
   try{validateKaraokeCues(cues);}catch(error){console.warn("Menu karaoke cues unavailable",error);root.hidden=true;return noop();}
   const lead=root.querySelector('.rg-karaoke-lead'),back=root.querySelector('.rg-karaoke-response'),next=root.querySelector('.rg-karaoke-next'),particles=root.querySelector('.rg-karaoke-particles'),bar=root.querySelector('.rg-karaoke-progress'),label=root.querySelector('.rg-karaoke-label');
   if(!lead||!back||!next||!particles||!bar||!label){root.hidden=true;return noop();}

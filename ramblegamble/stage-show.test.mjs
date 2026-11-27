@@ -32,3 +32,13 @@ test('reduced-motion open and close repeatedly restore the correct cloth vertice
  const x=()=>show.curtains[0].geometry.attributes.position.values[84][0];const closed=x();
  show.update(0,true,false);for(let i=0;i<5;i++){show.slot(true,i*100+1);show.update(i*100+2,true,true);assert.ok(slotsModel.visible);assert.ok(x()<closed-1);show.slot(false,i*100+3);show.update(i*100+4,true,false);assert.equal(x(),closed);assert.equal(slotsModel.visible,false);}
 });
+
+test('idle wind updates both endpoint meshes, not cabinet travel; suspend, reset and reduced motion freeze wind',()=>{
+ const scene=new Obj(),slotRig=new Obj(),slotsModel=new Mesh(new Geo(),new Mat({}));scene.add(slotRig);slotRig.add(slotsModel);let reduced=false,rigUpdates=0;slotRig.updateMatrixWorld=()=>rigUpdates++;
+ const show=createStageShow(THREE,scene,{slotRig,slotsModel,roots:[slotsModel],foley:{start(){},stop(){}},reduced:()=>reduced});
+ const pos=()=>show.curtains[0].geometry.attributes.position.values[18*85+42].slice();
+ show.update(100,true,false);const a=pos(),n=rigUpdates;show.update(110,true,false);assert.deepEqual(pos(),a);show.update(900,true,false);assert.notEqual(pos()[2],a[2]);assert.equal(rigUpdates,n);assert.equal(slotsModel.visible,false);
+ show.slot(true,1000);show.update(5000,true,true);const b=pos(),m=rigUpdates;show.update(6100,true,true);assert.notEqual(pos()[2],b[2]);assert.equal(rigUpdates,m);assert.equal(slotsModel.visible,true);
+ reduced=true;show.update(6200,true,true);const c=pos();show.update(9000,true,true);assert.deepEqual(pos(),c);reduced=false;show.update(9100,true,true);assert.notDeepEqual(pos(),c);
+ show.update(9200,false,true);const d=pos();show.update(10000,false,true);assert.deepEqual(pos(),d);show.update(11000,true,true);assert.notDeepEqual(pos(),d);show.dispose();
+});

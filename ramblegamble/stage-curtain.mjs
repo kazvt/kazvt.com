@@ -24,7 +24,7 @@ export function createCurtainProfile(layout){
 // u = fixed material coordinate from the anchored outer edge to the leading
 // edge; v = vertical coordinate, 0 at the track. Gravity leaves the bottom
 // a little fuller, while bounded travelling wrinkles run down the cloth.
-export function curtainVertex(profile,side,u,v,open,time=0){
+export function curtainVertex(profile,side,u,v,open,time=0,wind=true){
  const l=profile.layout,p=clamp(open),moving=Math.sin(Math.PI*p), local=clamp(p-.12*moving*v**1.3);
  const width=l.closedWidth+(l.stack-l.closedWidth)*local;
  const wave=.62*moving*Math.sin(Math.PI*u)*Math.sin(time*.007-v*6.5+u*3+side*.7);
@@ -36,9 +36,14 @@ export function curtainVertex(profile,side,u,v,open,time=0){
  const seamOffset=side===1?.022*smooth((u-.8)/.2):0;
  const flutter=.018*moving*Math.sin(Math.PI*u)*Math.sin(time*.009-v*8+side)*v;
  const y=l.height*(1-v)+.026*moving*Math.sin(u*Math.PI)*v**5;
- const z=depth-outerReturn+seamOffset+flutter;
+ // Ambient wind is separate from the traveler. It bends only in depth,
+ // leaves both lateral edges and the track pinned, and weakens as cloth gathers.
+ // Two non-harmonic traveling waves avoid a perfectly repetitive rigid sway.
+ const strength=wind?(.044-.024*p)*Math.sin(Math.PI*u)*v**1.6:0;
+ const gust=strength*(.68*Math.sin(time*.00165-u*5.4-v*3.3+side*.67)+.32*Math.sin(time*.00271+u*3.1-v*6.2+side*1.1));
+ const z=depth-outerReturn+seamOffset+flutter+gust;
  // Texture remains attached to material coordinates; fold shading is based
  // on its slope so the fabric has depth even with the original unlit art.
- const shade=.54+.44*(.5+.5*Math.sin(phase+.48));
+ const shade=.54+.44*(.5+.5*Math.sin(phase+.48+gust*5));
  return {x,y,z,shade};
 }
