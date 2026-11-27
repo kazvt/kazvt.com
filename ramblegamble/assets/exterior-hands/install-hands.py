@@ -28,7 +28,7 @@ def read_asset(name, url, folder):
         with (folder / name).open('rb') as stream:
             data = stream.read(MAX_BYTES+1)
     else:
-        req = urllib.request.Request(url, headers={'User-Agent':'RambleGambleAssetInstaller/1.0 (offline asset preparation)'})
+        req = urllib.request.Request(url, headers={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 RambleGambleAssetInstaller/1.0'})
         with urllib.request.urlopen(req, timeout=45) as stream:
             data = stream.read(MAX_BYTES+1)
     if len(data)>MAX_BYTES:
