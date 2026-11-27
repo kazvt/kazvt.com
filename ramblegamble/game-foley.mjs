@@ -1,6 +1,6 @@
 // Recorded samples only. This module never generates an oscillator/noise signal.
 // All assets are same-origin, installed by assets/sfx/install-foley.py.
-import { createRoomAmbience } from "./room-ambience.mjs?v=vip-atmosphere-20261127-v1";
+import { createRoomAmbience } from "./room-ambience.mjs?v=vip-water-gain-20261127-v1";
 const ROOT = new URL("./assets/sfx/foley/", import.meta.url);
 export const FOLEY_CUES = Object.freeze({
   switch: { files: ["switch.mp3"], fallback: ["click-1.ogg"], volume: .44 },

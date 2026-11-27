@@ -3,7 +3,7 @@ import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { showBurst } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 // Console uses the private read-only renderer without installing audio listeners.
 const foley = globalThis.location?.pathname?.replace(/\/$/, '') === '/rg/console'
- ? {play(){}} : (await import('./game-foley.mjs?v=neon-focus-20261127-v1')).foley;
+ ? {play(){}} : (await import('./game-foley.mjs?v=vip-water-gain-20261127-v1')).foley;
 import { snapComposePlacement } from './compose-placement.mjs';
 import { CHOICE_MODES, publicMedia, validTriviaAnswer, MAX_TRIVIA_ANSWER, answerSummary, NUMERIC_MODES, numericProgress } from './live-trivia.mjs?v=match-number-20261127-v1';
 const node=(tag,cls='',text='')=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text)e.textContent=text;return e;};

@@ -6,7 +6,7 @@ import { renderLiveQuestion, renderTriviaResponses, createTriviaSpectator, SPECT
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
 import { readCardGames, subscribeCardGames } from "./card-games-store.mjs?v=show-stage-20261126-v1";
 import { removeSlotSymbol } from "./slot-game.mjs?v=host-cell-cards-20261127-v1";
-import { foley } from "./game-foley.mjs?v=neon-focus-20261127-v1";
+import { foley } from "./game-foley.mjs?v=vip-water-gain-20261127-v1";
 import {
   MODE_NAMES,
   ROUND_IDS,
