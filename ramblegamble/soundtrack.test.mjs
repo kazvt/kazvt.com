@@ -87,6 +87,7 @@ test('actual main scene card mode events switch music even without camera moveme
   context.diceModeOpen=true;activate('smeemo');assert.equal(context.pendingCardGameMode,'smeemo');assert.equal(calls.at(-1),'rg:close-dice-mode');
 });
 test('host lifecycle stops music before intro, resumes only after intro is paused, and cleans up independently of Foley',()=>{
+  assert.match(js,/soundtrack\.mjs\?v=smeemo-theme-20261127-v2/);
   const menu=section('  function showPauseMenu() {','  function activateTriviaMode()');
   assert.ok(menu.indexOf('syncMusic();')<menu.indexOf('menuPresentation.sync();'));
   assert.ok(menu.lastIndexOf('menuPresentation.sync();')<menu.lastIndexOf('syncMusic(true);'));
