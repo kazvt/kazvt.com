@@ -1,0 +1,116 @@
+/* Private contestant route only. Decorative layers never transform the form,
+   artboard, question media or their coordinate space. Original box sizes stay. */
+.rg-player-stage {
+  --seat: #b597ff; --seat-rgb: 181,151,255; --seat-deep: #593d8b;
+  --gold: #ffe18a; --ink: #160e30;
+  background: #130d2b;
+}
+.rg-player-stage:has(#berry:not([hidden])[src$="/faroeberry.png"]) { --seat: #58ed9d; --seat-rgb: 88,237,157; --seat-deep: #246b55; }
+.rg-player-stage:has(#berry:not([hidden])[src$="/erinberry.png"]) { --seat: #c5a1ff; --seat-rgb: 197,161,255; --seat-deep: #694398; }
+.rg-player-stage:has(#berry:not([hidden])[src$="/kazberry.png"]) { --seat: #ffdc65; --seat-rgb: 255,220,101; --seat-deep: #8d592c; }
+.rg-player-scenery { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; user-select: none;
+  background: radial-gradient(ellipse at 50% 8%, rgba(var(--seat-rgb),.25), transparent 45%), radial-gradient(ellipse at 50% 8%, #67448b 0%, #302151 38%, #130d2b 76%); }
+.rg-player-scenery > span { position: absolute; display: block; pointer-events: none; }
+.rg-player-scenery .rg-player-lights { inset: -12%;
+  background: conic-gradient(from 180deg at 50% 7%, transparent 0deg, rgba(var(--seat-rgb),.32) 18deg, transparent 36deg, #d56dca48 64deg, transparent 85deg, transparent 275deg, #e3ba544a 300deg, transparent 330deg, rgba(var(--seat-rgb),.2) 350deg, transparent 360deg);
+  transform-origin: 50% 7%; animation: rg-player-lights 12s ease-in-out infinite alternate; }
+.rg-player-scenery .rg-player-stars { inset: -24px;
+  background-image: radial-gradient(circle, #ffedb6 1px, transparent 1.8px), radial-gradient(circle, var(--seat) 1px, transparent 1.7px), radial-gradient(circle, #e6b3ff 1.5px, transparent 2.2px);
+  background-size: 113px 91px, 73px 137px, 191px 173px; background-position: 13px 27px, 34px 8px, 2px 61px;
+  opacity: .5; animation: rg-player-stars 19s ease-in-out infinite alternate; }
+.rg-player-scenery .rg-player-orbit { width: min(116vw,1060px); aspect-ratio: 1; left: 50%; top: 4%;
+  border: 1px solid rgba(var(--seat-rgb),.28); border-radius: 50%;
+  box-shadow: 0 0 0 30px #ffdf7410, 0 0 0 32px #ffdf7438, 0 0 0 80px #b77beb13, inset 0 0 50px rgba(var(--seat-rgb),.1);
+  background: repeating-conic-gradient(from 0deg, transparent 0 7deg,#f7d88d45 7deg 7.6deg,transparent 7.6deg 15deg);
+  /* Restrict the rays to an outer ring, like a roulette dial. */
+  -webkit-mask-image: radial-gradient(transparent 0 61%,#000 62% 72%,transparent 73%);
+  mask-image: radial-gradient(transparent 0 61%,#000 62% 72%,transparent 73%);
+  transform: translate(-50%,-12%) rotate(0); animation: rg-player-orbit 64s linear infinite; }
+.rg-player-scenery .rg-player-floor { left: -50%; width: 200%; height: 112%; bottom: -53%;
+  background: repeating-linear-gradient(90deg, #b77beb42 0 1px,transparent 1px 74px), repeating-linear-gradient(0deg, #b77beb42 0 1px,transparent 1px 74px), conic-gradient(from 90deg,#261a45 25%,#39295d 0 50%,#261a45 0 75%,#39295d 0) 0 0/148px 148px;
+  transform-origin: 50% 0; transform: perspective(1800px) rotateX(54deg);
+  -webkit-mask-image: linear-gradient(transparent,#000 30%); mask-image: linear-gradient(transparent,#000 30%); }
+.rg-player-scenery .rg-player-glow { left: 50%; bottom: -25%; width: min(120vw,1100px); height: 65%;
+  background: radial-gradient(ellipse,rgba(var(--seat-rgb),.32),transparent 67%);
+  transform: translateX(-50%); animation: rg-player-glow 7s ease-in-out infinite alternate; }
+.rg-player-scenery .rg-player-rail { inset: 0; background: linear-gradient(90deg,#100a24b0,transparent 12% 88%,#100a24b0); }
+.rg-player-stage > main { position: relative; z-index: 1;
+  border-color: var(--seat); background: linear-gradient(150deg,#49366c 0%,#30234f 32%,#211735 100%);
+  box-shadow: inset 0 0 0 1px #ffdf7a50,inset 0 1px 0 #fff4cf99, 0 5px 0 #51326d,0 8px 0 #180e2d,0 15px 35px #09051bbc,0 0 40px rgba(var(--seat-rgb),.20); }
+.rg-player-stage > main::before { content: ''; position: absolute; inset: -2px; pointer-events: none;
+  background: linear-gradient(var(--gold),var(--gold)) left top/24px 2px,linear-gradient(var(--gold),var(--gold)) left top/2px 24px,linear-gradient(var(--gold),var(--gold)) right top/24px 2px,linear-gradient(var(--gold),var(--gold)) right top/2px 24px,linear-gradient(var(--gold),var(--gold)) left bottom/24px 2px,linear-gradient(var(--gold),var(--gold)) left bottom/2px 24px,linear-gradient(var(--gold),var(--gold)) right bottom/24px 2px,linear-gradient(var(--gold),var(--gold)) right bottom/2px 24px; background-repeat: no-repeat; }
+/* Pixel-like gold bulb tracks outside the card, no extra space or hit areas. */
+.rg-player-stage > main::after { content:''; position:absolute; inset:-7px -6px; pointer-events:none;
+  background: radial-gradient(circle,#fff2b1 0 1px,#d09c4d 1.3px 2px,transparent 2.5px) left top/18px 6px repeat-x,
+              radial-gradient(circle,#fff2b1 0 1px,#d09c4d 1.3px 2px,transparent 2.5px) left bottom/18px 6px repeat-x;
+  opacity:.75; animation:rg-player-bulbs 4.6s ease-in-out infinite alternate; }
+.rg-player-stage main header { position: relative; }
+.rg-player-stage main header::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse at 24px 50%,rgba(var(--seat-rgb),.36),transparent 100px),linear-gradient(90deg,var(--seat),#ffdf7500) left bottom/70% 1px no-repeat;
+  opacity: .85; }
+.rg-player-stage #berry { position: relative; filter: drop-shadow(0 4px 0 #130b2c) drop-shadow(0 0 7px rgba(var(--seat-rgb),.8));
+  transform-origin: 50% 65%; animation: rg-player-berry 3.8s ease-in-out infinite; }
+.rg-player-stage #player { position: relative; color: var(--seat); overflow-wrap: anywhere; min-width: 0;
+  text-shadow: 0 -1px #fff1d1,1px 1px var(--seat-deep),2px 2px var(--seat-deep),3px 3px #1d123a,4px 4px #1d123a,0 0 15px rgba(var(--seat-rgb),.5); animation:rg-player-title 4s ease-in-out infinite; }
+.rg-player-stage #player::after { content:''; position:absolute; left:0; bottom:-2px; width:100%; height:2px; pointer-events:none;
+  background: linear-gradient(90deg,transparent,var(--seat),#fff3be,transparent); transform-origin:left; animation:rg-player-name 4s ease-in-out infinite; }
+.rg-player-stage #mode { text-shadow: 0 2px #8d5429,0 4px #190f2e; }
+.rg-player-stage #prompt { background: linear-gradient(145deg,#f1e6ff,#d9d1ff); box-shadow: inset 0 2px #fff9e6,0 4px #19102f; }
+.rg-player-stage :is(input:not([type=checkbox]):not([type=radio]),textarea,select) { box-shadow: inset 0 2px 5px #25153c33; }
+/* Preserve the original primary red, secondary lavender, and selected mint semantics. */
+.rg-player-stage main button { position: relative; background-image: linear-gradient(180deg,#ffffff24,transparent 42%,#190d2d24); border-top-color:#fff0ce; border-bottom-color:#58376d;
+  box-shadow: inset 0 1px #ffffff66,0 3px #170e2e,0 4px 0 #a982c7,0 6px 8px #10091c80;
+  transition: transform 150ms cubic-bezier(.2,.8,.2,1); }
+.rg-player-stage main button.rg-live-button { border-top-color:#e0d6ff; border-bottom-color:#514187; }
+.rg-player-stage main button[aria-pressed=true] { background-color:#d6d1ff; box-shadow:inset 0 0 0 2px #5cf0b2,0 3px #23634c,0 5px #170e2e; }
+.rg-player-stage main button:not(:disabled)::after { content:''; position:absolute; inset:2px; pointer-events:none;
+  background: linear-gradient(110deg,transparent 28%,#ffffff32 49%,transparent 70%); opacity:0; }
+.rg-player-stage main :is(#submit,#trivia-player-content > button.rg-live-button):not(:disabled)::after { animation:rg-player-primary-glint 7s ease-in-out infinite; }
+.rg-player-stage main button:disabled { opacity:.5; cursor:default; box-shadow:inset 0 2px #170e2e44; }
+@media (hover:hover) and (pointer:fine) {
+  .rg-player-stage main button:not(:disabled):hover { transform:translateY(-1px); }
+  .rg-player-stage main button:not(:disabled):hover::after,
+  .rg-player-stage main :is(#submit,#trivia-player-content > button.rg-live-button):not(:disabled):hover::after { animation:rg-player-sheen .55s ease-out; }
+  .rg-player-stage main .evidence:hover { border-color:var(--seat); }
+}
+.rg-player-stage main button:not(:disabled):active { transform:translateY(2px); box-shadow:inset 0 2px 5px #170e2e55,0 1px #170e2e; }
+.rg-player-stage main :is(button, input, textarea, select):focus-visible { outline:3px solid #ffdf75; outline-offset:3px; }
+.rg-player-stage main button[aria-pressed=true]:focus-visible { outline:3px solid #ffdf75; outline-offset:3px; }
+.rg-player-stage main .evidence { background:linear-gradient(145deg,#fff8df,#e3dac0); box-shadow:inset 0 1px #fff,0 3px #1a102e; }
+.rg-player-stage main .evidence:has(input:checked) { border-color:#49db91; box-shadow:0 0 0 2px #49db91,0 4px #174b39; }
+.rg-player-stage main .evidence:focus-within { outline:3px solid #ffdf75; outline-offset:3px; }
+/* Keep numeric feedback and artwork unmodified; inert tiles gain relief. */
+.rg-player-stage main div.rg-live-tile { box-shadow:inset 0 1px #fff7,0 2px #170e2e; }
+.rg-player-stage main .rg-live-saved-choice { outline:3px solid #5cf0b2; outline-offset:-3px; }
+/* Keep the original page's control positions. The optional motion toggle is a
+   separate footer, never inside the round/form or over a game target. */
+.rg-player-stage > .rg-player-motion { position:relative; z-index:1; display:block; width:max-content; max-width:calc(100% - 24px); margin:0 auto 20px; min-height:44px;
+  background:#24183c; color:#fff1cc; border:1px solid var(--seat); box-shadow:0 3px #100a24; font-size:12px; }
+.rg-player-stage .rg-player-cursor { position:fixed; z-index:2; pointer-events:none; top:0;left:0; width:24px;height:24px; opacity:0;
+  border:1px solid var(--seat); border-radius:50%; box-shadow:0 0 10px rgba(var(--seat-rgb),.65),inset 0 0 5px rgba(var(--seat-rgb),.3); }
+.rg-player-stage .rg-player-cursor.is-visible { opacity:.8; }
+@keyframes rg-player-lights { from{transform:rotate(-9deg)} to{transform:rotate(9deg)} }
+@keyframes rg-player-stars { from{transform:translate(-8px,-12px);opacity:.38} to{transform:translate(10px,12px);opacity:.66} }
+@keyframes rg-player-orbit { from{transform:translate(-50%,-12%) rotate(0)} to{transform:translate(-50%,-12%) rotate(360deg)} }
+@keyframes rg-player-glow { from{transform:translateX(-50%) scale(.92);opacity:.55} to{transform:translateX(-50%) scale(1.1);opacity:.9} }
+@keyframes rg-player-berry { 0%,100%{transform:perspective(200px) translateY(0) rotateY(-9deg) rotate(-3deg)} 50%{transform:perspective(200px) translateY(-4px) rotateY(9deg) rotate(3deg)} }
+@keyframes rg-player-name { 0%,100%{transform:scaleX(.35);opacity:.45} 50%{transform:scaleX(1);opacity:1} }
+@keyframes rg-player-bulbs { from{opacity:.42} to{opacity:.95} }
+@keyframes rg-player-title { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-1.5px)} }
+@keyframes rg-player-primary-glint { 0%,70%,100%{opacity:0} 82%{opacity:.6} 92%{opacity:0} }
+@keyframes rg-player-sheen { 0%{opacity:0} 40%{opacity:.65} 100%{opacity:0} }
+/* Disable both this skin and pre-existing question-deal motion on request. */
+.rg-player-stage:not([data-motion=on]) .rg-player-scenery > span,.rg-player-stage:not([data-motion=on]) > main::after { animation:none!important; }
+.rg-player-stage:not([data-motion=on]) main *, .rg-player-stage:not([data-motion=on]) main *::after { animation:none!important; transition:none!important; }
+.rg-player-stage:not([data-motion=on]) main button { transform:none!important; }
+.rg-player-stage:not([data-motion=on]) .rg-player-cursor { display:none; }
+@media(prefers-reduced-motion:reduce) {
+  .rg-player-stage .rg-player-scenery > span,.rg-player-stage > main::after,.rg-player-stage main *, .rg-player-stage main *::after { animation:none!important; transition:none!important; }
+  .rg-player-stage main button { transform:none!important; }
+  .rg-player-stage .rg-player-cursor { display:none; }
+}
+@media(forced-colors:active) {
+  .rg-player-stage .rg-player-scenery,.rg-player-stage .rg-player-cursor,.rg-player-stage main::before,.rg-player-stage main::after,.rg-player-stage header::before,.rg-player-stage #player::after { display:none; }
+  .rg-player-stage main,.rg-player-stage main button,.rg-player-stage #player { box-shadow:none;text-shadow:none; }
+  .rg-player-stage main button[aria-pressed=true],.rg-player-stage main .evidence:has(input:checked) { outline:3px solid Highlight;outline-offset:-3px; }
+}
