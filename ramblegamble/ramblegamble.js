@@ -1,3 +1,4 @@
+import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=balcony-music-20261127-v1";
 import { createMenuMarquee } from "./menu-marquee.mjs?v=marquee-crossfade-20261127-v1";
 import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=hazel-balcony-20261127-v1";
 import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcony.mjs?v=hazel-balcony-20261127-v1";
@@ -223,6 +224,19 @@ import {
   let overviewCameraBounds = null;
   let pendingCardGameMode = "";
   let pendingTrivia = false;
+  let cardMusicMode = "";
+  const soundtrack = createSoundtrack();
+  function syncMusic(retry = false) {
+    soundtrack.sync(soundtrackFor({
+      active: gameStarted && sceneReady && !pauseMenuOpen && !document.hidden && !document.documentElement.hasAttribute("data-rg-host-locked"),
+      muted: foley.muted, dice: diceModeOpen, view: currentView.kind, cardMode: cardMusicMode,
+    }), { retry });
+  }
+  for (const type of ["pointerdown", "keydown", "click"]) document.addEventListener(type, event => {
+    if (event.isTrusted) syncMusic(true);
+  }, { capture: true, passive: true });
+  document.getElementById("rg-foley-enabled")?.addEventListener("change", () => syncMusic(true));
+  new MutationObserver(() => syncMusic()).observe(document.documentElement, { attributes: true, attributeFilter: ["data-rg-host-locked"] });
   const triviaLayer = document.getElementById("rg-live-trivia");
   let skyRandomState = 0x4b415a56;
 
@@ -1266,9 +1280,9 @@ import {
   }
 
   function getCameraPoseForView(view, aspect) {
-    if (view.kind === "hazel" && hazelBillboard) {
+    if (view.kind === "hazel") {
       const [yawCap,pitchCap]=focusLimits(view.kind);
-      const frame=hazelCameraFrame(hazelBillboard,aspect,camera.fov,camera.near,yawCap,pitchCap);
+      const frame=hazelCameraFrame(hazelBillboard ?? hazelBalconyPose(),aspect,camera.fov,camera.near,yawCap,pitchCap);
       return {target:new THREE.Vector3().copy(frame.target),position:new THREE.Vector3().copy(frame.position)};
     }
     if (view.kind === "trivia") {
@@ -1484,6 +1498,7 @@ import {
     if(viewChanged&&!immediate&&sceneReady){preview.dataset.showArrival=nextView.kind;preview.classList.remove("rg-show-arrival");void preview.offsetWidth;preview.classList.add("rg-show-arrival");if(nextView.kind==="overview"&&!closingSlot)crowdState.react("idle",crowdClock);}
     if (!immediate && sceneReady && (currentView.kind !== nextView.kind || currentView.look !== (nextView.look ?? 0) || currentView.contestantId !== nextView.contestantId)) foley.play(nextView.kind === "overview" ? "back" : "navigate");
     currentView = { ...nextView, look: nextView.kind === "overview" ? nextView.look ?? 0 : 0 };
+    syncMusic();
     focusOrbit.reset(currentView.kind);
     focusDrag?.reset();
     const pose = getCameraPoseForView(currentView, camera.aspect);
@@ -1931,8 +1946,14 @@ import {
 
   function setupHazelBillboard() {
     const pose=hazelBalconyPose();
-    hazelBillboard={...HAZEL_SOURCE,...pose,anchor:new THREE.Vector3().copy(pose.anchor),
-      panel:createBillboardPanel(HAZEL_SOURCE,"guest"), seated:true};
+    try {
+      hazelBillboard={...HAZEL_SOURCE,...pose,anchor:new THREE.Vector3().copy(pose.anchor),
+        panel:createBillboardPanel(HAZEL_SOURCE,"guest"), seated:true};
+    } catch (error) {
+      hazelBillboard=null;
+      console.warn("Hazel billboard unavailable; balcony camera remains available",error);
+      return;
+    }
     // A visible, depth-masked panel is the only pick target: an invisible
     // box behind the balcony would steal clicks through the wall.
     billboards.push(hazelBillboard);
@@ -2166,6 +2187,7 @@ import {
     foley.play("close");
     gameStarted = false;
     pauseMenuOpen = true;
+    syncMusic(); // Stop the soundtrack before the marquee audio begins.
     setMenuSceneVisibility(false);
     preview.classList.add("is-menu");
     readyScreen.hidden = true;
@@ -2188,12 +2210,13 @@ import {
     preview.classList.remove("is-menu");
     setMenuSceneVisibility(true);
     menuPresentation.sync();
+    syncMusic(true);
     canvas.focus({ preventScroll: true });
   }
 
   function activateTriviaMode() {
     if (!sceneReady || diceModeOpen) { pendingTrivia=true; if(diceModeOpen)window.dispatchEvent(new Event("rg:close-dice-mode")); return; }
-    pendingTrivia=false; pendingCardGameMode="";
+    pendingTrivia=false; pendingCardGameMode=""; cardMusicMode="";
     if (!gameStarted) {
       gameStarted=true;pauseMenuOpen=false;readyScreen.hidden=true;pauseMenu.hidden=true;preview.classList.remove("is-menu");setMenuSceneVisibility(true);menuPresentation.sync();
     }
@@ -2221,15 +2244,19 @@ import {
       setMenuSceneVisibility(true);
       menuPresentation.sync();
     }
+    cardMusicMode = mode;
     result.hidden = true;
     window.dispatchEvent(new Event("rg:close-host-panel"));
     if (cameraDetached || currentView.kind !== "card-table") { crowdState.react(mode === "menu" || mode === "shop" ? "idle" : "suspense",crowdClock); transitionToView({ kind: "card-table" }); }
+    else syncMusic(); // Same camera, different card game (notably Smeemo).
   }
 
   window.addEventListener("rg:card-game-active", (event) => activateCardGameMode(event.detail?.mode));
   window.addEventListener("rg:close-card-games", () => {
     pendingCardGameMode = "";
+    cardMusicMode = "";
     if (currentView.kind === "card-table") transitionToView({ kind: "overview" });
+    else syncMusic();
   });
 
   goButton.addEventListener("click", showPauseMenu);
@@ -2453,6 +2480,7 @@ import {
     if (open === diceModeOpen) return;
     if (open) { freecam?.stop(); stageShow?.reset(currentView.kind==="slot"); }
     diceModeOpen = open;
+    if (open) syncMusic();
     syncVipAmbience(gameStarted&&sceneReady&&!pauseMenuOpen&&!document.hidden&&!document.documentElement.hasAttribute("data-rg-host-locked"));
     // The modal is in the browser top layer: keep the one live score strip
     // inside it while playing Dice, then restore it to the room on exit.
@@ -2483,11 +2511,12 @@ import {
       camera.updateMatrixWorld(true);
       if(pendingTrivia)activateTriviaMode();
       else if(pendingCardGameMode){ const mode=pendingCardGameMode; pendingCardGameMode=""; activateCardGameMode(mode); }
+      syncMusic();
     }
   });
 
   window.addEventListener("keydown", (event) => {
-    if (freecam.active) return;
+    if (freecam?.active) return;
     if (event.altKey || event.ctrlKey || event.metaKey) return;
     if (diceModeOpen || document.querySelector("dialog[open]") || (event.target instanceof Element && event.target.closest("dialog[open]"))) return;
     if (event.target instanceof Element && event.target.closest("input, textarea, select, [contenteditable='true']")) return;
@@ -2510,7 +2539,7 @@ import {
     }
     else if (shortcut === "host") transitionToView({ kind: "host" });
     else if (shortcut === "hazel") {
-      if (!event.repeat && sceneReady && hazelBillboard && !document.documentElement.hasAttribute("data-rg-host-locked"))
+      if (!event.repeat && sceneReady && !document.documentElement.hasAttribute("data-rg-host-locked"))
         transitionToView({kind:"hazel"});
     }
     else if (shortcut === "card-table") transitionToView({ kind: "card-table" });
@@ -2794,6 +2823,7 @@ import {
       if ((changed || moving) && lastScenePointer && !lastScenePointer.buttons) updatePointer(lastScenePointer);
     }
     syncVipAmbience(roomVisible,emotion);
+    syncMusic();
     preview.classList.toggle("is-trivia",!cameraDetached && currentView.kind === "trivia");
     if (triviaLayer) triviaLayer.hidden = !(gameStarted && !pauseMenuOpen && !diceModeOpen && sceneReady && !cameraTransition && !cameraDetached && currentView.kind === "trivia" && triviaLayer.dataset.ready === "true");
     updateCardTableProjection();
@@ -3003,6 +3033,7 @@ import {
     if (wheelMotion && performance.now() >= wheelMotion.started + wheelMotion.duration) wheelMotion.silentCompletion = true;
   }
   document.addEventListener("visibilitychange", () => {
+    syncMusic();
     if (document.hidden) {
       characterSelection?.hide();
       slotCabinetFX?.reset();
@@ -3027,6 +3058,7 @@ import {
     liquidPortal?.dispose();
     exteriorMist?.dispose();
     menuPresentation.dispose();
+    soundtrack.dispose();
     slotCabinetFX?.dispose();
     focusArrow.dispose(); characterOcclusion?.dispose(); characterSelection?.dispose(); signGlow?.dispose(); audience?.dispose(); showFX?.dispose(); stageShow?.dispose();
     renderer?.dispose();

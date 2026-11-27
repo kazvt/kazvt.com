@@ -62,7 +62,12 @@ test('real shortcut handler focuses Hazel only when the room is ready and accept
  const press=(opts={})=>{let prevented=false;callback({key:'8',target:new Element(),preventDefault:()=>prevented=true,...opts});return prevented;};
  assert.equal(press(),true);assert.deepEqual(transitions,['hazel']);assert.equal(resolvePointClickBack(ctx.currentView).kind,'overview');
  press({repeat:true});locked=true;press();locked=false;ctx.sceneReady=false;press();ctx.sceneReady=true;ctx.hazelBillboard=null;press();ctx.hazelBillboard={};dialog=true;press();dialog=false;ctx.freecam.active=true;press();ctx.freecam.active=false;ctx.diceModeOpen=true;press();ctx.diceModeOpen=false;press({ctrlKey:true});ctx.pauseMenuOpen=true;press();ctx.pauseMenuOpen=false;ctx.gameStarted=false;press();ctx.gameStarted=true;
- assert.deepEqual(transitions,['hazel']);
- const input=new Element();input.closest=()=>true;press({target:input});assert.deepEqual(transitions,['hazel']);
- press();assert.deepEqual(transitions,['hazel','hazel']);
+ assert.deepEqual(transitions,['hazel','hazel']);
+ const input=new Element();input.closest=()=>true;press({target:input});assert.deepEqual(transitions,['hazel','hazel']);
+ press();assert.deepEqual(transitions,['hazel','hazel','hazel']);
+});
+
+test('balcony camera uses the authored pose even if the guest panel is absent',()=>{
+ assert.match(source,/if \(view.kind === "hazel"\) \{/);
+ assert.match(source,/hazelCameraFrame\(hazelBillboard \?\? hazelBalconyPose\(\),aspect/);
 });
