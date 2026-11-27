@@ -36,7 +36,7 @@ test('three tracks; exact mode priority including silent games, pause, lock and 
 
 test('Smeemo theme uses a fresh same-origin URL after installation',async()=>{
   const f=fixture();f.mixer.sync('smeemo');await flush();
-  assert.match(f.media.src,/assets\/music\/smeemo_theme\.mp3\?v=smeemo-theme-20261127-v1$/);
+  assert.match(f.media.src,/assets\/music\/smeemo_theme\.mp3\?v=smeemo-theme-20261127-v2$/);
   f.mixer.dispose();
 });
 
