@@ -1,6 +1,8 @@
 # Ramble Gamble menu karaoke
 
-The owner-supplied `ramble gamble final.mp3` is unchanged at `assets/music/ramble-gamble-theme.mp3` (198.288 s; SHA-256 `4103b336d65ec96680500f60bc2c79d82ae6cf63dceea4e787810bccd9d73feb`). The 240 whitespace-delimited lyric tokens are retained exactly, including all backing responses and the scat ending; the long last line is split into three readable phrases. Opening, instrumental and outro have an instrumental note display, not prematurely displayed lyrics.
+The owner-supplied `ramble gamble 2026-11-28 0626.mp3` is unchanged at `assets/music/ramble-gamble-theme.mp3` (198.288 s; SHA-256 `7485aa4feaf5557e2688b1ecf4fe448d96ec7e33d2388842096cd4d319258ec5`). The 240 whitespace-delimited lyric tokens are retained exactly, including all backing responses and the scat ending; the long last line is split into three readable phrases. Opening, instrumental and outro have an instrumental note display, not prematurely displayed lyrics.
+
+The replacement mix has the same decoded duration and no detected sample shift in 19 five-second waveform windows, sampled every ten seconds. Retain existing provisional cues; this does not verify individual vocal onsets.
 
 ## Timing confidence — read before treating this as finished karaoke
 
@@ -12,6 +14,6 @@ Open `/ramblegamble/tools/menu-karaoke-timing.html` on your existing deployed or
 
 ## Runtime design
 
-`createMenuMarquee` owns the overlay lifecycle. Lyrics are rendered only after the original opening clip hands off to the actually playing menu MP3, or the existing fallback sign settles. `theme.currentTime` is the single clock; the menu's existing RAF drives word selection, fill, hop, progress and bounded 24 reusable flower/suit/diamond particles. No second music player, media timer, runtime ASR, new external assets, SQL, or WebGL pass. The menu's established lock, controls, hidden tab, page suspension, mute, Play/rewind, error and native loop paths are preserved. A muted but advancing theme still displays lyrics. Reduced-motion settings remove particle and bounce effects. Forced-colors keeps text emphasis. Instrumental effects are low-key; the renderer stops updating when the menu is inactive. Invalid timing or absent markup disables karaoke without breaking Play.
+`createMenuMarquee` owns the overlay lifecycle. Lyrics are rendered only after the original opening clip hands off to the actually playing menu MP3, or the existing fallback sign settles. `theme.currentTime` is the single clock; the menu's existing RAF drives word selection, fill, hop, progress and bounded 24 reusable flower/suit/diamond particles. No second music player for karaoke, media timer, runtime ASR, new external assets, SQL, or WebGL pass. The separate credits-only audio player exclusively replaces menu audio while its dialog is open. The menu's established lock, controls, hidden tab, page suspension, mute, Play/rewind, error and native loop paths are preserved. A muted but advancing theme still displays lyrics. Reduced-motion settings remove particle and bounce effects. Forced-colors keeps text emphasis. Instrumental effects are low-key; the renderer stops updating when the menu is inactive. Invalid timing or absent markup disables karaoke without breaking Play.
 
 Reference: W3C Media Timed Events (https://www.w3.org/TR/media-timed-events/), MDN HTMLMediaElement.currentTime (https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/currentTime), and MDN prefers-reduced-motion (https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion).

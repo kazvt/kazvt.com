@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
     <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=exterior-hands-20261128-v1">
     <link rel="stylesheet" href="/ramblegamble/menu-karaoke.css?v=menu-karaoke-20261128-v1">
+    <link rel="stylesheet" href="/ramblegamble/show-finale.css?v=show-finale-20261128-v1">
     <link rel="stylesheet" href="/ramblegamble/host-console.css?v=freecam-depth-20261127-v1">
     <link rel="stylesheet" href="/ramblegamble/trivia-live.css?v=all-curtain-20261127-v1">
     <link rel="stylesheet" href="/ramblegamble/card-games.css?v=smeemo-arrival-20261128-v1">
@@ -23,7 +24,7 @@
       }
     </script>
     <link rel="stylesheet" href="/ramblegamble/host-access.css?v=host-toggle-20261126-v1">
-    <script type="module" src="/ramblegamble/host-access.mjs?v=menu-karaoke-20261128-v1"></script>
+    <script type="module" src="/ramblegamble/host-access.mjs?v=show-finale-20261128-v1"></script>
       <link rel="stylesheet" href="/ramblegamble/show-energy.css?v=compact-score-20261127-v1">
   </head>
   <body class="ramble-page" data-theme="p2">
@@ -111,14 +112,55 @@
             <canvas class="rg-marquee-neon" id="rg-marquee-neon" width="120" height="30" aria-hidden="true"></canvas>
           </div>
         </div>
-        <audio id="rg-menu-theme" src="/ramblegamble/assets/music/ramble-gamble-theme.mp3?v=menu-theme-20261128-v1" preload="auto" loop hidden></audio>
+        <audio id="rg-menu-theme" src="/ramblegamble/assets/music/ramble-gamble-theme.mp3?v=show-finale-20261128-v1" preload="auto" loop hidden></audio>
         <nav class="rg-pause-actions" aria-label="Pause menu actions">
           <button class="rg-menu-button" id="rg-play" type="button">PLAY!</button>
           <button class="rg-menu-button" id="rg-controls-open" type="button">CONTROLS!</button>
+          <button class="rg-menu-button" id="rg-credits-open" type="button" aria-haspopup="dialog">END CREDITS</button>
           <button class="rg-menu-button" data-host-lock type="button">LOCK HOST</button>
         </nav>
       </div>
     </section>
+
+    <dialog class="rg-credits" id="rg-show-credits" aria-label="Ramble Gamble end credits" data-phase="intro">
+      <div class="rg-credits-sky" aria-hidden="true"></div>
+      <div class="rg-credits-stage" tabindex="0" aria-label="Full end credits">
+        <div class="rg-credits-plane"><article class="rg-credits-track">
+              <section><h2>AND THAT&#x27;S A WRAP!</h2><p class="rg-credit-role">THAT WAS:</p><h2>RAMBLE GAMBLE</h2></section>
+              <section><p class="rg-credit-role">Thank you to our contestants:</p><h3>KAZ</h3><p class="rg-credit-link">Check her out at kazvt.com</p></section>
+              <section><h3>ERIN</h3><p class="rg-credit-alias">aka TheLadyEternal !!</p><p class="rg-credit-link">Check her out at berry.tube/u/erin</p></section>
+              <section><h3>FAROE</h3><p class="rg-credit-alias">aka Transrantula !!</p><p class="rg-credit-link">Check her out at berry.tube/u/faroe</p></section>
+              <section><p class="rg-credit-role">REFEREE WHO KEPT TRACK OF EVIL STUFF:</p><h3>HAZEL</h3><p class="rg-credit-alias">aka GazelDHazel</p><p class="rg-credit-link">Check her out at berry.tube/u/hazel</p></section>
+              <section><p class="rg-credit-role">and My wife, Your wonderful host</p><h3>LILLIE</h3><p class="rg-credit-alias">aka lillie_garden</p><p class="rg-credit-link">Check him out at lillie.garden</p></section>
+              <section><p class="rg-credit-role">GIGGLES PROVIDED BY:</p><h3>ERIN</h3><p class="rg-credit-role">BIRD CALLS PROVIDED BY:</p><h3>TRANSRANTULA</h3></section>
+              <section><p class="rg-credit-role">MODELING AND CONCEPTUALISING AND EVERYTHING YOU JUST EXPERIENCED TONIGHT:</p><h3>LILLIE</h3></section>
+              <section><p class="rg-credit-role">SONGS AND WEBSITE AND GAME DESIGN:</p><h3>KAZVT</h3></section>
+              <section><p class="rg-credit-role">BROUGHT TO YOU BY THE BERRIES AT</p><h3>BERRY.TUBE/GROUP</h3><p>KISS YOU LILLIE BTW</p></section>
+              <section><p class="rg-credit-role">EVIL BROUGHT TO YOU BY:</p><h3>SMEEMO</h3></section>
+              <section><p class="rg-credit-role">CONTESTANT ART/FUGI DRAWINGS:</p><h3>LORE</h3><p class="rg-credit-alias">AKA LORE !!</p><p class="rg-credit-link">Check him out at berry.tube/u/lore</p><p>He draws lots of art for the berries in general! Go commission him!</p></section>
+              <section><h2>AND THANK YOU, CHAT!</h2><p>FOR MAKING THIS POSSIBLE!</p><p>Thank you smeemo for being the villain today!</p></section>
+              <section><p class="rg-credit-role">BITES:</p><h3>SMEEMO</h3><p class="rg-credit-role">CUTES:</p><h3>LILLIE</h3><p class="rg-credit-role">BEATBOXING:</p><h3>KAZ</h3></section>
+              <section><p class="rg-credit-role">INTERNET OUTAGES:</p><h3>KAZ</h3><p class="rg-credit-role">TECHNICAL DIFFICULTIES:</p><h3>KAZ</h3></section>
+              <section><h2>THANK YOU LILLIE</h2><p>THIS WILL BE A FOREVER MEMORY FOR EVERYONE INVOLVED!</p></section>
+              <section><p>THE BLOODY HANDS IN THE BACK WERE FROM A REAL FOOTAGE</p></section>
+              <section><p>I&#x27;m the beatboxing puppy</p><p>I know you think it&#x27;s funny</p><p>All the people know they love me</p><p>I need some food in my tummy</p></section>
+              <section><h2>LILLIE I LOVE YOUUUUU</h2><p>UR SO CUTE</p><p>GOOD JOB LILLIE</p><p>EVERYONE SPAM +LILLIECUTES</p></section>
+              <section><h2>THANK YOU EVERYONE!</h2><h2>SEE YOU IN RAMBLE GAMBLE 2!</h2></section>
+        </article></div>
+      </div>
+      <div class="rg-credits-card rg-credits-intro" aria-hidden="true">
+        <p class="rg-credits-eyebrow">✦ AND THAT'S A WRAP! ✦</p><p>THAT WAS:</p><h2>RAMBLE<br>GAMBLE</h2><p class="rg-credits-heart">♥ ♦ ♣ ♥</p>
+      </div>
+      <div class="rg-credits-card rg-credits-finale" aria-hidden="true">
+        <p class="rg-credits-heart">♥ ♥ ♥</p><p>THANK YOU EVERYONE!</p><h2>SEE YOU IN<br>RAMBLE GAMBLE 2!</h2><p class="rg-credits-eyebrow">✦ FOREVER A MEMORY ✦</p>
+      </div>
+      <audio src="/ramblegamble/assets/music/ramble-gamble-theme.mp3?v=show-finale-20261128-v1" preload="none" hidden></audio>
+      <nav class="rg-credits-controls" aria-label="Credits playback">
+        <progress max="1" value="0" aria-label="Credits progress"></progress>
+        <button type="button" data-credits-pause>PAUSE</button>
+        <button type="button" data-credits-close>BACK TO MENU</button>
+      </nav>
+    </dialog>
 
     <dialog class="rg-controls-dialog" id="rg-controls-dialog" aria-labelledby="rg-controls-title">
       <header class="rg-controls-heading">

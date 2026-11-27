@@ -14,7 +14,7 @@ function fixture(){
  let state={activityRevision:'old',round:{id:'prior',mode:'shop'},smeemo:null,decks:{shop:[]}};
  const ctx={encounter,smeemoTable,encounterStartPending:null,encounterReturnRevision:'old',cameraTransition:{},currentView:{kind:'card-table'},cameraDetached:false,freecam:{active:false},gameStarted:true,sceneReady:true,pauseMenuOpen:false,diceModeOpen:false,cardMusicMode:'',document:{hidden:false,querySelector:()=>null,documentElement:{hasAttribute:()=>false}},
  stinger:{step(){}},smeemoTag:{},smeemoAura:{},audience:null,cardTableModel:{},THREE:{Box3:class{max={y:1};setFromObject(){return this;}getCenter(){return {};}} ,Vector3:class{}},stageShow:{silent(...a){lights.push(a);}},cardLayer:{classList:{add(){}}},reducedMotion:{matches:false},
- menuMarquee:{muted:false},menuTheme:{muted:false},foley:{muted:false},menuPresentation:{retryTheme(){}},sampleSpatialAudioZones:()=>({musicGain:1}),soundtrackFor,soundtrack:{sync:track=>tracks.push(track)},
+ menuMarquee:{muted:false},menuTheme:{muted:false},foley:{muted:false},menuPresentation:{retryTheme(){}},creditsPresentation:{sync(){}},sampleSpatialAudioZones:()=>({musicGain:1}),soundtrackFor,soundtrack:{sync:track=>tracks.push(track)},
  resetEncounter(){encounter.reset();ctx.encounterStartPending=null;ctx.encounterReturnRevision=null;},
  window:{addEventListener:(type,fn)=>listeners.set(type,fn),dispatchEvent:ev=>listeners.get(ev.type)?.(ev)},CustomEvent:class{constructor(type,opts){this.type=type;this.detail=opts.detail;}},
  readCardGames:()=>state,createSmeemoGame,runRoomMutation:fn=>new Promise(resolve=>queued.push(()=>{fn();resolve();})),closeHostPanel(){},adminStatus:{},liveStatus:{},console,

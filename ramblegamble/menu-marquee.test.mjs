@@ -51,7 +51,7 @@ test('rejected, missing and stalled media always end on the original logo and li
 test('actual markup and lifecycle wire the presentation without changing lock controls or logo artwork',()=>{
  const html=readFileSync(new URL('../rg/index.html',import.meta.url),'utf8'),js=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
  assert.match(html,/id="rg-marquee-plate" hidden/);assert.match(html,/assets\/provided\/sign\.png/);assert.doesNotMatch(html,/rg-menu-motion|MOTION: (?:ON|OFF)/);assert.doesNotMatch(js,/motionButton:/);assert.match(html,/data-host-lock type="button">LOCK HOST/);
- assert.match(js,/createMenuMarquee\(\{menu:pauseMenu/);assert.match(js,/menuPresentation\.dispose\(\)/);assert.equal((js.match(/menuPresentation\.sync\(\)/g)||[]).length,4);
+ assert.match(js,/createMenuMarquee\(\{menu:pauseMenu/);assert.match(js,/menuPresentation\.dispose\(\)/);assert.equal((js.match(/menuPresentation\.sync\(\)/g)||[]).length,5);
 });
 
 test('video fades by media time and final frame crossfades without a blank or dark midpoint',()=>{

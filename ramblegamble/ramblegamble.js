@@ -1,3 +1,4 @@
+import { createShowCredits } from "./show-credits.mjs?v=show-finale-20261128-v1";
 import { createContestantStands } from "./contestant-stands.mjs?v=stand-lift-20261128-v1";
 import { horrorRenderScale, HORROR_FRAME_MS } from "./smeemo-horror.mjs?v=smeemo-arrival-20261128-v1";
 import { readCardGames } from "./card-games-store.mjs?v=show-stage-20261126-v1";
@@ -7,7 +8,7 @@ import { createFloatingSky } from "./floating-sky.mjs?v=sky-solid-lettering-2026
 import { createStageDance, createDanceClock, createDanceIntensitySampler, dancePose } from "./stage-dance.mjs?v=music-intensity-20261128-v1";
 import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=freecam-music-20261128-v1";
 import { createVipInteriorTracker, sampleMusicZoneGain } from "./music-zones.mjs?v=music-zone-fade-20261128-v1";
-import { createMenuMarquee } from "./menu-marquee.mjs?v=menu-karaoke-20261128-v1";
+import { createMenuMarquee } from "./menu-marquee.mjs?v=show-finale-20261128-v1";
 import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=smeemo-reveal-20261127-v1";
 import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcony.mjs?v=hazel-balcony-20261127-v1";
 import { createSignGlow } from "./sign-glow.mjs?v=neon-focus-20261127-v1";
@@ -98,7 +99,9 @@ import {
   const controlsDialog = document.getElementById("rg-controls-dialog");
   const controlsCloseButton = document.getElementById("rg-controls-close");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const menuPresentation = createMenuMarquee({menu:pauseMenu,video:menuMarquee,theme:menuTheme,karaokeRoot:document.getElementById("rg-menu-karaoke"),plate:document.getElementById("rg-marquee-plate"),glow:document.getElementById("rg-marquee-neon"),controls:controlsDialog});
+  const creditsDialog = document.getElementById("rg-show-credits");
+  const menuPresentation = createMenuMarquee({menu:pauseMenu,video:menuMarquee,theme:menuTheme,karaokeRoot:document.getElementById("rg-menu-karaoke"),plate:document.getElementById("rg-marquee-plate"),glow:document.getElementById("rg-marquee-neon"),controls:controlsDialog,credits:creditsDialog});
+  const creditsPresentation = createShowCredits({dialog:creditsDialog,button:document.getElementById("rg-credits-open"),menu:pauseMenu,onOpenChange:()=>menuPresentation.sync(),muted:()=>foley.muted});
   const FORCED_THEME = "p2";
   const ROULETTE_PART_NAMES = new Set(["center", "wheel", "rim", "ball"]);
   const SLOT_PART_NAMES = new Set(["machine", "slot-reel-display", "arm", "button1", "button2", "button3", "button4", "button5"]);
@@ -340,6 +343,7 @@ import {
     // The marquee is music too: the shared sound preference applies to it.
     if (menuMarquee.muted !== foley.muted) menuMarquee.muted = foley.muted;
     if (menuTheme.muted !== foley.muted) menuTheme.muted = foley.muted;
+    creditsPresentation.sync();
     if (retry) menuPresentation.retryTheme();
     zones ||= sampleSpatialAudioZones();
     const nextTrack = soundtrackFor({
@@ -2384,6 +2388,7 @@ import {
     pauseMenuOpen = false;
     gameStarted = true;
     pauseMenu.hidden = true;
+    creditsPresentation.close();
     preview.classList.remove("is-menu");
     setMenuSceneVisibility(true);
     menuPresentation.sync();
@@ -2395,7 +2400,7 @@ import {
     if (!sceneReady || diceModeOpen) { pendingTrivia=true; if(diceModeOpen)window.dispatchEvent(new Event("rg:close-dice-mode")); return; }
     pendingTrivia=false; pendingCardGameMode=""; cardMusicMode="";
     if (!gameStarted) {
-      gameStarted=true;pauseMenuOpen=false;readyScreen.hidden=true;pauseMenu.hidden=true;preview.classList.remove("is-menu");setMenuSceneVisibility(true);menuPresentation.sync();
+      gameStarted=true;pauseMenuOpen=false;readyScreen.hidden=true;pauseMenu.hidden=true;creditsPresentation.close();preview.classList.remove("is-menu");setMenuSceneVisibility(true);menuPresentation.sync();
     }
     hideResult();hideGameCursor();
     window.dispatchEvent(new Event("rg:trivia-stage-open"));
@@ -2417,6 +2422,7 @@ import {
       pauseMenuOpen = false;
       readyScreen.hidden = true;
       pauseMenu.hidden = true;
+      creditsPresentation.close();
       preview.classList.remove("is-menu");
       setMenuSceneVisibility(true);
       menuPresentation.sync();
@@ -3329,6 +3335,7 @@ import {
     fitCamera();
     suppressElapsedWheelCue();
     menuPresentation.setPageSuspended(false);
+    creditsPresentation.setPageSuspended(false);
     syncMusic();
     if (!document.hidden && (gameStarted || pauseMenuOpen) && renderer && !animationFrame) animationFrame = requestAnimationFrame(animate);
   });
@@ -3343,6 +3350,7 @@ import {
       // media controllers alive, but stop active playback and transient effects.
       soundtrack.sync(null);
       menuPresentation.setPageSuspended(true);
+      creditsPresentation.setPageSuspended(true);
       floatingSky?.suspend();
       slotMarquee?.suspend();
       liquidPortal?.setActive(false);
@@ -3359,6 +3367,7 @@ import {
     floatingSky?.dispose();
     slotMarquee?.dispose();
     menuPresentation.dispose();
+    creditsPresentation.dispose();
     soundtrack.dispose();
     contestantStands?.dispose();
     stageDance?.dispose();

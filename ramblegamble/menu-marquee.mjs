@@ -46,13 +46,13 @@ export function paintMenuSign(out,elapsed){
 // One lifecycle for the opening clip, CSS fallback and live neon idle. This is
 // independent of WebGL readiness. The recorded intro plays once, then the
 // separate menu theme loops until the menu closes.
-export function createMenuMarquee({menu,video,theme,karaokeRoot,plate,glow,controls,doc=document,win=window}){
+export function createMenuMarquee({menu,video,theme,karaokeRoot,plate,glow,controls,credits,doc=document,win=window}){
   let phase='closed', elapsed=0,last=null,frame=0,active=false,unavailable=Boolean(video.error)||video.networkState===3,attempt=0,disposed=false,painted=false,pageSuspended=false;
   glow.width=W;glow.height=H;
   let ctx=null,image=null;
   try{ctx=glow.getContext('2d');image=ctx?.createImageData(W,H);}catch{}
   const clear=()=>{if(painted){ctx?.clearRect(0,0,W,H);painted=false;}};
-  const allowed=()=>!pageSuspended&&!menu.hidden&&!doc.hidden&&!doc.documentElement.hasAttribute('data-rg-host-locked')&&!controls.open;
+  const allowed=()=>!pageSuspended&&!menu.hidden&&!doc.hidden&&!doc.documentElement.hasAttribute('data-rg-host-locked')&&!controls.open&&!credits?.open;
   // One menu music voice, never audible alongside the opening video. A play
   // rejection is retried only on a trusted gesture or a fresh activation.
   const karaoke=createMenuKaraoke({root:karaokeRoot,menu,theme,doc,win});
@@ -144,6 +144,7 @@ export function createMenuMarquee({menu,video,theme,karaokeRoot,plate,glow,contr
   observer.observe(menu,{attributes:true,attributeFilter:['hidden']});
   observer.observe(doc.documentElement,{attributes:true,attributeFilter:['data-rg-host-locked']});
   observer.observe(controls,{attributes:true,attributeFilter:['open']});
+  if(credits)observer.observe(credits,{attributes:true,attributeFilter:['open']});
   video.addEventListener('ended',ended);video.addEventListener('error',failed);video.addEventListener('loadeddata',matte);
   theme.addEventListener('error',themeError);
   doc.addEventListener('visibilitychange',sync);
