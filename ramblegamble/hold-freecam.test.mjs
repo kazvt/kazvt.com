@@ -71,7 +71,7 @@ test('room animation, resize, view transition, Dice and pause preserve the indep
  assert.match(src,/freecam\.step\(time\);\s+if \(!freecam.active\) updateCameraTransition/);
  assert.match(src,/const canOrbit = \(\) => !freecam.active/);
  assert.match(src,/if \(!sceneReady \|\| freecam\?\.active \|\| cameraDetached\) return;/);
- assert.match(src,/function transitionToView[^\n]+\n[^\n]+\n\s+freecam\?\.stop\(\)/);
+ assert.match(src,/function transitionToView[^\n]+\n[^\n]+\n\s+const fromExterior = [^\n]+\n\s+freecam\?\.stop\(\)/);
  assert.match(src,/function showPauseMenu\(\) \{\s+if \(pauseMenuOpen\) return;\s+freecam\?\.stop\(\)/);
  assert.match(src,/if \(open\) \{ freecam\?\.stop\(\); resetEncounter\(\); stageShow\?\.reset\(currentView.kind==="slot"\); \}\s+diceModeOpen = open/);
  assert.match(src,/if \(!cardLayer \|\| freecam\?\.active \|\| cameraDetached\) return;/);

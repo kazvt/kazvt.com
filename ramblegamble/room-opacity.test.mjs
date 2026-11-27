@@ -64,7 +64,7 @@ test('all three crowd panels blend at 70 percent opacity without writing transpa
         assert.equal(m.material.opacity,.7);
         assert.equal(m.material.transparent,true);
         assert.equal(m.material.depthWrite,false);
-        assert.equal(m.material.side,THREE.FrontSide);
+        assert.equal(m.material.side,THREE.DoubleSide);assert.equal(m.material.forceSinglePass,true);
         assert.ok(m.material.alphaTest>0&&m.material.alphaTest<.7);
         assert.equal(m.material.map.magFilter,THREE.NearestFilter);
       }
@@ -168,7 +168,7 @@ test('local original and crowd sprite are separate PNGs, and the camera update f
  assert.deepEqual(dimensions(png('smeemo_scramble.png')),[236,601]);
  assert.deepEqual(dimensions(png('smeemo-crowd.png')),[30,76]);
  const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
- assert.match(src,/audience-render\.mjs\?v=smeemo-alpha-20261128-v1/);
+ assert.match(src,/audience-render\.mjs\?v=exterior-hands-20261128-v1/);
  const animate=src.slice(src.indexOf('function animate(time)'));
  assert.ok(animate.indexOf('audience?.update(crowdClock,emotion,reducedMotion.matches,camera.position,')>animate.indexOf('focusOrbit.step(time'));
 });

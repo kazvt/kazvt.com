@@ -17,15 +17,15 @@ export function createSmeemoEncounter(){
   get song(){return (phase==='focused'&&count>=1)||phase==='returning'?'smeemo':null;},
  };
 }
-// Stinger completion is exactly once, including media failure/skip/stall.
-export function createSmeemoStinger({root,video,skip,caption,muted=()=>false,onFinish,clock=()=>performance.now()}){
+// Stinger completion is exactly once, including media failure/stall.
+export function createSmeemoStinger({root,video,caption,muted=()=>false,onFinish,clock=()=>performance.now()}){
  let live=false,started=0,lastProgress=0,lastTime=0,token=0,autoplayMuted=false,prepared=false;
  function cancel(){live=false;prepared=false;token++;root.hidden=true;video.pause();video.preload='none';video.removeAttribute('src');video.load();}
  function prepare(){if(live||prepared)return;prepared=true;video.preload='auto';video.src=SMEEMO_STINGER;video.load();}
  function finish(){if(!live)return;cancel();onFinish();}
  function fail(){if(!live||lastTime<0)return;caption.textContent='SMEEMO • 5/5';started=clock();lastProgress=started;lastTime=-1;video.hidden=true;caption.hidden=false;video.pause();}
- video.addEventListener('ended',finish);video.addEventListener('error',fail);skip.addEventListener('click',finish);
- function start(){if(live)cancel();if(!prepared)prepare();live=true;const ticket=token;started=lastProgress=clock();lastTime=0;autoplayMuted=false;caption.textContent='SMEEMO • 5/5';caption.hidden=true;video.hidden=false;root.hidden=false;video.muted=muted();try{Promise.resolve(video.play()).catch(error=>{if(!live||ticket!==token)return;if(error?.name==='NotAllowedError'&&!video.muted){video.muted=true;autoplayMuted=true;try{Promise.resolve(video.play()).catch(()=>{if(live&&ticket===token)fail();});}catch{fail();}}else fail();});}catch{fail();}skip.focus?.({preventScroll:true});}
+ video.addEventListener('ended',finish);video.addEventListener('error',fail);
+ function start(){if(live)cancel();if(!prepared)prepare();live=true;const ticket=token;started=lastProgress=clock();lastTime=0;autoplayMuted=false;caption.textContent='SMEEMO • 5/5';caption.hidden=true;video.hidden=false;root.hidden=false;video.muted=muted();try{Promise.resolve(video.play()).catch(error=>{if(!live||ticket!==token)return;if(error?.name==='NotAllowedError'&&!video.muted){video.muted=true;autoplayMuted=true;try{Promise.resolve(video.play()).catch(()=>{if(live&&ticket===token)fail();});}catch{fail();}}else fail();});}catch{fail();}root.focus?.({preventScroll:true});}
  function step(){if(!live)return;video.muted=autoplayMuted||muted();const now=clock();if(lastTime<0){if(now-started>=1500)finish();return;}if(video.currentTime>lastTime){lastTime=video.currentTime;lastProgress=now;}if(now-lastProgress>12000)fail();}
  return {prepare,start,step,cancel,get active(){return live;}};
 }

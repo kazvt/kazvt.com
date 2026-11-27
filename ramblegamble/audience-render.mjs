@@ -189,7 +189,7 @@ export function createAudienceRenderer(THREE,scene) {
     const ctx=canvas.getContext('2d'); const people=crowdPeople(canvas.width,section.seed);
     const mask=makeCrowdEdgeMask(ctx,canvas.width,section);
     const tex=new THREE.CanvasTexture(canvas);tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestFilter;tex.generateMipmaps=false;tex.colorSpace=THREE.SRGBColorSpace;
-    const mesh=new THREE.Mesh(new THREE.PlaneGeometry(section.width,4.3),new THREE.MeshBasicMaterial({map:tex,transparent:true,opacity:.7,alphaTest:.001,depthWrite:false,side:THREE.FrontSide,toneMapped:false,fog:false}));
+    const mesh=new THREE.Mesh(new THREE.PlaneGeometry(section.width,4.3),new THREE.MeshBasicMaterial({map:tex,transparent:true,opacity:.7,alphaTest:.001,depthWrite:false,side:THREE.DoubleSide,forceSinglePass:true,toneMapped:false,fog:false}));
     mesh.position.set(section.x,1.525,section.z);mesh.rotation.y=section.yaw;group.add(mesh);
     return {ctx,canvas,people,tex,mesh,mask};
   });

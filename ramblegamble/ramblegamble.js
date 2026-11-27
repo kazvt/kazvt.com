@@ -1,7 +1,7 @@
 import { horrorRenderScale, HORROR_FRAME_MS } from "./smeemo-horror.mjs?v=smeemo-arrival-20261128-v1";
 import { readCardGames } from "./card-games-store.mjs?v=show-stage-20261126-v1";
 import { createSlotMarquee } from "./slot-marquee.mjs?v=slot-marquee-20261128-v1";
-import { createSmeemoEncounter, createSmeemoStinger, createSmeemoTableSession, SMEEMO_RETURN_MS } from "./smeemo-reveal.mjs?v=smeemo-alpha-20261128-v1";
+import { createSmeemoEncounter, createSmeemoStinger, createSmeemoTableSession, SMEEMO_RETURN_MS } from "./smeemo-reveal.mjs?v=exterior-hands-20261128-v1";
 import { createFloatingSky } from "./floating-sky.mjs?v=sky-solid-lettering-20261128-v1";
 import { createStageDance, createDanceClock, createDanceIntensitySampler, dancePose } from "./stage-dance.mjs?v=music-intensity-20261128-v1";
 import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=freecam-music-20261128-v1";
@@ -17,13 +17,14 @@ import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state
 import { createCharacterOcclusion } from "./character-occlusion.mjs?v=stage-dance-20261127-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=smeemo-alpha-20261128-v1";
-import { createAudienceRenderer, crowdCatAnchor, CROWD_CAT } from "./audience-render.mjs?v=smeemo-alpha-20261128-v1";
+import { createAudienceRenderer, crowdCatAnchor, CROWD_CAT } from "./audience-render.mjs?v=exterior-hands-20261128-v1";
 import { createShowFX } from "./show-fx.mjs?v=sky-soot-20261127-v1";
 import { createRouletteCabinetFX } from "./roulette-cabinet-fx.mjs?v=sky-soot-20261127-v1";
 import { cameraTravelDuration, isSpookyView, suspenseEase, crowdCloseupPose } from "./spooky-camera.mjs?v=cartoon-machines-20261127-v1";
 import { CHARACTER_SOURCE_SIZE, CHARACTER_YAW_LIMIT, characterYaw, standingCharacterPose, projectCharacterQuad, pointInCharacterQuad } from "./character-billboards.mjs?v=stage-dance-20261127-v1";
 import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
+import { createExteriorHands, sampleExteriorAmbience } from "./exterior-hands.mjs?v=exterior-hands-20261128-v1";
 import { createExteriorMist, EXTERIOR_FLOOR } from "./exterior-mist.mjs?v=crowd-mist-20261127-v1";
 import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=slot-closeup-20261128-v1";
 import { foley } from "./game-foley.mjs?v=sky-soot-20261127-v1";
@@ -176,7 +177,7 @@ import {
   let rouletteCabinetFX;
   let cardTableModel;
   let skyRoot, floatingSky;
-  let exteriorMist;
+  let exteriorMist, exteriorHands;
   let skyStars;
   let skyStarsMesh;
   let skyShootingStarsMesh;
@@ -245,13 +246,13 @@ import {
   const soundtrack = createSoundtrack();
   const vipMusicInterior = createVipInteriorTracker(DICE_DOOR_OPENING);
   const smeemoMusicAnchor = Object.freeze(crowdCatAnchor());
-  const spatialAudioState = { insideVip:false, vipMix:{room:1,water:0,cutoff:null}, musicGain:1 };
+  const spatialAudioState = { insideVip:false, vipMix:{room:1,water:0,cutoff:null}, exteriorMix:{room:1,water:0}, musicGain:1 };
   const encounter = createSmeemoEncounter();
   const smeemoTable = createSmeemoTableSession();
   let encounterStartPending = null;
   let encounterReturnRevision = null;
   const smeemoAura=document.getElementById("rg-smeemo-aura"), smeemoTag=document.getElementById("rg-smeemo-tag"), smeemoCount=document.getElementById("rg-smeemo-count");
-  const stinger=createSmeemoStinger({root:document.getElementById("rg-smeemo-stinger"),video:document.getElementById("rg-smeemo-video"),skip:document.getElementById("rg-smeemo-skip"),caption:document.getElementById("rg-smeemo-stinger-caption"),muted:()=>foley.muted,onFinish:()=>{
+  const stinger=createSmeemoStinger({root:document.getElementById("rg-smeemo-stinger"),video:document.getElementById("rg-smeemo-video"),caption:document.getElementById("rg-smeemo-stinger-caption"),muted:()=>foley.muted,onFinish:()=>{
     if(encounter.finish()){encounterReturnRevision=readCardGames().activityRevision;cardMusicMode="";canvas.focus({preventScroll:true});transitionToView({kind:"card-table"},{encounterReturn:true});}
   }});
   function resetEncounter(){
@@ -323,11 +324,15 @@ import {
     // allocations are needed for the audio-zone state or Smeemo anchor.
     sampleVipAmbience(position, DICE_DOOR_OPENING, { inside: insideVip }, spatialAudioState.vipMix);
     spatialAudioState.insideVip = insideVip;
+    // Authored close-ups and the responsive overview are intentionally audible.
+    // Only a camera physically detached from the room enters the exterior zone.
+    sampleExteriorAmbience(position, !insideVip && (cameraDetached || !!freecam?.active || !!cameraTransition?.fromExterior), spatialAudioState.exteriorMix);
     // Smeemo and the VIP room attenuate normal music by actual camera
     // position, not by the selected view or the way the camera got there.
     spatialAudioState.musicGain = sampleMusicZoneGain(position, DICE_DOOR_OPENING, smeemoMusicAnchor, {
       insideVip, vipGain:spatialAudioState.vipMix.room,
     });
+    spatialAudioState.musicGain = Math.min(spatialAudioState.musicGain, spatialAudioState.exteriorMix.room);
     return spatialAudioState;
   }
   function syncMusic(retry = false, zones = null) {
@@ -1618,6 +1623,7 @@ import {
 
   function transitionToView(nextView, { immediate = false, encounterReturn = false } = {}) {
     hideGameCursor(); lastScenePointer = null;
+    const fromExterior = cameraDetached || !!freecam?.active || !!cameraTransition?.fromExterior;
     freecam?.stop();
     if(!encounterReturn&&((nextView.kind!=="smeemo-crowd"&&(nextView.kind!=="card-table"||encounter.phase!=="table"))||(nextView.kind==="smeemo-crowd"&&encounter.phase!=="focused")))resetEncounter();
     if(nextView.kind==="smeemo-crowd"&&encounter.phase==="hidden"){
@@ -1645,19 +1651,20 @@ import {
     if(viewChanged&&!immediate&&sceneReady){preview.dataset.showArrival=nextView.kind;preview.classList.remove("rg-show-arrival");void preview.offsetWidth;preview.classList.add("rg-show-arrival");if(nextView.kind==="overview"&&!closingSlot)reactCrowd("idle");}
     if (!immediate && sceneReady && (currentView.kind !== nextView.kind || currentView.look !== (nextView.look ?? 0) || currentView.contestantId !== nextView.contestantId)) foley.play(nextView.kind === "overview" ? "back" : "navigate");
     currentView = { ...nextView, look: nextView.kind === "overview" ? nextView.look ?? 0 : 0 };
-    syncMusic();
     focusOrbit.reset(currentView.kind);
     focusDrag?.reset();
     const pose = getCameraPoseForView(currentView, camera.aspect);
-    if (!pose) return;
+    if (!pose) { syncMusic(); return; }
 
     if (immediate || reducedMotion.matches || !sceneReady) {
       cameraTransition = null;
       applyCameraPose(pose);
+      syncMusic();
       return;
     }
 
     cameraTransition = {
+      fromExterior,
       started: performance.now(),
       duration: encounterReturn ? SMEEMO_RETURN_MS : cameraTravelDuration(nextView.kind, stageShow&&(openingSlot||closingSlot) ? (openingSlot?REVEAL_MS:RETRACT_MS) : 0),
       spooky: encounterReturn || isSpookyView(nextView.kind),
@@ -1667,6 +1674,7 @@ import {
       toPosition: pose.position,
       toTarget: pose.target,
     };
+    syncMusic();
   }
 
   function setLookDirection(look) {
@@ -2331,7 +2339,7 @@ import {
   function setMenuSceneVisibility(visible) {
     if (!visible) floatingSky?.suspend();
     if (!visible) slotMarquee?.suspend();
-    for (const object of [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group, stageShow?.group, characterSelection?.group]) {
+    for (const object of [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group, stageShow?.group, characterSelection?.group, exteriorHands?.group]) {
       if (object) object.visible = visible;
     }
     characterSelection?.hide();
@@ -2685,7 +2693,7 @@ import {
       slotMarquee?.suspend();
       rouletteCabinetFX?.reset();
       focusDrag.clearHover(); lastScenePointer = null; stopRouletteSettlement();
-      diceModeVisibility = [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group, stageShow?.group, characterSelection?.group]
+      diceModeVisibility = [stageModel, rouletteRig, slotRig, exteriorMist?.group, audience?.group, showFX?.group, stageShow?.group, characterSelection?.group, exteriorHands?.group]
         .filter(Boolean)
         .map((object) => [object, object.visible]);
       for (const [object] of diceModeVisibility) object.visible = false;
@@ -3016,7 +3024,7 @@ import {
   function syncVipAmbience(roomVisible, emotion=crowdState.active, zones=null) {
     zones ||= sampleSpatialAudioZones();
     const mix=zones.vipMix;
-    foley.setRoomAmbience(roomVisible&&!encounter.quiet,mix.room,emotion,mix.water,mix.cutoff);
+    foley.setRoomAmbience(roomVisible&&!encounter.quiet,Math.min(mix.room,zones.exteriorMix.room),emotion,Math.max(mix.water,zones.exteriorMix.water),mix.cutoff);
   }
 
   function animate(time) {
@@ -3059,6 +3067,7 @@ import {
     if (triviaLayer) triviaLayer.hidden = !(gameStarted && !pauseMenuOpen && !diceModeOpen && sceneReady && !cameraTransition && !cameraDetached && currentView.kind === "trivia" && triviaLayer.dataset.ready === "true");
     updateCardTableProjection();
     exteriorMist?.update(time, reducedMotion.matches, camera);
+    exteriorHands?.update(crowdClock,roomVisible&&!diceModeOpen,reducedMotion.matches,camera.position);
     if (slotWinCelebration) {
       if (!canShowSlotCelebration() || (reducedMotion.matches && !slotWinCelebration.animation.reduced)) endSlotCelebration(false);
       else if (isSlotWinFinished(slotWinCelebration.animation, time)) endSlotCelebration();
@@ -3213,6 +3222,8 @@ import {
         liquidPortal.preload();
       }
       exteriorMist = createExteriorMist({ THREE, scene, stage: stageModel, horizonColor: SKY_CONFIG.horizonColor });
+      try { exteriorHands=createExteriorHands(THREE,scene); }
+      catch(error){scene.getObjectByName("rg-exterior-hands")?.removeFromParent();console.warn("Exterior hands unavailable",error);}
 
       rouletteModel = rouletteGltf.scene;
       prepareModel(rouletteModel);
@@ -3329,6 +3340,7 @@ import {
     resizeObserver?.disconnect();
     liquidPortal?.dispose();
     exteriorMist?.dispose();
+    exteriorHands?.dispose();
     floatingSky?.dispose();
     slotMarquee?.dispose();
     menuPresentation.dispose();
