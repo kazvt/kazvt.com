@@ -2,12 +2,12 @@
 export const SOUNDTRACK_FILES = Object.freeze({
   general: 'sonic_gammon_leel_theme.mp3',
   cards: 'sonic_no_daifuugou_title_theme.mp3',
-  smeemo: 'smeemo_theme.mp3',
+  smeemo: 'smeemo_ambiance.mp3',
 });
 const base = new URL('./assets/music/', import.meta.url);
-export function soundtrackFor({ active, muted, dice, view, cardMode, encounter }) {
+export function soundtrackFor({ active, muted, dice, view, cardMode, encounter, smeemoTable = false, detached = false }) {
   if (!active || muted || dice || view === 'dice-door' || encounter === 'stinger') return null;
-  if (encounter === 'smeemo') return 'smeemo';
+  if (!detached && (encounter === 'smeemo' && ['smeemo-crowd','card-table'].includes(view) || view === 'card-table' && smeemoTable && ['', 'menu', 'smeemo'].includes(cardMode ?? ''))) return 'smeemo';
   if (view === 'card-table' && cardMode === 'smeemo') return null;
   return ['roulette', 'card-table', 'trivia'].includes(view) ? 'cards' : 'general';
 }
@@ -15,6 +15,7 @@ export function soundtrackFor({ active, muted, dice, view, cardMode, encounter }
 export function createSoundtrack({ createMedia = () => new Audio(), now = () => performance.now(), volume = .20 } = {}) {
   let media, track = null, wanted = null, requested = false, blocked = false, disposed = false, epoch = 0, fadeAt = null;
   const failed = new Set();
+  let smeemoPosition = 0;
   const gain = Math.max(0, Math.min(1, volume));
   function stop() {
     epoch++; requested = false; blocked = false; fadeAt = null;
@@ -36,15 +37,18 @@ export function createSoundtrack({ createMedia = () => new Audio(), now = () => 
   function sync(next, { retry = false } = {}) {
     if (disposed) return;
     next = Object.hasOwn(SOUNDTRACK_FILES, next) ? next : null;
-    if (wanted !== next) { stop(); wanted = next; }
+    if (wanted !== next) {
+      if (track === 'smeemo' && wanted === track && Number.isFinite(media?.currentTime)) smeemoPosition = media.currentTime;
+      stop(); wanted = next;
+    }
     if (!wanted || failed.has(wanted) || !initialize()) return;
     if (track !== wanted) {
       // The previous source is paused before the element receives another URL.
       // No crossfade or second element can make two songs audible at once.
       track = wanted;
       try {
-        const file = track === 'smeemo' ? `${SOUNDTRACK_FILES[track]}?v=smeemo-theme-20261127-v2` : SOUNDTRACK_FILES[track];
-        media.src = new URL(file, base).href;
+        media.src = new URL(SOUNDTRACK_FILES[track], base).href;
+        if (track === 'smeemo' && smeemoPosition > 0) media.currentTime = smeemoPosition;
       }
       catch { failed.add(track); return; }
     }
@@ -78,7 +82,7 @@ export function createSoundtrack({ createMedia = () => new Audio(), now = () => 
     if (media) { media.removeEventListener('error', onError); media.removeAttribute('src'); media.load(); }
   }
   function playbackPosition(){
-    return !disposed&&wanted===track&&requested&&fadeAt!==null&&media&&!media.paused&&Number.isFinite(media.currentTime)
+    return !disposed&&wanted===track&&requested&&fadeAt!==null&&media&&!media.paused&&!media.ended&&!media.seeking&&!media.muted&&media.volume>0&&media.readyState>=3&&Number.isFinite(media.currentTime)
       ? {track,seconds:media.currentTime}:null;
   }
   return { sync, dispose, playbackPosition };

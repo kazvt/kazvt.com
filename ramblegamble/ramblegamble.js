@@ -1,7 +1,7 @@
-import { createSmeemoEncounter, createSmeemoStinger, SMEEMO_RETURN_MS } from "./smeemo-reveal.mjs?v=smeemo-reveal-20261127-v1";
+import { createSmeemoEncounter, createSmeemoStinger, createSmeemoTableSession, SMEEMO_RETURN_MS } from "./smeemo-reveal.mjs?v=music-sync-20261127-v1";
 import { createFloatingSky } from "./floating-sky.mjs?v=sky-variety-20261127-v1";
-import { createStageDance, createDanceClock, dancePose } from "./stage-dance.mjs?v=ambient-tuning-20261127-v1";
-import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=smeemo-theme-20261127-v2";
+import { createStageDance, createDanceClock, dancePose } from "./stage-dance.mjs?v=music-sync-20261127-v1";
+import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=music-sync-20261127-v1";
 import { createMenuMarquee } from "./menu-marquee.mjs?v=corrective-review-20261127-v1";
 import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=smeemo-reveal-20261127-v1";
 import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcony.mjs?v=hazel-balcony-20261127-v1";
@@ -13,7 +13,7 @@ import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state
 import { createCharacterOcclusion } from "./character-occlusion.mjs?v=stage-dance-20261127-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=show-energy-20261127-v1";
-import { createAudienceRenderer, crowdCatAnchor, CROWD_CAT } from "./audience-render.mjs?v=smeemo-reveal-20261127-v1";
+import { createAudienceRenderer, crowdCatAnchor, CROWD_CAT } from "./audience-render.mjs?v=music-sync-20261127-v1";
 import { createShowFX } from "./show-fx.mjs?v=sky-soot-20261127-v1";
 import { createRouletteCabinetFX } from "./roulette-cabinet-fx.mjs?v=sky-soot-20261127-v1";
 import { cameraTravelDuration, isSpookyView, suspenseEase, crowdCloseupPose } from "./spooky-camera.mjs?v=cartoon-machines-20261127-v1";
@@ -136,7 +136,7 @@ import {
   };
   let audience, showFX, stageShow, signGlow, characterSelection, stageDance;
   const danceClock=createDanceClock();
-  let danceTime=0;
+  let danceTime=NaN;
   let characterSelectedAt=-Infinity;
   let crowdClock=0,crowdLastFrame=null;
   const crowdState=createAudienceState(crowdClock,readAudienceMode());
@@ -235,9 +235,10 @@ import {
   let cardMusicMode = "";
   const soundtrack = createSoundtrack();
   const encounter = createSmeemoEncounter();
+  const smeemoTable = createSmeemoTableSession();
   const smeemoAura=document.getElementById("rg-smeemo-aura"), smeemoTag=document.getElementById("rg-smeemo-tag"), smeemoCount=document.getElementById("rg-smeemo-count");
   const stinger=createSmeemoStinger({root:document.getElementById("rg-smeemo-stinger"),video:document.getElementById("rg-smeemo-video"),skip:document.getElementById("rg-smeemo-skip"),caption:document.getElementById("rg-smeemo-stinger-caption"),muted:()=>foley.muted,onFinish:()=>{
-    if(encounter.finish()){canvas.focus({preventScroll:true});transitionToView({kind:"card-table"},{encounterReturn:true});}
+    if(encounter.finish()){smeemoTable.begin();cardMusicMode="";canvas.focus({preventScroll:true});transitionToView({kind:"card-table"},{encounterReturn:true});}
   }});
   function resetEncounter(){
     if(encounter.phase==="hidden")return;
@@ -286,7 +287,7 @@ import {
     if (menuMarquee.muted !== foley.muted) menuMarquee.muted = foley.muted;
     soundtrack.sync(soundtrackFor({
       active: gameStarted && sceneReady && !pauseMenuOpen && !document.hidden && !document.documentElement.hasAttribute("data-rg-host-locked"),
-      muted: foley.muted, dice: diceModeOpen, view: currentView.kind, cardMode: cardMusicMode, encounter:encounter.phase==="stinger"?"stinger":encounter.song,
+      muted: foley.muted, dice: diceModeOpen, view: currentView.kind, cardMode: cardMusicMode, encounter:encounter.phase==="stinger"?"stinger":encounter.song, smeemoTable:smeemoTable.active, detached:cameraDetached||!!freecam?.active,
     }), { retry });
   }
   for (const type of ["pointerdown", "keydown", "click"]) document.addEventListener(type, event => {
@@ -2342,12 +2343,14 @@ import {
       menuPresentation.sync();
     }
     cardMusicMode = mode;
+    smeemoTable.choose(mode);
     result.hidden = true;
     window.dispatchEvent(new Event("rg:close-host-panel"));
     if (cameraDetached || currentView.kind !== "card-table") { crowdState.react(mode === "menu" || mode === "shop" ? "idle" : "suspense",crowdClock); transitionToView({ kind: "card-table" }); }
     else syncMusic(); // Same camera, different card game (notably Smeemo).
   }
 
+  window.addEventListener("rg:smeemo-round-state", event => {smeemoTable.observe(event.detail);syncMusic();});
   window.addEventListener("rg:card-game-active", (event) => activateCardGameMode(event.detail?.mode));
   window.addEventListener("rg:close-card-games", () => {
     pendingCardGameMode = "";
@@ -2739,9 +2742,8 @@ import {
     };
     const selectionId = !cameraDetached && !freecam?.active ? selectedCharacterId(currentView) : null;
     for (const billboard of billboards) {
-      billboard.renderPose=characterRenderPose(billboard,billboard.id===selectionId?time-characterSelectedAt:Infinity,reducedMotion.matches,{time:!cameraDetached&&!freecam?.active&&!cameraTransition&&["contestants","contestant","host"].includes(currentView.kind)?time:undefined,...characterSelection?.reaction(billboard.id,time)});
-      const phase=({faroe:0,erin:.055,kaz:.11,"lillie-host":.08,hazel:.18})[billboard.id]??0;
-      const dance=dancePose(danceTime,reducedMotion.matches ? 0 : (billboard.seated ? .38 : .9),phase);
+      billboard.renderPose=characterRenderPose(billboard,billboard.id===selectionId?time-characterSelectedAt:Infinity,reducedMotion.matches,{time:undefined,...characterSelection?.reaction(billboard.id,time)});
+      const dance=dancePose(danceTime,reducedMotion.matches ? 0 : (billboard.seated ? .38 : .9));
       billboard.renderPose.worldWidth*=dance.width;
       billboard.renderPose.shear=dance.shear;
       const quad = projectCharacterQuad(billboard.renderPose,camera.position,project,viewport,camera.near);
@@ -2960,8 +2962,8 @@ import {
     syncVipAmbience(roomVisible,emotion);
     syncMusic();
     // Intentional 30 FPS pose cadence, shared by the stage and DOM depth pass.
-    danceTime=Math.floor(danceClock.step(time,roomVisible&&!diceModeOpen,soundtrack.playbackPosition())*30/1000)*1000/30;
-    stageDance?.update(danceTime,roomVisible&&!diceModeOpen&&!reducedMotion.matches);
+    danceTime=Math.floor(danceClock.step(time,roomVisible&&!diceModeOpen&&!reducedMotion.matches,soundtrack.playbackPosition())*30/1000)*1000/30;
+    stageDance?.update(danceTime,Number.isFinite(danceTime));
     audience?.update(crowdClock,emotion,reducedMotion.matches,camera.position,{time:danceTime,focused:encounter.phase==="focused"&&currentView.kind==="smeemo-crowd"&&!cameraTransition&&!cameraDetached&&!freecam?.active,revealed:encounter.revealed,quiet:encounter.quiet});
     updateSmeemoEncounter(time,roomVisible);
     preview.classList.toggle("is-trivia",!cameraDetached && currentView.kind === "trivia");

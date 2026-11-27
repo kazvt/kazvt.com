@@ -9,7 +9,7 @@ const flush = async () => { await Promise.resolve(); await Promise.resolve(); };
 function fixture({defer=false}={}) {
   const log=[],pending=[];let clock=0,created=0;
   class Media extends EventTarget {
-    paused=true; volume=1; currentTime=0; error=null; _src='';
+    paused=true; readyState=4; volume=1; currentTime=0; error=null; _src='';
     set src(value){assert.ok(this.paused,'must pause before switching source');this._src=value;this.currentTime=0;this.error=null;log.push(['src',value]);}
     get src(){return this._src;}
     play(){this.paused=false;log.push(['play',this.src]);return defer ? new Promise((resolve,reject)=>pending.push({resolve,reject})) : Promise.resolve();}
@@ -30,14 +30,8 @@ test('three tracks; exact mode priority including silent games, pause, lock and 
   assert.equal(mode('overview','smeemo'),'general');
   assert.equal(mode('dice-door'),null);
   for(const view of ['overview','slot','roulette','card-table','hazel']) for(const extra of [{active:false},{muted:true},{dice:true}]) assert.equal(mode(view,'menu',extra),null);
-  assert.deepEqual(Object.values(SOUNDTRACK_FILES),['sonic_gammon_leel_theme.mp3','sonic_no_daifuugou_title_theme.mp3','smeemo_theme.mp3']);
+  assert.deepEqual(Object.values(SOUNDTRACK_FILES),['sonic_gammon_leel_theme.mp3','sonic_no_daifuugou_title_theme.mp3','smeemo_ambiance.mp3']);
   assert.equal(mode('smeemo-crowd','',{encounter:'smeemo'}),'smeemo');assert.equal(mode('card-table','smeemo',{encounter:'smeemo'}),'smeemo');assert.equal(mode('smeemo-crowd','',{encounter:'stinger'}),null);assert.equal(mode('smeemo-crowd','',{encounter:'smeemo',muted:true}),null);
-});
-
-test('Smeemo theme uses a fresh same-origin URL after installation',async()=>{
-  const f=fixture();f.mixer.sync('smeemo');await flush();
-  assert.match(f.media.src,/assets\/music\/smeemo_theme\.mp3\?v=smeemo-theme-20261127-v2$/);
-  f.mixer.dispose();
 });
 
 test('shared songs are uninterrupted, fade in, switch on one media voice, and suspend/resume without rewinding',async()=>{
@@ -79,7 +73,7 @@ test('autoplay rejection is retried only on user input; missing recording is not
 const js=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
 const section=(from,to)=>js.slice(js.indexOf(from),js.indexOf(to,js.indexOf(from)));
 test('actual main scene card mode events switch music even without camera movement; pending Dice changes do not leak music',()=>{
-  const calls=[],handlers={};const context={pendingTrivia:false,pendingCardGameMode:'',cardMusicMode:'',sceneReady:true,diceModeOpen:false,gameStarted:true,pauseMenuOpen:false,cameraDetached:false,currentView:{kind:'card-table'},result:{hidden:false},crowdState:{react(){}},crowdClock:0,Event,window:{dispatchEvent:e=>calls.push(e.type),addEventListener:(name,fn)=>handlers[name]=fn},syncMusic:()=>calls.push(mode(context.currentView.kind,context.cardMusicMode,{dice:context.diceModeOpen})),transitionToView:view=>{context.currentView=view;context.syncMusic();}};
+  const calls=[],handlers={};const context={smeemoTable:{choose(){},observe(){}},pendingTrivia:false,pendingCardGameMode:'',cardMusicMode:'',sceneReady:true,diceModeOpen:false,gameStarted:true,pauseMenuOpen:false,cameraDetached:false,currentView:{kind:'card-table'},result:{hidden:false},crowdState:{react(){}},crowdClock:0,Event,window:{dispatchEvent:e=>calls.push(e.type),addEventListener:(name,fn)=>handlers[name]=fn},syncMusic:()=>calls.push(mode(context.currentView.kind,context.cardMusicMode,{dice:context.diceModeOpen})),transitionToView:view=>{context.currentView=view;context.syncMusic();}};
   runInNewContext(section('  function activateCardGameMode(mode) {','  goButton.addEventListener'),context);
   const activate=m=>handlers['rg:card-game-active']({detail:{mode:m}});
   activate('menu');assert.equal(calls.at(-1),'cards');activate('smeemo');assert.equal(calls.at(-1),null);activate('shop');assert.equal(calls.at(-1),'cards');
@@ -87,7 +81,6 @@ test('actual main scene card mode events switch music even without camera moveme
   context.diceModeOpen=true;activate('smeemo');assert.equal(context.pendingCardGameMode,'smeemo');assert.equal(calls.at(-1),'rg:close-dice-mode');
 });
 test('host lifecycle stops music before intro, resumes only after intro is paused, and cleans up independently of Foley',()=>{
-  assert.match(js,/soundtrack\.mjs\?v=smeemo-theme-20261127-v2/);
   const menu=section('  function showPauseMenu() {','  function activateTriviaMode()');
   assert.ok(menu.indexOf('syncMusic();')<menu.indexOf('menuPresentation.sync();'));
   assert.ok(menu.lastIndexOf('menuPresentation.sync();')<menu.lastIndexOf('syncMusic(true);'));
@@ -101,4 +94,24 @@ test('a browser-paused successful soundtrack resumes on a gesture without a seco
  const f=fixture();f.mixer.sync('general');await flush();f.advance(300);f.mixer.sync('general');f.media.currentTime=27;f.media.pause();
  for(let i=0;i<120;i++)f.mixer.sync('general');assert.equal(f.log.filter(a=>a[0]==='play').length,1);
  f.mixer.sync('general',{retry:true});await flush();f.advance(300);f.mixer.sync('general');assert.equal(f.media.volume,.2);assert.equal(f.media.currentTime,27);assert.equal(f.created,1);assert.equal(f.log.filter(a=>a[0]==='src').length,1);assert.equal(f.log.filter(a=>a[0]==='play').length,2);
+});
+
+test('Smeemo ambience is one resumable track and never a dancing clock',async()=>{
+ const f=fixture(),{mixer,media}=f;
+ mixer.sync('smeemo');await flush();f.advance(300);mixer.sync('smeemo');media.currentTime=14.25;
+ mixer.sync('general');await flush();assert.equal(media.currentTime,0);assert.equal(f.created,1);
+ mixer.sync('smeemo');await flush();assert.equal(media.currentTime,14.25);assert.match(media.src,/smeemo_ambiance\.mp3$/);
+ mixer.sync(null);assert.ok(media.paused);assert.equal(mixer.playbackPosition(),null);
+ mixer.sync('smeemo');await flush();assert.equal(media.currentTime,14.25);
+});
+test('dance clock is unavailable until audible playback, and on buffering, pause, mute or seeking',async()=>{
+ const f=fixture(),{mixer,media}=f;mixer.sync('general');assert.equal(mixer.playbackPosition(),null);await flush();assert.equal(mixer.playbackPosition(),null);f.advance(300);mixer.sync('general');media.currentTime=2.5;assert.deepEqual(mixer.playbackPosition(),{track:'general',seconds:2.5});
+ for(const [k,v] of [['readyState',2],['paused',true],['muted',true],['seeking',true],['ended',true]]){const old=media[k];media[k]=v;assert.equal(mixer.playbackPosition(),null,k);media[k]=old;}
+});
+test('table horror has strict camera and mode priority',()=>{
+ for(const cardMode of ['','menu','smeemo'])assert.equal(mode('card-table',cardMode,{smeemoTable:true}),'smeemo');
+ for(const view of ['overview','slot','roulette','trivia','dice-door'])assert.notEqual(mode(view,'smeemo',{smeemoTable:true}),'smeemo');
+ for(const m of ['shop','red-handed','quiplash'])assert.equal(mode('card-table',m,{smeemoTable:true}),'cards');
+ for(const extra of [{muted:true},{active:false},{dice:true},{detached:true},{encounter:'stinger'}])assert.notEqual(mode('card-table','smeemo',{smeemoTable:true,...extra}),'smeemo');
+ assert.equal(mode('card-table','smeemo',{smeemoTable:false}),null);
 });

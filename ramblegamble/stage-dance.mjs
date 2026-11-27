@@ -15,20 +15,14 @@ export function dancePose(time, strength=1, phase=0){
   return {width:1-amount*(.085+.008*shake),shear:side*amount*(.095+.012*shake)};
 }
 export function cardSwing(time,phase=0){return Number.isFinite(time)?Math.sin((time/DANCE_CYCLE_MS+phase)*Math.PI*2)*Math.PI/60:0;}
-// Use the playing media's elapsed time where available. A track switch, loop,
-// seek, stall or missing recording must not teleport the animation phase.
-export function createDanceClock(){let last=null,mediaLast=null,offset=0,elapsed=0;return {step(time,active,media){
-  if(!active){last=mediaLast=null;return elapsed;}
-  if(last!==null){const dt=Math.max(0,Math.min(100,time-last));const md=media&&mediaLast&&media.track===mediaLast.track?(media.seconds-mediaLast.seconds)*1000:NaN;
-    elapsed+=dt;
-    if(Number.isFinite(md)&&md>=0&&md<=Math.max(250,dt*3)){
-      // Bounded phase correction avoids double-counting quantized media times.
-      const error=media.seconds*1000+offset-elapsed;
-      if(Math.abs(error)>250)offset=elapsed-media.seconds*1000;
-      else elapsed+=Math.max(-dt*.2,Math.min(dt*.2,error*.18));
-    }else if(media)offset=elapsed-media.seconds*1000;
-  }else if(media)offset=elapsed-media.seconds*1000;
-  last=time;mediaLast=media;return elapsed;
+// A single absolute musical clock. No wall-time fallback, no phase drift.
+// The two original recordings are not supplied: BPM and downbeat are configurable
+// estimates, not measured beat maps. The horror ambience is deliberately excluded.
+export const DANCE_TRACKS=Object.freeze({general:Object.freeze({bpm:120,downbeat:0}),cards:Object.freeze({bpm:120,downbeat:0})});
+export function createDanceClock(){return {step(_time,active,media){
+  if(!active||!media||!Object.hasOwn(DANCE_TRACKS,media.track)||!Number.isFinite(media.seconds)||media.seconds<0)return NaN;
+  const {bpm,downbeat}=DANCE_TRACKS[media.track];
+  return (media.seconds-downbeat)*1000*bpm/120;
 }};}
 // Authored rg_stage.gltf mesh 0: paired front/back card primitives, plus two
 // cards sharing primitive 11. Dice are 8 disconnected 12-triangle cubes in
@@ -63,19 +57,19 @@ export function createStageDance(THREE,stage,associations){
   // UVs are retained. The source with no remaining faces is detached.
   for(const s of splits){const parent=s.source.parent;for(const m of s.meshes)parent.add(m);if(s.remaining)s.source.geometry=s.remaining;else parent.remove(s.source);s.parent=parent;}
   stage.updateMatrixWorld(true);
-  function add(objects,strength,phase,normal=null){const box=bounds(objects),pivot=box.getCenter(new THREE.Vector3());if(!normal)pivot.y=box.min.y;
-    records.push({objects:objects.map(o=>({o,base:o.matrix.clone(),world:o.matrixWorld.clone(),parentInverse:o.parent.matrixWorld.clone().invert(),auto:o.matrixAutoUpdate})),pivot,strength,phase,axis:normal?new THREE.Vector3(...normal).normalize():null});}
+  function add(objects,strength,normal=null){const box=bounds(objects),pivot=box.getCenter(new THREE.Vector3());if(!normal)pivot.y=box.min.y;
+    records.push({objects:objects.map(o=>({o,base:o.matrix.clone(),world:o.matrixWorld.clone(),parentInverse:o.parent.matrixWorld.clone().invert(),auto:o.matrixAutoUpdate})),pivot,strength,axis:normal?new THREE.Vector3(...normal).normalize():null});}
   // Faroe, Erin, Kaz: move the stand and its extruded letters in lockstep.
-  [[4,6],[2,5],[3,1]].forEach((ids,i)=>add(ids.map(id=>nodes.get(id)),1,i*.055));
+  [[4,6],[2,5],[3,1]].forEach((ids,i)=>add(ids.map(id=>nodes.get(id)),1));
   // Actual tall chairs, plus four individual chairs around the middle table.
-  [12,11,10].forEach((id,i)=>add([nodes.get(id)],.8,i*.055));
-  [9,13,14,15].forEach((id,i)=>add([nodes.get(id)],.65,.08+i*.065));
-  CARD_GROUPS.forEach((c,i)=>add(c.parts.map(p=>primitives.get(p)),1,i*.085,c.normal));
-  dice.forEach((m,i)=>add([m],.56,.13+i*.1));
-  add([nodes.get(17)],.25,.035);
+  [12,11,10].forEach((id,i)=>add([nodes.get(id)],.8));
+  [9,13,14,15].forEach((id,i)=>add([nodes.get(id)],.65));
+  CARD_GROUPS.forEach((c,i)=>add(c.parts.map(p=>primitives.get(p)),1,c.normal));
+  dice.forEach((m,i)=>add([m],.56));
+  add([nodes.get(17)],.25);
   const d=new THREE.Matrix4(),to=new THREE.Matrix4(),from=new THREE.Matrix4(),worldDelta=new THREE.Matrix4();let dancing=false,lastTime=null;
   function update(time,active=true){if((!active&&!dancing)||(active&&dancing&&time===lastTime))return;dancing=active;lastTime=time;
-    for(const r of records){const {pivot}=r; if(r.axis)d.makeRotationAxis(r.axis,active?cardSwing(time,r.phase):0);else{const p=active?dancePose(time,r.strength,r.phase):{width:1,shear:0};d.set(p.width,p.shear,0,0,0,1,0,0,0,0,1,0,0,0,0,1);}
+    for(const r of records){const {pivot}=r; if(r.axis)d.makeRotationAxis(r.axis,active?cardSwing(time):0);else{const p=active?dancePose(time,r.strength):{width:1,shear:0};d.set(p.width,p.shear,0,0,0,1,0,0,0,0,1,0,0,0,0,1);}
       worldDelta.copy(to.makeTranslation(pivot.x,pivot.y,pivot.z)).multiply(d).multiply(from.makeTranslation(-pivot.x,-pivot.y,-pivot.z));
       for(const {o,base,world,parentInverse,auto} of r.objects){if(active){o.matrixAutoUpdate=false;o.matrix.copy(parentInverse).multiply(worldDelta).multiply(world);}else{o.matrix.copy(base);o.matrixAutoUpdate=auto;}o.matrixWorldNeedsUpdate=true;}
     }

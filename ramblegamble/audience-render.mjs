@@ -1,4 +1,4 @@
-import { dancePose } from './stage-dance.mjs?v=ambient-tuning-20261127-v1';
+import { dancePose } from './stage-dance.mjs?v=music-sync-20261127-v1';
 // Original low-resolution silhouette art, three world-space cutout texture panels.
 // Only these canvases update at 6 fps; the rest of the scene renders normally.
 export const CROWD_FPS=6;
@@ -77,19 +77,19 @@ export function crowdPose(person,frame,emotion) {
 export function crowdDancePose(person,frame) {
   const d=person.dance;
   if(!d)return null;
-  const t=frame/CROWD_FPS, beat=t*5.2*d.speed+d.phase;
+  const t=frame/CROWD_FPS, beat=t*Math.PI*2;
   const pulse=Math.sin(beat), hop=Math.max(0,Math.sin(beat*.5))*5;
   return {x:Math.round(d.center+d.side*(5.1+1.3*pulse)),
     y:Math.round(person.base-hop),lean:d.side*(2.6*pulse),
     hip:Math.round(-d.side*(2.8+2*pulse)),arm:10+Math.round(5*(1+Math.sin(beat+.9))),
     partnerSide:-d.side};
 }
-export function paintCrowd(ctx,width,height,people,frame,emotion) {
+export function paintCrowd(ctx,width,height,people,frame,emotion,musicFrame=frame) {
   ctx.clearRect(0,0,width,height);
   const poly=(pts,color)=>{ctx.fillStyle=color;ctx.beginPath();pts.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.fill();};
   const palettes=[['#473653','#40304e','#382940'],['#3d2d4c','#332541','#423051'],['#332541','#2c203b','#39294b'],['#291d37','#30223e','#352441'],['#21192f','#292039','#30233e']];
   for(const p of people) {
-    const dance=emotion==='cheer'?crowdDancePose(p,frame):null;
+    const dance=emotion==='cheer'&&Number.isFinite(musicFrame)?crowdDancePose(p,musicFrame):null;
     const {x,y,arm,arms}=dance?{...dance,arms:2}:crowdPose(p,frame,emotion),w=Math.round(p.w),h=Math.round(p.h),head=y-h,hw=Math.round(w*.67),color=palettes[p.row][p.shade];
     if(dance){
       const hx=Math.round(x+dance.lean),hip=x+dance.hip;
@@ -106,7 +106,7 @@ export function paintCrowd(ctx,width,height,people,frame,emotion) {
         ctx.strokeStyle=color;ctx.lineWidth=4+p.row*.35;ctx.beginPath();
         ctx.moveTo(hx+side*w*.48,head+17);
         ctx.lineTo(hx+side*w*.9,head+9-arm*.45);
-        ctx.lineTo(linked?p.dance.center:hx+side*w*.9,linked?Math.round(p.base-30-4*Math.sin(frame/CROWD_FPS*5.2*p.dance.speed+p.dance.phase)):head+4-arm);
+        ctx.lineTo(linked?p.dance.center:hx+side*w*.9,linked?Math.round(p.base-30-4*Math.sin(musicFrame/CROWD_FPS*Math.PI*2)):head+4-arm);
         ctx.stroke();
       }
       continue;
@@ -169,16 +169,15 @@ export function createCrowdCat(THREE,group) {
     mesh.visible=ready&&yaw!==null;
     if(!mesh.visible)return;
     mesh.rotation.y=yaw;
-    const beat=frame/CROWD_FPS*2.1+1.7;
     const revealed=!!dance?.revealed;
     if(revealed&&!revealTex){revealTex=new THREE.TextureLoader().load(new URL('./assets/berries/smeemo_scramble.png',import.meta.url).href,()=>{if(!disposed)revealReady=true;},undefined,()=>{revealReady=false;});revealTex.magFilter=THREE.NearestFilter;revealTex.minFilter=THREE.NearestFilter;revealTex.generateMipmaps=false;revealTex.colorSpace=THREE.SRGBColorSpace;}
     const map=revealed&&revealReady?revealTex:tex;if(mesh.material.map!==map){mesh.material.map=map;mesh.material.needsUpdate=true;}
-    const focused=!!dance?.focused&&!reduced&&!revealed;
+    const focused=!!dance?.focused&&!reduced&&!revealed&&Number.isFinite(dance?.time);
     mesh.material.opacity=revealed?1:dance?.focused ? .96 : .86;
     mesh.renderOrder=revealed?2:-1;
-    mesh.position.y=anchor.y+(focused||reduced||revealed?0:emotion==='cheer'?Math.max(0,Math.sin(beat))* .055:Math.sin(beat)*.018);
+    mesh.position.y=anchor.y;
     mesh.matrixAutoUpdate=true;
-    if(focused){const p=dancePose(dance.time,.78,.16),h=CROWD_CAT.height;
+    if(focused){const p=dancePose(dance.time,.78),h=CROWD_CAT.height;
       mesh.updateMatrix();mesh.matrix.multiply(new THREE.Matrix4().set(p.width,p.shear,0,p.shear*h/2,0,1,0,0,0,0,1,0,0,0,0,1));mesh.matrixAutoUpdate=false;mesh.matrixWorldNeedsUpdate=true;}
 
   },dispose(){if(disposed)return;disposed=true;mesh.visible=false;group.remove(mesh);tex.dispose();revealTex?.dispose();mesh.geometry.dispose();mesh.material.dispose();}};
@@ -197,14 +196,15 @@ export function createAudienceRenderer(THREE,scene) {
   // A failed optional image load must never disable the procedural crowd.
   let cat=null;
   try { cat=createCrowdCat(THREE,group); } catch(error) { console.warn('Audience decoration unavailable',error); }
-  let oldFrame=-1, oldEmotion='';
+  let oldFrame=-1, oldEmotion='',oldMusicFrame=null;
   return {group,get cat(){return cat?.mesh;},dispose(){cat?.dispose();scene.remove(group);for(const p of panels){p.tex.dispose();p.mesh.geometry.dispose();p.mesh.material.dispose();}},update(time,emotion,reduced=false,eye,dance){
     if(!group.visible)return;
     const frame=reduced||dance?.quiet?0:Math.floor(time*CROWD_FPS/1000);
     // Orientation must follow every rendered camera frame, not the 6 FPS paint clock.
     cat?.update(frame,emotion,reduced,eye,dance);
-    if(frame===oldFrame&&emotion===oldEmotion)return;
-    oldFrame=frame;oldEmotion=emotion;
-    for(const p of panels){paintCrowd(p.ctx,p.canvas.width,p.canvas.height,p.people,frame,emotion);applyCrowdEdgeMask(p.ctx,p.canvas.width,p.canvas.height,p.mask);p.tex.needsUpdate=true;}
+    const musicFrame=emotion==='cheer'&&!reduced&&!dance?.quiet&&Number.isFinite(dance?.time)?Math.floor(dance.time*CROWD_FPS/1000):null;
+    if(frame===oldFrame&&emotion===oldEmotion&&musicFrame===oldMusicFrame)return;
+    oldFrame=frame;oldEmotion=emotion;oldMusicFrame=musicFrame;
+    for(const p of panels){paintCrowd(p.ctx,p.canvas.width,p.canvas.height,p.people,frame,emotion,musicFrame);applyCrowdEdgeMask(p.ctx,p.canvas.width,p.canvas.height,p.mask);p.tex.needsUpdate=true;}
   }};
 }

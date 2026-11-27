@@ -121,3 +121,11 @@ test('only stage-left audience extends toward the stage, preserving physical fad
  assert.equal(crowdEdgeAlpha(left,1-3.5/left.width),1);
  assert.equal(crowdEdgeAlpha(left,1),0);
 });
+
+test('music-dependent paired dancing shares one beat and disables without music while cheer stays visible',()=>{
+ const people=crowdPeople(396,19),plain=people.map(({dance,...p})=>p),paired=people.filter(p=>p.dance);
+ const a=paired[0],b=paired.find(p=>p.dance.side===a.dance.side&&p.dance.center!==a.dance.center);
+ for(let t=0;t<12;t++)assert.equal(crowdDancePose(a,t).lean,crowdDancePose(b,t).lean);
+ function capture(list,musicFrame){const calls=[];const ctx=new Proxy({}, {get:(o,k)=>(...args)=>calls.push([k,...args]),set:(o,k,v)=>{calls.push([k,v]);return true;}});paintCrowd(ctx,396,180,list,4,'cheer',musicFrame);return calls;}
+ assert.deepEqual(capture(people,null),capture(plain,null));assert.notDeepEqual(capture(people,3),capture(plain,3));
+});
