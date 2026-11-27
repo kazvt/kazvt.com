@@ -34,6 +34,18 @@ class RenderTests(unittest.TestCase):
  def setUpClass(cls):
   import importlib.util
   spec=importlib.util.spec_from_file_location('render_sky',Path(__file__).with_name('render-sky.py'));cls.render=importlib.util.module_from_spec(spec);spec.loader.exec_module(cls.render)
+ def test_two_sparse_casts_and_genuinely_new_model_geometry(self):
+  from sky_models import CASTS,RADII,new_models
+  self.assertEqual([len(c) for c in CASTS],[17,17]);self.assertEqual(len(RADII),17)
+  a,b=(set(c)-{'orb','text'} for c in CASTS);self.assertEqual(len(a),14);self.assertEqual(len(b),14);self.assertFalse(a&b)
+  self.assertTrue(all(c.count('orb')==2 and c.count('text')==1 for c in CASTS))
+  r=self.render;new=new_models(r.mesh_box,r.mesh_ellipsoid,r.mesh_cylinder,r.mesh_cone,r.PALETTE)
+  self.assertTrue(b<=new.keys())
+  for name,parts in new.items():
+   v=r.normalized(parts);vertices=np.concatenate([x[0].reshape(-1,3) for x in v]);self.assertTrue(np.isfinite(vertices).all(),name);self.assertAlmostEqual(np.linalg.norm(vertices,axis=1).max(),1.,places=6);self.assertTrue(compound(v,45),name)
+  self.assertNotEqual(len(new['car2']),len(r.car(r.PALETTE[0])))
+  self.assertNotEqual(len(new['book2']),len(r.book(r.PALETTE[0])))
+  self.assertNotEqual(len(new['cat2']),len(r.cat(r.PALETTE[0])))
  def test_exact_authored_concave_mesh_does_not_fill_open_space(self):
   r=self.render;i=np.eye(3);zero=np.zeros(3);probe=Hull(box((2,2,2)))
   # These points lie well inside the OLD whole-component convex envelope,

@@ -10,10 +10,11 @@ from PIL import Image, ImageDraw, ImageFont
 from scipy.spatial.transform import Rotation
 import trimesh
 from sky_materials import mapped_parts
+from sky_models import CASTS,RADII,new_models
 from sky_physics import Body, Hull, box, compound, simulate, text_rotation, text_hulls
 
 HERE=Path(__file__).resolve().parent
-N=1024; FPS=20; SECONDS=20; TAU=math.tau
+N=1024; TILE_PIXELS=768; FPS=20; SECONDS=20; TAU=math.tau
 rng=np.random.default_rng(78298)
 PALETTE=['#c6a8ee','#ffe3a0','#a5dce9','#f4a5a9','#f8c29b','#e9b5e3','#353041']
 def rgb(s):return np.array(tuple(bytes.fromhex(s.lstrip('#'))),float)
@@ -196,31 +197,22 @@ _worker_frame=None
 def bake_one(f):
  return f,_worker_frame(f)
 
-def main():
- parser=argparse.ArgumentParser();parser.add_argument('--models',type=Path);parser.add_argument('--eye',type=Path);parser.add_argument('--output',type=Path,default=HERE);parser.add_argument('--preview-only',action='store_true');args=parser.parse_args();args.output.mkdir(parents=True,exist_ok=True)
- assets=stage_assets();assets.update(chair=retro_chair(PALETTE[0]),desk=retro_desk(PALETTE[4]),table=retro_table(PALETTE[2]),book=book(PALETTE[3]),book2=book(PALETTE[1]),car=car(PALETTE[2]),car2=car(PALETTE[5]),boat=boat(PALETTE[1]),cat=cat(PALETTE[6]),cat2=cat(PALETTE[4]))
- if args.models:
-  for k in list(assets):
-   path=args.models/(k+'.glb')
-   if path.is_file():assets[k]=override(path,PALETTE[0])
- assets={k:normalized(v) for k,v in assets.items()}; collision_assets=assets; assets={k:mapped_parts(k,v) for k,v in assets.items()};photo=np.asarray(Image.open(args.eye).convert('RGB')) if args.eye else None
- # Sparse clusters with ample negative space. No model is a live scene object.
- names=['chair','book','orb','boat','card1','cat','car','desk','die','text','orb','book2','chair2','card2','cat2','car2','table',
-        'chair','desk','book2','boat','cat2','card1','die','car2','table','orb','chair2','book','car','cat','card2','die','orb']
- radii=[round(r*.86) for r in [60,51,73,59,50,49,55,67,39,95,64,43,48,48,45,50,49,53,62,46,54,44,48,40,50,54,64,50,48,53,45,48,38,65]]
- pos=[(85+(i%6)*166+((i//6)%2)*12,85+(i//6)*166) for i in range(len(names))]
- vel=rng.uniform(-34,34,(len(names),2));vel[0]=[27,13];vel[1]=[-27,14];vel[6]=[24,25];vel[10]=[-26,-24]
- text=text_sprite();assets['text']=text_mesh(text)
- bodies=[];phases=rng.uniform(0,TAU,(len(names),3))
+def make_cast(names,collision_assets,assets,photo,seed):
+ local_rng=np.random.default_rng(seed)
+ radii=list(RADII)
+ pos=[(122+(i%5)*195+((i//5)%2)*15,125+(i//5)*245) for i in range(len(names))]
+ vel=local_rng.uniform(-34,34,(len(names),2));vel[0]=[27,13];vel[1]=[-27,14];vel[6]=[24,25];vel[10]=[-26,-24]
+ text=text_sprite();assets={**assets,'text':text_mesh(text)}
+ bodies=[];phases=local_rng.uniform(0,TAU,(len(names),3))
  for i,(name,r) in enumerate(zip(names,radii)):
-  ang=phases[i];rot=Rotation.from_euler('xyz',[(1.12 if name.startswith('book') else -.18)+.35*math.sin(ang[0]),.55*math.sin(ang[1])+.28+(math.pi if name=='card2' else 0),.32*math.sin(ang[2])]);w=rng.uniform(-1.65,1.65,3)
+  ang=phases[i];rot=Rotation.from_euler('xyz',[(1.12 if name.startswith('book') else -.18)+.35*math.sin(ang[0]),.55*math.sin(ang[1])+.28+(math.pi if name=='card2' else 0),.32*math.sin(ang[2])]);w=local_rng.uniform(-1.65,1.65,3)
   if name=='orb':
    sphere=trimesh.creation.icosphere(subdivisions=2);hulls=[Hull(sphere.vertices*r)]
   elif name=='text':
    hulls=text_hulls(np.asarray(text)[:,:,3],r)
    rot=text_rotation(0);w=np.zeros(3)
   else:hulls=compound(collision_assets[name],r)
-  bodies.append(Body(hulls,[pos[i][0],-pos[i][1]+N,rng.uniform(-18,18)],[vel[i][0],-vel[i][1],rng.uniform(-9,9)],rot,w,r,text=name=='text'))
+  bodies.append(Body(hulls,[pos[i][0],-pos[i][1]+N,local_rng.uniform(-18,18)],[vel[i][0],-vel[i][1],local_rng.uniform(-9,9)],rot,w,r,text=name=='text'))
  blend=FPS*2;history=simulate(bodies,SECONDS+blend/FPS,FPS);eye_cache={}
  def frame(f):
   p,rotations=history[f];canvas=np.zeros((N,N,4),np.uint8);depth=np.full((N,N),-np.inf,np.float32)
@@ -242,6 +234,29 @@ def main():
   if f<FPS*SECONDS-blend:return frame(f+blend)
   i=f-(FPS*SECONDS-blend);t=i/blend;t=t*t*(3-2*t)
   return crossfade(frame(f+blend),frame(i),t)
+ return loop_frame
+
+def main():
+ parser=argparse.ArgumentParser();parser.add_argument('--models',type=Path);parser.add_argument('--eye',type=Path);parser.add_argument('--output',type=Path,default=HERE);parser.add_argument('--preview-only',action='store_true');args=parser.parse_args();args.output.mkdir(parents=True,exist_ok=True)
+ assets=stage_assets();assets.update(chair=retro_chair(PALETTE[0]),desk=retro_desk(PALETTE[4]),table=retro_table(PALETTE[2]),book=book(PALETTE[3]),book2=book(PALETTE[1]),car=car(PALETTE[2]),car2=car(PALETTE[5]),boat=boat(PALETTE[1]),cat=cat(PALETTE[6]),cat2=cat(PALETTE[4]))
+ assets.update(new_models(mesh_box,mesh_ellipsoid,mesh_cylinder,mesh_cone,PALETTE))
+ if args.models:
+  for k in list(assets):
+   path=args.models/(k+'.glb')
+   if path.is_file():assets[k]=override(path,PALETTE[0])
+ assets={k:normalized(v) for k,v in assets.items()}; collision_assets=assets; assets={k:mapped_parts(k,v) for k,v in assets.items()}
+ photo=np.asarray(Image.open(args.eye).convert('RGB')) if args.eye else None
+ casts=[make_cast(names,collision_assets,assets,photo,78298+i*1097) for i,names in enumerate(CASTS)]
+ def loop_frame(f):
+  # Premultiplied resize prevents dark transparent edges. Pack two alternate
+  # color tiles vertically; ffmpeg places their matching alpha column at right.
+  out=[]
+  for cast in casts:
+   a=cast(f).astype(np.float32)/255;alpha=a[:,:,3:4];a[:,:,:3]*=alpha
+   a=cv2.resize(a,(TILE_PIXELS,TILE_PIXELS),interpolation=cv2.INTER_AREA)
+   a[:,:,:3]/=np.maximum(a[:,:,3:4],1e-6)
+   out.append(np.uint8(np.clip(a*255+.5,0,255)))
+  return np.concatenate(out,axis=0)
  with tempfile.TemporaryDirectory() as tmp:
   d=Path(tmp);count=1 if args.preview_only else FPS*SECONDS
   global _worker_frame

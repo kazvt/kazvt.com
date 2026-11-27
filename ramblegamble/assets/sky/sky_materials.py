@@ -25,6 +25,11 @@ def material_map(kind,seed):
 
 def classify(name,color):
  r,g,b=color/255
+ if name in ('television','arcade','submarine','plane') and b>r and max(color)<145:return 'glass'
+ if name in ('cart','lamp','telephone','cassette','train','scooter','plane','submarine') and max(color)-min(color)<45:return 'metal'
+ if name in ('train','scooter') and max(color)<90:return 'rubber'
+ if name in ('armchair','umbrella'):return 'fabric'
+ if name=='guitar' and r>.55:return 'wood'
  if name.startswith('cat'):return 'fur' if not(r>.8 and g>.6 and b<.5) else 'paint'
  if name.startswith('book'):return 'paper' if r>.8 and g>.75 and b>.65 else 'fabric' if r>.55 else 'metal'
  if name.startswith('car'):

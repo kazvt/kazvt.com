@@ -1,7 +1,7 @@
 import { createSmeemoEncounter, createSmeemoStinger, SMEEMO_RETURN_MS } from "./smeemo-reveal.mjs?v=smeemo-reveal-20261127-v1";
-import { createFloatingSky } from "./floating-sky.mjs?v=sky-refresh-20261127-v3";
+import { createFloatingSky } from "./floating-sky.mjs?v=sky-variety-20261127-v1";
 import { createStageDance, createDanceClock, dancePose } from "./stage-dance.mjs?v=ambient-tuning-20261127-v1";
-import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=smeemo-theme-20261127-v1";
+import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=smeemo-reveal-20261127-v1";
 import { createMenuMarquee } from "./menu-marquee.mjs?v=corrective-review-20261127-v1";
 import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=smeemo-reveal-20261127-v1";
 import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcony.mjs?v=hazel-balcony-20261127-v1";
@@ -2975,7 +2975,7 @@ import {
     }
     if (!canShowRouletteCabinet() || reducedMotion.matches) rouletteCabinetFX?.reset();
     slotCabinetFX?.update(time, { active: canShowCabinetFX(), reduced: reducedMotion.matches });
-    floatingSky?.update(camera, roomVisible && !diceModeOpen);
+    floatingSky?.update(camera, roomVisible && !diceModeOpen, time);
     updateSkyAnimations(time);
     updateLiquidPortal(time);
     if (diceModeOpen) {
