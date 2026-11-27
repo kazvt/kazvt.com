@@ -1,8 +1,8 @@
 import { createSlotMarquee } from "./slot-marquee.mjs?v=slot-marquee-20261128-v1";
 import { createSmeemoEncounter, createSmeemoStinger, createSmeemoTableSession, SMEEMO_RETURN_MS } from "./smeemo-reveal.mjs?v=smeemo-cinema-20261128-v1";
-import { createFloatingSky } from "./floating-sky.mjs?v=sky-variety-20261127-v1";
+import { createFloatingSky } from "./floating-sky.mjs?v=sky-pingpong-20261128-v1";
 import { createStageDance, createDanceClock, createDanceIntensitySampler, dancePose } from "./stage-dance.mjs?v=music-intensity-20261128-v1";
-import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=music-zone-fade-20261128-v1";
+import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=freecam-music-20261128-v1";
 import { createVipInteriorTracker, sampleMusicZoneGain } from "./music-zones.mjs?v=music-zone-fade-20261128-v1";
 import { createMenuMarquee } from "./menu-marquee.mjs?v=corrective-review-20261127-v1";
 import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=smeemo-reveal-20261127-v1";
@@ -2530,12 +2530,13 @@ import {
       camera.lookAt(cameraTarget); camera.updateMatrixWorld(true);
     },
     onStart: () => {
+      cameraDetached = true;
       resetEncounter();
       cameraTransition = null;
       focusDrag?.reset(); focusOrbit.reset(currentView.kind); lastScenePointer = null;
       slotHoverCell = -1; slotHoverLine = null; drawSlotReelDisplay(); hideGameCursor();
-      cameraDetached = true;
       preview.classList.add("is-freecam", "is-freecam-detached");
+      syncMusic(true);
     },
     onStop: () => {
       preview.classList.remove("is-freecam");
@@ -2544,6 +2545,7 @@ import {
       // navigation action; resize, pointer hover and game state cannot reframe it.
       cameraDetached = true;
       preview.classList.add("is-freecam-detached");
+      syncMusic();
     },
   });
   window.addEventListener("rg:open-host-panel", () => freecam.stop());

@@ -38,6 +38,21 @@ test('three tracks; exact mode priority including silent games, pause, lock and 
   assert.equal(mode('smeemo-crowd','',{encounter:'smeemo'}),'smeemo');assert.equal(mode('card-table','smeemo',{encounter:'smeemo'}),'smeemo');assert.equal(mode('smeemo-crowd','',{encounter:'stinger'}),null);assert.equal(mode('smeemo-crowd','',{encounter:'smeemo',muted:true}),null);
 });
 
+test('freecam leaves every focused song and explicit navigation restores the selected song',async()=>{
+  for(const view of ['roulette','trivia','card-table','dice-door','overview','smeemo-crowd']) {
+    assert.equal(mode(view,'smeemo',{detached:true,smeemoTable:true,encounter:'smeemo'}),'general');
+    for(const flags of [{muted:true},{active:false},{dice:true},{encounter:'stinger'}]) assert.equal(mode(view,'smeemo',{detached:true,...flags}),null);
+  }
+  const {mixer,media,log}=fixture();
+  mixer.sync(mode('roulette'));await flush();assert.match(media.src,/no_daifuugou/);
+  mixer.sync(mode('roulette','',{detached:true}));await flush();assert.match(media.src,/gammon/);
+  for(let i=0;i<5;i++)mixer.sync(mode('roulette','',{detached:true}));
+  assert.equal(log.filter(a=>a[0]==='src').length,2,'released freecam remains on general without restarting');
+  mixer.sync(mode('roulette'));await flush();assert.match(media.src,/no_daifuugou/);
+  mixer.sync(mode('dice-door','',{detached:true}),{spatialGain:0});
+  await flush();assert.match(media.src,/gammon/);
+});
+
 test('shared songs are uninterrupted, fade in, switch on one media voice, and suspend/resume without rewinding',async()=>{
   const f=fixture();const {mixer,media,log}=f;
   mixer.sync(null);assert.equal(f.created,0);

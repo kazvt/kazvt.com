@@ -2,7 +2,7 @@
 // shares a single muted video decoder and texture. World X/Z never follow
 // the camera; only the height can rise to enforce the overhead clearance.
 export const SKY_TILE=Object.freeze({size:36,overlap:.16,ring:3,nearFade:42,farFade:76,baseY:22.5,clearance:3,pixels:768});
-export const SKY_VIDEO_URL='/ramblegamble/assets/sky/floating-sky-matte.mp4?v=sky-variety-20261127-v1';
+export const SKY_VIDEO_URL='/ramblegamble/assets/sky/floating-sky-matte.mp4?v=sky-pingpong-20261128-v1';
 // A C1-continuous soft knee begins lifting the sheet before the hard guard
 // engages. The soft target eventually stays six units above the camera.
 export const skyHeight=y=>Math.max(SKY_TILE.baseY,Number.isFinite(y)?y+SKY_TILE.clearance:SKY_TILE.baseY);

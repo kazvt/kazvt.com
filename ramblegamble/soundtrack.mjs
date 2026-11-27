@@ -7,9 +7,12 @@ export const SOUNDTRACK_FILES = Object.freeze({
 const base = new URL('./assets/music/', import.meta.url);
 export function soundtrackFor({ active, muted, dice, view, cardMode, encounter, smeemoTable = false, detached = false }) {
   if (!active || muted || dice || encounter === 'stinger') return null;
+  // Freecam leaves the focused game even after the middle button is released.
+  // Keep the spatial VIP/Smeemo attenuation in the mixer, independent of song choice.
+  if (detached) return 'general';
   const encounterTrack = encounter === 'smeemo' && ['smeemo-crowd','card-table'].includes(view);
   const activeTableGame = view === 'card-table' && cardMode === 'smeemo' && smeemoTable === true;
-  if (!detached && (encounterTrack || activeTableGame)) return 'smeemo';
+  if (encounterTrack || activeTableGame) return 'smeemo';
   // A selected-but-not-running/cancelled Smeemo round is not a silence mode.
   // The ordinary card-table theme remains the fallback unless the live game
   // session explicitly owns the Smeemo ambience.

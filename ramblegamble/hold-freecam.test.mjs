@@ -82,9 +82,9 @@ import { runInNewContext } from 'node:vm';
 test('production room wiring snapshots camera direction, suspends orbit and retains the released world pose on resize without changing activity',()=>{
  const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
  const extract=(a,b)=>src.slice(src.indexOf(a),src.indexOf(b,src.indexOf(a)));
- let callbacks,applied,position,lookAt,projection=0,draws=0,resize=0;
+ let callbacks,applied,position,lookAt,projection=0,draws=0,resize=0;const music=[];
  const currentView={kind:'card-table',look:0},classes=new Set();
- const ctx={resetEncounter(){},stageShow:{busy:false},freecam:null,cameraDetached:false,gameStarted:true,sceneReady:true,pauseMenuOpen:false,diceModeOpen:false,document:{hidden:false,querySelector:()=>null,documentElement:{hasAttribute:()=>false}},
+ const ctx={resetEncounter(){},syncMusic(retry){music.push({detached:ctx.cameraDetached,retry});},stageShow:{busy:false},freecam:null,cameraDetached:false,gameStarted:true,sceneReady:true,pauseMenuOpen:false,diceModeOpen:false,document:{hidden:false,querySelector:()=>null,documentElement:{hasAttribute:()=>false}},
   camera:{position:{x:7,y:4,z:6,set(...v){position=v;}},aspect:1.2,getWorldDirection:()=>forward,lookAt:t=>lookAt=t.values,updateMatrixWorld(){},updateProjectionMatrix(){projection++;}},
   THREE:{Vector3:class{}},cameraTarget:{set(...v){this.values=v;}},canvas:{},preview:{clientWidth:1200,clientHeight:600,classList:{add:(...ks)=>ks.forEach(k=>classes.add(k)),remove:k=>classes.delete(k)}},
   currentView,cameraTransition:{},focusDrag:{reset(){}},focusOrbit:{reset(){}},lastScenePointer:{},slotHoverCell:4,slotHoverLine:{},drawSlotReelDisplay(){draws++;},hideGameCursor(){},
@@ -100,5 +100,6 @@ test('production room wiring snapshots camera direction, suspends orbit and reta
  callbacks.writePose({position:{x:5,y:9,z:8},direction:{x:0,y:0,z:-1}});assert.deepEqual(position,[5,9,8]);assert.deepEqual(lookAt,[5,9,7]);
  ctx.fit();assert.equal(ctx.camera.aspect,2);assert.equal(projection,1);assert.equal(resize,1);assert.equal(applied,undefined);
  ctx.freecam.active=false;callbacks.onStop();assert.equal(applied,undefined);assert.equal(ctx.cameraDetached,true);assert.ok(!classes.has('is-freecam'));assert.ok(classes.has('is-freecam-detached'));assert.equal(ctx.currentView,currentView);ctx.fit();assert.equal(applied,undefined);assert.deepEqual(position,[5,9,8]);assert.deepEqual(lookAt,[5,9,7]);
+ assert.deepEqual(music,[{detached:true,retry:true},{detached:true,retry:undefined}]);
  ctx.diceModeOpen=true;assert.equal(callbacks.eligible(),false);
 });

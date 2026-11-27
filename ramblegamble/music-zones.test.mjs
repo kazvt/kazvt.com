@@ -64,3 +64,15 @@ test('combined attenuation chooses the quieter of overlapping VIP and Smeemo zon
   assert.ok(onlySmeemo>0);assert.equal(combined,0);
   assert.equal(sampleMusicZoneGain(null,DICE_DOOR_OPENING,cat),1);
 });
+
+// Freecam detachment switches the song, not the authored doorway attenuation.
+test('detached VIP zoom fades regular music back in on physical departure',()=>{
+  const door=DICE_DOOR_OPENING,tracker=createVipInteriorTracker(door);
+  const gains=[];
+  for(const d of [2.8,3.65,4,4.925,5.5,6.2,8,20]) {
+    const position=nearDoor(door.wallX-d);
+    gains.push(sampleMusicZoneGain(position,door,{x:100,y:100,z:100},{insideVip:tracker.update(position)}));
+  }
+  assert.equal(gains[0],0);assert.equal(gains[1],0);assert.ok(gains[3]>0&&gains[3]<1);
+  assert.equal(gains.at(-1),1);assert.ok(gains.every((g,i)=>i===0||g>=gains[i-1]));
+});

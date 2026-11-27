@@ -167,10 +167,15 @@ def text_mesh(im):
  ix=np.array([[0,1,2],[0,2,3]]);uv=np.array([[0,1],[1-1e-6,1],[1-1e-6,0],[0,0]],float);uv[:,1]=np.minimum(uv[:,1],1-1e-6)
  return [(v[ix],np.ones((2,3))*255,uv[ix],np.asarray(im))]
 
-def crossfade(a,b,t):
- aa=a[:,:,3:4].astype(np.float32)/255;ba=b[:,:,3:4].astype(np.float32)/255;alpha=aa*(1-t)+ba*t
- color=(a[:,:,:3]*aa*(1-t)+b[:,:,:3]*ba*t)/np.maximum(alpha,1e-6)
- return np.uint8(np.clip(np.concatenate([color,alpha*255],-1)+.5,0,255))
+# Preserve the existing 18-second unblended span (simulation frames 40..399).
+FORWARD_START=FPS*2
+FORWARD_COUNT=FPS*SECONDS-FORWARD_START
+
+def pingpong_indices(count):
+ # Each turning-point frame appears once; the native video loop supplies
+ # the final step from index 1 back to index 0, without a held endpoint.
+ if count<2:raise ValueError('need at least two frames')
+ return list(range(count))+list(range(count-2,0,-1))
 
 def raster_triangle(canvas,depth,points,z,color,uv,tex,shade):
  lo=np.maximum(0,np.floor(points.min(0)).astype(int));hi=np.minimum(N,np.ceil(points.max(0)).astype(int)+1);w,h=hi-lo
@@ -213,7 +218,7 @@ def make_cast(names,collision_assets,assets,photo,seed):
    rot=text_rotation(0);w=np.zeros(3)
   else:hulls=compound(collision_assets[name],r)
   bodies.append(Body(hulls,[pos[i][0],-pos[i][1]+N,local_rng.uniform(-18,18)],[vel[i][0],-vel[i][1],local_rng.uniform(-9,9)],rot,w,r,text=name=='text'))
- blend=FPS*2;history=simulate(bodies,SECONDS+blend/FPS,FPS);eye_cache={}
+ history=simulate(bodies,SECONDS+FORWARD_START/FPS,FPS);eye_cache={}
  def frame(f):
   p,rotations=history[f];canvas=np.zeros((N,N,4),np.uint8);depth=np.full((N,N),-np.inf,np.float32)
   for i,(name,r) in enumerate(zip(names,radii)):
@@ -230,11 +235,7 @@ def make_cast(names,collision_assets,assets,photo,seed):
    else:render_mesh(canvas,depth,assets[name],np.array([x,y]),r,rot,z)
   mask=canvas[:,:,3]==255;noise2=((np.indices((N,N))[0]*13+np.indices((N,N))[1]*17)%11-5)*.45;canvas[mask,:3]=np.uint8(np.clip(canvas[mask,:3].astype(float)+noise2[mask,None],0,255))
   return canvas
- def loop_frame(f):
-  if f<FPS*SECONDS-blend:return frame(f+blend)
-  i=f-(FPS*SECONDS-blend);t=i/blend;t=t*t*(3-2*t)
-  return crossfade(frame(f+blend),frame(i),t)
- return loop_frame
+ return lambda f:frame(f+FORWARD_START)
 
 def main():
  parser=argparse.ArgumentParser();parser.add_argument('--models',type=Path);parser.add_argument('--eye',type=Path);parser.add_argument('--output',type=Path,default=HERE);parser.add_argument('--preview-only',action='store_true');args=parser.parse_args();args.output.mkdir(parents=True,exist_ok=True)
@@ -258,7 +259,7 @@ def main():
    out.append(np.uint8(np.clip(a*255+.5,0,255)))
   return np.concatenate(out,axis=0)
  with tempfile.TemporaryDirectory() as tmp:
-  d=Path(tmp);count=1 if args.preview_only else FPS*SECONDS
+  d=Path(tmp);count=1 if args.preview_only else FORWARD_COUNT
   global _worker_frame
   _worker_frame=loop_frame
   pool=mp.get_context("fork").Pool(min(4,os.cpu_count() or 1)) if not args.preview_only and "fork" in mp.get_all_start_methods() else None
@@ -272,6 +273,8 @@ def main():
    if f%50==0:print('frame',f,'/',count,flush=True)
   if pool:pool.close();pool.join()
   if not args.preview_only:
+   for index,source in enumerate(pingpong_indices(count)[count:],start=count):
+    os.link(d/f"{source:04d}.png",d/f"{index:04d}.png")
    common=['ffmpeg','-hide_banner','-loglevel','error','-y','-threads','4','-framerate',str(FPS),'-i',str(d/'%04d.png')]
    # Packed matte is cross-browser; one texture, no browser-dependent native alpha.
    subprocess.run(common+['-filter_complex_threads','2','-filter_complex','[0:v]split[c][a];[c]format=rgb24[c1];[a]alphaextract,format=rgb24[a1];[c1][a1]hstack,format=yuv420p','-an','-c:v','libx264','-preset','fast','-crf','19','-threads','4','-movflags','+faststart',str(args.output/'floating-sky-matte.mp4')],check=True)

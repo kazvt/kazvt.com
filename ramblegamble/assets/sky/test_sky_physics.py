@@ -77,8 +77,14 @@ class RenderTests(unittest.TestCase):
   np.testing.assert_array_equal(a[140:177,130:190],b[140:177,130:190]);self.assertGreater(np.abs(a[:80,:,:3].astype(float)-b[:80,:,:3]).sum(),10000);np.testing.assert_array_equal(a[:,:,3],b[:,:,3])
  def test_eye_ticks_at_five_fps(self):
   r=self.render;a=np.asarray(r.eye_sprite(68,0));b=np.asarray(r.eye_sprite(69,0));c=np.asarray(r.eye_sprite(72,0));np.testing.assert_array_equal(a,b);self.assertFalse(np.array_equal(a,c))
- def test_alpha_dissolve_uses_premultiplication(self):
-  r=self.render;a=np.array([[[250,100,50,255]]],np.uint8);b=np.zeros_like(a);np.testing.assert_array_equal(r.crossfade(a,b,.5),[[[250,100,50,128]]]);np.testing.assert_array_equal(r.crossfade(a,b,0),a);np.testing.assert_array_equal(r.crossfade(a,b,1),b)
+ def test_pingpong_no_dissolve_no_duplicate_turning_frames(self):
+  r=self.render;n=r.FORWARD_COUNT;seq=r.pingpong_indices(n)
+  self.assertEqual(n,360);self.assertEqual(r.FORWARD_START,40)
+  self.assertEqual(len(seq),718);self.assertEqual(seq[:n],list(range(n)))
+  self.assertEqual(seq[n:],list(range(n-2,0,-1)))
+  self.assertTrue(all(abs(a-b)==1 for a,b in zip(seq,seq[1:]+seq[:1])))
+  self.assertEqual(r.pingpong_indices(2),[0,1])
+  with self.assertRaises(ValueError):r.pingpong_indices(1)
 
 class MaterialTests(unittest.TestCase):
  def test_material_maps_are_distinct_bounded_and_repeatable(self):
