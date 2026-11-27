@@ -86,3 +86,10 @@ test('media error during handoff leaves the original logo immediately visible',(
  const f=fixture();f.open();f.end();f.step(100);f.video.dispatchEvent(new Event('error'));
  assert.equal(f.phase,'settled');assert.equal(f.plate.hidden,false);assert.equal(f.plate.style.opacity,'');assert.equal(f.video.hidden,true);f.fx.dispose();
 });
+
+test('persisted page suspension pauses both frames and media, then resumes the same intro',()=>{
+ const f=fixture();f.open();f.video.currentTime=.4;f.step(100);
+ f.fx.setPageSuspended(true);assert.equal(f.video.paused,true);assert.equal(f.pending,0);assert.equal(f.phase,'video');
+ f.step(5000);f.fx.sync();assert.equal(f.pending,0);f.fx.setPageSuspended(false);
+ assert.equal(f.video.currentTime,.4);assert.equal(f.video.paused,false);assert.equal(f.pending,1);assert.equal(f.video.plays,2);f.fx.dispose();
+});

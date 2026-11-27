@@ -75,7 +75,8 @@ test('camera frames launch and tray envelope across portrait, landscape and ultr
   const src=readFileSync(new URL('./dice-mode.js',import.meta.url),'utf8');
   const resize=src.slice(src.indexOf('function resizeRenderer'),src.indexOf('function cryptoRandomUnit'));
   assert.doesNotMatch(resize,/body\.position|group\.position|resizeDiceBody|group\.scale/);
-  assert.match(src,/if \(rolling \|\| orbit\.moving \|\| effectsMoving\)/);
+  // Pointer easing also needs animation frames; assert all four live conditions.
+  assert.match(src,/if \(rolling \|\| orbit\.moving \|\| effectsMoving \|\| pointerMoving\) frame = requestAnimationFrame\(render\)/);
   assert.match(src,/activeRolls\.every\(\(\{ body \}\) => body\.sleepState === CANNON\.Body\.SLEEPING\)/);
   assert.match(src,/getUpwardFaceIndex\(body\.quaternion, DICE_FACE_ORDER\)/);
 });

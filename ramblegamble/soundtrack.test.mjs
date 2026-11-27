@@ -88,3 +88,9 @@ test('host lifecycle stops music before intro, resumes only after intro is pause
   assert.match(js,/soundtrack\.dispose\(\)/);
   assert.match(js,/muted: foley\.muted, dice: diceModeOpen/);
 });
+
+test('a browser-paused successful soundtrack resumes on a gesture without a second voice or source change',async()=>{
+ const f=fixture();f.mixer.sync('general');await flush();f.advance(300);f.mixer.sync('general');f.media.currentTime=27;f.media.pause();
+ for(let i=0;i<120;i++)f.mixer.sync('general');assert.equal(f.log.filter(a=>a[0]==='play').length,1);
+ f.mixer.sync('general',{retry:true});await flush();f.advance(300);f.mixer.sync('general');assert.equal(f.media.volume,.2);assert.equal(f.media.currentTime,27);assert.equal(f.created,1);assert.equal(f.log.filter(a=>a[0]==='src').length,1);assert.equal(f.log.filter(a=>a[0]==='play').length,2);
+});

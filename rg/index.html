@@ -8,7 +8,7 @@
     <link rel="canonical" href="https://kazvt.com/rg/">
     <title>Ramble Gamble - kazvt</title>
     <link rel="stylesheet" href="/styles.css?v=palette-wallpaper-path-20261113-v1">
-    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=marquee-crossfade-20261127-v1">
+    <link rel="stylesheet" href="/ramblegamble/ramblegamble.css?v=corrective-review-20261127-v1">
     <link rel="stylesheet" href="/ramblegamble/host-console.css?v=freecam-depth-20261127-v1">
     <link rel="stylesheet" href="/ramblegamble/trivia-live.css?v=all-curtain-20261127-v1">
     <link rel="stylesheet" href="/ramblegamble/card-games.css?v=compact-score-20261127-v1">
@@ -22,7 +22,7 @@
       }
     </script>
     <link rel="stylesheet" href="/ramblegamble/host-access.css?v=host-toggle-20261126-v1">
-    <script type="module" src="/ramblegamble/host-access.mjs?v=floating-sky-20261127-v1"></script>
+    <script type="module" src="/ramblegamble/host-access.mjs?v=corrective-review-20261127-v1"></script>
       <link rel="stylesheet" href="/ramblegamble/show-energy.css?v=compact-score-20261127-v1">
   </head>
   <body class="ramble-page" data-theme="p2">
@@ -102,15 +102,56 @@
       </div>
     </section>
 
-    <dialog class="rg-controls-dialog" id="rg-controls-dialog" aria-label="Controls">
-      <button class="rg-controls-close" id="rg-controls-close" type="button" aria-label="Close controls">×</button>
-      <p>CLICK - CHOOSE / DRAG - LOOK / ← → ↑ SHIFT+↓</p>
-      <p>↓ / BACKSPACE - BACK - ESC - PAUSE</p>
-      <p>HOLD MIDDLE MOUSE - FREECAM / WASD - MOVE / Q E - DOWN UP / RELEASE - STAY</p>
-      <p>SHIFT + CLICK - SPOTLIGHT / AGAIN - HIDE</p>
-      <p>P - PEOPLE - H - HOST - 2 - SLOTS - 3 - ROULETTE - 5 - CARDS - 8 - HAZEL (BALCONY) - D - DOOR - CLICK AGAIN - DICE</p>
-      <p>C - TOGGLE CHEER - R - SPIN - S - LEVER - T - LATEST TRIVIA</p>
-      <p>RIGHT CLICK - STAFF / SHIFT+B - CARD STAFF / SHIFT+D - DICE STAFF (INSIDE VIP)</p>
+    <dialog class="rg-controls-dialog" id="rg-controls-dialog" aria-labelledby="rg-controls-title">
+      <header class="rg-controls-heading">
+        <h2 id="rg-controls-title">CONTROLS</h2>
+        <button class="rg-controls-close" id="rg-controls-close" type="button" aria-label="Close controls">×</button>
+      </header>
+      <div class="rg-controls-grid">
+        <section aria-labelledby="rg-controls-navigation">
+          <h3 id="rg-controls-navigation">Explore</h3>
+          <dl>
+            <dt><kbd>Click</kbd></dt><dd>Focus or interact</dd>
+            <dt><kbd>Drag</kbd> / <kbd>←</kbd> <kbd>→</kbd> <kbd>↑</kbd> <kbd>Shift+↓</kbd></dt><dd>Look around</dd>
+            <dt><kbd>↓</kbd> / <kbd>Backspace</kbd></dt><dd>Return to previous view</dd>
+            <dt><kbd>Esc</kbd></dt><dd>Pause (back from trivia)</dd>
+            <dt><kbd>Middle mouse</kbd> (hold)</dt><dd>Free camera: WASD move, Q/E down/up. Release to stay.</dd>
+          </dl>
+        </section>
+        <section aria-labelledby="rg-controls-destinations">
+          <h3 id="rg-controls-destinations">Jump to</h3>
+          <dl>
+            <dt><kbd>1</kbd> / <kbd>P</kbd></dt><dd>Contestants</dd>
+            <dt><kbd>2</kbd></dt><dd>Slots</dd>
+            <dt><kbd>3</kbd></dt><dd>Roulette</dd>
+            <dt><kbd>4</kbd> / <kbd>H</kbd></dt><dd>Host</dd>
+            <dt><kbd>5</kbd></dt><dd>Card table</dd>
+            <dt><kbd>8</kbd></dt><dd>Hazel’s balcony</dd>
+            <dt><kbd>D</kbd></dt><dd>VIP door; click again to enter Dice</dd>
+          </dl>
+        </section>
+        <section aria-labelledby="rg-controls-play">
+          <h3 id="rg-controls-play">Play &amp; show</h3>
+          <dl>
+            <dt><kbd>Enter</kbd> / <kbd>Space</kbd></dt><dd>Interact at screen center</dd>
+            <dt><kbd>R</kbd></dt><dd>Spin roulette</dd>
+            <dt><kbd>S</kbd></dt><dd>Pull slot lever</dd>
+            <dt><kbd>T</kbd></dt><dd>Latest trivia</dd>
+            <dt><kbd>C</kbd></dt><dd>Toggle crowd cheer</dd>
+            <dt><kbd>Shift+click</kbd></dt><dd>Toggle character spotlight</dd>
+          </dl>
+        </section>
+        <section aria-labelledby="rg-controls-staff">
+          <h3 id="rg-controls-staff">Staff</h3>
+          <dl>
+            <dt><kbd>Right-click</kbd></dt><dd>Machine controls</dd>
+            <dt><kbd>G</kbd></dt><dd>Slot controls</dd>
+            <dt><kbd>Shift+B</kbd></dt><dd>Card controls</dd>
+            <dt><kbd>Shift+T</kbd></dt><dd>Trivia controls</dd>
+            <dt><kbd>Shift+D</kbd></dt><dd>Dice controls (inside VIP)</dd>
+          </dl>
+        </section>
+      </div>
     </dialog>
 
     <dialog class="rg-dice-dialog" id="rg-dice-dialog" aria-label="Dice">

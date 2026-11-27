@@ -45,12 +45,12 @@ export function paintMenuSign(out,elapsed){
 // One lifecycle for the opening clip, CSS fallback and live neon idle. This is
 // independent of WebGL readiness, and never loops the recorded intro audio.
 export function createMenuMarquee({menu,video,plate,glow,controls,doc=document,win=window}){
-  let phase='closed', elapsed=0,last=null,frame=0,active=false,unavailable=Boolean(video.error)||video.networkState===3,attempt=0,disposed=false,painted=false;
+  let phase='closed', elapsed=0,last=null,frame=0,active=false,unavailable=Boolean(video.error)||video.networkState===3,attempt=0,disposed=false,painted=false,pageSuspended=false;
   glow.width=W;glow.height=H;
   let ctx=null,image=null;
   try{ctx=glow.getContext('2d');image=ctx?.createImageData(W,H);}catch{}
   const clear=()=>{if(painted){ctx?.clearRect(0,0,W,H);painted=false;}};
-  const allowed=()=>!menu.hidden&&!doc.hidden&&!doc.documentElement.hasAttribute('data-rg-host-locked')&&!controls.open;
+  const allowed=()=>!pageSuspended&&!menu.hidden&&!doc.hidden&&!doc.documentElement.hasAttribute('data-rg-host-locked')&&!controls.open;
   const resetVideo=()=>{++attempt;video.pause();try{video.currentTime=0;}catch{}};
   function setPhase(next){
     phase=next;elapsed=0;last=null;clear();menu.dataset.marqueePhase=next;
@@ -122,5 +122,5 @@ export function createMenuMarquee({menu,video,plate,glow,controls,doc=document,w
   doc.addEventListener('visibilitychange',sync);
   video.volume=Math.max(0,Math.min(1,video.volume*.2));
   setPhase('closed');sync();
-  return {sync,dispose(){disposed=true;observer.disconnect();if(frame)win.cancelAnimationFrame(frame);resetVideo();setPhase('closed');video.removeEventListener('ended',ended);video.removeEventListener('error',failed);video.removeEventListener('loadeddata',matte);doc.removeEventListener('visibilitychange',sync);}};
+  return {sync,setPageSuspended(value){pageSuspended=Boolean(value);sync();},dispose(){disposed=true;observer.disconnect();if(frame)win.cancelAnimationFrame(frame);resetVideo();setPhase('closed');video.removeEventListener('ended',ended);video.removeEventListener('error',failed);video.removeEventListener('loadeddata',matte);doc.removeEventListener('visibilitychange',sync);}};
 }

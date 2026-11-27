@@ -1,7 +1,7 @@
 import { createFloatingSky } from "./floating-sky.mjs?v=floating-sky-20261127-v1";
 import { createStageDance, createDanceClock, dancePose } from "./stage-dance.mjs?v=stage-dance-20261127-v1";
-import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=stage-dance-20261127-v1";
-import { createMenuMarquee } from "./menu-marquee.mjs?v=marquee-crossfade-20261127-v1";
+import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=corrective-review-20261127-v1";
+import { createMenuMarquee } from "./menu-marquee.mjs?v=corrective-review-20261127-v1";
 import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=arrow-restored-20261127-v1";
 import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcony.mjs?v=hazel-balcony-20261127-v1";
 import { createSignGlow } from "./sign-glow.mjs?v=neon-focus-20261127-v1";
@@ -234,6 +234,8 @@ import {
   let cardMusicMode = "";
   const soundtrack = createSoundtrack();
   function syncMusic(retry = false) {
+    // The marquee is music too: the shared sound preference applies to it.
+    if (menuMarquee.muted !== foley.muted) menuMarquee.muted = foley.muted;
     soundtrack.sync(soundtrackFor({
       active: gameStarted && sceneReady && !pauseMenuOpen && !document.hidden && !document.documentElement.hasAttribute("data-rg-host-locked"),
       muted: foley.muted, dice: diceModeOpen, view: currentView.kind, cardMode: cardMusicMode,
@@ -243,6 +245,9 @@ import {
     if (event.isTrusted) syncMusic(true);
   }, { capture: true, passive: true });
   document.getElementById("rg-foley-enabled")?.addEventListener("change", () => syncMusic(true));
+  window.addEventListener("storage", event => {
+    if (event.key === "ramblegamble.foley.muted.v1" || event.key === null) syncMusic();
+  });
   new MutationObserver(() => { syncMusic(); if (document.documentElement.hasAttribute("data-rg-host-locked")) floatingSky?.suspend(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-rg-host-locked"] });
   const triviaLayer = document.getElementById("rg-live-trivia");
   let skyRandomState = 0x4b415a56;
@@ -316,7 +321,7 @@ import {
   }
 
   function beginTurn(machine) {
-    if (playing) return false;
+    if (playing || document.documentElement.hasAttribute("data-rg-host-locked")) return false;
     playing = true;
     preview.classList.add("is-playing");
     hideResult();
@@ -716,7 +721,7 @@ import {
   }
 
   function startSlotAction(targetGrid, axis, indexes, { pullCrank = false, kind = "spin" } = {}) {
-    if (playing || slotReelMotion || stageShow?.busy) return false;
+    if (playing || slotReelMotion || stageShow?.busy || document.documentElement.hasAttribute("data-rg-host-locked")) return false;
     const startedAt = performance.now();
     const startingGrid = slotReelGrid.slice();
     const settledGrid = normalizeSlotGrid(targetGrid);
@@ -2289,9 +2294,15 @@ import {
     if (typeof controlsDialog.showModal === "function") controlsDialog.showModal();
     else controlsDialog.setAttribute("open", "");
   });
-  controlsCloseButton.addEventListener("click", () => controlsDialog.close());
+  function closeControls() {
+    if (typeof controlsDialog.close === "function") controlsDialog.close();
+    else { controlsDialog.removeAttribute("open"); controlsOpenButton.focus({ preventScroll: true }); }
+  }
+  controlsCloseButton.addEventListener("click", closeControls);
   controlsDialog.addEventListener("click", (event) => {
-    if (event.target === controlsDialog) controlsDialog.close();
+    if (event.target !== controlsDialog) return;
+    const rect = controlsDialog.getBoundingClientRect();
+    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeControls();
   });
   goButton.focus({ preventScroll: true });
 
@@ -2543,13 +2554,19 @@ import {
 
   window.addEventListener("keydown", (event) => {
     if (freecam?.active) return;
-    if (event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.defaultPrevented || event.isComposing || event.altKey || event.ctrlKey || event.metaKey) return;
     if (diceModeOpen || document.querySelector("dialog[open]") || (event.target instanceof Element && event.target.closest("dialog[open]"))) return;
-    if (event.target instanceof Element && event.target.closest("input, textarea, select, [contenteditable='true']")) return;
-    if (!gameStarted || pauseMenuOpen) return;
+    if (event.target instanceof Element && (event.target.isContentEditable || event.target.closest("input, textarea, select, [role='textbox']"))) return;
+    if (!gameStarted || pauseMenuOpen || document.documentElement.hasAttribute("data-rg-host-locked")) return;
     const key = event.key.toLowerCase();
     // Keep native button activation: the canvas shortcut must not steal row clicks.
     if ((key === "enter" || key === " ") && event.target instanceof Element && event.target.closest("button, [role='button']")) return;
+    // Arrow-key orbit remains continuous; all other arcade shortcuts are discrete.
+    // Native controls keep their own activation and unrelated keys keep browser defaults.
+    if (event.repeat && !["arrowleft", "arrowright", "arrowup"].includes(key) && !(key === "arrowdown" && event.shiftKey)) {
+      if (resolveArcadeShortcut(key) || ["2", "3", "escape", "arrowdown", "backspace", "enter", " ", "r", "s", "g", "t"].includes(key) || (key === "b" && event.shiftKey)) event.preventDefault();
+      return;
+    }
     if (key === "escape") {
       if(currentView.kind==="trivia"){goBack();event.preventDefault();return;}
       showPauseMenu();
@@ -2690,8 +2707,11 @@ import {
   }
 
   function updateSlotPlacementControlProjection() {
-    if (freecam?.active || cameraDetached || !slotControlLayer || !camera || !sceneReady || preview.clientWidth < 1 || preview.clientHeight < 1) return;
-    const visible = gameStarted && !pauseMenuOpen && !diceModeOpen && !cameraTransition && !stageShow?.busy && currentView.kind === "slot";
+    if (freecam?.active || cameraDetached || !slotControlLayer || !camera || !sceneReady || preview.clientWidth < 1 || preview.clientHeight < 1) {
+      if (slotControlLayer) slotControlLayer.hidden = true;
+      return;
+    }
+    const visible = gameStarted && !pauseMenuOpen && !diceModeOpen && !document.hidden && !document.documentElement.hasAttribute("data-rg-host-locked") && !cameraTransition && !stageShow?.busy && currentView.kind === "slot";
     slotControlLayer.hidden = !visible;
     if (!visible || !slotPlacementControls.length) return;
 
@@ -2881,8 +2901,6 @@ import {
       renderer.render(scene, camera);
       return;
     }
-    if (sceneReady) updateSlotPlacementControlProjection();
-
     if (wheelMotion && wheelPivot && ballPivot && ballOrbitObject && Number.isFinite(wheelMotion.ballAngle)) {
       const progress = Math.min(1, (time - wheelMotion.started) / wheelMotion.duration);
       rouletteCabinetFX?.update(time,progress,canShowRouletteCabinet()&&!reducedMotion.matches);
@@ -2978,6 +2996,8 @@ import {
     }
 
     showFX?.update(time,{active:roomVisible,spinning:Boolean(wheelMotion),view:currentView,reduced:reducedMotion.matches});
+    // Project against this frame’s completed camera and cabinet pose, not the prior frame.
+    if (sceneReady) updateSlotPlacementControlProjection();
     if (sceneReady && roomVisible) updateBillboardProjection(time);
     updateFocusArrow(time,roomVisible);
     renderer.render(scene, camera);
@@ -3101,8 +3121,31 @@ import {
     }
   });
 
-  window.addEventListener("pagehide", () => {
+  window.addEventListener("pageshow", event => {
+    if (!event.persisted) return;
+    fitCamera();
+    suppressElapsedWheelCue();
+    menuPresentation.setPageSuspended(false);
+    syncMusic();
+    if (!document.hidden && (gameStarted || pauseMenuOpen) && renderer && !animationFrame) animationFrame = requestAnimationFrame(animate);
+  });
+
+  window.addEventListener("pagehide", event => {
     cancelAnimationFrame(animationFrame);
+    animationFrame = 0;
+    if (event.persisted) {
+      // A frozen page can return with the same JS heap. Keep the renderer and
+      // media controllers alive, but stop active playback and transient effects.
+      soundtrack.sync(null);
+      menuPresentation.setPageSuspended(true);
+      floatingSky?.suspend();
+      liquidPortal?.setActive(false);
+      slotCabinetFX?.reset();
+      rouletteCabinetFX?.reset();
+      focusArrow.hide();
+      crowdLastFrame = null;
+      return;
+    }
     resizeObserver?.disconnect();
     liquidPortal?.dispose();
     exteriorMist?.dispose();
@@ -3114,5 +3157,5 @@ import {
     rouletteCabinetFX?.dispose();
     focusArrow.dispose(); characterOcclusion?.dispose(); characterSelection?.dispose(); signGlow?.dispose(); audience?.dispose(); showFX?.dispose(); stageShow?.dispose();
     renderer?.dispose();
-  }, { once: true });
+  });
 })();

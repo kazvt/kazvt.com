@@ -42,7 +42,12 @@ export function createSoundtrack({ createMedia = () => new Audio(), now = () => 
       try { media.src = new URL(SOUNDTRACK_FILES[track], base).href; }
       catch { failed.add(track); return; }
     }
-    if (retry) blocked = false;
+    if (retry) {
+      blocked = false;
+      // A browser/OS interruption may pause a previously successful element
+      // without rejecting play(). Recover on the next trusted gesture only.
+      if (requested && fadeAt !== null && media.paused) stop();
+    }
     if (!requested && !blocked) {
       requested = true;
       const ticket = ++epoch;
