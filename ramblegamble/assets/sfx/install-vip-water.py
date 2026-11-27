@@ -16,7 +16,7 @@ import urllib.request
 
 
 SOURCE_URL = 'https://opengameart.org/sites/default/files/atmosbasement.mp3_.flac'
-SOURCE_SHA1 = '77e17163b4bcc4c2199eeecaaa1c46ed7fa627409'
+SOURCE_SHA1 = '77e17163b4bcc4c2199eecaaa1c46ed7fa627409'
 SOURCE_DURATION = 20.063107
 MAX_SOURCE_BYTES = 4 * 1024 * 1024
 DEST = Path(__file__).resolve().parent / 'foley' / 'vip-water-drips.ogg'
