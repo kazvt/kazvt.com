@@ -1,7 +1,7 @@
 // The animation is baked, not a simulation running in the show. Every tile
 // shares a single muted video decoder and texture. World X/Z never follow
 // the camera; only the height can rise to enforce the overhead clearance.
-export const SKY_TILE=Object.freeze({size:36,overlap:.16,ring:3,nearFade:42,farFade:76,baseY:5,clearance:3,pixels:1024});
+export const SKY_TILE=Object.freeze({size:36,overlap:.16,ring:3,nearFade:42,farFade:76,baseY:15,clearance:3,pixels:1024});
 export const SKY_VIDEO_URL='/ramblegamble/assets/sky/floating-sky-matte.mp4?v=floating-sky-20261127-v1';
 export const skyHeight=y=>Math.max(SKY_TILE.baseY,Number.isFinite(y)?y+SKY_TILE.clearance:SKY_TILE.baseY);
 export const skyStride=SKY_TILE.size*(1-SKY_TILE.overlap);

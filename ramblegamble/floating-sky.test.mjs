@@ -4,8 +4,8 @@ import {readFileSync,statSync} from 'node:fs';
 import {SKY_TILE,skyHeight,skyStride,skyTiles,tileRotation,SKY_FRAGMENT,createFloatingSky} from './floating-sky.mjs';
 
 test('overhead height is exact, monotone, never passes camera, and returns to authored floor',()=>{
- for(let y=-30;y<=150;y+=.025){const h=skyHeight(y);assert.equal(h,Math.max(5,y+3));assert.ok(h>=5&&h-y>=3-1e-12);}
- assert.equal(skyHeight(NaN),5);assert.equal(skyHeight(1),5);assert.equal(skyHeight(100),103);assert.equal(skyHeight(1),5);
+ for(let y=-30;y<=150;y+=.025){const h=skyHeight(y);assert.equal(h,Math.max(15,y+3));assert.ok(h>=15&&h-y>=3-1e-12);}
+ assert.equal(skyHeight(NaN),15);assert.equal(skyHeight(1),15);assert.equal(skyHeight(100),103);assert.equal(skyHeight(12),15);assert.equal(skyHeight(12.01),15.01);assert.equal(skyHeight(1),15);
 });
 test('bounded stationary tile grid has complete coverage through all cell seams and negative world coordinates',()=>{
  let samples=0;
@@ -32,8 +32,8 @@ test('one lazy media request and decoder, cull only visible quads, height tracks
  const {sky,video,camera,scene}=fixture();assert.equal(video.requests,0);assert.equal(video.preload,'none');assert.equal(video.muted,true);assert.equal(video.loop,true);assert.equal(sky.group.children.length,49);
  sky.update(camera,false);sky.update(camera,true);assert.equal(video.requests,0);
  Frustum.visible=true;sky.update(camera,true);await tick();assert.equal(video.requests,1);assert.equal(video.plays,1);assert.equal(sky.group.visible,false);
- video.readyState=2;sky.update(camera,true);assert.equal(sky.group.visible,true);const active=sky.group.children.filter(m=>m.visible);assert.ok(active.length>0&&active.length<49);assert.ok(active.every(m=>m.position.y===5&&m.material===active[0].material&&m.geometry===active[0].geometry));assert.equal(active[0].geometry.tilt,Math.PI/2);assert.equal(active[0].material.depthWrite,false);assert.equal(active[0].material.depthTest,true);assert.equal(active[0].raycast(),undefined);
- const before=active.map(m=>[m.position.x,m.position.z,m.rotation.y]);camera.position.y=22;sky.update(camera,true);assert.ok(active.every(m=>m.position.y===25));assert.deepEqual(active.map(m=>[m.position.x,m.position.z,m.rotation.y]),before);camera.position.y=0;sky.update(camera,true);assert.ok(active.every(m=>m.position.y===5));
+ video.readyState=2;sky.update(camera,true);assert.equal(sky.group.visible,true);const active=sky.group.children.filter(m=>m.visible);assert.ok(active.length>0&&active.length<49);assert.ok(active.every(m=>m.position.y===15&&m.material===active[0].material&&m.geometry===active[0].geometry));assert.equal(active[0].geometry.tilt,Math.PI/2);assert.equal(active[0].material.depthWrite,false);assert.equal(active[0].material.depthTest,true);assert.equal(active[0].raycast(),undefined);
+ const before=active.map(m=>[m.position.x,m.position.z,m.rotation.y]);camera.position.y=22;sky.update(camera,true);assert.ok(active.every(m=>m.position.y===25));assert.deepEqual(active.map(m=>[m.position.x,m.position.z,m.rotation.y]),before);camera.position.y=0;sky.update(camera,true);assert.ok(active.every(m=>m.position.y===15));
  Frustum.visible=false;sky.update(camera,true);assert.ok(video.paused);assert.equal(sky.group.visible,false);Frustum.visible=true;sky.update(camera,true);await tick();assert.equal(video.requests,1);assert.equal(video.plays,2);sky.suspend();assert.ok(video.paused);sky.dispose();assert.equal(scene.children.length,0);assert.equal(video.loads,1);assert.ok(active[0].geometry.disposed&&active[0].material.disposed&&active[0].material.uniforms.uVideo.value.disposed);
 });
 test('blocked autoplay retries only on gesture/return, missing video never becomes an opaque panel',async()=>{

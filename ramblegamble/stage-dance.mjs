@@ -1,6 +1,7 @@
 // A four-beat, pose-to-pose rubber-hose dance. Nothing integrates position or
 // Euler rotation over time: every frame derives from the original transform.
 export const DANCE_CYCLE_MS=2000;
+export const DANCE_AMPLITUDE=.35; // ambient squash, shear and held shivers only
 const clamp=n=>Math.max(0,Math.min(1,n));
 const ease=n=>{const t=clamp(n);return t*t*(3-2*t);};
 export function dancePose(time, strength=1, phase=0){
@@ -10,7 +11,8 @@ export function dancePose(time, strength=1, phase=0){
   const envelope=ease(p/.22)*(1-ease((p-.64)/.22));
   if(envelope===0)return {width:1,shear:0};
   const shake=p>.22&&p<.64?Math.sin((p-.22)/.42*Math.PI*4)*Math.sin((p-.22)/.42*Math.PI):0;
-  return {width:1-strength*envelope*(.085+.008*shake),shear:side*strength*envelope*(.095+.012*shake)};
+  const amount=DANCE_AMPLITUDE*strength*envelope;
+  return {width:1-amount*(.085+.008*shake),shear:side*amount*(.095+.012*shake)};
 }
 export function cardSwing(time,phase=0){return Number.isFinite(time)?Math.sin((time/DANCE_CYCLE_MS+phase)*Math.PI*2)*Math.PI/60:0;}
 // Use the playing media's elapsed time where available. A track switch, loop,

@@ -10,15 +10,15 @@ test('semantic destinations cover both keyboard and clicked targets, never overv
  for(const id of ['faroe','erin','kaz'])assert.equal(focusArrowKey({kind:'contestant',contestantId:id}),`contestant:${id}`);
  for(const view of [null,{kind:'overview'},{kind:'contestant',contestantId:'invalid'}])assert.equal(focusArrowKey(view),null);
 });
-test('rotated sprite is outside the target and its tip ray intersects the actual aim',()=>{
- const target={bounds,aim:{x:450,y:220}},p=focusArrowPose(target,viewport);assert.ok(p);assert.ok(p.tipX<bounds.left&&p.tipY<bounds.top);assert.ok(p.angle>0&&p.angle<90);
+test('rotated sprite stays close to an inset target and its tip ray intersects the actual aim',()=>{
+ const target={bounds,aim:{x:450,y:220}},p=focusArrowPose(target,viewport);assert.ok(p);assert.ok(Math.hypot(p.aimX-p.tipX,p.aimY-p.tipY)<=12);assert.ok(p.tipX<450&&p.tipY<220);assert.ok(p.angle>0&&p.angle<90);
  near(p.left+p.width*62/64,p.tipX);near(p.top+p.height/2,p.tipY);near(Math.atan2(p.aimY-p.tipY,p.aimX-p.tipX)*180/Math.PI,p.angle);
 });
 test('multiple sizes and cropped frames remain in the viewport and aim down-right',()=>{
  let shown=0;for(const [w,h] of [[320,480],[390,844],[768,1024],[1920,1080],[2560,720],[720,320]])for(const x of [-40,0,10,w*.25,w*.65])for(const y of [-50,0,12,h*.2,h*.5]){
   const b={left:x,top:y,right:x+w*.32,bottom:y+h*.42},p=focusArrowPose({bounds:b},{width:w,height:h});if(!p)continue;shown++;
   const rad=p.angle*Math.PI/180;for(const dx of [-p.width*62/64,p.width*2/64])for(const dy of [-p.height/2,p.height/2]){const X=p.tipX+dx*Math.cos(rad)-dy*Math.sin(rad),Y=p.tipY+dx*Math.sin(rad)+dy*Math.cos(rad);assert.ok(X>=3-1e-7&&X<=w-3+1e-7&&Y>=3-1e-7&&Y<=h-3+1e-7);}
-  assert.ok(p.aimX>=Math.max(0,b.left)&&p.aimX<=Math.min(w,b.right)&&p.aimY>=Math.max(0,b.top)&&p.aimY<=Math.min(h,b.bottom));near(Math.atan2(p.aimY-p.tipY,p.aimX-p.tipX)*180/Math.PI,p.angle);
+  assert.ok(Math.hypot(p.aimX-p.tipX,p.aimY-p.tipY)<=12+1e-7);assert.ok(p.aimX>=Math.max(0,b.left)&&p.aimX<=Math.min(w,b.right)&&p.aimY>=Math.max(0,b.top)&&p.aimY<=Math.min(h,b.bottom));near(Math.atan2(p.aimY-p.tipY,p.aimX-p.tipX)*180/Math.PI,p.angle);
  }assert.ok(shown>100);
  for(const b of [null,{left:-60,right:-10,top:0,bottom:10},{left:0,right:10,top:800,bottom:900},{left:NaN,right:10,top:0,bottom:10}])assert.equal(focusArrowPose({bounds:b},viewport),null);
 });
@@ -65,4 +65,12 @@ test('focus arrow hides while loading, falls back to the still, and never shows 
   marker.update({kind:'slot'},target,viewport,200,false);events.error();events.error();assert.equal(img.hidden,true);
   marker.update({kind:'slot'},target,viewport,250,false);assert.equal(img.hidden,true);
  }finally{globalThis.document=original;}
+});
+
+test('character arrow prefers the upper interior rather than the transparent iframe margin',()=>{
+ const entry={panel:{style:{visibility:'visible'}},projectedQuad:{corners:[{x:80,y:80},{x:480,y:80},{x:480,y:480},{x:80,y:480}]}};
+ const vp={width:536,height:533};const target=characterArrowTarget(entry,vp,{contains:()=>true});
+ assert.deepEqual(target.aim,{x:232,y:168});const p=focusArrowPose(target,vp);assert.ok(p);assert.ok(Math.hypot(p.tipX-232,p.tipY-168)<=12);
+ const corner=focusArrowPose({bounds:{left:200,right:400,top:150,bottom:350},aim:{x:200,y:150}},vp);assert.ok(corner.tipX<200&&corner.tipY<150);
+ const fallback=characterArrowTarget(entry,vp,{contains:(_e,x)=>x<160});assert.ok(fallback&&fallback.aim.x<160);
 });

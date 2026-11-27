@@ -30,14 +30,17 @@ export function characterArrowTarget(entry,viewport,occlusion){
   const corners=entry.projectedQuad.corners;
   const bounds=screenBounds(corners);if(!bounds)return null;
   const [a,b,c,d]=corners;
-  for(const [u,v] of [[.16,.16],[.08,.08],[.24,.16],[.32,.20],[.12,.28],[.25,.32],[.36,.30],[.42,.36]]){
+  // Live art often has wide transparent margins; prefer the head-side
+  // interior over the outer iframe corner. Preserve occlusion checks.
+  for(const [u,v] of [[.38,.22],[.32,.20],[.42,.24],[.36,.30],[.25,.32],[.24,.16],[.16,.16],[.12,.28],[.08,.08],[.42,.36]]){
     const p={x:(a.x+(b.x-a.x)*u)*(1-v)+(d.x+(c.x-d.x)*u)*v,y:(a.y+(b.y-a.y)*u)*(1-v)+(d.y+(c.y-d.y)*u)*v};
     if(p.x>=0&&p.y>=0&&p.x<=viewport.width&&p.y<=viewport.height&&occlusion.contains(entry,p.x,p.y))return {bounds,aim:p};
   }
   return null;
 }
 // A right-facing 2:1 image rotates around its actual tip (62,16 in 64x32).
-// Place the complete rotated sprite outside the top-left whenever possible.
+// Keep the tip close to the verified aim; prefer an outside corner only
+// when it is nearby. Never use a distant transparent iframe corner.
 // At an extreme viewport edge, shrink or use the visible upper-left interior,
 // never pin an arrow to an unrelated screen edge or point backwards.
 export function focusArrowPose(target,viewport){
@@ -49,6 +52,8 @@ export function focusArrowPose(target,viewport){
   if(aim.x<0||aim.x>w||aim.y<0||aim.y>h)return null;
   const size=Math.max(32,Math.min(64,Math.min(w,h)*.105));
   const angles=[45,30,60];
+  const preferredGap=Math.max(4,Math.min(9,size*.14));
+  const maxGap=12;
   function tryPose(ax,ay,width,angle,gap){
     const rad=angle*Math.PI/180,cos=Math.cos(rad),sin=Math.sin(rad),height=width/2;
     const tipX=ax-gap*cos,tipY=ay-gap*sin;
@@ -61,12 +66,13 @@ export function focusArrowPose(target,viewport){
   const cornerX=Math.min(aim.x,l),cornerY=Math.min(aim.y,t);
   for(const width of [size,size*.8,24])for(const angle of angles){
     const rad=angle*Math.PI/180,cos=Math.cos(rad),sin=Math.sin(rad);
-    const gap=Math.max(6,(aim.x-cornerX+4)/cos,(aim.y-cornerY+4)/sin);
+    const gap=Math.max(preferredGap,(aim.x-cornerX+2)/cos,(aim.y-cornerY+2)/sin);
+    if(gap>maxGap)continue;
     const pose=tryPose(aim.x,aim.y,width,angle,gap);if(pose)return pose;
   }
-  // On a tightly framed target the original corner can be outside the view.
-  // Keep aiming at the same verified point; only shorten the gap/arrow.
-  for(const width of [size*.8,24,18])for(const angle of angles){const pose=tryPose(aim.x,aim.y,width,angle,3);if(pose)return pose;}
+  // An inset aim or clipped corner should not pull the arrow away from the
+  // subject. Keep the full size if possible, then shrink to fit the viewport.
+  for(const width of [size,size*.8,24,18])for(const gap of [preferredGap,3])for(const angle of angles){const pose=tryPose(aim.x,aim.y,width,angle,gap);if(pose)return pose;}
   // For non-character bounds only, a visible inset is preferable to a false
   // offscreen marker. Character targets must retain their occlusion test.
   for(const alt of target.alternates||[]){

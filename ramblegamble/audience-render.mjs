@@ -1,4 +1,4 @@
-import { dancePose } from './stage-dance.mjs?v=stage-dance-20261127-v1';
+import { dancePose } from './stage-dance.mjs?v=ambient-tuning-20261127-v1';
 // Original low-resolution silhouette art, three world-space cutout texture panels.
 // Only these canvases update at 6 fps; the rest of the scene renders normally.
 export const CROWD_FPS=6;

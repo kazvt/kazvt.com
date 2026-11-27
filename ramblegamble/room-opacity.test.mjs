@@ -167,7 +167,7 @@ test('local original and crowd sprite are separate PNGs, and the camera update f
  assert.deepEqual(dimensions(png('smeemo_scramble.png')),[236,601]);
  assert.deepEqual(dimensions(png('smeemo-crowd.png')),[15,38]);
  const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
- assert.match(src,/audience-render\.mjs\?v=stage-dance-20261127-v1/);
+ assert.match(src,/audience-render\.mjs\?v=ambient-tuning-20261127-v1/);
  const animate=src.slice(src.indexOf('function animate(time)'));
  assert.ok(animate.indexOf('audience?.update(crowdClock,emotion,reducedMotion.matches,camera.position,')>animate.indexOf('focusOrbit.step(time'));
 });

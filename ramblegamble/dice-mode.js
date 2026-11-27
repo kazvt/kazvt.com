@@ -1,4 +1,4 @@
-import { createFocusArrow, projectedArrowTarget } from "./focus-arrow.mjs?v=arrow-restored-20261127-v1";
+import { createFocusArrow, projectedArrowTarget } from "./focus-arrow.mjs?v=ambient-tuning-20261127-v1";
 import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
 import { VIP_LIQUID_SOURCE } from "./vip-liquid-preset.mjs?v=vip-black-liquid-20261126-v1";

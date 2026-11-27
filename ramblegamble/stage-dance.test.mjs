@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {dancePose,cardSwing,createDanceClock,createStageDance,CARD_GROUPS,DICE_TRIANGLE_RANGES,splitIndexRanges} from './stage-dance.mjs';
+import {DANCE_AMPLITUDE,dancePose,cardSwing,createDanceClock,createStageDance,CARD_GROUPS,DICE_TRIANGLE_RANGES,splitIndexRanges} from './stage-dance.mjs';
 import {characterCorners,characterPlaneMatrix} from './character-billboards.mjs';
 const near=(a,b,e=1e-8)=>assert.ok(Math.abs(a-b)<e,`${a} != ${b}`);
 const close=(a,b,e=1e-8)=>a.forEach((v,i)=>near(v,b[i],e));
@@ -36,10 +36,10 @@ const dist=(a,b)=>Math.hypot(...a.map((x,i)=>x-b[i]));
 const dot=(a,b)=>a.reduce((s,x,i)=>s+x*b[i],0);
 const sub=(a,b)=>a.map((x,i)=>x-b[i]);
 test('alternating held squish, shivers, center holds and exact looping are bounded',()=>{
- for(let t=0;t<4000;t++){const p=dancePose(t);assert.ok(p.width>=.906&&p.width<=1);assert.ok(Math.abs(p.shear)<=.108);close(Object.values(p),Object.values(dancePose(t+2000)));assert.ok(Math.abs(cardSwing(t))<=Math.PI/60+1e-12);}
+ for(let t=0;t<4000;t++){const p=dancePose(t);assert.ok(p.width>=.967&&p.width<=1);assert.ok(Math.abs(p.shear)<=.038);close(Object.values(p),Object.values(dancePose(t+2000)));assert.ok(Math.abs(cardSwing(t))<=Math.PI/60+1e-12);}
  for(const t of [0,900,950,1000,1900,1950,2000])assert.deepEqual(dancePose(t),{width:1,shear:0});
- assert.ok(dancePose(300).shear<-.08&&dancePose(1300).shear>.08);assert.notEqual(dancePose(300).shear,dancePose(400).shear);assert.equal(dancePose(500,0).width,1);
- assert.ok(Math.abs(dancePose(300,.25).shear)<.03);
+ assert.ok(dancePose(300).shear<-.028&&dancePose(1300).shear>.028);assert.notEqual(dancePose(300).shear,dancePose(400).shear);assert.equal(dancePose(500,0).width,1);
+ assert.ok(Math.abs(dancePose(300,.25).shear)<.01);
 });
 test('real stage triangles partition without changing any resting geometry; all 23 intended rigs only',()=>{
  const {stage,associations,nodes,prims}=fixture(),before=triangleSet(stage),staticWorld=prims[16].matrixWorld.a.slice(),table=nodes[8].matrixWorld.a.slice();
@@ -62,3 +62,15 @@ test('DOM projection and depth plane agree exactly at every yaw and dance phase;
   [[-.5,.5],[.5,.5],[.5,-.5],[-.5,-.5]].forEach(([x,y],i)=>close(new V(x,y,0).applyMatrix4(m).array(),Object.values(corners[i])));close(new V(0,-.5,0).applyMatrix4(m).array(),[2,2.1,-1]);}
 });
 test('music position corrections are bounded across quantized playback, loops, missing files and hidden tabs',()=>{const c=createDanceClock();let last=0;for(let t=0;t<5000;t+=16){const seconds=Math.floor((t%2000)/100)/10,now=c.step(t,true,{track:t<3000?'general':'cards',seconds});assert.ok(now>=last&&now-last<=20);last=now;}assert.ok(Math.abs(last-5000)<250);assert.equal(c.step(10000,false),last);assert.equal(c.step(20000,true,null),last);assert.equal(c.step(20016,true,null),last+16);});
+
+test('ambient amplitude is 35% of previous squash and shear, with identical card swing and beat timing',()=>{
+ assert.equal(DANCE_AMPLITUDE,.35);
+ const ease=n=>{const t=Math.max(0,Math.min(1,n));return t*t*(3-2*t);};
+ for(const strength of [.25,.38,.56,.65,.78,.8,.9,1])for(let time=0;time<2000;time+=7){
+  const phase=.11,t=((time/2000+phase)%1+1)%1,side=t<.5?-1:1,p=(t%.5)*2;
+  const envelope=ease(p/.22)*(1-ease((p-.64)/.22));
+  const shake=p>.22&&p<.64?Math.sin((p-.22)/.42*Math.PI*4)*Math.sin((p-.22)/.42*Math.PI):0;
+  const pose=dancePose(time,strength,phase);near(1-pose.width,.35*strength*envelope*(.085+.008*shake));near(pose.shear,.35*side*strength*envelope*(.095+.012*shake));
+  near(cardSwing(time,phase),Math.sin((time/2000+phase)*Math.PI*2)*Math.PI/60);
+ }
+});
