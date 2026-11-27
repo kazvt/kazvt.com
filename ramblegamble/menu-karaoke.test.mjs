@@ -5,7 +5,7 @@ import {MENU_KARAOKE_CUES as cues,MENU_KARAOKE_DURATION as duration} from './men
 import {karaokeFrame,validateKaraokeCues,createMenuKaraoke,readKaraokeCalibration,validateKaraokeCalibration,KARAOKE_CALIBRATION_KEY,karaokeBounce,karaokeWordPose} from './menu-karaoke.mjs';
 
 test('theme cue sheet has valid monotonic word timing and the entire supplied lyric in order',()=>{
- assert.equal(validateKaraokeCues(cues,duration),cues);assert.equal(cues[0].start,0);assert.equal(cues.at(-1).end,duration);assert.equal(cues.length,34);
+ assert.equal(validateKaraokeCues(cues,duration),cues);assert.equal(cues[0].start,0);assert.equal(cues.at(-1).end,duration);assert.equal(cues.length,35);
  const lyric=cues.flatMap(c=>c.words.map(w=>w[0])).join(' ');
  const chorus='as the cards go shuffling all night long (ramble gamble) and they shout oh lillie is at the table (ramble gamble) place your bets and come and sing along (ramble gamble)';
  assert.equal(lyric,`yippee-yay, the house is gonna win again, today i got chips lets ramble ramble gamble (ramble gamble) ${chorus} oh dealer lillie (oh dealer lillie) oh dealer lillie (oh dealer lillie) though i thought i know the answer now my confidence is gone oh lucky ace (oh what a scam) oh lucky ace (oh what a scam) i walked in with royal swagger now i got a poker face cause i got chips lets ramble ramble gamble (ramble gamble) ${chorus} oh dealer lillie (oh dealer lillie) oh dealer lillie (oh dealer lillie) though i thought my hand was winning smeemo grinned and took my chips!? well i got chips lets ramble ramble gamble (ramble gamble) ${chorus} burgata babara (oh dealer lillie) bargata gatagattara (oh dealer lillie) bargata bumbumbumbumbumbumbumbum bargataba tum tagum bargata gata gatibati gatibati gatibati gatibati booom bargata booom bargata bun dum bum bum bum bargata bum bun weird bululub`);
@@ -28,12 +28,12 @@ function fixture(){
  const theme={paused:true,ended:false,error:null,readyState:4,currentTime:0};const doc={createElement:()=>new El()},win={matchMedia:()=>({matches:false})};const fx=createMenuKaraoke({root,menu,theme,doc,win});return {root,menu,theme,fx,lead:root.map['.rg-karaoke-lead'],back:root.map['.rg-karaoke-response'],particles:root.map['.rg-karaoke-particles']};
 }
 test('karaoke remains hidden before actual theme playback; keeps exact progress when media time freezes; handles seeks and response grouping',()=>{
- const f=fixture();f.fx.update(true);assert.equal(f.root.hidden,true);f.theme.paused=false;f.theme.currentTime=9;f.fx.update(false);assert.equal(f.root.hidden,true);
+ const f=fixture();f.fx.update(true);assert.equal(f.root.hidden,true);f.theme.paused=false;f.theme.currentTime=13;f.fx.update(false);assert.equal(f.root.hidden,true);
  f.fx.update(true);assert.equal(f.root.hidden,false);assert.equal(f.menu.dataset.karaokeActive,'true');assert.equal(f.lead.children.length,7);assert.equal(f.back.children.length,2);assert.equal(f.particles.children.length,8);
- const c=cues[2];f.theme.currentTime=(c.words[1][1]+c.words[1][2])/2;f.fx.update();assert.equal(f.lead.children[1].dataset.state,'active');assert.equal(f.lead.children[1].style['--sweep'],'50.0%');f.fx.update();assert.equal(f.lead.children[1].style['--sweep'],'50.0%');
+ const c=cues[3];f.theme.currentTime=(c.words[1][1]+c.words[1][2])/2;f.fx.update();assert.equal(f.lead.children[1].dataset.state,'active');assert.equal(f.lead.children[1].style['--sweep'],'50.0%');f.fx.update();assert.equal(f.lead.children[1].style['--sweep'],'50.0%');
  f.theme.currentTime=c.words[0][1];f.fx.update();assert.equal(f.lead.children[0].dataset.state,'active');assert.equal(f.lead.children[1].dataset.state,'waiting');
  f.theme.currentTime=100;f.fx.update();assert.equal(f.root.dataset.section,'instrumental');assert.equal(f.back.hidden,true);f.theme.currentTime=0;f.fx.update();assert.equal(f.root.dataset.section,'instrumental');
- f.theme.paused=true;f.fx.update();assert.equal(f.root.hidden,true);f.theme.paused=false;f.theme.currentTime=9;f.fx.update();assert.equal(f.root.hidden,false);f.fx.hide();assert.equal(f.root.hidden,true);f.fx.dispose();assert.equal(f.particles.children.length,0);
+ f.theme.paused=true;f.fx.update();assert.equal(f.root.hidden,true);f.theme.paused=false;f.theme.currentTime=13;f.fx.update();assert.equal(f.root.hidden,false);f.fx.hide();assert.equal(f.root.hidden,true);f.fx.dispose();assert.equal(f.particles.children.length,0);
 });
 test('the renderer is a safe optional feature and production menu uses existing audio lifecycle',()=>{
  const no=createMenuKaraoke({root:null,menu:null,theme:null,doc:{},win:{}});no.update();no.hide();no.dispose();
@@ -43,9 +43,9 @@ test('the renderer is a safe optional feature and production menu uses existing 
 
 test('revised final-mix acoustic anchor estimates are represented, with full lyric and duration invariants',()=>{
  assert.equal(cues[1].words[0][1],1.81);assert.equal(cues[1].words[5][1],5.81);
- assert.equal(cues[5].words[7][1],20.73);assert.equal(cues[17].words[7][1],62.47);
- assert.ok(Math.abs((cues[17].words[7][1]-cues[5].words[7][1])-41.74)<.001);
- assert.equal(cues[26].start,153.4);assert.equal(cues[27].start,159.67);
+ assert.equal(cues[6].words[7][1],24.78);assert.equal(cues[18].words[7][1],66.52);
+ assert.ok(Math.abs((cues[18].words[7][1]-cues[6].words[7][1])-41.74)<.001);
+ assert.equal(cues[27].start,157.45);assert.equal(cues[28].start,163.72);
 });
 test('optional browser calibration is exact-recording scoped, validated, and fails safely',()=>{
  assert.deepEqual(readKaraokeCalibration({}),cues);assert.deepEqual(readKaraokeCalibration({get localStorage(){throw Error('blocked')}}),cues);
@@ -68,6 +68,14 @@ test('retro marker lands on the current word and advances monotonically on the s
 test('retro karaoke uses only lyric rows, notes and a single ball, no chrome',()=>{
  const html=readFileSync(new URL('../rg/index.html',import.meta.url),'utf8');
  assert.match(html,/class="rg-karaoke-ball"[^>]*hidden/);assert.doesNotMatch(html,/rg-karaoke-(ribbon|deck|label|next|track|progress)/);
- const f=fixture();f.theme.paused=false;f.theme.currentTime=9;f.fx.update();assert.deepEqual(f.particles.children.map(n=>n.textContent),['♪','♫','♩','♬','♪','♫','♩','♬']);
+ const f=fixture();f.theme.paused=false;f.theme.currentTime=13;f.fx.update();assert.deepEqual(f.particles.children.map(n=>n.textContent),['♪','♫','♩','♬','♪','♫','♩','♬']);
  const w=f.lead.children[0];assert.equal(w.children[0].className,'rg-karaoke-ink');assert.equal(w.children[0].textContent,'i');
+});
+
+test('opening instrumental break clears lyrics and marker until the delayed first chorus',()=>{
+ const f=fixture();f.theme.paused=false;f.theme.currentTime=8;f.fx.update();assert.ok(f.lead.children.length>0);
+ assert.equal(cues[1].end,8.53);assert.deepEqual(cues[2],{section:'instrumental',start:8.53,end:12.6,words:[]});
+ for(const t of [8.53,9,11,12.599]){f.theme.currentTime=t;f.fx.update();assert.equal(f.root.dataset.section,'instrumental');assert.equal(f.lead.children.length,0);assert.equal(f.back.children.length,0);assert.equal(f.root.map['.rg-karaoke-ball'].hidden,true);assert.equal(karaokeFrame(t).word,-1);}
+ f.theme.currentTime=12.6;f.fx.update();assert.equal(f.lead.children[0].dataset.word,'i');assert.equal(f.lead.children[0].dataset.state,'active');
+ f.theme.currentTime=9;f.fx.update();assert.equal(f.lead.children.length,0);assert.equal(cues.at(-1).start,193.55);assert.equal(cues.at(-1).end,duration);
 });

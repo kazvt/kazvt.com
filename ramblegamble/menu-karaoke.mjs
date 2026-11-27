@@ -1,8 +1,8 @@
-import {MENU_KARAOKE_CUES} from './menu-karaoke-cues.mjs?v=curtain-karaoke-20261128-v1';
+import {MENU_KARAOKE_CUES} from './menu-karaoke-cues.mjs?v=karaoke-break-20261128-v1';
 
 // Per-recording opt-in calibration. Never read a correction for a different
 // mix or accept changed lyric text/sections. Storage may be blocked in private mode.
-export const KARAOKE_CALIBRATION_KEY='rg.menu-karaoke.calibration.7485aa4feaf5557e2688b1ecf4fe448d96ec7e33d2388842096cd4d319258ec5.v2';
+export const KARAOKE_CALIBRATION_KEY='rg.menu-karaoke.calibration.7485aa4feaf5557e2688b1ecf4fe448d96ec7e33d2388842096cd4d319258ec5.v3';
 export function validateKaraokeCalibration(cues){
   validateKaraokeCues(cues);
   if(cues.length!==MENU_KARAOKE_CUES.length||cues.some((c,i)=>c.section!==MENU_KARAOKE_CUES[i].section||c.words.length!==MENU_KARAOKE_CUES[i].words.length||c.words.some((w,j)=>w[0]!==MENU_KARAOKE_CUES[i].words[j][0])))throw new Error('Calibration must preserve the supplied lyrics and sections');
