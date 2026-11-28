@@ -104,14 +104,17 @@ def map_words(cues, aligned):
 
 
 def candidate(cues, mapped, recognized):
-    """Rebuild phrase and instrumental bounds from aligned word times, not old offsets."""
+    """Rebuild lead/instrumental bounds while preserving separate backing timing."""
     result, report = [], []
     recognized_map = map_transcript_words(cues, recognized)
     at = 0
+    def copy_responses(cue):
+        return [dict(start=r['start'], end=r['end'], words=[list(w) for w in r['words']])
+                for r in cue.get('responses', [])]
     for i, cue in enumerate(cues):
         n = len(cue['words'])
         if not n:
-            result.append(dict(section=cue['section'], start=None, end=None, words=[]))
+            result.append(dict(section=cue['section'], start=None, end=None, words=[], responses=copy_responses(cue)))
             continue
         words = mapped[at:at+n]
         at += n
@@ -121,7 +124,7 @@ def candidate(cues, mapped, recognized):
         checks = [r is not None and r.get('start') is not None and abs(w[1] - float(r['start'])) <= .6 for w, r in zip(words, matched)]
         low = [w[0] for w in words if w[3] is not None and w[3] < .25]
         long = [w[0] for w in words if w[2]-w[1] > 3]
-        result.append(dict(section=cue['section'], start=words[0][1], end=words[-1][2], words=[list(w[:3]) for w in words]))
+        result.append(dict(section=cue['section'], start=words[0][1], end=words[-1][2], words=[list(w[:3]) for w in words], responses=copy_responses(cue)))
         report.append(dict(cue=i+1, lyric=' '.join(w[0] for w in words), oldStart=cue['start'], start=words[0][1], end=words[-1][2], independentlyMatched=sum(checks), total=n, lowProbability=low, unusuallyLong=long, review=not all(checks) or bool(low or long)))
     if at != len(mapped):
         raise ValueError('Unexpected mapped word count')
@@ -278,7 +281,7 @@ def main():
     write_json(out/'review.json', report)
     write_json(out/'candidate.json', dict(audioSha256=SHA256, alignment=alignment_meta, cues=result, review=report))
     print(f'Candidate: {out / "candidate.json"}. Review flagged phrases in review.json, then import in the timing editor.')
-    print(f'{sum(r["independentlyMatched"] for r in report)}/{sum(r["total"] for r in report)} words matched independent recognition within 0.6 s. This is not a verified sync score.')
+    print(f'{sum(r["independentlyMatched"] for r in report)}/{sum(r["total"] for r in report)} lead words matched independent recognition within 0.6 s. Backing timings were preserved. This is not a verified sync score.')
 
 
 if __name__ == '__main__':
