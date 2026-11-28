@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {sidePortraitLayout,sideNeeded,createSidePortraits} from './character-side-fallback.mjs';
+import {sidePortraitLayout,sideNeeded,createSidePortraits,createFugiSpeechBridge,FUGI_ORIGIN,FUGI_STATE,FUGI_REQUEST,FUGI_SPEECH_TTL} from './character-side-fallback.mjs';
 const ids=['faroe','erin','kaz','hazel','lillie-host'];
 const styles=()=>{const map=new Map();return {getPropertyValue:k=>map.get(k)||'',setProperty:(k,v)=>map.set(k,v)};};
 const element=()=>{const set=new Set();return {style:styles(),dataset:{},classList:{add:k=>set.add(k),remove:k=>set.delete(k),contains:k=>set.has(k),toggle(k,v){v?set.add(k):set.delete(k);}}};};
@@ -16,11 +16,51 @@ test('all cast subsets split with integer division and fit safe non-overlapping 
 test('same panels move into side rails; referee is counted, hidden host included, restore clears overrides without touching projection',()=>{
  const preview=element(),ctrl=createSidePortraits(preview,1024),entries=ids.map(id=>({id,panel:{parentElement:element(),style:{transform:'matrix3d(...)',visibility:'hidden'}}}));
  const view={width:1366,height:668};const coverage=new Map(entries.map(e=>[e,e.id==='lillie-host'?1:0]));
- const update=t=>ctrl.update(entries,e=>coverage.get(e),view,t,true);
+ const update=t=>ctrl.update(entries,e=>coverage.get(e),view,t,true,()=>true);
  update(0);assert.deepEqual(entries.map(e=>e.panel.parentElement.dataset.side),['left','left','right','right',undefined]);assert.equal(entries[3].sidePortrait,true);assert.equal(entries[4].sidePortrait,false);
  coverage.set(entries[4],0);update(10);assert.equal(entries[4].sidePortrait,false);update(151);assert.equal(entries[4].sidePortrait,true);
  coverage.set(entries[0],.37);update(200);update(400);assert.equal(entries[0].sidePortrait,true);coverage.set(entries[0],.7);update(410);update(551);assert.equal(entries[0].sidePortrait,false);assert.equal(entries[0].panel.style.transform,'matrix3d(...)');assert.equal(entries[0].panel.style.visibility,'hidden');
  ctrl.update(entries,()=>0,view,600,false);assert.ok(entries.every(e=>!e.sidePortrait&&!e.panel.parentElement.classList.contains('rg-side-portrait')));assert.equal(preview.style.getPropertyValue('--rg-fugi-left'),'0px');assert.equal(preview.classList.contains('has-side-fugis'),false);
- ctrl.update(entries,()=>0,view,700,true);ctrl.clear();assert.ok(entries.every(e=>!e.sidePortrait));
+ ctrl.update(entries,()=>0,view,700,true,()=>true);ctrl.clear();assert.ok(entries.every(e=>!e.sidePortrait));
 });
 test('hysteresis separates entering and leaving threshold; invalid coverage fails to peripheral fallback',()=>{assert.equal(sideNeeded(.35,false),false);assert.equal(sideNeeded(.35,true),true);assert.equal(sideNeeded(0),true);assert.equal(sideNeeded(1,true),false);assert.equal(sideNeeded(NaN),true);});
+test('silent hidden cast does not appear; speaking uses stable rails with short release and exit',()=>{
+ const preview=element(),ctrl=createSidePortraits(preview,1024),entries=ids.map(id=>({id,panel:{parentElement:element()}}));
+ const view={width:1366,height:668},speakers=new Set(),coverage=new Map(entries.map(e=>[e,0]));
+ const update=t=>ctrl.update(entries,e=>coverage.get(e),view,t,true,e=>speakers.has(e));
+ update(0);assert.ok(entries.every(e=>!e.sidePortrait));const margins=[preview.style.getPropertyValue('--rg-fugi-left'),preview.style.getPropertyValue('--rg-fugi-right')];
+ speakers.add(entries[3]);update(10);assert.equal(entries[3].sidePortrait,true);assert.equal(entries[3].panel.parentElement.dataset.side,'right');
+ const position=entries[3].panel.parentElement.style.getPropertyValue('--rg-side-y');speakers.add(entries[0]);update(20);assert.equal(entries[0].sidePortrait,true);assert.equal(entries[3].panel.parentElement.style.getPropertyValue('--rg-side-y'),position);
+ assert.deepEqual([preview.style.getPropertyValue('--rg-fugi-left'),preview.style.getPropertyValue('--rg-fugi-right')],margins);
+ speakers.clear();update(300);assert.ok(entries[0].sidePortrait);update(301);assert.ok(entries[0].panel.parentElement.classList.contains('rg-side-exiting'));speakers.add(entries[0]);update(350);assert.ok(!entries[0].panel.parentElement.classList.contains('rg-side-exiting'));
+ update(600);assert.ok(!entries[3].sidePortrait);assert.ok(entries[0].sidePortrait);coverage.set(entries[0],1);update(610);update(751);assert.ok(!entries[0].sidePortrait);
+ ctrl.clear();assert.ok(entries.every(e=>!e.sidePortrait));
+});
+test('speech bridge checks origin and frame identity, expiry, explicit false and load reset',()=>{
+ let t=0;const listeners=new Map(),target={addEventListener:(k,v)=>listeners.set(k,v),removeEventListener:k=>listeners.delete(k)};
+ const make=()=>{const frameListeners=new Map(),messages=[];const frame={src:`${FUGI_ORIGIN}/basic/123`,contentWindow:{postMessage:(...args)=>messages.push(args)},addEventListener:(k,v)=>frameListeners.set(k,v),removeEventListener:k=>frameListeners.delete(k)};return {entry:{panel:{querySelector:()=>frame}},frame,frameListeners,messages};};
+ const a=make(),b=make(),bridge=createFugiSpeechBridge(target,()=>t);bridge.track([a.entry,b.entry]);assert.deepEqual(a.messages[0],[{type:FUGI_REQUEST},FUGI_ORIGIN]);
+ const send=(f, speaking, origin=FUGI_ORIGIN,type=FUGI_STATE)=>listeners.get('message')({source:f,origin,data:{type,speaking}});
+ send(a.frame.contentWindow,true,'https://evil.test');send({},true);send(a.frame.contentWindow,'true');assert.ok(!bridge.speaking(a.entry));assert.equal(bridge.available(),false);
+ send(a.frame.contentWindow,true);assert.equal(bridge.available(),true);assert.ok(bridge.speaking(a.entry));assert.ok(!bridge.speaking(b.entry));t=FUGI_SPEECH_TTL+1;assert.ok(!bridge.speaking(a.entry));assert.equal(bridge.available(),false);bridge.track([a.entry,b.entry]);assert.equal(a.messages.length,2);
+ send(a.frame.contentWindow,true);send(a.frame.contentWindow,false);assert.ok(!bridge.speaking(a.entry));send(a.frame.contentWindow,true);a.frameListeners.get('load')();assert.ok(!bridge.speaking(a.entry));
+ send(b.frame.contentWindow,true);bridge.track([a.entry]);assert.ok(!bridge.speaking(b.entry));bridge.destroy();assert.equal(listeners.size,0);
+});
+
+test('actual bridge content script reads only explicit speech and only answers authorized parent',async()=>{
+ const {readFileSync}=await import('node:fs'),{runInNewContext}=await import('node:vm');
+ const code=readFileSync(new URL('./tools/fugi-speaking-bridge/bridge.js',import.meta.url),'utf8');
+ const sent=[],callbacks=new Map();let values=['false'],onMutation;
+ const parent={postMessage:(data,origin)=>sent.push([data.speaking,origin,data.type])};
+ const window={parent,addEventListener:(key,cb)=>callbacks.set(key,cb)};
+ const document={documentElement:{},querySelectorAll:()=>values.map(v=>({getAttribute:()=>v}))};
+ class MutationObserver {constructor(cb){onMutation=cb;}observe(){} }
+ runInNewContext(code,{window,document,location:{pathname:'/basic/123'},MutationObserver,queueMicrotask:fn=>fn()});
+ const request=(source,origin,type=FUGI_REQUEST)=>callbacks.get('message')({source,origin,data:{type}});
+ request(parent,'https://evil.test');request({},'https://kazvt.com');request(parent,'https://kazvt.com','wrong');assert.equal(sent.length,0);
+ request(parent,'https://kazvt.com');assert.deepEqual(sent.at(-1),[false,'https://kazvt.com',FUGI_STATE]);
+ values=['true'];onMutation();assert.deepEqual(sent.at(-1),[true,'https://kazvt.com',FUGI_STATE]);const count=sent.length;onMutation();assert.equal(sent.length,count);
+ values=['false'];onMutation();assert.equal(sent.at(-1)[0],false);values=[];onMutation();assert.equal(sent.at(-1)[0],null);values=['unknown'];onMutation();assert.equal(sent.at(-1)[0],null);
+ request(parent,'https://kazvt.com');assert.equal(sent.at(-1)[0],null);
+ const manifest=JSON.parse(readFileSync(new URL('./tools/fugi-speaking-bridge/manifest.json',import.meta.url),'utf8'));assert.deepEqual(manifest.content_scripts[0].matches,['https://reactive.fugi.tech/basic/*']);assert.equal(manifest.content_scripts[0].all_frames,true);assert.equal(manifest.permissions,undefined);
+});

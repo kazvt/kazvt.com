@@ -1,3 +1,4 @@
+import { normalizeAcceptedAnswers } from "./trivia-accepted-answers.mjs?v=accepted-20261128-v1";
 // A host-only saved snapshot; player projections are explicitly allowlisted.
 import { withRoomSubmissionLock } from './card-room-election.mjs';
 import { readCardGames } from './card-games-store.mjs?v=answer-edit-20261128-v1';
@@ -86,7 +87,7 @@ export function createLiveTrivia({round,difficulty,format,content,cards,id=newTr
   if(mode==='match-pairs'&&(!q.left.length||q.right.some(v=>!v.trim())||q.left.some(v=>!v.label&&!v.image)))throw Error('Complete the matching pairs first.');
 
   if(!q.prompt&&!q.subtitle&&!q.promptImage&&!q.backgroundImage&&!q.videoUrl&&!list(content.options).some(o=>o?.label||o?.image)&&!q.items.some(o=>o.label||o.image)&&!q.left.length&&!(mode==="memory-number"&&media(content.promptImage))&&!(mode==="number-grid"&&/^\d{4}$/.test(text(content.numberCode,4))))throw Error('No authored question for that round/difficulty.');
-  const secret={correct:list(content.options).flatMap((o,i)=>o?.correct?[i]:[]),accepted:list(content.acceptedAnswers).map(v=>text(v)),numberCode:text(content.numberCode,4),numberValue:resolveNumberTarget(content),rightOrder,itemOrder,memoryImage:mode==="memory-number"?media(content.promptImage):""};
+  const secret={correct:list(content.options).flatMap((o,i)=>o?.correct?[i]:[]),accepted:normalizeAcceptedAnswers(content.acceptedAnswers),numberCode:text(content.numberCode,4),numberValue:resolveNumberTarget(content),rightOrder,itemOrder,memoryImage:mode==="memory-number"?media(content.promptImage):""};
   if(mode==='number-grid'&&!/^\d{4}$/.test(secret.numberCode))throw Error('Set the four-digit secret first.');
   if(['number-stepper','memory-number'].includes(mode)&&!Number.isFinite(secret.numberValue))throw Error('Set the target number first.');
   const result={id,mode:'trivia',phase:'submissions',prompt:q.prompt,question:q,secret,cardStamp:cardStamp(cards),submissions:Object.fromEntries(PLAYERS.map(p=>[p,null])),attempts:Object.fromEntries(PLAYERS.map(p=>[p,[]])),drafts:{},lastPlayer:null};

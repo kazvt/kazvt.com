@@ -1,11 +1,12 @@
+import { normalizeAcceptedAnswers, acceptedAnswerKey } from "./trivia-accepted-answers.mjs?v=accepted-20261128-v1";
 // Host-only grading. This module receives the answer key only on the host;
 // it never writes a contestant submission, score or public room snapshot.
 const choices = new Set(['choice-text','choice-image','choice-image-wide','image-grid']);
 export const isSimpleGradeMode = mode => mode==='short-answer'||choices.has(mode);
-export const normalizeSimpleAnswer = value => String(value??'').normalize('NFKC').trim().toLocaleLowerCase().replace(/\s+/g,' ');
+export const normalizeSimpleAnswer = acceptedAnswerKey;
 export function gradeSimpleAnswer(question,secret,answer) {
   if(question?.kind==='short-answer'){
-    const accepted=(Array.isArray(secret?.accepted)?secret.accepted:[]).map(normalizeSimpleAnswer).filter(Boolean);
+    const accepted=normalizeAcceptedAnswers(secret?.accepted).map(normalizeSimpleAnswer).filter(Boolean);
     if(!accepted.length)return {state:'neutral',text:'Set an accepted answer first.'};
     const given=normalizeSimpleAnswer(answer?.text);
     if(!given)return {state:'neutral',text:'Enter the answer given.'};

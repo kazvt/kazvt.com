@@ -19,7 +19,7 @@ import { sampleVipAmbience } from "./vip-atmosphere.mjs?v=sky-soot-20261127-v1";
 import { createStageShow } from "./stage-show.mjs?v=curtain-karaoke-20261128-v1";
 import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state.mjs?v=all-curtain-20261127-v1";
 import { createCharacterOcclusion } from "./character-occlusion.mjs?v=side-fugis-20261128-v1";
-import { createSidePortraits } from "./character-side-fallback.mjs?v=side-fugis-20261128-v1";
+import { createSidePortraits, createFugiSpeechBridge } from "./character-side-fallback.mjs?v=speech-peeks-20261128-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=smeemo-alpha-20261128-v1";
 import { createAudienceRenderer, crowdCatAnchor, CROWD_CAT } from "./audience-render.mjs?v=exterior-hands-20261128-v1";
@@ -87,6 +87,7 @@ import {
   const liquidPortalFrame = document.getElementById("rg-liquid-portal-frame");
   const billboardLayer = document.getElementById("rg-billboard-layer");
   const sidePortraits = createSidePortraits(preview, CHARACTER_SOURCE_SIZE);
+  const fugiSpeech = createFugiSpeechBridge();
   const slotControlLayer = document.getElementById("rg-slot-control-layer");
   const pointsHud = document.getElementById("rg-points-hud");
   const diceHeader = document.querySelector(".rg-dice-header");
@@ -1967,6 +1968,7 @@ import {
     hazelBillboard = null;
     billboards = [];
     sidePortraits.clear();
+    fugiSpeech.track([]);
     billboardLayer?.replaceChildren();
     rouletteModel?.traverse((object) => {
       if (object.isMesh) rouletteTargets.push(object);
@@ -2945,13 +2947,14 @@ import {
     }
     // Actual scene geometry masks the DOM planes at pixel granularity. The
     // iframe itself is never read or replaced; transparent pixels remain live.
+    fugiSpeech.track(billboards);
     visible.sort((a,b)=>b.projectedQuad.depth-a.projectedQuad.depth);
     visible.forEach((entry,index)=>{const style=entry.panel.parentElement.style,value=String(index+1);if(style.zIndex!==value)style.zIndex=value;});
     try {
       if (!characterOcclusion) throw new Error("Character depth pass unavailable");
       scene.updateMatrixWorld(true);
       characterOcclusion.update(visible,viewport,camera);
-      sidePortraits.update(billboards,entry=>characterOcclusion.coverage(entry),viewport,time,!cameraDetached&&!freecam?.active&&!cameraTransition);
+      sidePortraits.update(billboards,entry=>characterOcclusion.coverage(entry),viewport,time,!cameraDetached&&!freecam?.active&&!cameraTransition&&fugiSpeech.available(),entry=>fugiSpeech.speaking(entry));
       const groupTags=!cameraDetached&&!freecam?.active&&!cameraTransition&&currentView.kind==="contestants"?contestants:[];
       characterSelection?.update(visible.find(entry=>entry.id===selectionId&&!entry.sidePortrait),time,time-characterSelectedAt,reducedMotion.matches,viewport,characterOcclusion,groupTags.filter(entry=>!entry.sidePortrait));
     } catch(error) {
@@ -2960,7 +2963,7 @@ import {
       characterSelection?.hide();
       characterOcclusion?.invalidate();
       // A failed depth pass must not show world planes through geometry.
-      sidePortraits.update(billboards,()=>0,viewport,time,!cameraDetached&&!freecam?.active&&!cameraTransition);
+      sidePortraits.update(billboards,()=>0,viewport,time,!cameraDetached&&!freecam?.active&&!cameraTransition&&fugiSpeech.available(),entry=>fugiSpeech.speaking(entry));
       if(!warnedOcclusion){warnedOcclusion=true;console.warn("Character occlusion unavailable",error);}
     }
   }

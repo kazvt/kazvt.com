@@ -1,3 +1,4 @@
+import { normalizeAcceptedAnswers } from "./trivia-accepted-answers.mjs?v=accepted-20261128-v1";
 import { MODE_NAMES, isChoiceMode, resolveRoundFormat, resolveComposeTypeCount } from "./trivia-data.js?v=compose-object-types-20261127-v1";
 import { normalizeGuessLimit, parseTriviaNumber, resolveNumberTarget, isNumericTargetMode } from "./trivia-game.mjs?v=match-number-20261127-v1";
 import { normalizeComposePlacements } from "./compose-placement.mjs";
@@ -87,6 +88,11 @@ function sanitizeRoundDrafts(value) {
       if (!Number.isInteger(level) || level < 1 || level > 5 || !rawDraft || typeof rawDraft !== "object" || Array.isArray(rawDraft)) continue;
       const draft = {};
       for (const [field, item] of Object.entries(rawDraft)) {
+        if (["acceptedAnswers", "accepted_answers", "accepted", "expectedAnswers", "expected_answers", "expectedAnswer", "expected_answer"].includes(field)) {
+          // Canonical key wins over compatibility aliases, including an explicit empty list.
+          if (field === "acceptedAnswers" || !Object.hasOwn(rawDraft,"acceptedAnswers") && !Object.hasOwn(draft,"acceptedAnswers")) draft.acceptedAnswers=normalizeAcceptedAnswers(item);
+          continue;
+        }
         if (!ROUND_FIELDS.has(field)) continue;
         if (["question", "subtitle", "promptImage", "promptAsset", "videoUrl", "backgroundImage", "drawing"].includes(field)) {
           draft[field] = safeString(item);
@@ -96,7 +102,7 @@ function sanitizeRoundDrafts(value) {
         } else if (field === "optionCount") {
           const count = Number(item);
           if (Number.isFinite(count)) draft.optionCount = Math.max(0, Math.min(24, Math.trunc(count)));
-        } else if (["acceptedAnswers", "categories"].includes(field)) {
+        } else if (field === "categories") {
           if (Array.isArray(item)) draft[field] = item.map(safeString);
         } else if (field === "options" && Array.isArray(item)) {
           draft.options = item.filter((option) => option && typeof option === "object").map((option) => ({
@@ -129,6 +135,11 @@ function sanitizeRoundDrafts(value) {
         } else if (field === "guessLimit") {
           draft.guessLimit = normalizeGuessLimit(item);
         }
+      }
+      if (draft.mode === "short-answer" && !Object.hasOwn(draft,"acceptedAnswers")) {
+        const key=rawDraft.correctAnswers??rawDraft.correct_answers??rawDraft.correctAnswer??rawDraft.correct_answer??rawDraft.answer;
+        const alternatives=rawDraft.answers??rawDraft.alternatives;
+        if(key!=null||alternatives!=null)draft.acceptedAnswers=normalizeAcceptedAnswers(key??onlyMarkedWhenPresent(alternatives));
       }
       if (Array.isArray(draft.placements)) draft.placements = normalizeComposePlacements(draft.placements, draft.items || 24);
       levels[level] = draft;
@@ -222,6 +233,11 @@ function parseJsonPayload(value) {
   return null;
 }
 
+function onlyMarkedWhenPresent(value) {
+  if(Array.isArray(value)&&value.some(entry=>typeof entry?.correct==='boolean'))return value.filter(entry=>entry?.correct===true);
+  return value;
+}
+
 function parseQuestionObjects(questions) {
   const warnings = [];
   const grouped = new Map();
@@ -233,20 +249,23 @@ function parseQuestionObjects(questions) {
     if (!question) { warnings.push(`Entry ${index + 1} has no question text and was skipped.`); continue; }
     const rawOptions = item.options ?? item.choices ?? item.answers ?? item.alternatives;
     const options = normalizeOptionObjects(rawOptions);
-    const explicitAccepted = item.acceptedAnswers ?? item.accepted_answers ?? item.expectedAnswer ?? item.expected_answer;
+    const explicitAccepted = item.acceptedAnswers ?? item.accepted_answers ?? item.accepted ?? item.expectedAnswers ?? item.expected_answers ?? item.expectedAnswer ?? item.expected_answer;
+    const authoredShort = normalizeMode(item.mode ?? item.type ?? item.format)==="short-answer" || /^(?:true|yes|on|1)$/i.test(String(item.noMultipleChoice ?? item.no_multiple_choice ?? item.noMc ?? item.noMcq ?? ""));
     const answerValue = item.answer ?? item.back ?? item.definition;
-    const acceptedAnswers = normalizeAnswerObjects(explicitAccepted ?? (options.length ? null : answerValue));
+    const explicitCorrect=item.correctAnswers??item.correct_answers??item.correctAnswer??item.correct_answer??item.answerKey??item.answer_key??item.correct;
+    const rawAccepted=explicitAccepted ?? (authoredShort ? (typeof explicitCorrect==="boolean"?null:explicitCorrect) ?? answerValue ?? onlyMarkedWhenPresent(item.answers??item.alternatives) : options.length ? null : answerValue);
+    const acceptedAnswers = normalizeAcceptedAnswers(rawAccepted);
     const hasObjectTypes = Array.isArray(item.objectTypes ?? item.object_types) || (resolveRoundFormat(round, 1).mode === "compose-image" && Array.isArray(item.items));
     const templateMode=resolveRoundFormat(round,1).mode;
-    const mode = normalizeMode(item.mode ?? item.type ?? item.format) || (hasObjectTypes ? "compose-image" : options.length > 1 ? "choice-text" : isNumericTargetMode(templateMode)?templateMode:"short-answer");
-    const rawCorrect = item.correctAnswers ?? item.correct_answers ?? item.correctAnswer ?? item.correct_answer ?? item.answerKey ?? item.answer_key ?? item.correctOption ?? item.correct_option ?? item.correct ?? (options.length ? answerValue : null);
+    const mode = normalizeMode(item.mode ?? item.type ?? item.format) || (hasObjectTypes ? "compose-image" : explicitAccepted!=null && item.options==null && item.choices==null && !isNumericTargetMode(templateMode) ? "short-answer" : options.length > 1 ? "choice-text" : isNumericTargetMode(templateMode)?templateMode:"short-answer");
+    const rawCorrect = item.correctAnswers ?? item.correct_answers ?? item.correctAnswer ?? item.correct_answer ?? item.answerKey ?? item.answer_key ?? item.correctOption ?? item.correct_option ?? item.correct ?? (options.length && !authoredShort ? answerValue : null);
     const correct = typeof rawCorrect === "boolean" ? null : rawCorrect;
     const hasDifficulty = item.difficulty != null || item.level != null || item.tier != null;
     const rawDifficulty = item.difficulty ?? item.level ?? item.tier ?? 1;
     const parsedDifficulty = parseLevelValue(rawDifficulty) || Number(rawDifficulty) || 1;
     const difficulty = Math.max(1, Math.min(5, Math.trunc(parsedDifficulty)));
     const choiceOptions = options.map((option) => ({ ...option }));
-    const correctValues = correct == null ? [] : normalizeAnswerObjects(correct);
+    const correctValues = correct == null ? [] : authoredShort || mode === "short-answer" ? normalizeAcceptedAnswers(correct) : normalizeAnswerObjects(correct);
     const correctIndexValue = item.correctAnswerIndex ?? item.correct_answer_index ?? item.correctOptionIndex ?? item.correct_option_index ?? item.answerIndex ?? item.answer_index ?? item.correctIndex ?? item.correct_index;
     if (correctIndexValue != null && Number.isInteger(Number(correctIndexValue))) {
       const correctIndex = Number(correctIndexValue);
@@ -262,11 +281,11 @@ function parseQuestionObjects(questions) {
       question,
       subtitle: safeString(item.subtitle ?? item.description ?? item.hint),
       mode,
-      explicitMode: Boolean(item.mode ?? item.type ?? item.format) || hasObjectTypes || isNumericTargetMode(mode),
+      explicitMode: Boolean(item.mode ?? item.type ?? item.format) || hasObjectTypes || isNumericTargetMode(mode) || (explicitAccepted!=null && mode==="short-answer"),
       options: choiceOptions,
       optionsPresent: rawOptions != null,
       acceptedAnswers,
-      acceptedPresent: explicitAccepted != null || (!options.length && answerValue != null),
+      acceptedPresent: rawAccepted != null,
       correctValues,
       additive: bool(rawAdditive) || /\b(?:add|append|plus|additive)\b/i.test(String(rawAdditive ?? "")),
       noMultipleChoice: bool(rawNoChoice) || /\b(?:no|without)\s+(?:multiple[ -]?choice|mcq|mc)\b|\bshort[ -]?answer\b/i.test(String(rawNoChoice ?? "")),
@@ -343,7 +362,7 @@ function parseQuestionObjects(questions) {
             state.optionCount = 0;
           }
         }
-        if (record.correctValues.length) {
+        if (record.correctValues.length && !(state.mode === "short-answer" && record.acceptedPresent)) {
           if (state.options.length && isChoiceMode(state.mode)) applyCorrectValues(state.options, record.correctValues);
           else {
             if (!record.explicitMode && !isNumericTargetMode(state.mode)) state.mode = "short-answer";

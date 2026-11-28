@@ -1,7 +1,8 @@
+import { normalizeAcceptedAnswers } from "./trivia-accepted-answers.mjs?v=accepted-20261128-v1";
 import { matchMediaSource, normalizeMatchItem } from "./trivia-match-media.mjs?v=match-number-20261127-v1";
 import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
-import { gradeSimpleAnswer, isSimpleGradeMode } from "./trivia-simple-grade.mjs?v=room-recovery-20261127-v1";
-import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, newTriviaId, updateTrivia, activeRoomRound, publicMedia } from "./live-trivia.mjs?v=live-match-20261128-v1";
+import { gradeSimpleAnswer, isSimpleGradeMode } from "./trivia-simple-grade.mjs?v=accepted-20261128-v1";
+import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, newTriviaId, updateTrivia, activeRoomRound, publicMedia } from "./live-trivia.mjs?v=accepted-20261128-v1";
 import { renderLiveQuestion, renderTriviaResponses, createTriviaSpectator, SPECTATOR_MODES, matchItemView } from "./trivia-live-view.mjs?v=compose-alpha-center-20261128-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
 import { readCardGames, subscribeCardGames } from "./card-games-store.mjs?v=answer-edit-20261128-v1";
@@ -27,7 +28,7 @@ import {
   decodeTriviaBytes,
   exportTriviaText,
   parseTriviaText,
-} from "./trivia-text.mjs?v=match-number-20261127-v1";
+} from "./trivia-text.mjs?v=accepted-20261128-v1";
 import { compareNumberGuess, parseTriviaNumber, resolveNumberTarget, isNumericTargetMode, hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, normalizeGuessLimit, scoreFourDigitGuess } from "./trivia-game.mjs?v=match-number-20261127-v1";
 import { migrateLegacyComposePlacements, normalizeComposePlacements, snapComposePlacement, composePointerPercent, loadComposeSprite, paintComposeMarker } from "./compose-placement.mjs?v=compose-alpha-center-20261128-v1";
 import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, validateClientSubmission } from "./trivia-client.mjs?v=player-handoff-20261125-v1";
@@ -715,7 +716,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     content.subtitle = String(content.subtitle || "");
     content.promptImage = String(content.promptImage || "");
     content.promptAsset = String(content.promptAsset || "");
-    content.acceptedAnswers = Array.isArray(content.acceptedAnswers) ? content.acceptedAnswers.map(String) : [];
+    content.acceptedAnswers = normalizeAcceptedAnswers(content.acceptedAnswers);
     content.options = Array.isArray(content.options) ? content.options.filter((item) => item && typeof item === "object").map((item) => ({ label: String(item.label || ""), image: String(item.image || ""), asset: String(item.asset || ""), correct: item.correct === true })) : [];
     content.items = Array.isArray(content.items) ? content.items.filter((item) => item && typeof item === "object").map((item) => ({ label: String(item.label || ""), image: String(item.image || ""), asset: String(item.asset || ""), x: Number.isFinite(Number(item.x)) ? Number(item.x) : 8, y: Number.isFinite(Number(item.y)) ? Number(item.y) : 8 })) : [];
     content.pairs = Array.isArray(content.pairs) ? content.pairs.filter((item) => item && typeof item === "object").map((item) => ({ left: String(item.left || ""), leftImage: String(item.leftImage || ""), right: String(item.right || "") })) : [];
@@ -1111,7 +1112,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
   renderQuestionBank();
 
   function parseList(value) {
-    return String(value || "").split(/[\n,|]+/).map((part) => part.trim()).filter(Boolean);
+    return normalizeAcceptedAnswers(String(value || "").split(/\r?\n/));
   }
 
   function padOptions(options, count) {
@@ -2446,7 +2447,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     if(!round)return;
     const q=publicQuestion(round);const key=JSON.stringify([round.id,q]);
     if(key!==lastRenderedQuestion){
-      const hostCheck=isSimpleGradeMode(q.kind)?answer=>gradeSimpleAnswer(q,round.secret,answer):null;
+      const hostCheck=isSimpleGradeMode(q.kind)?answer=>{const current=readLiveTrivia();return current?.id===round.id?gradeSimpleAnswer(q,current.secret,answer):{state:"neutral",text:"Question changed. Present it again."};}:null;
       const selection=spectatorRoundId===round.id?spectator?.selection():undefined;
       spectator=null;spectatorRoundId=round.id;liveContent.classList.remove('rg-spectator','rg-spectator-all');
       if(SPECTATOR_MODES.includes(q.kind))spectator=createTriviaSpectator(liveContent,q,selection);

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import * as data from './trivia-data.js';
+import { normalizeAcceptedAnswers } from './trivia-accepted-answers.mjs';
 import { normalizeGuessLimit, isNumericTargetMode, resolveNumberTarget, parseTriviaNumber } from './trivia-game.mjs';
 import { normalizeComposePlacements, migrateLegacyComposePlacements } from './compose-placement.mjs';
 import { parseTriviaText, exportTriviaText } from './trivia-text.mjs';
@@ -10,7 +11,7 @@ import { createLiveTrivia, publicTriviaRound, validTriviaAnswer } from './live-t
 const source=readFileSync(new URL('./trivia-ui.js',import.meta.url),'utf8');
 const effectiveSource=source.slice(source.indexOf('  function getEffectiveContent('),source.indexOf('  function setTab('));
 function effective(round,difficulty,draft){
- const context={...data,modeNames:data.MODE_NAMES, drafts:{rounds:{[round]:draft}}, copy:v=>JSON.parse(JSON.stringify(v)), normalizeGuessLimit,isNumericTargetMode,resolveNumberTarget,parseTriviaNumber,normalizeComposePlacements,migrateLegacyComposePlacements};
+ const context={...data,modeNames:data.MODE_NAMES, drafts:{rounds:{[round]:draft}}, copy:v=>JSON.parse(JSON.stringify(v)), normalizeGuessLimit,isNumericTargetMode,resolveNumberTarget,parseTriviaNumber,normalizeComposePlacements,migrateLegacyComposePlacements,normalizeAcceptedAnswers};
  return JSON.parse(JSON.stringify(runInNewContext(`${effectiveSource}\ngetEffectiveContent(${JSON.stringify(round)},${difficulty})`,context)));
 }
 const items=Array.from({length:8},(_,i)=>({label:`Object ${i+1}`,image:`https://example.com/${i}.png`,asset:'',x:8+(i%5)*18,y:8+Math.floor(i/5)*18}));

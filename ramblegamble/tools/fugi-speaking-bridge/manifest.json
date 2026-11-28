@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Ramble Gamble Fugi Speaking Bridge",
+  "version": "1.0.0",
+  "description": "Relays only the speaking flag of embedded Fugi basic sources to the Ramble Gamble host.",
+  "content_scripts": [{
+    "matches": ["https://reactive.fugi.tech/basic/*"],
+    "js": ["bridge.js"],
+    "all_frames": true,
+    "run_at": "document_idle"
+  }]
+}
