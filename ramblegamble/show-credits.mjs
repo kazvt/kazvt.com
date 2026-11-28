@@ -10,7 +10,7 @@ export function creditsFrame(time,height,contentHeight){
   return {phase:t<CREDITS_INTRO?'intro':t<CREDITS_FINALE?'crawl':'finale',offset:h*.22+p*(c+h*1.58),progress:t/CREDITS_DURATION,done:t>=CREDITS_DURATION};
 }
 export function createShowCredits({dialog,button,menu,onOpenChange=()=>{},muted=()=>false,doc=document,win=window}){
-  const audio=dialog.querySelector('audio'),stage=dialog.querySelector('.rg-credits-stage'),track=dialog.querySelector('.rg-credits-track'),pause=dialog.querySelector('[data-credits-pause]'),closeButton=dialog.querySelector('[data-credits-close]'),progress=dialog.querySelector('progress');
+  const audio=dialog.querySelector('audio'),stage=dialog.querySelector('.rg-credits-stage'),track=dialog.querySelector('.rg-credits-track'),closeButton=dialog.querySelector('[data-credits-close]');
   const motion=win.matchMedia('(prefers-reduced-motion: reduce)');
   let frame=0,elapsed=0,last=null,playing=false,fallback=false,requested=false,epoch=0,suspended=false,disposed=false,h=0,c=0,finished=false,sessionOpen=false,stall=0;
   audio.loop=false;audio.volume=.20;
@@ -21,9 +21,6 @@ export function createShowCredits({dialog,button,menu,onOpenChange=()=>{},muted=
     const f=creditsFrame(elapsed,h,c);
     if(dialog.dataset.phase!==f.phase)dialog.dataset.phase=f.phase;
     track.style.transform=`translate3d(0,${-f.offset}px,0)`;
-    progress.value=f.progress;
-    const label=finished?'REPLAY':playing?'PAUSE':'RESUME';
-    if(pause.textContent!==label){pause.textContent=label;pause.setAttribute('aria-label',finished?'Replay credits':playing?'Pause credits':'Resume credits');}
   }
   function stopClock(){if(frame)win.cancelAnimationFrame(frame);frame=0;last=null;stall=0;}
   function stopAudio(){if(requested||!audio.paused){++epoch;requested=false;audio.pause();}}
@@ -72,7 +69,6 @@ export function createShowCredits({dialog,button,menu,onOpenChange=()=>{},muted=
   }
   function cleanup(){if(!sessionOpen)return;sessionOpen=false;stopClock();stopAudio();playing=false;try{audio.currentTime=0;}catch{};onOpenChange(false);}
   function close(){if(!sessionOpen&&!dialog.open)return;stopClock();stopAudio();playing=false;if(dialog.open)dialog.close();cleanup();}
-  function toggle(){if(!dialog.open||locked())return;if(finished){reset();return;}playing=!playing;if(!playing){if(!fallback&&Number.isFinite(audio.currentTime))elapsed=audio.currentTime;stopClock();stopAudio();}paint();sync();}
   function cancel(e){e.preventDefault();close();}
   function nativeClose(){if(!dialog.open)cleanup();}
   function ended(){if(dialog.open&&!fallback&&audio.ended)finish();}
@@ -81,9 +77,9 @@ export function createShowCredits({dialog,button,menu,onOpenChange=()=>{},muted=
   observer.observe(dialog,{attributes:true,attributeFilter:['open']});
   observer.observe(menu,{attributes:true,attributeFilter:['hidden']});
   observer.observe(doc.documentElement,{attributes:true,attributeFilter:['data-rg-host-locked']});
-  button.addEventListener('click',open);closeButton.addEventListener('click',close);pause.addEventListener('click',toggle);
+  button.addEventListener('click',open);closeButton.addEventListener('click',close);
   dialog.addEventListener('cancel',cancel);dialog.addEventListener('close',nativeClose);audio.addEventListener('ended',ended);audio.addEventListener('error',fail);
   doc.addEventListener('visibilitychange',sync);win.addEventListener('resize',resize);motion.addEventListener?.('change',resize);
   const ro=win.ResizeObserver?new win.ResizeObserver(resize):null;ro?.observe(stage);ro?.observe(track);
-  return {sync,close,setPageSuspended(v){suspended=Boolean(v);sync();},dispose(){close();disposed=true;stopClock();stopAudio();observer.disconnect();ro?.disconnect();button.removeEventListener('click',open);closeButton.removeEventListener('click',close);pause.removeEventListener('click',toggle);dialog.removeEventListener('cancel',cancel);dialog.removeEventListener('close',nativeClose);audio.removeEventListener('ended',ended);audio.removeEventListener('error',fail);doc.removeEventListener('visibilitychange',sync);win.removeEventListener('resize',resize);motion.removeEventListener?.('change',resize);}};
+  return {sync,close,setPageSuspended(v){suspended=Boolean(v);sync();},dispose(){close();disposed=true;stopClock();stopAudio();observer.disconnect();ro?.disconnect();button.removeEventListener('click',open);closeButton.removeEventListener('click',close);dialog.removeEventListener('cancel',cancel);dialog.removeEventListener('close',nativeClose);audio.removeEventListener('ended',ended);audio.removeEventListener('error',fail);doc.removeEventListener('visibilitychange',sync);win.removeEventListener('resize',resize);motion.removeEventListener?.('change',resize);}};
 }

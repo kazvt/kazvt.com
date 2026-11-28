@@ -1,6 +1,6 @@
 import { publishPointAward, subscribePointAwards } from "./point-award-events.mjs?v=star-stinger-20261128-v1";
 import { createPointAwardStinger } from "./point-award-stinger.mjs?v=star-stinger-20261128-v1";
-import { createShowCredits } from "./show-credits.mjs?v=show-finale-20261128-v1";
+import { createShowCredits } from "./show-credits.mjs?v=credits-clean-20261128-v1";
 import { createContestantStands } from "./contestant-stands.mjs?v=stand-lift-20261128-v1";
 import { horrorRenderScale, HORROR_FRAME_MS } from "./smeemo-horror.mjs?v=smeemo-arrival-20261128-v1";
 import { readCardGames } from "./card-games-store.mjs?v=show-stage-20261126-v1";
