@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="/ramblegamble/host-console.css?v=freecam-depth-20261127-v1">
     <link rel="stylesheet" href="/ramblegamble/trivia-live.css?v=all-curtain-20261127-v1">
     <link rel="stylesheet" href="/ramblegamble/card-games.css?v=smeemo-smooth-20261128-v1">
+    <link rel="stylesheet" href="/ramblegamble/point-award-stinger.css?v=points-stinger-20261128-v1">
     <script type="importmap">
       {
         "imports": {
@@ -24,7 +25,7 @@
       }
     </script>
     <link rel="stylesheet" href="/ramblegamble/host-access.css?v=host-toggle-20261126-v1">
-    <script type="module" src="/ramblegamble/host-access.mjs?v=karaoke-notes-20261128-v1"></script>
+    <script type="module" src="/ramblegamble/host-access.mjs?v=points-stinger-20261128-v1"></script>
       <link rel="stylesheet" href="/ramblegamble/show-energy.css?v=compact-score-20261127-v1">
   </head>
   <body class="ramble-page" data-theme="p2">
@@ -48,6 +49,17 @@
         <video id="rg-smeemo-video" playsinline preload="none"></video>
         <p id="rg-smeemo-stinger-caption" role="status" hidden>SMEEMO • 5/5</p>
       </section>
+      <section id="rg-point-award" class="rg-point-award" aria-label="Points earned" hidden>
+        <div class="rg-award-frame" aria-hidden="true">
+          <video id="rg-award-video" class="rg-award-video" playsinline preload="none" hidden></video>
+          <div class="rg-award-panel">
+            <h2 class="rg-award-title" id="rg-award-title">POINTS EARNED!</h2>
+            <p class="rg-award-kicker">AWARDED TO</p>
+            <div id="rg-award-rows" class="rg-award-rows"></div>
+          </div>
+        </div>
+      </section>
+      <p class="rg-visually-hidden" id="rg-award-status" role="status" aria-live="polite" aria-atomic="true"></p>
       <div class="rg-billboard-layer" id="rg-billboard-layer" aria-label="Host, contestant and balcony guest browser-source billboards"></div>
       <div class="rg-slot-control-layer" id="rg-slot-control-layer" aria-label="Slot machine berry placement controls" hidden></div>
       <aside class="rg-points-hud" id="rg-points-hud" aria-label="Contestant points" aria-live="polite" aria-atomic="true" hidden></aside>
@@ -108,7 +120,7 @@
             <canvas class="rg-marquee-neon" id="rg-marquee-neon" width="120" height="30" aria-hidden="true"></canvas>
           </div>
         </div>
-        <audio id="rg-menu-theme" src="/ramblegamble/assets/music/ramble-gamble-theme.mp3?v=show-finale-20261128-v2" preload="auto" loop hidden></audio>
+        <audio id="rg-menu-theme" src="/ramblegamble/assets/music/ramble-gamble-theme.mp3?v=show-finale-20261128-v1" preload="auto" loop hidden></audio>
         <nav class="rg-pause-actions" aria-label="Pause menu actions">
           <button class="rg-menu-button" id="rg-play" type="button">PLAY!</button>
           <button class="rg-menu-button" id="rg-controls-open" type="button">CONTROLS!</button>
@@ -150,7 +162,7 @@
       <div class="rg-credits-card rg-credits-finale" aria-hidden="true">
         <p class="rg-credits-heart">♥ ♥ ♥</p><p>THANK YOU EVERYONE!</p><h2>SEE YOU IN<br>RAMBLE GAMBLE 2!</h2><p class="rg-credits-eyebrow">✦ FOREVER A MEMORY ✦</p>
       </div>
-      <audio src="/ramblegamble/assets/music/ramble-gamble-theme.mp3?v=show-finale-20261128-v2" preload="none" hidden></audio>
+      <audio src="/ramblegamble/assets/music/ramble-gamble-theme.mp3?v=show-finale-20261128-v1" preload="none" hidden></audio>
       <nav class="rg-credits-controls" aria-label="Credits playback">
         <progress max="1" value="0" aria-label="Credits progress"></progress>
         <button type="button" data-credits-pause>PAUSE</button>

@@ -19,8 +19,8 @@ const unlock=gate.querySelector('[data-host-unlock]');
 let promptOpen=false;
 let access, booted=false, bootPromise=null, busy=false, locked=true, inertBefore=new Map();
 const isConsole=location.pathname.replace(/\/$/,'').endsWith('/console');
-const appModules=isConsole? ['/rg/console/console.js?v=sky-soot-20261127-v1'] : [
-  '/ramblegamble/ramblegamble.js?v=karaoke-notes-20261128-v1',
+const appModules=isConsole? ['/rg/console/console.js?v=points-stinger-20261128-v1'] : [
+  '/ramblegamble/ramblegamble.js?v=points-stinger-20261128-v1',
   '/ramblegamble/dice-mode.js?v=sky-soot-20261127-v1',
   '/ramblegamble/trivia-ui.js?v=sky-soot-20261127-v1',
   '/ramblegamble/card-games-ui.js?v=smeemo-smooth-20261128-v1',

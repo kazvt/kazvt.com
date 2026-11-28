@@ -1,3 +1,5 @@
+import { publishPointAward, subscribePointAwards } from "./point-award-events.mjs?v=points-stinger-20261128-v1";
+import { createPointAwardStinger } from "./point-award-stinger.mjs?v=points-stinger-20261128-v1";
 import { createShowCredits } from "./show-credits.mjs?v=show-finale-20261128-v1";
 import { createContestantStands } from "./contestant-stands.mjs?v=stand-lift-20261128-v1";
 import { horrorRenderScale, HORROR_FRAME_MS } from "./smeemo-horror.mjs?v=smeemo-arrival-20261128-v1";
@@ -26,7 +28,7 @@ import { cameraTravelDuration, isSpookyView, suspenseEase, crowdCloseupPose } fr
 import { CHARACTER_SOURCE_SIZE, CHARACTER_YAW_LIMIT, characterYaw, standingCharacterPose, projectCharacterQuad, pointInCharacterQuad } from "./character-billboards.mjs?v=stage-dance-20261127-v1";
 import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
-import { createExteriorHands, sampleExteriorAmbience } from "./exterior-hands.mjs?v=exterior-hands-20261128-v1";
+import { createExteriorHands, sampleExteriorAmbience } from "./exterior-hands.mjs?v=clean-depth-hands-20261128-v1";
 import { createExteriorMist, EXTERIOR_FLOOR } from "./exterior-mist.mjs?v=crowd-mist-20261127-v1";
 import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=slot-closeup-20261128-v1";
 import { foley } from "./game-foley.mjs?v=sky-soot-20261127-v1";
@@ -1019,6 +1021,7 @@ import {
             if (!writePointScores(prior).persisted) throw Error("Slot board could not be saved or points refunded; check the console before continuing.");
             throw Error("Could not save slot board; points restored.", { cause: error });
           }
+          publishPointAward(outcome.totals);
         });
       } else {
         checkManualBoard();
@@ -2359,6 +2362,7 @@ import {
   function showPauseMenu() {
     if (pauseMenuOpen) return;
     freecam?.stop();
+    pointAwardStinger.cancel();
     resetEncounter();
     stageShow?.reset(currentView.kind==="slot");
     foley.setRoomAmbience(false);
@@ -2480,6 +2484,20 @@ import {
     selectAudienceMode(mode);
   }
 
+  const pointAwardStinger=createPointAwardStinger({
+    root:document.getElementById("rg-point-award"),video:document.getElementById("rg-award-video"),
+    rows:document.getElementById("rg-award-rows"),title:document.getElementById("rg-award-title"),
+    status:document.getElementById("rg-award-status"),
+    allowed:()=>gameStarted&&!pauseMenuOpen&&!document.documentElement.hasAttribute("data-rg-host-locked"),
+    blocked:()=>!sceneReady||document.hidden||stinger.active||!!document.querySelector("dialog[open]:not(#rg-dice-dialog),#rg-dice-dialog[open]:is(.rg-dice-entering,.rg-dice-exiting)"),
+    muted:()=>foley.muted,reduced:()=>reducedMotion.matches,
+  });
+  const unsubscribePointAwards=subscribePointAwards(pointAwardStinger.enqueue);
+  goButton?.addEventListener("click",()=>pointAwardStinger.prepare());
+  playButton?.addEventListener("click",()=>pointAwardStinger.prepare());
+  document.addEventListener("visibilitychange",pointAwardStinger.step);
+  reducedMotion.addEventListener?.("change",pointAwardStinger.step);
+  new MutationObserver(pointAwardStinger.step).observe(document.documentElement,{attributes:true,attributeFilter:["data-rg-host-locked"]});
   if(pointsHud)subscribePointScores(createScoreHud(pointsHud,{names:["faroe","erin","kaz"],assetPath:SLOT_SYMBOL_IMAGE_PATH,visible:()=>gameStarted&&!pauseMenuOpen}));
   window.addEventListener("rg:slot-action-finish",event=>{if(gameStarted&&!pauseMenuOpen&&!diceModeOpen&&!document.hidden&&currentView.kind==="slot"&&Object.values(event.detail?.totals||{}).some(v=>v>0))reactCrowd("cheer");});
 
@@ -2695,6 +2713,7 @@ import {
     if (open) { freecam?.stop(); resetEncounter(); stageShow?.reset(currentView.kind==="slot"); }
     diceModeOpen = open;
     if (open) syncMusic();
+    pointAwardStinger.relocate(open?document.getElementById("rg-dice-dialog"):preview);
     syncVipAmbience(gameStarted&&sceneReady&&!pauseMenuOpen&&!document.hidden&&!document.documentElement.hasAttribute("data-rg-host-locked"));
     // The modal is in the browser top layer: keep the one live score strip
     // inside it while playing Dice, then restore it to the room on exit.
@@ -3341,6 +3360,8 @@ import {
   });
 
   window.addEventListener("pagehide", event => {
+    pointAwardStinger.cancel();
+    if(!event.persisted){unsubscribePointAwards();pointAwardStinger.dispose();}
     resetEncounter();
     contestantStands?.suspend();
     cancelAnimationFrame(animationFrame);

@@ -1,0 +1,50 @@
+/* The video has native alpha. Keep the live scene visible and its input intact. */
+.rg-point-award {position:absolute;inset:0;z-index:29;display:grid;place-items:center;pointer-events:none!important;overflow:hidden;isolation:isolate;}
+.rg-point-award[hidden],.rg-point-award [hidden],html[data-rg-host-locked] .rg-point-award,.rg-preview.is-menu .rg-point-award {display:none!important;}
+.rg-award-frame {position:relative;width:min(94vw,142vh,1280px);aspect-ratio:16/9;container-type:inline-size;}
+.rg-award-video {position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:transparent;}
+/* Same slanted cyan/violet/pink broadcast language as the supplied plate.
+   The receiver/amount rail occupies the space below the baked headline. */
+.rg-award-panel {position:absolute;left:43%;right:2.5%;top:76%;padding:clamp(5px,1cqw,13px) clamp(9px,1.7cqw,22px);background:linear-gradient(110deg,#17112e,#100d23 70%,#251347);border:2px solid #8271ff;border-top:3px solid #a7f7ff;border-bottom:3px solid #ff31c0;box-shadow:0 5px 0 #2d185e,0 10px 24px #080514a8;clip-path:polygon(2.5% 0,100% 0,100% 100%,0 100%,0 16%);color:#e8fbff;}
+.rg-award-title {margin:0 0 6px;font:900 italic clamp(20px,4cqw,48px)/1.03 Arial,Helvetica,sans-serif;letter-spacing:.015em;color:#c8f9ff;text-shadow:2px 2px #6759ee;}
+.rg-award-kicker {font:800 clamp(9px,1.15cqw,14px)/1.1 Arial,Helvetica,sans-serif;letter-spacing:.18em;color:#c9b8ff;margin:0 0 4px;text-transform:uppercase;}
+.rg-award-rows {display:grid;gap:clamp(3px,.55cqw,7px);}
+.rg-award-row {display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;--berry:#f2dbff;}
+.rg-award-row[data-berry=faroe]{--berry:#ffc7e8;}.rg-award-row[data-berry=erin]{--berry:#c5f7ff;}.rg-award-row[data-berry=kaz]{--berry:#e1caff;}
+.rg-award-name {font:900 italic clamp(17px,2.8cqw,35px)/1 Arial,Helvetica,sans-serif;color:var(--berry);letter-spacing:.035em;white-space:nowrap;}
+.rg-award-value {display:flex;min-width:0;align-items:center;justify-content:flex-end;gap:clamp(4px,.65cqw,9px);color:#fff1af;font:900 clamp(18px,3.05cqw,40px)/1.05 Arial,Helvetica,sans-serif;font-variant-numeric:tabular-nums;}
+.rg-award-value img {width:clamp(20px,3.5cqw,43px);height:auto;flex:none;object-fit:contain;clip-path:circle(49%);filter:drop-shadow(1px 2px 0 #080517);}
+.rg-award-number {min-width:0;overflow-wrap:anywhere;text-align:right;}
+.rg-award-row.is-long .rg-award-value {font-size:clamp(12px,1.75cqw,23px);}
+.rg-point-award[data-count='2'] .rg-award-name,.rg-point-award[data-count='3'] .rg-award-name {font-size:clamp(15px,2.05cqw,26px);}
+.rg-point-award[data-count='2'] .rg-award-value,.rg-point-award[data-count='3'] .rg-award-value {font-size:clamp(16px,2.15cqw,28px);}
+.rg-point-award[data-count='2'] .rg-award-value img,.rg-point-award[data-count='3'] .rg-award-value img {width:clamp(18px,2.4cqw,30px);}
+.rg-point-award[data-count='2'] .rg-award-row.is-long .rg-award-value,.rg-point-award[data-count='3'] .rg-award-row.is-long .rg-award-value {font-size:clamp(11px,1.6cqw,20px);}
+/* Static equivalent for reduced motion, blocked playback or decoding failure. */
+.rg-point-award:not(.is-video) .rg-award-frame {width:min(90vw,560px);aspect-ratio:auto;}
+.rg-point-award:not(.is-video) .rg-award-panel {position:relative;inset:auto;padding:16px 22px;}
+.rg-point-award:not(.is-video) .rg-award-name,.rg-point-award:not(.is-video) .rg-award-value {font-size:clamp(18px,4.7cqw,28px);}
+.rg-point-award:not(.is-video) .rg-award-row.is-long .rg-award-value {font-size:clamp(12px,3.2cqw,20px);}
+/* On phones the same rail docks immediately under the full-width artwork,
+   instead of squeezing text into the right half of a tiny video. */
+@media(max-width:650px) and (orientation:portrait){
+ .rg-point-award.is-video .rg-award-frame{width:94vw;transform:translateY(-56px);}
+ .rg-point-award.is-video .rg-award-panel{left:5%;right:5%;top:88%;padding:8px 12px;}
+ .rg-point-award.is-video .rg-award-name,.rg-point-award.is-video .rg-award-value{font-size:clamp(17px,5cqw,25px);}
+ .rg-point-award.is-video .rg-award-row.is-long .rg-award-value{font-size:clamp(12px,3.7cqw,17px);}
+}
+@media(max-height:400px) and (orientation:landscape){.rg-award-frame{width:min(94vw,130vh);}.rg-award-panel{top:72%;}.rg-award-kicker{font-size:9px;}.rg-award-row{gap:4px;}.rg-award-value img{width:17px;}}
+@media(forced-colors:active){.rg-award-panel{background:Canvas;color:CanvasText;border:2px solid CanvasText;clip-path:none;}.rg-award-title,.rg-award-name,.rg-award-value,.rg-award-kicker{color:CanvasText;text-shadow:none;}}
+@media(max-height:300px) and (orientation:landscape){
+ .rg-point-award.is-video .rg-award-frame{width:min(90vw,106vh);transform:translateY(-32px);}
+ .rg-point-award.is-video .rg-award-panel{left:50%;right:auto;width:min(90vw,420px);box-sizing:border-box;transform:translateX(-50%);top:74%;padding:5px 9px;}
+ .rg-point-award.is-video .rg-award-name,.rg-point-award.is-video .rg-award-value{font-size:14px;}
+ .rg-point-award.is-video .rg-award-row.is-long .rg-award-value{font-size:12px;}
+ .rg-point-award.is-video .rg-award-value img{width:15px;}
+ .rg-point-award.is-video .rg-award-rows{gap:3px;}
+ .rg-point-award:not(.is-video) .rg-award-panel{padding:8px 12px;}
+ .rg-point-award:not(.is-video) .rg-award-title{font-size:clamp(19px,4.5cqw,28px);}
+ .rg-point-award:not(.is-video) .rg-award-name,.rg-point-award:not(.is-video) .rg-award-value{font-size:15px;}
+ .rg-point-award:not(.is-video) .rg-award-row.is-long .rg-award-value{font-size:12px;}
+ .rg-point-award:not(.is-video) .rg-award-value img{width:17px;}
+}
