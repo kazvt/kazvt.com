@@ -146,7 +146,7 @@ export function createMenuKaraoke({root,menu,theme,doc=document,win=window,cues}
     const responseCue=state.responseIndex>=0?cues[state.responseIndex]:null;
     const response=responseCue?.responses[state.responseGroup]??null;
     if(!cue&&!response){
-      if(leadIndex!==-1||responseKey){leadIndex=-1;responseKey='';lead.replaceChildren();back.replaceChildren();back.hidden=true;clearFX();dirty=true;}
+      if(leadIndex!==-1||responseKey||visible){leadIndex=-1;responseKey='';lead.replaceChildren();back.replaceChildren();back.hidden=true;clearFX();dirty=true;root.hidden=true;menu.dataset.karaokeActive='false';visible=false;}
       root.dataset.section='instrumental';return;
     }
     if(!visible){visible=true;root.hidden=false;menu.dataset.karaokeActive='true';dirty=true;}
