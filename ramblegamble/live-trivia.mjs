@@ -11,7 +11,7 @@ export const TRIVIA_REPLY_KEY = 'rg-trivia-reply-v1';
 export const TRIVIA_CHANGE = 'rg:live-trivia-changed';
 export const TRIVIA_DRAFT_CHANGE = 'rg:live-trivia-draft-changed';
 export const MAX_TRIVIA_ANSWER = 24000;
-export const LIVE_DRAFT_MODES = Object.freeze(['draw-over-image','compose-image','categorize-images']);
+export const LIVE_DRAFT_MODES = Object.freeze(['draw-over-image','compose-image','categorize-images','match-pairs']);
 export const MAX_TRIVIA_SNAPSHOT = 1400000;
 export const CHOICE_MODES = ['choice-text','choice-image','choice-image-wide','image-grid'];
 const PLAYERS = ['kaz','faroe','erin'];
@@ -122,8 +122,11 @@ export function validTriviaAnswer(q,a) {
 // are valid so Undo/Clear can remove the previously displayed work.
 export function validTriviaDraft(q,a) {
   if(!q||!LIVE_DRAFT_MODES.includes(q.kind)||!a||typeof a!=='object'||Array.isArray(a))return false;
-  const key=q.kind==='draw-over-image'?'strokes':q.kind==='compose-image'?'placements':'groups';
+  const key=q.kind==='draw-over-image'?'strokes':q.kind==='compose-image'?'placements':q.kind==='match-pairs'?'matches':'groups';
   if(Object.keys(a).length!==1||!Array.isArray(a[key]))return false;
+  // Mirror partial selections exactly, including temporarily duplicated choices.
+  // Final submission still requires a complete, one-to-one mapping.
+  if(key==='matches')return a.matches.length===q.left.length&&q.left.length>0&&a.matches.every(v=>v===-1||index(v,q.right.length));
   if(key==='groups')return a.groups.length===q.items.length&&a.groups.every(v=>v===-1||index(v,q.categories.length));
   return a[key].length===0||validTriviaAnswer(q,a);
 }

@@ -111,3 +111,26 @@ test('numeric accepted-answer legacy target grades higher/lower/exact, and expli
  }
  assert.throws(()=>make('number-stepper',{numberValue:null,acceptedAnswers:[]}),/target number/);
 });
+
+test('matching live drafts mirror partial, changed, cleared and duplicate choices; final answers stay one-to-one',()=>{
+ let r=make('match-pairs');assert.equal(publicTriviaRound(r,'kaz').liveDrafts,true);
+ for(const matches of [[0,-1],[1,-1],[1,1],[-1,-1]]){
+  const a={matches};const res=acceptTriviaDraft(r,'kaz',JSON.stringify(a));assert.equal(res.status,'accepted');r=res.round;
+  assert.deepEqual(publicTriviaRound(r,'kaz').savedDraft,a);assert.equal(publicTriviaRound(r,'erin').savedDraft,null);assert.equal(r.submissions.kaz,null);
+ }
+ for(const a of [{matches:[0]},{matches:[0,2]},{matches:[-2,0]},{matches:[0,0.5]},{matches:[0,null]},{matches:[0,-1],extra:1}])assert.equal(validTriviaDraft(r.question,a),false);
+ assert.equal(submit(r,'kaz',{matches:[0,0]}).status,'invalid-answer');
+ assert.equal(submit(r,'kaz',{matches:[0,-1]}).status,'invalid-answer');
+ const final=submit(r,'kaz',{matches:[1,0]});assert.equal(final.status,'accepted');assert.equal(final.round.drafts.kaz,undefined);
+ assert.equal(acceptTriviaDraft(final.round,'kaz','{"matches":[0,-1]}').status,'closed');
+ assert.equal(acceptTriviaDraft({...r,phase:'closed'},'erin','{"matches":[0,-1]}').status,'closed');
+});
+test('matching drafts survive host reload and remain isolated to their round and seat',()=>{
+ const vals=new Map(),storage={getItem:k=>vals.get(k),setItem:(k,v)=>vals.set(k,v)};
+ let r=make('match-pairs');assert.ok(writeLiveTrivia(r,storage));const initial=vals.get(LIVE_TRIVIA_KEY);
+ for(const [p,matches] of [['kaz',[0,-1]],['erin',[1,0]],['faroe',[-1,1]]]){
+  r=acceptTriviaDraft(readLiveTrivia(storage),p,JSON.stringify({matches})).round;assert.ok(writeLiveTriviaDraft(r,storage));
+ }
+ assert.equal(vals.get(LIVE_TRIVIA_KEY),initial);assert.deepEqual(readLiveTrivia(storage).drafts.erin,{matches:[1,0]});
+ assert.ok(writeLiveTrivia({...make('match-pairs'),id:'new'},storage));assert.deepEqual(readLiveTrivia(storage).drafts,{});assert.equal(writeLiveTriviaDraft(r,storage),false);
+});

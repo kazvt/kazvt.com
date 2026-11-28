@@ -1,7 +1,7 @@
-import { acceptTriviaDraft, MAX_TRIVIA_ANSWER } from "./live-trivia.mjs?v=answer-edit-20261128-v1";
+import { acceptTriviaDraft, MAX_TRIVIA_ANSWER } from "./live-trivia.mjs?v=live-match-20261128-v1";
 import { validRequestId } from "./card-room-delivery.mjs?v=answer-edit-20261128-v1";
 import { loadHostIdentity, nonce, validNonce, transcript, channelBinding, signHost, verifySeat } from "./card-room-auth.mjs?v=room-recovery-20261127-v1";
-import { ROOM_VERSION, createRoom, validRoom, playerRound, encodePacket, decodePacket, acceptSubmission, isPlayer, randomToken } from "./card-room-protocol.mjs?v=answer-edit-20261128-v1";
+import { ROOM_VERSION, createRoom, validRoom, playerRound, encodePacket, decodePacket, acceptSubmission, isPlayer, randomToken } from "./card-room-protocol.mjs?v=live-match-20261128-v1";
 import { loadPeer } from "./card-room-peer.mjs?v=room-recovery-20261127-v1";
 import { openLocalHost } from "./card-room-local.mjs?v=room-recovery-20261127-v1";
 import { CARD_GAME_PLAYERS } from "./card-games.mjs?v=answer-edit-20261128-v1";

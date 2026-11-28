@@ -247,3 +247,18 @@
 }
 .rg-spectator-all .rg-spectator-grid .rg-live-digit{font-size:clamp(10px,min(5.7vh,13cqh,15cqw),52px);}
 .rg-spectator-all .rg-spectator-status{font-size:clamp(12px,2.1vh,20px);}
+
+/* Matching spectator: neutral assignments, never reveal correctness. */
+.rg-spectator-matches{display:grid;grid-template-columns:repeat(var(--rg-match-columns,4),minmax(0,1fr));width:100%;max-width:1100px;gap:clamp(4px,.65vw,10px);}
+.rg-spectator-match-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;gap:3px;padding:4px;background:#a6a1fa;border:2px solid #6457ef;box-shadow:2px 3px #302451;color:#211844;font-size:clamp(11px,1.45vw,20px);font-weight:800;overflow-wrap:anywhere;}
+.rg-spectator-match-tile .rg-match-icon{min-height:0;}
+.rg-spectator-match-tile .rg-live-image{max-height:clamp(28px,9vh,100px);max-width:100%;object-fit:contain;}
+.rg-spectator-match-label{display:block;width:100%;padding:3px 1px;border-top:1px solid #6457ef;line-height:1.15;color:#33245d;}
+.rg-spectator-match-tile[data-assigned=true]{border-color:#ffe567;}
+.rg-spectator-match-tile[data-assigned=true] .rg-spectator-match-label{color:#211844;background:#efe5ff;}
+.rg-spectator-match-tile[data-assigned=false] .rg-spectator-match-label{font-weight:500;}
+.rg-spectator-all .rg-spectator-matches{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;}
+.rg-spectator-all .rg-spectator-match-tile{font-size:clamp(10px,1vw,15px);padding:2px;gap:2px;}
+.rg-spectator-all .rg-spectator-match-tile .rg-live-image{max-height:clamp(20px,5vh,54px);}
+.rg-spectator-all[data-kind="match-pairs"] .rg-spectator-body{justify-content:flex-start;}
+@media(max-width:700px){.rg-spectator-all[data-kind="match-pairs"] .rg-spectator-deck{grid-template-columns:minmax(0,1fr);}.rg-spectator-all[data-kind="match-pairs"] .rg-spectator-panel-heading{flex-direction:row;}.rg-spectator-all .rg-spectator-matches{grid-template-columns:repeat(var(--rg-match-columns,4),minmax(0,1fr));}.rg-spectator-matches{grid-template-columns:repeat(2,minmax(0,1fr));}}

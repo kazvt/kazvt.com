@@ -1,4 +1,4 @@
-import { ROOM_VERSION, decodePacket, isPlayer } from './card-room-protocol.mjs?v=answer-edit-20261128-v1';
+import { ROOM_VERSION, decodePacket, isPlayer } from './card-room-protocol.mjs?v=live-match-20261128-v1';
 import { validNonce, validPublicKey } from './card-room-auth.mjs?v=host-security-20261126-v1';
 import { foley } from "./game-foley.mjs?v=sky-soot-20261127-v1";
 import { createClientSubmission, validateClientActivity, CLIENT_PACKET_MAX_BYTES } from "./trivia-client.mjs?v=player-handoff-20261125-v1";

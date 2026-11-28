@@ -2,10 +2,10 @@ import { publishPointAward, publishStarAward } from "/ramblegamble/point-award-e
 import { AUDIENCE_KEY, AUDIENCE_MODES, readAudienceMode, writeAudienceMode } from "/ramblegamble/audience-state.mjs?v=show-energy-20261127-v1";
 import { mountCommandCompletion } from "/ramblegamble/console-completion.mjs?v=player-stats-20261127-v1";
 import { applyCardShowAction } from "/ramblegamble/card-show-actions.mjs?v=answer-edit-20261128-v1";
-import { renderTriviaResponses } from "/ramblegamble/trivia-live-view.mjs?v=answer-edit-20261128-v1";
-import { activeRoomRound, readLiveTrivia, writeLiveTrivia, writeLiveTriviaDraft, subscribeLiveTrivia, newTriviaId, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, updateTrivia, answerSummary } from "/ramblegamble/live-trivia.mjs?v=answer-edit-20261128-v1";
+import { renderTriviaResponses } from "/ramblegamble/trivia-live-view.mjs?v=live-match-20261128-v1";
+import { activeRoomRound, readLiveTrivia, writeLiveTrivia, writeLiveTriviaDraft, subscribeLiveTrivia, newTriviaId, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, updateTrivia, answerSummary } from "/ramblegamble/live-trivia.mjs?v=live-match-20261128-v1";
 import { withRoomSubmissionLock } from "/ramblegamble/card-room-election.mjs";
-import { mountCardRoom } from "/ramblegamble/card-room-host.mjs?v=answer-edit-20261128-v1";
+import { mountCardRoom } from "/ramblegamble/card-room-host.mjs?v=live-match-20261128-v1";
 import {
   RG_CONTESTANTS,
   readPointScores,
@@ -202,5 +202,6 @@ const cardRoom = mountCardRoom(document.getElementById("console-card-room"), {
 });
 subscribeCardGames(() => {cardRoom.publish();refreshAnswers();});
 
-subscribeLiveTrivia(()=>{cardRoom.publish();refreshAnswers();},{drafts:false});
+subscribeLiveTrivia(()=>cardRoom.publish(),{drafts:false});
+subscribeLiveTrivia(refreshAnswers);
 window.addEventListener("storage",event=>{if(event.key!==TRIVIA_REPLY_KEY)return;try{const reply=JSON.parse(event.newValue);if(reply?.message)addLine(reply.message,reply.ok?"":"terminal-error");}catch{}});

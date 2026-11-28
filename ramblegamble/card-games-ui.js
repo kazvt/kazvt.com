@@ -4,10 +4,10 @@ import { showBurst, voteFlight, purchaseFlight } from "./show-ui-fx.mjs?v=shop-m
 import { createSmeemoImpact, smeemoImpactTransition } from "./smeemo-impact.mjs?v=smeemo-cinema-20261128-v1";
 import { createLightningLayer } from "./smeemo-lightning.mjs?v=smeemo-arrival-20261128-v1";
 import { applyCardShowAction } from "./card-show-actions.mjs?v=answer-edit-20261128-v1";
-import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia, writeLiveTriviaDraft } from "./live-trivia.mjs?v=answer-edit-20261128-v1";
+import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia, writeLiveTriviaDraft } from "./live-trivia.mjs?v=live-match-20261128-v1";
 import { activeCardStage, cardStageChange, discardCardRound } from "./card-stage-state.mjs?v=round-exit-20261128-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
-import { mountCardRoom } from "./card-room-host.mjs?v=answer-edit-20261128-v1";
+import { mountCardRoom } from "./card-room-host.mjs?v=live-match-20261128-v1";
 import { foley } from "./game-foley.mjs?v=sky-soot-20261127-v1";
 import {
   CARD_GAME_CATEGORIES,

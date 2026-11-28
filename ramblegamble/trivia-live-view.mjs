@@ -5,7 +5,7 @@ import { showBurst } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 const foley = globalThis.location?.pathname?.replace(/\/$/, '') === '/rg/console'
  ? {play(){}} : (await import('./game-foley.mjs?v=sky-soot-20261127-v1')).foley;
 import { snapComposePlacement } from './compose-placement.mjs';
-import { CHOICE_MODES, publicMedia, validTriviaAnswer, MAX_TRIVIA_ANSWER, answerSummary, NUMERIC_MODES, numericProgress } from './live-trivia.mjs?v=answer-edit-20261128-v1';
+import { CHOICE_MODES, publicMedia, validTriviaAnswer, MAX_TRIVIA_ANSWER, answerSummary, NUMERIC_MODES, numericProgress } from './live-trivia.mjs?v=live-match-20261128-v1';
 const node=(tag,cls='',text='')=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text)e.textContent=text;return e;};
 const button=(text,fn)=>{const b=node('button','rg-live-button',text);b.type='button';b.addEventListener('click',fn);return b;};
 function image(src,alt='') {const url=publicMedia(src);if(!url)return null;const e=node('img','rg-live-image');e.alt=alt;e.referrerPolicy='no-referrer';e.draggable=false;e.src=url;return e;}
@@ -93,7 +93,8 @@ export function renderTriviaResponses(root,round){
  root.replaceChildren();if(!round)return;
  for(const p of ['kaz','faroe','erin']){
   const row=node('div','rg-live-response');const summary=answerSummary(round,p);
-  const raw=round.submissions[p],q=round.question;
+   const raw=round.submissions[p],q=round.question;
+   const matching=q.kind==='match-pairs',draft=matching&&!raw?round.drafts?.[p]:null;
   row.append(node('strong','',p.toUpperCase()));
   if(NUMERIC_MODES.includes(q.kind)){
     const progress=numericProgress(round,p);
@@ -103,17 +104,18 @@ export function renderTriviaResponses(root,round){
       for(const attempt of progress.attempts){for(let i=0;i<4;i++){const digit=node('span','rg-live-digit',attempt.guess[i]);digit.dataset.result=attempt.result[i];digit.setAttribute('aria-label',`${attempt.guess[i]} ${attempt.result[i]}`);history.append(digit);}}
       if(progress.attempts.length)row.append(history);
     }else if(progress.attempts.length){const history=node('ol','rg-host-number-attempts');for(const attempt of progress.attempts)history.append(node('li','',`${attempt.guess} — ${attempt.result}`));row.append(history);}
-  }else row.append(node('span','',summary==='—'?(round.phase==='submissions'?'Waiting':'No answer'):summary));
-  if(raw){try{
-   const a=JSON.parse(raw);
+   }else if(draft){row.append(node('span','',`${draft.matches.filter(i=>i>=0).length}/${q.left.length} assigned · ${round.phase==='submissions'?'In progress':'Closed'}`));}
+   else row.append(node('span','',summary==='—'?(round.phase==='submissions'?'Waiting':'No answer'):summary));
+   if(raw||draft){try{
+    const a=raw?JSON.parse(raw):draft;
    if(['draw-over-image','compose-image'].includes(q.kind))artboard(row,q,a);
    else if(a.selected||a.order||a.groups||a.matches){
     const grid=node('div','rg-live-grid');
     const items=a.selected?q.options:a.matches?q.left:q.items;
     const ids=a.selected||a.order||items.map((_,i)=>i);
     // Text summaries already cover all-text answers; show actual selected or mapped images too.
-    if(ids.some(i=>a.matches?normalizeMatchItem(items[i],publicMedia).icon:items[i]?.image)){
-     ids.forEach(i=>{const item=node('div','rg-live-tile');item.append(a.matches?matchItemView(items[i],i):itemView(items[i],i));if(a.groups)item.append(node('span','',q.categories[a.groups[i]]));if(a.matches)item.append(node('span','',q.right[a.matches[i]]));grid.append(item);});row.append(grid);
+    if(matching||ids.some(i=>a.matches?normalizeMatchItem(items[i],publicMedia).icon:items[i]?.image)){
+     ids.forEach(i=>{const item=node('div','rg-live-tile');item.append(a.matches?matchItemView(items[i],i):itemView(items[i],i));if(a.groups)item.append(node('span','',q.categories[a.groups[i]]));if(a.matches)item.append(node('span','',q.right[a.matches[i]]??'Unassigned'));grid.append(item);});row.append(grid);
     }
    }
   }catch{}}
@@ -121,7 +123,7 @@ export function renderTriviaResponses(root,round){
  }
 }
 
-export const SPECTATOR_MODES=Object.freeze(['number-grid','number-stepper','memory-number','draw-over-image','compose-image','categorize-images']);
+export const SPECTATOR_MODES=Object.freeze(['number-grid','number-stepper','memory-number','draw-over-image','compose-image','categorize-images','match-pairs']);
 const SPECTATOR_PLAYERS=['faroe','erin','kaz'];
 function seatAnswer(round,p){
  const raw=round.submissions?.[p];if(raw){try{return JSON.parse(raw);}catch{return null;}}
@@ -153,7 +155,17 @@ function createSpectatorPanel(deck,q,p,choose){
   content.append(buckets);
   q.items.forEach((item,i)=>{const tile=node('div','rg-spectator-object');tile.append(itemView(item,i));tiles.push(tile);groups.at(-1).append(tile);});
  }
- let lastKey=null,lastAttempts=[],lastAnswer=null,lastSubmitted=false,wasSolved=false;
+  const matchTiles=[];
+  if(q.kind==='match-pairs'){
+   const grid=node('div','rg-spectator-matches');
+   grid.style.setProperty('--rg-match-columns',String(q.left.length>8?4:q.left.length>4?3:2));
+   for(const [i,item] of q.left.entries()){
+    const tile=node('div','rg-spectator-match-tile'),label=node('span','rg-spectator-match-label','Unassigned');
+    tile.append(matchItemView(item,i),label);grid.append(tile);matchTiles.push({tile,label});
+   }
+   content.append(grid);
+  }
+  let lastKey=null,lastAttempts=[],lastAnswer=null,lastSubmitted=false,wasSolved=false;
  function update(round,visible,animate){
   const answer=seatAnswer(round,p),attempts=round.attempts?.[p]||[],submitted=!!round.submissions?.[p];
   const key=JSON.stringify([answer,attempts,submitted,round.phase]);if(key===lastKey)return false;
@@ -169,8 +181,17 @@ function createSpectatorPanel(deck,q,p,choose){
    if(newGuess)pulse(hero,'rg-spectator-tile-pop');
   }else if(art){drawArt.setAnswer(answer);if(live&&q.kind==='compose-image'&&(answer?.placements?.length||0)>(lastAnswer?.placements?.length||0))pulse(content,'rg-spectator-placement-pop');}
   else if(groups.length){tiles.forEach((tile,i)=>{const idx=answer?.groups?.[i];const target=groups[Number.isInteger(idx)&&idx>=0&&idx<q.categories.length?idx:groups.length-1];if(tile.parentNode!==target){target.append(tile);if(live)pulse(tile,'rg-spectator-object-pop');}});}
-  const progress=numeric?numericProgress(round,p):null;
-  status.textContent=progress?(progress.solved?'SOLVED':submitted?'NO GUESSES LEFT':`${attempts.length} / ${progress.limit}`):submitted?'SUBMITTED':round.phase!=='submissions'?'CLOSED':'';
+   let assigned=0;
+   if(matchTiles.length){matchTiles.forEach(({tile,label},i)=>{
+    const pick=answer?.matches?.[i],valid=Number.isInteger(pick)&&pick>=0&&pick<q.right.length;
+    if(valid)assigned++;
+    const value=valid?q.right[pick]:'Unassigned';
+    const changed=label.textContent!==value||tile.dataset.assigned!==String(valid);
+    if(changed){label.textContent=value;tile.dataset.assigned=String(valid);if(live)pulse(tile,'rg-spectator-object-pop');}
+   });}
+   const progress=numeric?numericProgress(round,p):null;
+   status.textContent=progress?(progress.solved?'SOLVED':submitted?'NO GUESSES LEFT':`${attempts.length} / ${progress.limit}`):submitted?'SUBMITTED':round.phase!=='submissions'?'CLOSED':'';
+   if(matchTiles.length)status.textContent=`${assigned}/${matchTiles.length} assigned${submitted?' · SUBMITTED':round.phase!=='submissions'?' · CLOSED':''}`;
   status.dataset.state=progress?.solved?'solved':submitted?'done':'';panel.dataset.state=status.dataset.state;
   const solved=!!progress?.solved,celebrate=live&&solved&&!wasSolved;
   if(celebrate){pulse(panel,'rg-spectator-panel-win');showBurst(content,{color:SPECTATOR_COLORS[p],count:24});}
@@ -179,7 +200,7 @@ function createSpectatorPanel(deck,q,p,choose){
  }
  return {panel,palette,update};
 }
-export function createTriviaSpectator(root,q,{seat="faroe",manualChoice=false}={}){
+export function createTriviaSpectator(root,q,{seat=q.kind==='match-pairs'?'all':'faroe',manualChoice=false}={}){
  root.replaceChildren();root.classList.remove('rg-live-wrong','rg-live-correct','rg-spectator-all');root.onkeydown=root.oninput=root.onchange=root.onclick=root.onpointerup=null;
  root.dataset.kind=q.kind;root.classList.remove('rg-question-dealt');void root.offsetWidth;root.classList.add('rg-spectator','rg-question-dealt');
  if(q.prompt)root.append(node('h1','rg-live-question',q.prompt));

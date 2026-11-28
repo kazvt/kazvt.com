@@ -1,8 +1,8 @@
 import { matchMediaSource, normalizeMatchItem } from "./trivia-match-media.mjs?v=match-number-20261127-v1";
 import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { gradeSimpleAnswer, isSimpleGradeMode } from "./trivia-simple-grade.mjs?v=room-recovery-20261127-v1";
-import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, newTriviaId, updateTrivia, activeRoomRound, publicMedia } from "./live-trivia.mjs?v=answer-edit-20261128-v1";
-import { renderLiveQuestion, renderTriviaResponses, createTriviaSpectator, SPECTATOR_MODES, matchItemView } from "./trivia-live-view.mjs?v=answer-edit-20261128-v1";
+import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, newTriviaId, updateTrivia, activeRoomRound, publicMedia } from "./live-trivia.mjs?v=live-match-20261128-v1";
+import { renderLiveQuestion, renderTriviaResponses, createTriviaSpectator, SPECTATOR_MODES, matchItemView } from "./trivia-live-view.mjs?v=live-match-20261128-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
 import { readCardGames, subscribeCardGames } from "./card-games-store.mjs?v=answer-edit-20261128-v1";
 import { removeSlotSymbol } from "./slot-game.mjs?v=host-cell-cards-20261127-v1";
@@ -2477,7 +2477,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
       else if(round.phase!==before.phase) foley.play("close");
       else if(JSON.stringify(publicQuestion(round))!==JSON.stringify(publicQuestion(before))) foley.play("navigate");
     }
-    const privateKey=JSON.stringify([round.id,round.phase,round.submissions,round.attempts,publicQuestion(round)]);
+    const privateKey=JSON.stringify([round.id,round.phase,round.submissions,round.attempts,publicQuestion(round),round.question.kind==='match-pairs'?round.drafts:null]);
     if(privateKey!==lastPrivateKey){lastPrivateKey=privateKey;renderTriviaResponses(liveAnswers,round);}
     const fresh=round.id!==lastLiveId;lastLiveId=round.id;
     if(activeRoomRound()?.id===round.id&&(fresh||lastRenderedQuestion))renderLive(round,fresh);

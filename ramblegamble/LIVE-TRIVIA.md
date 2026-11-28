@@ -51,4 +51,9 @@ Validation: 368 automated tests, including authenticated host submissions and im
 
 ### Combined spectator view
 
-ALL appears alongside the berry buttons in all six spectator modes. Each seat has its own live panel with the same authoritative attempts, draft and submission state. One shared question and object palette avoid duplicate headers. Selecting a berry restores the individual view without losing state or replaying old result effects. Desktop layouts fit together; smaller screens scroll when necessary for legibility. No new player messages or invitation changes.
+ALL appears alongside the berry buttons in all seven spectator modes. Each seat has its own live panel with the same authoritative attempts, draft and submission state. One shared question and object palette avoid duplicate headers. Selecting a berry restores the individual view without losing state or replaying old result effects. Desktop layouts fit together; smaller screens scroll when necessary for legibility. No new player messages or invitation changes.
+
+
+### Live matching spectator
+
+Matching now uses the same authenticated draft delivery as drawing and sorting. ALL opens by default with each contestant's icon/label board; choose any berry to focus on that contestant, or ALL to return. Each edit or clear is coalesced into a small array of choice indices (-1 means unassigned), normally sent at a 180 ms cadence subject to acknowledgement and connection latency. The host shows current assignments, not correctness, with an assigned-item count and explicit submission status. Temporary duplicate choices are mirrored as entered; final submission still requires a complete one-to-one mapping. Final answers supersede drafts. Other contestants receive neither those drafts nor the answer key. Refresh all host and player pages after deploying. No scoring or database changes.
