@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Offline authoring tool: Whisper transcription + forced alignment, never edits live files."""
 import argparse
+from difflib import SequenceMatcher
 import hashlib
 import json
 import math
@@ -26,6 +27,49 @@ def load_cues():
 
 def flatten(result):
     return [w for seg in result['segments'] for w in seg.get('words', []) if norm(w['word'])]
+
+
+def map_transcript_words(cues, recognized):
+    """Fuzzy sequence-map unprompted ASR words to lyrics without losing order."""
+    expected = [word[0] for cue in cues for word in cue['words']]
+    heard = [word for word in recognized if norm(word.get('word', ''))]
+    left = [norm(word).casefold() for word in expected]
+    right = [norm(word['word']).casefold() for word in heard]
+    gap = .76
+    costs = [[0.0] * (len(right) + 1) for _ in range(len(left) + 1)]
+    back = [[None] * (len(right) + 1) for _ in range(len(left) + 1)]
+    for i in range(1, len(left) + 1):
+        costs[i][0], back[i][0] = i * gap, 'delete'
+    for j in range(1, len(right) + 1):
+        costs[0][j], back[0][j] = j * gap, 'insert'
+    for i, target in enumerate(left, 1):
+        for j, heard_word in enumerate(right, 1):
+            similarity = SequenceMatcher(None, target, heard_word, autojunk=False).ratio()
+            substitute = 0.0 if target == heard_word else (.1 + .9 * (1 - similarity) if min(len(target), len(heard_word)) >= 3 and similarity >= .55 else 1.53)
+            options = ((costs[i-1][j-1] + substitute, 'match'),
+                       (costs[i-1][j] + gap, 'delete'),
+                       (costs[i][j-1] + gap, 'insert'))
+            costs[i][j], back[i][j] = min(options, key=lambda item: item[0])
+    result = [None] * len(expected)
+    i, j = len(left), len(right)
+    while i or j:
+        action = back[i][j]
+        if action == 'match':
+            similarity = SequenceMatcher(None, left[i-1], right[j-1], autojunk=False).ratio()
+            exact = left[i-1] == right[j-1]
+            enough = exact or (min(len(left[i-1]), len(right[j-1])) >= 3 and similarity >= .55)
+            if enough:
+                result[i-1] = dict(word=heard[j-1]['word'], start=heard[j-1].get('start'),
+                                   end=heard[j-1].get('end'), similarity=similarity, exact=exact)
+            i -= 1
+            j -= 1
+        elif action == 'delete':
+            i -= 1
+        elif action == 'insert':
+            j -= 1
+        else:
+            raise ValueError('ASR-to-lyrics sequence mapping is incomplete')
+    return result
 
 
 def map_words(cues, aligned):
@@ -62,6 +106,7 @@ def map_words(cues, aligned):
 def candidate(cues, mapped, recognized):
     """Rebuild phrase and instrumental bounds from aligned word times, not old offsets."""
     result, report = [], []
+    recognized_map = map_transcript_words(cues, recognized)
     at = 0
     for i, cue in enumerate(cues):
         n = len(cue['words'])
@@ -72,7 +117,8 @@ def candidate(cues, mapped, recognized):
         at += n
         # Independently decoded ASR tokens close to the forced-alignment onset.
         # This is a diagnostic, not proof; repeated short words may match by chance.
-        checks = [any(norm(w[0]) == norm(r['word']) and abs(w[1] - float(r['start'])) <= .6 for r in recognized) for w in words]
+        matched = recognized_map[at-n:at]
+        checks = [r is not None and r.get('start') is not None and abs(w[1] - float(r['start'])) <= .6 for w, r in zip(words, matched)]
         low = [w[0] for w in words if w[3] is not None and w[3] < .25]
         long = [w[0] for w in words if w[2]-w[1] > 3]
         result.append(dict(section=cue['section'], start=words[0][1], end=words[-1][2], words=[list(w[:3]) for w in words]))
