@@ -3,7 +3,7 @@ import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { showBurst, voteFlight, purchaseFlight } from "./show-ui-fx.mjs?v=shop-motion-20261127-v1";
 import { createSmeemoImpact, smeemoImpactTransition } from "./smeemo-impact.mjs?v=smeemo-cinema-20261128-v1";
 import { createLightningLayer } from "./smeemo-lightning.mjs?v=smeemo-arrival-20261128-v1";
-import { applyCardShowAction } from "./card-show-actions.mjs?v=answer-edit-20261128-v1";
+import { applyCardShowAction } from "./card-show-actions.mjs?v=side-votes-20261128-v1";
 import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia, writeLiveTriviaDraft } from "./live-trivia.mjs?v=live-match-20261128-v1";
 import { activeCardStage, cardStageChange, discardCardRound } from "./card-stage-state.mjs?v=round-exit-20261128-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
@@ -499,8 +499,11 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       const latest = readCardGames();
       if (activeRoomRound()?.id !== roundId) throw Error("Round changed.");
       const next = applyCardShowAction(latest, action, { roundId, responseId });
+      if (next === latest) return;
+      const restoreFocus = document.activeElement?.dataset?.voteResponse === responseId;
       sync(next);
-      if (action === "vote") foley.play("vote");
+      if (restoreFocus) content.querySelector(`[data-vote-response="${responseId}"]`)?.focus({preventScroll:true});
+      if (action === "vote" || action === "unvote") foley.play("vote");
     });
   }
 
@@ -532,7 +535,22 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
         const canVote = round.phase === "voting";
         const winner = round.phase === "results" && round.winnerIds.includes(response.id);
         const answer = element(canVote ? "button" : "article", `rg-card-answer${winner ? " is-winner" : ""}${fresh.has(response.id) ? " rg-show-reveal" : ""}${winner && resultsNow ? " rg-show-winner" : ""}`);
-        if (canVote) { answer.type = "button"; answer.setAttribute("aria-label", `Vote for anonymous answer: ${response.text}`); answer.addEventListener("click", () => showAction("vote", round.id, response.id)); }
+        if (canVote) {
+          answer.type = "button";
+          answer.dataset.voteResponse = response.id;
+          answer.title = "Left-click: +1 vote · Right-click: −1 vote";
+          answer.setAttribute("aria-label", `Vote for anonymous answer: ${response.text}. ${round.votes[response.id] || 0} votes. Press minus to remove a vote.`);
+          answer.addEventListener("click", () => showAction("vote", round.id, response.id));
+          answer.addEventListener("contextmenu", event => {
+            event.preventDefault(); event.stopPropagation();
+            return showAction("unvote", round.id, response.id);
+          });
+          answer.addEventListener("keydown", event => {
+            if (event.key !== "-" || event.ctrlKey || event.metaKey || event.altKey) return;
+            event.preventDefault(); event.stopPropagation();
+            if (!event.repeat) return showAction("unvote", round.id, response.id);
+          });
+        }
         answer.style.setProperty("--reveal-delay", `${Math.min(i, 2) * 75}ms`);
         const copy = element("span", "rg-card-answer-copy", response.text);
         if (!canVote) copy.tabIndex = 0;

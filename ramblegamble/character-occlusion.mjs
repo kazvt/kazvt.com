@@ -25,9 +25,9 @@ export function unionMaskBounds(bounds){
 // Convert binary visibility into an immediate CSS path (no changing image URL,
 // PNG encoding, asynchronous decode or texture upload). Merge matching runs
 // vertically, and skip the clip entirely if the plane is unobstructed.
-export function visibilityClip(corners,bounds,w,h,view,visibleAt){
+export function visibilityClip(corners,bounds,w,h,view,visibleAt,stats){
  const quad=corners.map(p=>({x:p.x*w/view.width,y:p.y*h/view.height}));
- const completed=[];let previous=new Map(),any=false,occluded=false;
+ const completed=[];let previous=new Map(),any=false,occluded=false,visiblePixels=0;
  for(let y=bounds.top;y<bounds.bottom;y++){
   const scan=y+.5,xs=[];
   for(let i=0;i<4;i++){
@@ -43,13 +43,17 @@ export function visibilityClip(corners,bounds,w,h,view,visibleAt){
   for(let x=bounds.left;x<=bounds.right;x++){
    const visible=x<bounds.right&&visibleAt(x,y);
    if(x>=first&&x<last&&!visible)occluded=true;
-   if(visible){any=true;if(run<0)run=x;continue;}
+   if(visible){visiblePixels++;any=true;if(run<0)run=x;continue;}
    if(run<0)continue;
    const key=run+':'+x,rect=previous.get(key)||{left:run,right:x,top:y,bottom:y};
    rect.bottom=y+1;current.set(key,rect);run=-1;
   }
   for(const [key,rect] of previous)if(!current.has(key))completed.push(rect);
   previous=current;
+ }
+ if(stats){
+  const area=Math.abs(quad.reduce((sum,p,i)=>{const q=quad[(i+1)%4];return sum+p.x*q.y-q.x*p.y;},0))/2;
+  stats.coverage=area>0?Math.min(1,visiblePixels/area):0;
  }
  if(!any)return {visible:false,path:'none'};
  if(!occluded)return {visible:true,path:'none'};
@@ -79,11 +83,11 @@ export function createCharacterOcclusion(THREE,renderer,roots,entries){
   const bit=CHARACTER_BITS[i];if(!bit)return;
   const material=new THREE.ShaderMaterial({uniforms:{value:{value:bit/255}},vertexShader:'void main(){gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',fragmentShader:'uniform float value; void main(){gl_FragColor=vec4(value,0.0,0.0,1.0);}',transparent:true,blending:THREE.AdditiveBlending,depthTest:true,depthWrite:false,toneMapped:false,side:THREE.FrontSide});
   const mesh=new THREE.Mesh(plane,material);mesh.renderOrder=1;mesh.frustumCulled=false;mesh.visible=false;scene.add(mesh);
-  states.set(entry,{bit,mesh,path:null,visible:false});
+  states.set(entry,{bit,mesh,path:null,visible:false,coverage:0});
  });
  let w=0,h=0,pixels=null,region=null,lastKey='',disposed=false,viewport=null;
  const clearColor=new THREE.Color();
- function hide(entry,state){state.visible=false;if(entry.panel.style.visibility!=='hidden')entry.panel.style.visibility='hidden';}
+ function hide(entry,state){state.visible=false;state.coverage=0;if(entry.panel.style.visibility!=='hidden')entry.panel.style.visibility='hidden';}
  function readVisible(bit,x,y){return !!region&&maskPixel(pixels,region.right-region.left,region.bottom-region.top,bit,x-region.left,y-region.top);}
  function hideAll(){for(const [entry,state] of states)hide(entry,state);}
  function update(visible,view,camera){
@@ -118,7 +122,7 @@ export function createCharacterOcclusion(THREE,renderer,roots,entries){
   finally{renderer.setRenderTarget(oldTarget);renderer.setClearColor(clearColor,oldAlpha);renderer.autoClear=oldAuto;}
   region=crop;
   for(const [entry,box] of bounds){const state=states.get(entry);
-   const clip=visibilityClip(entry.projectedQuad.corners,box,w,h,view,(x,y)=>readVisible(state.bit,x,y));
+   const clip=visibilityClip(entry.projectedQuad.corners,box,w,h,view,(x,y)=>readVisible(state.bit,x,y),state);
    if(!clip.visible){hide(entry,state);continue;}
    // This geometry and the projective transform describe the same camera
    // frame. No asynchronous image resource can temporarily hide the iframe.
@@ -128,5 +132,5 @@ export function createCharacterOcclusion(THREE,renderer,roots,entries){
   }
   lastKey=signature;
  }
- return {update,contains(entry,x,y){const state=states.get(entry);return !!(state?.visible&&pixels&&viewport&&readVisible(state.bit,Math.floor(x*w/viewport.width),Math.floor(y*h/viewport.height)));},invalidate(){lastKey='';region=null;hideAll();},dispose(){disposed=true;target.dispose();plane.dispose();for(const m of materialCache.values())m.dispose();for(const s of states.values())s.mesh.material.dispose();states.clear();}};
+ return {update,coverage(entry){return states.get(entry)?.coverage??0;},contains(entry,x,y){const state=states.get(entry);return !!(state?.visible&&pixels&&viewport&&readVisible(state.bit,Math.floor(x*w/viewport.width),Math.floor(y*h/viewport.height)));},invalidate(){lastKey='';region=null;hideAll();},dispose(){disposed=true;target.dispose();plane.dispose();for(const m of materialCache.values())m.dispose();for(const s of states.values())s.mesh.material.dispose();states.clear();}};
 }

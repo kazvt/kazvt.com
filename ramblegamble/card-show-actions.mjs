@@ -1,4 +1,4 @@
-import { createQuiplashRound, createRedHandedRound, createShopRound, closeCardSubmissions, revealCardAnswers, revealAudienceResults, recordAudienceVote } from "./card-games.mjs?v=answer-edit-20261128-v1";
+import { createQuiplashRound, createRedHandedRound, createShopRound, closeCardSubmissions, revealCardAnswers, revealAudienceResults, recordAudienceVote } from "./card-games.mjs?v=side-votes-20261128-v1";
 
 export function newCardShowRound(decks, mode, prompt = "") {
   if (mode === "quiplash") return createQuiplashRound(prompt ? [prompt] : decks.quiplash);
@@ -16,11 +16,14 @@ export function applyCardShowAction(state, action, { mode, prompt, roundId, resp
     return { ...state, round, smeemo: null };
   }
   if (!current || !["quiplash", "red-handed"].includes(current.mode) || state.smeemo || (roundId && current.id !== roundId) || (mode && current.mode !== mode)) throw Error("No matching active card round.");
+  // At zero, a valid deduction is a silent no-op, not an invalid phase.
+  if (action === "unvote" && current.phase === "voting" && current.responses.some(r=>r.id===responseId) && !current.votes[responseId]) return state;
   const round = action === "close" ? closeCardSubmissions(current)
     : action === "reveal" ? revealCardAnswers(current)
     : action === "all" ? revealCardAnswers(current, true)
     : action === "results" ? revealAudienceResults(current)
-    : action === "vote" ? recordAudienceVote(current, responseId) : current;
+    : action === "vote" ? recordAudienceVote(current, responseId)
+    : action === "unvote" ? recordAudienceVote(current, responseId, -1) : current;
   if (round === current) throw Error(action === "close" ? "No answers to close, or submissions already closed." : action === "reveal" || action === "all" ? "No answers waiting to reveal." : "Action not available in this phase.");
   return { ...state, round };
 }

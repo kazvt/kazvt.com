@@ -304,8 +304,12 @@ export function recordAudienceVote(roundValue, responseId, amount = 1) {
   const round = normalizeRound(roundValue);
   const delta = Number(amount);
   if (!round || round.phase !== "voting" || !round.responses.some((response) => response.id === responseId)) return roundValue;
-  if (!Number.isSafeInteger(delta) || delta < 1 || round.votes[responseId] > Number.MAX_SAFE_INTEGER - delta) return roundValue;
-  round.votes[responseId] += delta;
+  if (!Number.isSafeInteger(delta) || delta === 0) return roundValue;
+  const previous = round.votes[responseId];
+  if (delta > 0 && previous > Number.MAX_SAFE_INTEGER - delta) return roundValue;
+  const next = Math.max(0, previous + delta);
+  if (next === previous) return roundValue;
+  round.votes[responseId] = next;
   return round;
 }
 

@@ -35,3 +35,16 @@ test('console supports explicit actions without treating prompt words as command
  for(const command of ['cards show','redhanded show','berryblast show','smeemo resume']) assert.equal(parsePointsCommand(command).action,'error');
  assert.deepEqual(parsePointsCommand('cards reveal next'),{action:'card-reveal'});assert.deepEqual(parsePointsCommand('cards reveal all'),{action:'card-all'});assert.deepEqual(parsePointsCommand('cards vote 2'),{action:'card-vote',responseId:'answer-2'});assert.equal(parsePointsCommand('cards vote 4').action,'error');
 });
+
+test('deduct exactly one vote while voting, clamp at zero, preserve results and reject stale or invalid actions',()=>{
+ for(const mode of ['quiplash','red-handed']){
+  let round=mode==='quiplash'?createQuiplashRound(['prompt']):createRedHandedRound(Array.from({length:15},(_,i)=>`Evidence ${i}`),['prompt']);
+  for(const player of CARD_GAME_PLAYERS)round=submitRoundAnswer(round,player,mode==='quiplash'?player:round.hands[player][0]);
+  round=revealCardAnswers(round,true);const [a,b]=round.responses.map(r=>r.id);let state=normalizeCardGamesState({round});
+  const action=(name,id=a,roundId=round.id)=>applyCardShowAction(state,name,{roundId,responseId:id});
+  assert.equal(action('unvote'),state);state=action('vote');state=action('vote');state=action('vote',b);state=action('unvote');assert.equal(state.round.votes[a],1);assert.equal(state.round.votes[b],1);
+  state=action('unvote');assert.equal(state.round.votes[a],0);assert.equal(action('unvote'),state);assert.throws(()=>action('unvote','unknown'));assert.throws(()=>action('unvote',a,'old-round'));
+  assert.equal(recordAudienceVote(state.round,b,-100).votes[b],0);assert.equal(recordAudienceVote(state.round,b,1.5),state.round);assert.equal(recordAudienceVote(state.round,b,Number.MAX_SAFE_INTEGER),state.round);
+  state=action('results');assert.deepEqual(state.round.winnerIds,[b]);assert.throws(()=>action('unvote',b));
+ }
+});

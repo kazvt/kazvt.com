@@ -93,3 +93,15 @@ test('five independently addressable live planes retain the existing four bit va
  assert.equal(renderer.rendered.children.at(-1).material.uniforms.value.value,8/255);
  masks.update(entries.slice(0,4),view,camera);assert.equal(guest.panel.style.visibility,'hidden');assert.equal(masks.contains(guest,6,2),false);masks.dispose();
 });
+
+test('fallback coverage measures offscreen and depth-hidden area, remains cached and resets when culled',()=>{
+ const {renderer,entries,root,camera}=makeFixture();const e=entries[0],view={width:100,height:80};
+ e.projectedQuad.corners=[{x:-10,y:0},{x:10,y:0},{x:10,y:20},{x:-10,y:20}];
+ renderer.readRenderTargetPixels=(t,x,y,w,h,p)=>{renderer.reads++;for(let i=0;i<w*h;i++)p[i*4]=16;};
+ const mask=createCharacterOcclusion(THREE,renderer,[root],[e]);
+ mask.update([e],view,camera);assert.equal(mask.coverage(e),.5);
+ mask.update([e],view,camera);assert.equal(mask.coverage(e),.5);assert.equal(renderer.reads,1);
+ renderer.readRenderTargetPixels=(t,x,y,w,h,p)=>{for(let i=0;i<w*h;i++)p[i*4]=i%2?16:0;};
+ camera.matrixWorld.elements[12]=1;mask.update([e],view,camera);assert.equal(mask.coverage(e),.25);
+ mask.update([],view,camera);assert.equal(mask.coverage(e),0);mask.dispose();
+});

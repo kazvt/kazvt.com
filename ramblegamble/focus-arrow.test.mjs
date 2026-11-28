@@ -40,7 +40,7 @@ test('render integration targets actual scene objects and hides in non-focus mod
  runInNewContext(code+'\nthis.update=updateFocusArrow;',c);
  for(const view of [{kind:'host'},{kind:'contestant',contestantId:'erin'},{kind:'contestants'}]){c.currentView=view;c.update(1,true);assert.equal(actions.at(-1)[0],view.kind);assert.ok(actions.at(-1)[1]);}
  for(const gate of ['diceModeOpen','cameraDetached','cameraTransition']){c[gate]=true;c.update(1,true);assert.equal(actions.at(-1),'hide');c[gate]=false;}c.freecam.active=true;c.update(1,true);assert.equal(actions.at(-1),'hide');c.freecam.active=false;c.update(1,false);assert.equal(actions.at(-1),'hide');
- assert.match(code,/slotWorldPoint\(x,y\)/);assert.match(code,/door\.minY,door\.maxY/);assert.match(code,/getObjectByName\("rim"\)/);assert.match(code,/rg-live-stage-content/);assert.match(src,/updateBillboardProjection\(time\);\s*updateFocusArrow\(time,roomVisible\)/);
+ assert.match(code,/slotWorldPoint\(x,y\)/);assert.match(code,/door\.minY,door\.maxY/);assert.match(code,/getObjectByName\("rim"\)/);assert.match(code,/rg-live-stage-content/);assert.match(src,/updateBillboardProjection\(time\);\s*else sidePortraits\.clear\(\);\s*updateFocusArrow\(time,roomVisible\)/);
 });
 test('VIP marker uses both dice body extents and pauses during rolling',()=>{
  const src=readFileSync(new URL('./dice-mode.js',import.meta.url),'utf8');const a=src.indexOf('  function updateDiceFocusArrow('),b=src.indexOf('  function render(time)',a);

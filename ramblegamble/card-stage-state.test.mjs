@@ -373,3 +373,20 @@ test('the exit control clearly describes round abandonment and score preservatio
  const button=ui.get('#rg-card-room');assert.equal(button.textContent,'END ROUND');assert.match(button.attributes['aria-label'],/points and stars are kept/);
  ui.update({round:createShopRound(decks)});assert.equal(button.textContent,'ROOM');
 });
+
+test('real vote buttons add, right-click deducts and stops host menu, minus key deducts; zero is silent and results are locked',async()=>{
+ for(const mode of ['quiplash','red-handed']){
+  let round=mode==='quiplash'?createQuiplashRound(['prompt']):games.createRedHandedRound(Array.from({length:15},(_,i)=>`Evidence ${i}`),['prompt']);
+  for(const p of games.CARD_GAME_PLAYERS)round=games.submitRoundAnswer(round,p,mode==='quiplash'?p:round.hands[p][0]);
+  round=games.revealCardAnswers(round,true);
+  const ui=mountUI({}, {faroe:123,kaz:456,erin:789});ui.update({round});const id=round.responses[0].id;
+  const getButton=()=>{const find=node=>node.dataset?.voteResponse===id?node:node.children.map(find).find(Boolean);return find(ui.get('#rg-card-games-content'));};
+  let stopped=0,prevented=0;const event=()=>({preventDefault(){prevented++;},stopPropagation(){stopped++;}});
+  await getButton().click();await getButton().click();assert.equal(ui.state.round.votes[id],2);
+  await getButton().events.contextmenu(event());assert.equal(ui.state.round.votes[id],1);assert.equal(stopped,1);assert.equal(prevented,1);
+  await getButton().events.keydown({...event(),key:'-'});assert.equal(ui.state.round.votes[id],0);const sounds=ui.sounds.length;
+  await getButton().events.contextmenu(event());assert.equal(ui.state.round.votes[id],0);assert.equal(ui.sounds.length,sounds);
+  await getButton().click();const stale=getButton();ui.update({round:games.revealAudienceResults(ui.state.round)});assert.equal(getButton(),undefined);
+  await stale.events.contextmenu(event());assert.equal(ui.state.round.votes[id],1);assert.deepEqual(ui.balances,{faroe:123,kaz:456,erin:789});
+ }
+});

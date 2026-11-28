@@ -1121,3 +1121,29 @@ body.ramble-page *::after {
 @media(prefers-reduced-motion:reduce){.rg-smeemo-aura-pulse{animation:none;}}
 /* Stinger artwork carries its own typography; do not double-caption it. */
 .rg-smeemo-stinger p[hidden] {display:none!important;}
+
+/* Peripheral live Fugi portraits: use the existing iframe and override only
+   its presentation. The world transform/depth clip remains current underneath. */
+.rg-character-visibility.rg-side-portrait {clip-path:none!important;z-index:8!important;pointer-events:none;}
+.rg-side-portrait > .rg-billboard {
+  visibility:visible!important;filter:none!important;
+  transform:translate(var(--rg-side-x),var(--rg-side-y)) scale(var(--rg-side-scale))!important;
+  pointer-events:none;
+}
+@media(prefers-reduced-motion:no-preference){
+  .rg-side-portrait > .rg-billboard {animation:rg-side-pop .18s ease-out both;}
+  .rg-side-portrait[data-side="left"] {--rg-side-enter:-20px;}
+  .rg-side-portrait[data-side="right"] {--rg-side-enter:20px;}
+  @keyframes rg-side-pop {from{translate:var(--rg-side-enter) 0;opacity:0;}to{translate:0 0;opacity:1;}}
+}
+/* Keep interactive content in its own safe area rather than under portraits. */
+.rg-preview.has-side-fugis .rg-live-stage {
+  left:max(12%,var(--rg-fugi-left,0px));right:max(12%,var(--rg-fugi-right,0px));
+}
+@media(max-width:600px){.rg-preview.has-side-fugis .rg-live-stage {left:max(5%,var(--rg-fugi-left,0px));right:max(5%,var(--rg-fugi-right,0px));}}
+.rg-preview.has-side-fugis .rg-card-games-shell {
+  max-width:calc(100% - var(--rg-fugi-left,0px) - var(--rg-fugi-right,0px) - 8px);
+  left:calc((100% + var(--rg-fugi-left,0px) - var(--rg-fugi-right,0px))/2);
+}
+.rg-preview:is(.is-menu,.is-freecam,.is-freecam-detached) .rg-side-portrait,
+html[data-rg-host-locked] .rg-side-portrait {display:none!important;}

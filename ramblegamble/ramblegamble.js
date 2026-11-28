@@ -18,7 +18,8 @@ import { selectedCharacterId, characterRenderPose, createCharacterSelection } fr
 import { sampleVipAmbience } from "./vip-atmosphere.mjs?v=sky-soot-20261127-v1";
 import { createStageShow } from "./stage-show.mjs?v=curtain-karaoke-20261128-v1";
 import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state.mjs?v=all-curtain-20261127-v1";
-import { createCharacterOcclusion } from "./character-occlusion.mjs?v=stage-dance-20261127-v1";
+import { createCharacterOcclusion } from "./character-occlusion.mjs?v=side-fugis-20261128-v1";
+import { createSidePortraits } from "./character-side-fallback.mjs?v=side-fugis-20261128-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=smeemo-alpha-20261128-v1";
 import { createAudienceRenderer, crowdCatAnchor, CROWD_CAT } from "./audience-render.mjs?v=exterior-hands-20261128-v1";
@@ -85,6 +86,7 @@ import {
   const liquidPortalLayer = document.getElementById("rg-liquid-portal-layer");
   const liquidPortalFrame = document.getElementById("rg-liquid-portal-frame");
   const billboardLayer = document.getElementById("rg-billboard-layer");
+  const sidePortraits = createSidePortraits(preview, CHARACTER_SOURCE_SIZE);
   const slotControlLayer = document.getElementById("rg-slot-control-layer");
   const pointsHud = document.getElementById("rg-points-hud");
   const diceHeader = document.querySelector(".rg-dice-header");
@@ -1964,6 +1966,7 @@ import {
     hostBillboard = null;
     hazelBillboard = null;
     billboards = [];
+    sidePortraits.clear();
     billboardLayer?.replaceChildren();
     rouletteModel?.traverse((object) => {
       if (object.isMesh) rouletteTargets.push(object);
@@ -2285,7 +2288,7 @@ import {
     // Use the actual projected quadrilateral, not an oversized rectangle.
     // Where panels overlap, prefer the visible frontmost DOM layer,
     // then use distance to the projected centre as a tie breaker.
-    const hits = billboards.filter(entry=>entry.panel.style.visibility==="visible"
+    const hits = billboards.filter(entry=>!entry.sidePortrait && entry.panel.style.visibility==="visible"
       && pointInCharacterQuad(entry.projectedQuad?.corners,x,y)
       && characterOcclusion?.contains(entry,x,y)).map(entry=>{
       const corners=entry.projectedQuad.corners;
@@ -2389,6 +2392,7 @@ import {
   }
 
   function setMenuSceneVisibility(visible) {
+    if (!visible) sidePortraits.clear();
     if (!visible) floatingSky?.suspend();
     if (!visible) slotMarquee?.suspend();
     if (!visible) contestantStands?.suspend();
@@ -2764,6 +2768,7 @@ import {
     if (open) { freecam?.stop(); resetEncounter(); stageShow?.reset(currentView.kind==="slot"); }
     diceModeOpen = open;
     if (open) syncMusic();
+    if (open) sidePortraits.clear();
     pointAwardStinger.relocate(open?document.getElementById("rg-dice-dialog"):preview);
     syncVipAmbience(gameStarted&&sceneReady&&!pauseMenuOpen&&!document.hidden&&!document.documentElement.hasAttribute("data-rg-host-locked"));
     // The modal is in the browser top layer: keep the one live score strip
@@ -2946,13 +2951,16 @@ import {
       if (!characterOcclusion) throw new Error("Character depth pass unavailable");
       scene.updateMatrixWorld(true);
       characterOcclusion.update(visible,viewport,camera);
+      sidePortraits.update(billboards,entry=>characterOcclusion.coverage(entry),viewport,time,!cameraDetached&&!freecam?.active&&!cameraTransition);
       const groupTags=!cameraDetached&&!freecam?.active&&!cameraTransition&&currentView.kind==="contestants"?contestants:[];
-      characterSelection?.update(visible.find(entry=>entry.id===selectionId),time,time-characterSelectedAt,reducedMotion.matches,viewport,characterOcclusion,groupTags);
+      characterSelection?.update(visible.find(entry=>entry.id===selectionId&&!entry.sidePortrait),time,time-characterSelectedAt,reducedMotion.matches,viewport,characterOcclusion,groupTags.filter(entry=>!entry.sidePortrait));
     } catch(error) {
       // Fail closed instead of letting a character show through walls.
       for(const entry of visible)entry.panel.style.visibility="hidden";
       characterSelection?.hide();
       characterOcclusion?.invalidate();
+      // A failed depth pass must not show world planes through geometry.
+      sidePortraits.update(billboards,()=>0,viewport,time,!cameraDetached&&!freecam?.active&&!cameraTransition);
       if(!warnedOcclusion){warnedOcclusion=true;console.warn("Character occlusion unavailable",error);}
     }
   }
@@ -3063,7 +3071,7 @@ import {
       }
     } else if(id || kind==="contestants") {
       const entries=id?billboards.filter(entry=>entry.id===id):contestants;
-      target=entries.map(entry=>characterArrowTarget(entry,viewport,characterOcclusion)).filter(Boolean).sort((a,b)=>a.bounds.left-b.bounds.left)[0]||null;
+      target=entries.filter(entry=>!entry.sidePortrait).map(entry=>characterArrowTarget(entry,viewport,characterOcclusion)).filter(Boolean).sort((a,b)=>a.bounds.left-b.bounds.left)[0]||null;
     } else {
       // A presented question/card stage is the visible objective, not the
       // physical table or wall behind its controls.
@@ -3269,6 +3277,7 @@ import {
     // Project against this frame’s completed camera and cabinet pose, not the prior frame.
     if (sceneReady) updateSlotPlacementControlProjection();
     if (sceneReady && roomVisible) updateBillboardProjection(time);
+    else sidePortraits.clear();
     updateFocusArrow(time,roomVisible);
     renderer.render(scene, camera);
   }
@@ -3380,6 +3389,7 @@ import {
     if (document.hidden) {
       floatingSky?.suspend();
       resetEncounter();
+      sidePortraits.clear();
       contestantStands?.suspend();
       slotMarquee?.suspend();
       characterSelection?.hide();
@@ -3411,6 +3421,7 @@ import {
   });
 
   window.addEventListener("pagehide", event => {
+    sidePortraits.clear();
     pointAwardStinger.cancel();
     if(!event.persisted){unsubscribePointAwards();pointAwardStinger.dispose();}
     resetEncounter();
