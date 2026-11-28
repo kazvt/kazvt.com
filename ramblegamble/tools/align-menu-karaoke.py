@@ -111,6 +111,81 @@ def load_alignment_model(stable_whisper, model_name, backend, device=None):
     return loader(model_name, **options)
 
 
+def ctc_words_from_spans(spans, cues, labels, frame_seconds):
+    """Convert TorchAudio CTC character spans into one scored interval per lyric word."""
+    output = []
+    cursor = 0
+    previous_end = 0.0
+    words = [word[0] for cue in cues for word in cue['words']]
+    for index, original in enumerate(words):
+        token = norm(original).upper()
+        if not token:
+            raise ValueError(f'Lyric token {original!r} has no alignable letters')
+        chars = spans[cursor:cursor + len(token)]
+        if len(chars) != len(token):
+            raise ValueError(f'CTC alignment ended inside {original!r}')
+        if ''.join(labels[span.token] for span in chars) != token:
+            raise ValueError(f'CTC token mismatch at {original!r}')
+        start = float(chars[0].start) * frame_seconds
+        end = float(chars[-1].end) * frame_seconds
+        frame_count = sum(int(span.length) for span in chars)
+        if frame_count <= 0:
+            raise ValueError(f'CTC alignment has no acoustic frames for {original!r}')
+        # TorchAudio reports mean log posterior per character span. Geometric
+        # averaging retains a useful 0..1 diagnostic without calling it truth.
+        log_score = sum(float(span.score) * int(span.length) for span in chars) / frame_count
+        score = math.exp(min(0.0, log_score))
+        if not (math.isfinite(start) and math.isfinite(end) and 0 <= start < end <= DURATION + .05):
+            raise ValueError(f'Invalid CTC interval for {original!r}: {start}–{end}')
+        if start < previous_end - .001:
+            raise ValueError(f'Overlapping CTC word at {original!r}')
+        output.append(dict(word=original, start=start, end=end, probability=score))
+        previous_end = end
+        cursor += len(token)
+        if index + 1 < len(words):
+            if cursor >= len(spans) or labels[spans[cursor].token] != '|':
+                raise ValueError(f'Missing CTC word separator after {original!r}')
+            cursor += 1
+    if cursor != len(spans):
+        raise ValueError('Unexpected CTC alignment spans remain after the final lyric')
+    return output
+
+
+def align_ctc(source, cues, device=None):
+    """Forced-align exact lyrics with TorchAudio Wav2Vec2 CTC on a vocal stem."""
+    import torch
+    import torchaudio
+
+    bundle = torchaudio.pipelines.WAV2VEC2_ASR_BASE_960H
+    labels = bundle.get_labels()
+    label_ids = {label: index for index, label in enumerate(labels)}
+    target_text = '|'.join(norm(word[0]).upper() for cue in cues for word in cue['words'])
+    unsupported = sorted(set(target_text) - set(label_ids))
+    if unsupported:
+        raise ValueError(f'Lyrics contain symbols unsupported by CTC model: {unsupported}')
+    target = torch.tensor([[label_ids[char] for char in target_text]], dtype=torch.int32)
+    waveform, sample_rate = torchaudio.load(str(source))
+    if waveform.ndim != 2 or waveform.shape[0] < 1:
+        raise ValueError('Audio could not be decoded as a channel-first waveform')
+    waveform = waveform.mean(dim=0, keepdim=True)
+    if sample_rate != bundle.sample_rate:
+        waveform = torchaudio.functional.resample(waveform, sample_rate, bundle.sample_rate)
+    device = device or ('cuda' if torch.cuda.is_available() else 'cpu')
+    model = bundle.get_model().to(device).eval()
+    with torch.inference_mode():
+        emissions, _ = model(waveform.to(device))
+        log_probs = torch.log_softmax(emissions, dim=-1)
+        aligned, scores = torchaudio.functional.forced_align(
+            log_probs, target.to(device), blank=label_ids['-'])
+        spans = torchaudio.functional.merge_tokens(
+            aligned[0].cpu(), scores[0].cpu(), blank=label_ids['-'])
+    frame_seconds = waveform.shape[-1] / bundle.sample_rate / emissions.shape[1]
+    return ctc_words_from_spans(spans, cues, labels, frame_seconds), dict(
+        model='torchaudio WAV2VEC2_ASR_BASE_960H', device=device,
+        sampleRate=bundle.sample_rate, frames=int(emissions.shape[1]),
+        frameSeconds=frame_seconds, source=str(source))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--model', default='medium.en', help='Whisper model (small.en for lower-memory CPU, large-v3 for higher accuracy)')
