@@ -39,7 +39,7 @@ function fake(){
 test('six double-sided batches, no draw before atlas ready, 5fps writes, reduced motion, lifecycle',()=>{
  const f=fake(),h=createExteriorHands(f.THREE,f.scene),eye={x:0,y:3,z:0},meshes=h.group.children;const total=()=>meshes.reduce((n,m)=>n+m.calls,0);
  assert.equal(meshes.length,6);assert.equal(meshes.reduce((n,m)=>n+m.count,0),192);h.update(0,true,false,eye);assert.equal(h.group.visible,false);assert.equal(total(),0);
- f.load();h.update(0,true,false,eye);assert.equal(total(),192);assert.equal(h.group.visible,true);for(const m of meshes){assert.equal(m.material.side,2);assert.equal(m.material.forceSinglePass,true);assert.equal(m.material.depthWrite,true);assert.equal(m.material.depthTest,true);assert.equal(m.material.opacity,.9);assert.equal(m.material.alphaHash,true);assert.equal(m.material.transparent,false);assert.equal(m.renderOrder,undefined);assert.equal(m.raycast(),undefined);}
+ f.load();h.update(0,true,false,eye);assert.equal(total(),192);assert.equal(h.group.visible,true);for(const m of meshes){assert.equal(m.material.side,2);assert.equal(m.material.forceSinglePass,true);assert.equal(m.material.depthWrite,true);assert.equal(m.material.depthTest,true);assert.equal(m.material.opacity,.8);assert.equal(m.material.alphaHash,true);assert.equal(m.material.transparent,false);assert.equal(m.renderOrder,undefined);assert.equal(m.raycast(),undefined);}
  h.update(199,true,false,eye);assert.equal(total(),192);h.update(200,true,false,eye);assert.equal(total(),384);h.update(1000,true,true,eye);assert.equal(total(),576);h.update(2000,true,true,eye);assert.equal(total(),576);
  h.update(2000,false,false,eye);assert.equal(h.group.visible,false);assert.ok(meshes.every(m=>!m.visible));h.dispose();assert.equal(f.scene.children.length,0);assert.ok(meshes.every(m=>m.disposed&&m.geometry.disposed));f.load();h.update(3000,true,false,eye);assert.equal(h.group.visible,false);
 });
@@ -60,8 +60,8 @@ test('clean atlas has a distinct deployed pathname and refreshed module chain',(
  assert.equal(png.readUInt32BE(16),288);assert.equal(png.readUInt32BE(20),96);
  const js=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
  const gate=readFileSync(new URL('./host-access.mjs',import.meta.url),'utf8');
- assert.match(js,/exterior-hands\.mjs\?v=clean-hands-asset-20261128-v2/);
- assert.match(gate,/ramblegamble\.js\?v=clean-hands-asset-20261128-v2/);
- for(const path of ['../rg/index.html','../rg/console/index.html'])assert.match(readFileSync(new URL(path,import.meta.url),'utf8'),/host-access\.mjs\?v=clean-hands-asset-20261128-v2/);
+ assert.match(js,/exterior-hands\.mjs\?v=clean-hands-opacity-20261128-v3/);
+ assert.match(gate,/ramblegamble\.js\?v=clean-hands-opacity-20261128-v3/);
+ for(const path of ['../rg/index.html','../rg/console/index.html'])assert.match(readFileSync(new URL(path,import.meta.url),'utf8'),/host-access\.mjs\?v=clean-hands-opacity-20261128-v3/);
  h.dispose();
 });

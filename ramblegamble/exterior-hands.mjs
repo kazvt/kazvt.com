@@ -59,10 +59,10 @@ export function createExteriorHands(THREE,scene){
   const map=new THREE.TextureLoader().load(new URL('./assets/exterior-hands/hands-clean-v2.png',import.meta.url).href,
     texture=>{if(!disposed){const image=texture.image;ready=image?.width===48*HANDS_VARIANTS&&image?.height===96;if(!ready)console.warn('Exterior hand atlas has incorrect dimensions; reinstall the sourced asset.');}},undefined,()=>{if(disposed)return;ready=false;group.visible=false;console.warn('Exterior hand atlas missing; run assets/exterior-hands/install-hands.py before deployment.');});
   map.magFilter=THREE.NearestFilter;map.minFilter=THREE.NearestFilter;map.generateMipmaps=false;map.colorSpace=THREE.SRGBColorSpace;
-  // Alpha hashing gives 90% coverage on opaque skin, preserves the wrist fade,
+  // Alpha hashing gives 80% coverage on opaque skin, preserves the wrist fade,
   // and writes real per-fragment depth. Unlike blended instancing, the order of
   // atlas batches cannot make a distant arm or mist sheet overpaint a near arm.
-  const material=new THREE.MeshBasicMaterial({map,opacity:.9,transparent:false,alphaHash:true,alphaTest:.055,depthTest:true,depthWrite:true,side:THREE.DoubleSide,forceSinglePass:true,toneMapped:false,fog:false});
+  const material=new THREE.MeshBasicMaterial({map,opacity:.8,transparent:false,alphaHash:true,alphaTest:.055,depthTest:true,depthWrite:true,side:THREE.DoubleSide,forceSinglePass:true,toneMapped:false,fog:false});
   for(let variant=0;variant<HANDS_VARIANTS;variant++){
     const members=seeds.filter(seed=>seed.variant===variant),geometry=new THREE.PlaneGeometry(1,1);
     geometry.translate(0,.5,0); // pivot at the submerged wrist, not the center
