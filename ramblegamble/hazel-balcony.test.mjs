@@ -22,14 +22,16 @@ const triangles=d.meshes[node.mesh].primitives.flatMap(p=>{const vertices=access
 function blocked(eye,point){const dir=sub(point,eye);return triangles.some(([a,b,c])=>{const e1=sub(b,a),e2=sub(c,a),h=cross(dir,e2),det=dot(e1,h);if(Math.abs(det)<1e-9)return false;const s=sub(eye,a),v=dot(s,h)/det;if(v<0||v>1)return false;const r=cross(s,e1),w=dot(dir,r)/det;if(w<0||v+w>1)return false;const t=dot(e2,r)/det;return t>1e-5&&t<.99999;});}
 const near=(a,b,tol=1e-5)=>Math.abs(a-b)<tol;
 const pose=hazelBalconyPose();
-test('Hazel is anchored above the actual top die on the right/rear balcony, not a contestant seat',()=>{
+test('Hazel sits immediately room-side of the actual right/rear balcony lip',()=>{
  assert.equal(HAZEL_SOURCE.id,'hazel');assert.equal(HAZEL_SOURCE.source,'https://reactive.fugi.tech/basic/1130618562382413834');
  const ledge=triangles.filter(t=>t.every(v=>near(v[1],HAZEL_LEDGE_Y)));
- // The vertical line through the avatar center meets the real ledge top.
+ // The center is just ahead of the lip, while the real ledge remains directly behind it.
  const eye=[pose.anchor.x,HAZEL_LEDGE_Y+1,pose.anchor.z],point=[pose.anchor.x,HAZEL_LEDGE_Y-1,pose.anchor.z];
- assert.ok(ledge.some(t=>t.some(v=>near(v[0],15.5448)&&near(v[2],-4.8768))));assert.ok(blocked(eye,point));
+ assert.ok(ledge.some(t=>t.some(v=>near(v[0],15.5448)&&near(v[2],-4.8768))));assert.equal(blocked(eye,point),false);
+ assert.ok(blocked([pose.anchor.x,HAZEL_LEDGE_Y+1,pose.anchor.z-.12],[pose.anchor.x,HAZEL_LEDGE_Y-1,pose.anchor.z-.12]));
+ assert.ok(near(pose.anchor.x,15.15));assert.ok(near(pose.anchor.z,-4.84));
  assert.ok(triangles.some(t=>t.every(v=>near(v[1],3.028))&&t.some(v=>near(v[0],15.0995,.0001)&&near(v[2],-5.0756,.0001))));
- assert.ok(near(pose.anchor.y-pose.worldHeight/2,HAZEL_LEDGE_Y-.24));
+ assert.ok(near(pose.anchor.y-pose.worldHeight/2,HAZEL_LEDGE_Y-.40));
  assert.equal(pose.worldWidth,pose.worldHeight);
  assert.match(source,/setupHostBillboard\(\);\s*setupHazelBillboard\(\);/);
  assert.match(source,/billboards\.push\(hazelBillboard\)/);assert.doesNotMatch(source,/contestants\.push\(hazelBillboard\)/);
@@ -42,9 +44,9 @@ test('72 responsive orbit/framing cases keep the upper billboard, ledge and uppe
   const project=p=>{const r=sub(xyz(p),e),depth=-dot(r,dir);return {x:dot(r,right)/(depth*tan*aspect),y:dot(r,up)/(depth*tan),z:(320+.1)/(320-.1)-2*320*.1/((320-.1)*depth),depth};};
   const y=characterYaw(eye.x-pose.anchor.x,eye.z-pose.anchor.z),corners=characterCorners(pose.anchor,pose.worldWidth,pose.worldHeight,y);
   assert.ok(corners.every(p=>{const q=project(p);return Math.abs(q.x)<.80&&Math.abs(q.y)<.80&&q.depth>.1;}));
-  // Upper and middle portions stay clear. Lower source sits behind ledge.
+  // Upper and middle portions stay clear. The lower center hangs in front of the ledge.
   for(const s of [-.35,0,.35])for(const h of [0,.25,.4]){const pt=add(xyz(pose.anchor),[s*pose.worldWidth*Math.cos(y),h*pose.worldHeight,-s*pose.worldWidth*Math.sin(y)]);assert.equal(blocked(e,pt),false,`${width}x${height} ${yaw} ${pitch}`);}
-  assert.equal(blocked(e,[pose.anchor.x,pose.anchor.y-pose.worldHeight*.48,pose.anchor.z]),true);
+  assert.equal(blocked(e,[pose.anchor.x,pose.anchor.y-pose.worldHeight*.48,pose.anchor.z]),false);
   // Upper die front-face center is part of the shot; the top face itself is
   // naturally occluded by the balcony and need not be artificially exposed.
   const die=[15.55265,2.528,-4.86425],p=project(obj(die));assert.ok(Math.abs(p.x)<1&&Math.abs(p.y)<1);assert.equal(blocked(e,die),false);

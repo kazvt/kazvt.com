@@ -61,7 +61,7 @@ test('clean atlas has a distinct deployed pathname and refreshed module chain',(
  const js=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
  const gate=readFileSync(new URL('./host-access.mjs',import.meta.url),'utf8');
  assert.match(js,/exterior-hands\.mjs\?v=clean-hands-opacity-20261128-v3/);
- assert.match(gate,/ramblegamble\.js\?v=credits-clean-20261128-v1/);
- for(const path of ['../rg/index.html','../rg/console/index.html'])assert.match(readFileSync(new URL(path,import.meta.url),'utf8'),/host-access\.mjs\?v=credits-clean-20261128-v1/);
+ assert.match(gate,/ramblegamble\.js\?v=hazel-seat-20261128-v1/);
+ for(const path of ['../rg/index.html','../rg/console/index.html'])assert.match(readFileSync(new URL(path,import.meta.url),'utf8'),/host-access\.mjs\?v=hazel-seat-20261128-v1/);
  h.dispose();
 });

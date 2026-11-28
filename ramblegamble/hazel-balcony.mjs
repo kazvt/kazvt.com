@@ -11,10 +11,10 @@ export const HAZEL_CAMERA_YAW = -.60;
 export const HAZEL_CAMERA_ELEVATION = .10;
 export function hazelBalconyPose() {
   const size = 1.8;
-  // Tuck the lower quarter-unit behind the real ledge, so the live artwork
-  // reads as perched on the corner. Do not distort or crop the iframe itself:
-  // its depth mask naturally hides the portion below the balcony surface.
-  return {anchor:{x:15.34,y:HAZEL_LEDGE_Y-.24+size/2,z:-5.14},worldWidth:size,worldHeight:size};
+  // Place the seated artwork just room-side of the inner lip, with its
+  // lower portion below the top surface so the legs hang over the edge.
+  // Keep the source square and use the existing world-space depth mask.
+  return {anchor:{x:15.15,y:HAZEL_LEDGE_Y-.40+size/2,z:-4.84},worldWidth:size,worldHeight:size};
 }
 export function hazelCameraFrame({anchor,worldWidth,worldHeight}, aspect, fov, near, yawCap, pitchCap) {
   // Lower the aim enough to keep the stacked dice and balcony lip in shot.
