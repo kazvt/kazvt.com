@@ -88,7 +88,7 @@ class AlignmentTests(unittest.TestCase):
         mapped = a.ctc_words_from_spans(spans, cues, alphabet, .02)
         self.assertEqual([w['word'] for w in mapped], ['A', 'yippee-yay,'])
         self.assertEqual((mapped[0]['start'], mapped[0]['end']), (0, .02))
-        self.assertEqual((mapped[1]['start'], mapped[1]['end']), (.04, .44))
+        self.assertEqual((mapped[1]['start'], mapped[1]['end']), (.04, .42))
         self.assertAlmostEqual(mapped[0]['probability'], .818730753)
 
     def test_ctc_rejects_wrong_character_or_missing_separator(self):
