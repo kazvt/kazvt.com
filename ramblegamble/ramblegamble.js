@@ -41,7 +41,7 @@ import {
   resolveArcadeShortcut,
   resolveSlotContextCell,
   resolveHostContextAction,
-} from "./point-click-routing.js?v=cartoon-machines-20261127-v1";
+} from "./point-click-routing.js?v=slot-selection-20261128-v1";
 import { createQuestionPicker, readSessionQuestionBank } from "./question-bank.mjs?v=host-question-bank-session-20261118-v1";
 import { DICE_DOOR_OPENING, isDiceDoorBackingTriangle } from "./dice-doorway.mjs?v=dice-door-wall-target-20261120-v1";
 import { readPointScores, subscribePointScores, subscribeStarScores, writePointScores, withPointScoresLock } from "./points-store.mjs?v=player-stats-20261127-v1";
@@ -207,7 +207,7 @@ import {
   let slotReelDisplay = null;
   let slotControlTargets = new Map();
   const slotReelImages = new Map();
-  let selectedSlotBerry = "kazberry";
+  let selectedSlotBerry = null;
   let slotPlacementControls = [];
   let slotFocusPoints = [];
   let slotSpinButtonCorners = [];
@@ -663,7 +663,7 @@ import {
     }
     context.stroke();
     context.restore();
-    if (slotHoverCell >= 0 && !slotReelMotion && !slotWinCelebration && !playing && currentView.kind === "slot") {
+    if (selectedSlotBerry && slotHoverCell >= 0 && !slotReelMotion && !slotWinCelebration && !playing && currentView.kind === "slot") {
       const column = slotHoverCell % 5;
       const row = Math.floor(slotHoverCell / 5);
       context.fillStyle = "rgba(56, 242, 255, 0.23)";
@@ -800,7 +800,7 @@ import {
       button.classList.add("rg-slot-sprite-" + definition.axis);
       button.setAttribute("aria-label", definition.axis + " " + definition.label);
       button.addEventListener("pointerenter", () => {
-        if (selectedSlotBerry !== SLOT_REEL_WILDCARD) slotHoverLine = { axis: definition.axis, index: definition.index };
+        if (selectedSlotBerry && selectedSlotBerry !== SLOT_REEL_WILDCARD) slotHoverLine = { axis: definition.axis, index: definition.index };
         drawSlotReelDisplay();
         hideGameCursor();
       });
@@ -811,7 +811,7 @@ import {
         }
       });
       button.addEventListener("focus", () => {
-        if (selectedSlotBerry !== SLOT_REEL_WILDCARD) slotHoverLine = { axis: definition.axis, index: definition.index };
+        if (selectedSlotBerry && selectedSlotBerry !== SLOT_REEL_WILDCARD) slotHoverLine = { axis: definition.axis, index: definition.index };
         drawSlotReelDisplay();
       });
       button.addEventListener("blur", () => {
@@ -901,8 +901,15 @@ import {
     return true;
   }
 
+  function requireSlotSelection() {
+    if (selectedSlotBerry) return true;
+    foley.play("error", { channel: "slot-selection-error" });
+    return false;
+  }
+
   function placeSlotBerryOnLine(axis, lineIndex) {
-    if (playing || slotReelMotion || selectedSlotBerry === SLOT_REEL_WILDCARD || !["row", "column"].includes(axis)) return false;
+    if (playing || slotReelMotion || stageShow?.busy || currentView.kind !== "slot" || document.documentElement.hasAttribute("data-rg-host-locked") || !["row", "column"].includes(axis)) return false;
+    if (!requireSlotSelection() || selectedSlotBerry === SLOT_REEL_WILDCARD) return false;
     const placement = placeSlotBerry(slotReelGrid, selectedSlotBerry, {
       axis,
       index: lineIndex,
@@ -917,6 +924,7 @@ import {
 
   function placeSelectedSlotSymbolAtCell(index) {
     if (playing || slotReelMotion || slotCellPop || stageShow?.busy || currentView.kind !== "slot" || document.documentElement.hasAttribute("data-rg-host-locked")) return false;
+    if (!requireSlotSelection()) return false;
     const placement = placeSlotSymbolAtCell(slotReelGrid, selectedSlotBerry, index);
     if (placement.placedIndex < 0) return false;
     const startedAt = performance.now();
@@ -943,29 +951,32 @@ import {
     const grid = slotReelGrid;
     const berryNames = { faroeberry: "Faroeberry", erinberry: "Erinberry", kazberry: "Kazberry", star: "Star wildcard" };
     const wildcardMode = selectedSlotBerry === SLOT_REEL_WILDCARD;
+    const noSelection = selectedSlotBerry === null;
     slotControlLayer.classList.toggle("is-wildcard-mode", wildcardMode);
     for (const button of slotBerryPicker?.children || []) {
       button.setAttribute("aria-pressed", String(button.dataset.slotBerry === selectedSlotBerry));
       button.disabled = playing;
     }
     for (const control of slotPlacementControls) {
-      const available = wildcardMode ? 0 : getSlotEligibleIndexes(grid, selectedSlotBerry, {
+      const available = wildcardMode || noSelection ? 0 : getSlotEligibleIndexes(grid, selectedSlotBerry, {
         axis: control.axis,
         index: control.index,
       }).length;
       const lineName = control.axis === "column" ? "column " + (control.index + 1) : "row " + control.label;
-      control.button.disabled = Boolean(playing || slotReelMotion || wildcardMode || available === 0);
-      control.button.setAttribute("aria-label", wildcardMode
+      control.button.disabled = Boolean(playing || slotReelMotion || wildcardMode || (!noSelection && available === 0));
+      control.button.setAttribute("aria-label", noSelection ? lineName : wildcardMode
         ? "Left-click a slot cell to place a star; right-click to remove its icon"
         : "Place " + berryNames[selectedSlotBerry] + " in a random available cell in " + lineName + "; " + available + " available");
-      control.button.title = wildcardMode
+      control.button.title = noSelection ? lineName : wildcardMode
         ? "Star selected - left-click to place; right-click to remove"
         : "Place " + berryNames[selectedSlotBerry] + " in " + lineName + " (" + available + " available)";
-      control.button.classList.toggle("is-unavailable", available === 0);
+      control.button.classList.toggle("is-unavailable", !noSelection && available === 0);
     }
   }
 
   function startSlotReelSpin(columns, pullCrank = false) {
+    if (playing || slotReelMotion || stageShow?.busy || document.documentElement.hasAttribute("data-rg-host-locked")) return false;
+    if (!requireSlotSelection()) return false;
     const startingGrid = slotReelGrid.slice();
     const spin = rotateSlotColumns(startingGrid, columns, { randomIndex: secureRandomIndex });
     return startSlotAction(spin.grid, "column", Object.keys(spin.rotations).map(Number), {
@@ -1677,6 +1688,9 @@ import {
     if (nextView.kind !== "slot") slotCabinetFX?.reset();
     const openingSlot=currentView.kind!=="slot"&&nextView.kind==="slot";
     const closingSlot=currentView.kind==="slot"&&nextView.kind!=="slot";
+    if (openingSlot || (nextView.kind === "slot" && fromExterior)) {
+      window.dispatchEvent(new CustomEvent("rg:slot-settings-updated", { detail: { berry: null } }));
+    }
     if(stageShow&&viewChanged){
       const now=performance.now();
       if(immediate)stageShow.reset(nextView.kind==="slot");
@@ -2723,6 +2737,7 @@ import {
     // Do not open a browser menu over a slot cell, even if it is empty or busy.
     event.preventDefault();
     if (playing || slotReelMotion || slotCellPop || stageShow?.busy) return;
+    if (!requireSlotSelection()) return;
     const removal = removeSlotSymbol(slotReelGrid, index);
     if (!removal.removed) return;
     try { saveSlotGrid(removal.grid, { requirePersistence: true }); }
@@ -2861,7 +2876,7 @@ import {
   });
   window.addEventListener("rg:slot-settings-updated", (event) => {
     const berry = event.detail?.berry;
-    if (["faroeberry", "erinberry", "kazberry", SLOT_REEL_WILDCARD].includes(berry)) selectedSlotBerry = berry;
+    if (berry === null || ["faroeberry", "erinberry", "kazberry", SLOT_REEL_WILDCARD].includes(berry)) selectedSlotBerry = berry;
     slotHoverLine = null;
     syncSlotPlacementControls();
     slotHoverCell = -1;

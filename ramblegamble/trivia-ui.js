@@ -105,7 +105,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
   let questionBank = readSessionQuestionBank();
   let pendingImport = null;
   let slotGrid = loadGrid();
-  let selectedBerry = "kazberry";
+  let selectedBerry = null;
   let slotBoardBusy = false;
   let issuedClientActivities = readSessionArray(CLIENT_ISSUED_KEY).filter((entry) => entry && typeof entry.activityId === "string");
   let clientSubmissions = readSessionArray(CLIENT_ANSWERS_KEY).filter((entry) => validateClientSubmission(entry).ok);
@@ -915,7 +915,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     publishSlotSettings();
   }));
   window.addEventListener("rg:slot-settings-updated", (event) => {
-    if (!Object.hasOwn(berryNames, event.detail?.berry)) return;
+    if (event.detail?.berry !== null && !Object.hasOwn(berryNames, event.detail?.berry)) return;
     selectedBerry = event.detail.berry;
     $$("[data-berry]").forEach((choice) => choice.setAttribute("aria-pressed", String(choice.dataset.berry === selectedBerry)));
   });

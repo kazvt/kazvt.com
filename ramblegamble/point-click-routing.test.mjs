@@ -115,7 +115,7 @@ test("back returns to the starting overview view and never retreats past it", ()
 
  test("right-click deletion routes only real slot display cells in all symbol modes", () => {
   const base = {button:2, view:"slot", selected:"star", interaction:{machine:"slot",part:"slot-reel-display",cellIndex:0}};
-  for (const selected of ["star","faroeberry","erinberry","kazberry"]) for (let i=0; i<15; i++) assert.equal(resolveSlotContextCell({...base, selected, interaction:{...base.interaction,cellIndex:i}}),i);
+  for (const selected of [null,"star","faroeberry","erinberry","kazberry"]) for (let i=0; i<15; i++) assert.equal(resolveSlotContextCell({...base, selected, interaction:{...base.interaction,cellIndex:i}}),i);
   for (const overrides of [{button:0},{button:1},{view:"overview"},{selected:"invalid"},{interaction:null},{interaction:{...base.interaction,part:"arm"}},{interaction:{...base.interaction,machine:"roulette"}}]) assert.equal(resolveSlotContextCell({...base,...overrides}),-1);
   for (const i of [-1,15,NaN,null,1.5,"1"]) assert.equal(resolveSlotContextCell({...base,interaction:{...base.interaction,cellIndex:i}}),-1);
 });
