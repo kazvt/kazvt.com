@@ -189,7 +189,7 @@ def align_ctc(source, cues, device=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--model', default='medium.en', help='Whisper model (small.en for lower-memory CPU, large-v3 for higher accuracy)')
-    parser.add_argument('--backend', choices=('openai', 'faster-whisper'), default='openai', help='Whisper implementation; faster-whisper reuses its Hugging Face model cache')
+    parser.add_argument('--backend', choices=('openai', 'faster-whisper', 'torchaudio-ctc'), default='openai', help='Forced aligner; torchaudio-ctc uses Wav2Vec2 CTC (requires torchaudio)')
     parser.add_argument('--device', default=None, help='cpu or cuda; default auto')
     parser.add_argument('--vocals', type=Path, help='Optional untrimmed vocal stem separated from the exact bundled MP3')
     parser.add_argument('--output', type=Path, default=Path('karaoke-alignment'), help='Output directory (does not change game files)')
@@ -198,7 +198,12 @@ def main():
         raise SystemExit('Unexpected song version: refusing to align against a different recording.')
     source = args.vocals or AUDIO
     if args.vocals:
-        duration = float(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration','-of','default=noprint_wrappers=1:nokey=1',str(source)], text=True).strip())
+        try:
+            duration = float(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration','-of','default=noprint_wrappers=1:nokey=1',str(source)], text=True).strip())
+        except (FileNotFoundError, subprocess.CalledProcessError):
+            import torchaudio
+            info = torchaudio.info(str(source))
+            duration = info.num_frames / info.sample_rate
         if abs(duration-DURATION) > .15:
             raise SystemExit('Vocal stem must have the same duration and sample origin as the MP3.')
     cues = load_cues()
@@ -209,16 +214,23 @@ def main():
     for filename in ('candidate.json','review.json'):
         (out/filename).unlink(missing_ok=True)
     import stable_whisper
-    model = load_alignment_model(stable_whisper, args.model, args.backend, args.device)
+    transcription_backend = 'faster-whisper' if args.backend == 'torchaudio-ctc' else args.backend
+    model = load_alignment_model(stable_whisper, args.model, transcription_backend, args.device)
     print('Independent transcription (no lyric prompt)...', flush=True)
     transcribed = model.transcribe(str(source), language='en', word_timestamps=True, regroup=False).to_dict()
     write_json(out/'transcription.json', transcribed)
-    print('Forced alignment of supplied lyrics against recording...', flush=True)
-    aligned = model.align(str(source), lyrics, language='en', original_split=True, regroup=False).to_dict()
+    if args.backend == 'torchaudio-ctc':
+        print('CTC forced alignment of exact supplied lyrics...', flush=True)
+        aligned_words, alignment_meta = align_ctc(source, cues, args.device)
+        aligned = {'segments': [{'words': aligned_words}], 'alignment': alignment_meta}
+    else:
+        print('Whisper forced alignment of supplied lyrics against recording...', flush=True)
+        aligned = model.align(str(source), lyrics, language='en', original_split=True, regroup=False).to_dict()
+        alignment_meta = dict(model=f'{args.backend} {args.model}', source=str(source))
     write_json(out/'forced-alignment.json', aligned)
     result, report = candidate(cues, map_words(cues, flatten(aligned)), flatten(transcribed))
     write_json(out/'review.json', report)
-    write_json(out/'candidate.json', dict(audioSha256=SHA256, cues=result, review=report))
+    write_json(out/'candidate.json', dict(audioSha256=SHA256, alignment=alignment_meta, cues=result, review=report))
     print(f'Candidate: {out / "candidate.json"}. Review flagged phrases in review.json, then import in the timing editor.')
     print(f'{sum(r["independentlyMatched"] for r in report)}/{sum(r["total"] for r in report)} words matched independent recognition within 0.6 s. This is not a verified sync score.')
 
