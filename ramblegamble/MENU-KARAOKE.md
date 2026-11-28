@@ -41,7 +41,7 @@ The marquee lifecycle controls visibility and the existing menu MP3 remains the 
 Music-aware alignment work notes that speech aligners do not model sung pitch/phoneme timing well; vocal boundary and pitch cues can help. Karaoke alignment pipelines commonly combine source/vocal separation, lyric recognition and forced alignment, with manual review for errors. These approaches are useful evidence, not a substitute for checking against the recording:
 
 - Huang et al., [Improving Lyrics Alignment through Joint Pitch Detection](https://qmro.qmul.ac.uk/xmlui/bitstream/handle/123456789/76603/Huang%20Improving%20lyrics%20Alignment%202022%20Accepted.pdf?isAllowed=y&sequence=10)
-- Dzhambazov et al., [Lyrics to Audio Alignment for Karaoke in Pop Music](https://www.music-ir.org/mirex/abstracts/2017/DMS2.pdf)
+- Dzhambazov et al., [Lyrics to Audio Alignment in Polyphonic Audio](https://www.music-ir.org/mirex/abstracts/2017/DMS1.pdf)
 - [Automatic Recognition of Lyrics in Singing](https://link.springer.com/article/10.1155/2010/546047)
 - [MIREX Lyrics-to-Audio Alignment task](https://music-ir.org/mirex/wiki/2024%3ALyrics-to-Audio_Alignment)
 - [Demucs](https://github.com/facebookresearch/demucs), for optional source separation
