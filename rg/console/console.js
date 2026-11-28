@@ -2,7 +2,7 @@ import { publishPointAward, publishStarAward } from "/ramblegamble/point-award-e
 import { AUDIENCE_KEY, AUDIENCE_MODES, readAudienceMode, writeAudienceMode } from "/ramblegamble/audience-state.mjs?v=show-energy-20261127-v1";
 import { mountCommandCompletion } from "/ramblegamble/console-completion.mjs?v=player-stats-20261127-v1";
 import { applyCardShowAction } from "/ramblegamble/card-show-actions.mjs?v=answer-edit-20261128-v1";
-import { renderTriviaResponses } from "/ramblegamble/trivia-live-view.mjs?v=unique-match-20261128-v1";
+import { renderTriviaResponses } from "/ramblegamble/trivia-live-view.mjs?v=compose-alpha-center-20261128-v1";
 import { activeRoomRound, readLiveTrivia, writeLiveTrivia, writeLiveTriviaDraft, subscribeLiveTrivia, newTriviaId, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, updateTrivia, answerSummary } from "/ramblegamble/live-trivia.mjs?v=live-match-20261128-v1";
 import { withRoomSubmissionLock } from "/ramblegamble/card-room-election.mjs";
 import { mountCardRoom } from "/ramblegamble/card-room-host.mjs?v=live-match-20261128-v1";

@@ -2,7 +2,7 @@ import { ROOM_VERSION, decodePacket, isPlayer } from './card-room-protocol.mjs?v
 import { validNonce, validPublicKey } from './card-room-auth.mjs?v=host-security-20261126-v1';
 import { foley } from "./game-foley.mjs?v=sky-soot-20261127-v1";
 import { createClientSubmission, validateClientActivity, CLIENT_PACKET_MAX_BYTES } from "./trivia-client.mjs?v=player-handoff-20261125-v1";
-import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-place-20261124-v1";
+import { snapComposePlacement, composePointerPercent, loadComposeSprite, paintComposeMarker } from "./compose-placement.mjs?v=compose-alpha-center-20261128-v1";
 
 (() => {
   "use strict";
@@ -220,6 +220,8 @@ import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-p
     tray.setAttribute("aria-label", "Select an image to place");
     const board = document.createElement("div");
     board.className = "rg-client-picture";
+    // Keep wide source images wide even on a narrow device.
+    board.style.minHeight = "0";
     board.tabIndex = 0;
     board.setAttribute("role", "application");
     board.setAttribute("aria-label", "Picture placement board. Select an image and click to place it. Click a placed image to remove it. Use arrow keys and Enter to place with a keyboard.");
@@ -233,7 +235,7 @@ import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-p
     const gridSize = activity.content.gridSize;
     const pieceSize = activity.content.pieceSize || 32;
     const setMetrics = () => {
-      if (!image.naturalWidth || !image.naturalHeight) return;
+      if (!board.isConnected || !image.naturalWidth || !image.naturalHeight) return;
       boardMetrics = { width: image.naturalWidth, height: image.naturalHeight };
       board.style.aspectRatio = image.naturalWidth + " / " + image.naturalHeight;
       const gridW = gridSize > 0 ? gridSize / boardMetrics.width * 100 : 0;
@@ -251,6 +253,8 @@ import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-p
     image.addEventListener("error", () => { status.textContent = "The picture could not be loaded. Re-open the task file or tell the host."; });
     board.append(image);
     const pieces = new Map();
+    const sprites = new Map();
+    boardMetrics = { width: 880, height: 240 };
     const ghost = document.createElement("div");
     ghost.className = "rg-client-place-ghost";
     ghost.hidden = true;
@@ -275,18 +279,24 @@ import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-p
       button.dataset.itemIndex = String(index);
       tray.append(button);
       pieces.set(index, item);
+      loadComposeSprite(imageSource(item.image, item.asset)).then(sprite => {
+        sprites.set(index, sprite);
+        if (board.isConnected) { renderPlaced(); updateGhost(); }
+      });
     });
 
     function snapped(clientX, clientY) {
-      const rect = board.getBoundingClientRect();
-      const left = clamp(clientX - rect.left - board.clientLeft, 0, Math.max(0, board.clientWidth));
-      const top = clamp(clientY - rect.top - board.clientTop, 0, Math.max(0, board.clientHeight));
-      return snapComposePlacement(left / Math.max(1, board.clientWidth) * boardMetrics.width, top / Math.max(1, board.clientHeight) * boardMetrics.height, boardMetrics.width, boardMetrics.height, gridSize, pieceSize);
+      cursor = composePointerPercent(clientX, clientY, image.getBoundingClientRect());
+      return cursorPlacement();
     }
 
-    function sizePiece(node) {
-      node.style.width = Math.min(100, pieceSize / boardMetrics.width * 100) + "%";
-      node.style.height = Math.min(100, pieceSize / boardMetrics.height * 100) + "%";
+    function cursorPlacement() {
+      return snapComposePlacement(cursor.x / 100 * boardMetrics.width, cursor.y / 100 * boardMetrics.height, boardMetrics.width, boardMetrics.height, gridSize, pieceSize);
+    }
+
+    function paint(node, itemIndex, position) {
+      const item = pieces.get(itemIndex);
+      paintComposeMarker(node, sprites.get(itemIndex) || null, item?.label || "IMAGE", position.x, position.y, boardMetrics.width, boardMetrics.height, pieceSize);
     }
 
     function renderPlaced() {
@@ -298,13 +308,8 @@ import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-p
         button.type = "button";
         button.className = "rg-client-place-piece";
         button.dataset.placementIndex = String(placementIndex);
-        button.style.left = placement.x + "%";
-        button.style.top = placement.y + "%";
-        sizePiece(button);
         button.setAttribute("aria-label", "Remove placed " + (item.label || "image " + (placement.itemIndex + 1)));
-        const placedImage = makeImage(item);
-        if (placedImage) button.append(placedImage);
-        else button.textContent = item.label || "IMAGE";
+        paint(button, placement.itemIndex, placement);
         button.addEventListener("click", (event) => {
           event.stopPropagation();
           foley.play("remove");
@@ -318,20 +323,13 @@ import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-p
     }
 
     function updateGhost() {
-      ghost.replaceChildren();
-      ghost.hidden = selectedPiece < 0;
-      if (selectedPiece < 0) return;
-      const item = pieces.get(selectedPiece);
-      const thumb = makeImage(item);
-      if (thumb) ghost.append(thumb);
-      else ghost.textContent = item?.label || "IMAGE";
-      ghost.style.left = cursor.x + "%";
-      ghost.style.top = cursor.y + "%";
-      sizePiece(ghost);
+      ghost.hidden = selectedPiece < 0 || !image.naturalWidth;
+      if (ghost.hidden) return;
+      paint(ghost, selectedPiece, cursorPlacement());
     }
 
     const placeAt = (position) => {
-      if (selectedPiece < 0 || !pieces.has(selectedPiece)) return;
+      if (selectedPiece < 0 || !pieces.has(selectedPiece) || !image.naturalWidth) return;
       foley.play("place");
       answer.placements.push({ itemIndex: selectedPiece, x: position.x, y: position.y });
       renderPlaced();
@@ -340,8 +338,7 @@ import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-p
 
     board.addEventListener("pointermove", (event) => {
       if (selectedPiece < 0) return;
-      const pos = snapped(event.clientX, event.clientY);
-      cursor = { x: pos.x, y: pos.y };
+      snapped(event.clientX, event.clientY);
       updateGhost();
     });
     board.addEventListener("click", (event) => {
@@ -349,7 +346,7 @@ import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-p
       placeAt(snapped(event.clientX, event.clientY));
     });
     board.addEventListener("keydown", (event) => {
-      if (selectedPiece < 0) return;
+      if (event.target !== board || selectedPiece < 0) return;
       const step = gridSize || 8;
       let x = cursor.x / 100 * boardMetrics.width;
       let y = cursor.y / 100 * boardMetrics.height;
@@ -359,12 +356,11 @@ import { snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-p
       else if (event.key === "ArrowDown") y += step;
       else if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        placeAt({ x: cursor.x, y: cursor.y });
+        placeAt(cursorPlacement());
         return;
       } else return;
       event.preventDefault();
-      const pos = snapComposePlacement(x, y, boardMetrics.width, boardMetrics.height, gridSize, pieceSize);
-      cursor = { x: pos.x, y: pos.y };
+      cursor = { x: clamp(x / boardMetrics.width * 100, 0, 100), y: clamp(y / boardMetrics.height * 100, 0, 100) };
       updateGhost();
     });
 

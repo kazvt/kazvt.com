@@ -2,7 +2,7 @@ import { matchMediaSource, normalizeMatchItem } from "./trivia-match-media.mjs?v
 import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { gradeSimpleAnswer, isSimpleGradeMode } from "./trivia-simple-grade.mjs?v=room-recovery-20261127-v1";
 import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, newTriviaId, updateTrivia, activeRoomRound, publicMedia } from "./live-trivia.mjs?v=live-match-20261128-v1";
-import { renderLiveQuestion, renderTriviaResponses, createTriviaSpectator, SPECTATOR_MODES, matchItemView } from "./trivia-live-view.mjs?v=unique-match-20261128-v1";
+import { renderLiveQuestion, renderTriviaResponses, createTriviaSpectator, SPECTATOR_MODES, matchItemView } from "./trivia-live-view.mjs?v=compose-alpha-center-20261128-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
 import { readCardGames, subscribeCardGames } from "./card-games-store.mjs?v=answer-edit-20261128-v1";
 import { removeSlotSymbol } from "./slot-game.mjs?v=host-cell-cards-20261127-v1";
@@ -29,7 +29,7 @@ import {
   parseTriviaText,
 } from "./trivia-text.mjs?v=match-number-20261127-v1";
 import { compareNumberGuess, parseTriviaNumber, resolveNumberTarget, isNumericTargetMode, hasAuthoredTriviaContent, isFourDigitCode, matchesCorrectSelection, normalizeGuessLimit, scoreFourDigitGuess } from "./trivia-game.mjs?v=match-number-20261127-v1";
-import { migrateLegacyComposePlacements, normalizeComposePlacements, snapComposePlacement } from "./compose-placement.mjs?v=compose-repeat-place-20261124-v1";
+import { migrateLegacyComposePlacements, normalizeComposePlacements, snapComposePlacement, composePointerPercent, loadComposeSprite, paintComposeMarker } from "./compose-placement.mjs?v=compose-alpha-center-20261128-v1";
 import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, validateClientSubmission } from "./trivia-client.mjs?v=player-handoff-20261125-v1";
 
 (() => {
@@ -331,13 +331,11 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
         background.alt = "";
         background.draggable = false;
         const backgroundUrl = safeUrl(submission.snapshot.backgroundImage || submission.snapshot.promptImage);
+        const resultMarkers = [];
         const placeResultImages = () => {
-          if (!background.naturalWidth || !background.naturalHeight) return;
-          picture.style.aspectRatio = background.naturalWidth + " / " + background.naturalHeight;
-          picture.querySelectorAll("[data-result-placement]").forEach((marker) => {
-            marker.style.width = Math.min(100, (Number(submission.snapshot.pieceSize) || 32) / background.naturalWidth * 100) + "%";
-            marker.style.height = Math.min(100, (Number(submission.snapshot.pieceSize) || 32) / background.naturalHeight * 100) + "%";
-          });
+          const width = background.naturalWidth || 880, height = background.naturalHeight || 240;
+          if (background.naturalWidth) picture.style.aspectRatio = width + " / " + height;
+          for (const entry of resultMarkers) paintComposeMarker(entry.marker, entry.sprite, entry.label, entry.placement.x, entry.placement.y, width, height, Number(submission.snapshot.pieceSize) || 32);
         };
         background.addEventListener("load", placeResultImages);
         if (backgroundUrl) background.src = backgroundUrl;
@@ -348,17 +346,15 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
           if (!item) return;
           const marker = document.createElement("span");
           marker.dataset.resultPlacement = String(placementIndex);
-          marker.style.left = placement.x + "%";
-          marker.style.top = placement.y + "%";
-          marker.style.width = "3.7%";
-          marker.style.height = "13.4%";
-          marker.setAttribute("aria-label", item.label || "Placed image " + (placement.itemIndex + 1));
-          if (item.image || item.asset) addImageToNode(marker, item.image, item.asset, "rg-client-result-place-image");
-          else marker.textContent = item.label || "IMAGE";
+          const label = item.label || "Placed image " + (placement.itemIndex + 1);
+          marker.setAttribute("aria-label", label);
+          const entry = { marker, placement, label, sprite: null };
+          resultMarkers.push(entry);
+          composeSpriteFor(item).then(sprite => { entry.sprite = sprite; if (picture.isConnected) placeResultImages(); });
           picture.append(marker);
         });
         answer.append(picture);
-        if (background.complete && background.naturalWidth) placeResultImages();
+        placeResultImages();
         const list = document.createElement("ol");
         submission.answer.placements.forEach((placement) => {
           const row = document.createElement("li");
@@ -1372,6 +1368,11 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     syncClientActivityControls();
   }
 
+  function composeSpriteFor(item) {
+    const source = safeUrl(item?.image);
+    return source ? loadComposeSprite(source) : item?.asset ? readMedia(item.asset).then(loadComposeSprite).catch(() => null) : Promise.resolve(null);
+  }
+
   function addImageToNode(node, url, assetId, className) {
     const safe = safeUrl(url);
     const append = (resolved) => {
@@ -2075,6 +2076,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
           board.style.setProperty("--rg-compose-grid-width", (gridSize / width * 100) + "%");
           board.style.setProperty("--rg-compose-grid-height", (gridSize / height * 100) + "%");
         }
+        updatePlaced();
         updateGhost();
       };
       background.src = url;
@@ -2084,26 +2086,25 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     else if (content.promptAsset) readMedia(content.promptAsset).then((url) => { if (url && board.isConnected) setBackground(url); });
 
     const placements = normalizeComposePlacements(content.placements, content.items);
+    const sprites = new Map(), placedNodes = [];
     const ghost = document.createElement("div");
     ghost.className = "rg-compose-ghost";
     ghost.setAttribute("aria-hidden", "true");
     ghost.hidden = true;
+    const paint = (node, itemIndex, position) => {
+      const width = Number(board.dataset.imageWidth) || 880, height = Number(board.dataset.imageHeight) || 240;
+      paintComposeMarker(node, sprites.get(itemIndex) || null, content.items[itemIndex]?.label || "OBJECT", position.x, position.y, width, height, 32);
+    };
     const updateGhost = () => {
       const type = content.items[selectedComposePiece];
       board.classList.toggle("has-selected-type", Boolean(type));
-      ghost.replaceChildren();
-      ghost.hidden = !type;
-      if (!type) return;
-      if (type.image || type.asset) addImageToNode(ghost, type.image, type.asset, "rg-compose-pixel-art");
-      else ghost.textContent = type.label || "OBJECT";
-      const width = Number(board.dataset.imageWidth) || 880;
-      const height = Number(board.dataset.imageHeight) || 240;
+      ghost.hidden = !type || Boolean(background.src && !background.naturalWidth);
+      if (ghost.hidden) return;
+      const width = Number(board.dataset.imageWidth) || 880, height = Number(board.dataset.imageHeight) || 240;
       const snapped = snapComposePlacement(composeCursor.x / 100 * width, composeCursor.y / 100 * height, width, height, Number(board.dataset.gridSize), 32);
-      ghost.style.left = snapped.x + "%";
-      ghost.style.top = snapped.y + "%";
-      ghost.style.width = "var(--rg-compose-piece-width)";
-      ghost.style.height = "var(--rg-compose-piece-height)";
+      paint(ghost, selectedComposePiece, snapped);
     };
+    const updatePlaced = () => placedNodes.forEach(({node, placement}) => paint(node, placement.itemIndex, placement));
     content.items.forEach((item, index) => {
       const typeButton = document.createElement("button");
       typeButton.type = "button";
@@ -2123,6 +2124,10 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
         if (event.detail === 0 && selectedComposePiece >= 0) board.focus();
       });
       tray.append(typeButton);
+      composeSpriteFor(item).then(sprite => {
+        sprites.set(index, sprite);
+        if (board.isConnected) { updatePlaced(); updateGhost(); }
+      });
     });
 
     placements.forEach((placement, index) => {
@@ -2132,14 +2137,10 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
       placed.type = "button";
       placed.className = "rg-compose-piece";
       placed.dataset.composePlacement = String(index);
-      placed.style.left = placement.x + "%";
-      placed.style.top = placement.y + "%";
-      placed.style.width = "var(--rg-compose-piece-width)";
-      placed.style.height = "var(--rg-compose-piece-height)";
       const name = item.label || "OBJECT " + String(placement.itemIndex + 1).padStart(2, "0");
       placed.setAttribute("aria-label", "Remove placed " + name + " " + String(index + 1));
-      if (item.image || item.asset) addImageToNode(placed, item.image, item.asset, "rg-compose-pixel-art");
-      else placed.textContent = name;
+      placedNodes.push({ node: placed, placement });
+      paint(placed, placement.itemIndex, placement);
       placed.addEventListener("click", (event) => {
         event.stopPropagation();
         foley.play("remove");
@@ -2152,21 +2153,13 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
 
     board.append(ghost);
     const pointerPlacement = (clientX, clientY) => {
-      const rect = board.getBoundingClientRect();
-      const imageWidth = Math.max(1, board.clientWidth);
-      const imageHeight = Math.max(1, board.clientHeight);
-      const localX = Math.max(0, Math.min(imageWidth, clientX - rect.left - board.clientLeft));
-      const localY = Math.max(0, Math.min(imageHeight, clientY - rect.top - board.clientTop));
       const width = Number(board.dataset.imageWidth) || 880;
       const height = Number(board.dataset.imageHeight) || 240;
-      composeCursor = {
-        x: localX / imageWidth * 100,
-        y: localY / imageHeight * 100,
-      };
-      return snapComposePlacement(localX / imageWidth * width, localY / imageHeight * height, width, height, Number(board.dataset.gridSize), 32);
+      composeCursor = composePointerPercent(clientX, clientY, background.getBoundingClientRect());
+      return snapComposePlacement(composeCursor.x / 100 * width, composeCursor.y / 100 * height, width, height, Number(board.dataset.gridSize), 32);
     };
     const placeSelected = (placement) => {
-      if (selectedComposePiece < 0 || !content.items[selectedComposePiece]) return;
+      if (selectedComposePiece < 0 || !content.items[selectedComposePiece] || (background.src && !background.naturalWidth)) return;
       foley.play("place");
       writeLevelField("placements", [...placements, { itemIndex: selectedComposePiece, ...placement }]);
       renderStage();
@@ -2181,7 +2174,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
       placeSelected(pointerPlacement(event.clientX, event.clientY));
     });
     board.addEventListener("keydown", (event) => {
-      if (selectedComposePiece < 0) return;
+      if (event.target !== board || selectedComposePiece < 0) return;
       const width = Number(board.dataset.imageWidth) || 880;
       const height = Number(board.dataset.imageHeight) || 240;
       const step = Number(board.dataset.gridSize) || 8;
@@ -2206,6 +2199,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     note.textContent = "Select - place - click to remove";
     layout.append(tray, board);
     stageItems.append(note, layout);
+    updateGhost();
   }
 
   function renderStage() {
