@@ -1,11 +1,11 @@
 import { publishPointAward, publishStarAward } from "/ramblegamble/point-award-events.mjs?v=star-stinger-20261128-v1";
 import { AUDIENCE_KEY, AUDIENCE_MODES, readAudienceMode, writeAudienceMode } from "/ramblegamble/audience-state.mjs?v=show-energy-20261127-v1";
 import { mountCommandCompletion } from "/ramblegamble/console-completion.mjs?v=player-stats-20261127-v1";
-import { applyCardShowAction } from "/ramblegamble/card-show-actions.mjs?v=card-polish-20261127-v1";
-import { renderTriviaResponses } from "/ramblegamble/trivia-live-view.mjs?v=sky-soot-20261127-v1";
-import { activeRoomRound, readLiveTrivia, writeLiveTrivia, writeLiveTriviaDraft, subscribeLiveTrivia, newTriviaId, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, updateTrivia, answerSummary } from "/ramblegamble/live-trivia.mjs?v=match-number-20261127-v1";
+import { applyCardShowAction } from "/ramblegamble/card-show-actions.mjs?v=answer-edit-20261128-v1";
+import { renderTriviaResponses } from "/ramblegamble/trivia-live-view.mjs?v=answer-edit-20261128-v1";
+import { activeRoomRound, readLiveTrivia, writeLiveTrivia, writeLiveTriviaDraft, subscribeLiveTrivia, newTriviaId, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, updateTrivia, answerSummary } from "/ramblegamble/live-trivia.mjs?v=answer-edit-20261128-v1";
 import { withRoomSubmissionLock } from "/ramblegamble/card-room-election.mjs";
-import { mountCardRoom } from "/ramblegamble/card-room-host.mjs?v=match-number-20261127-v1";
+import { mountCardRoom } from "/ramblegamble/card-room-host.mjs?v=answer-edit-20261128-v1";
 import {
   RG_CONTESTANTS,
   readPointScores,
@@ -16,8 +16,8 @@ import {
   withStarScoresLock,
 } from "/ramblegamble/points-store.mjs?v=player-stats-20261127-v1";
 import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=player-stats-20261127-v1";
-import { createSmeemoGame } from "/ramblegamble/card-games.mjs?v=show-stage-20261126-v1";
-import { readCardGames, writeCardGames, subscribeCardGames } from "/ramblegamble/card-games-store.mjs?v=show-stage-20261126-v1";
+import { createSmeemoGame } from "/ramblegamble/card-games.mjs?v=answer-edit-20261128-v1";
+import { readCardGames, writeCardGames, subscribeCardGames } from "/ramblegamble/card-games-store.mjs?v=answer-edit-20261128-v1";
 
 const output = document.getElementById("terminal-output");
 const form = document.getElementById("terminal-form");

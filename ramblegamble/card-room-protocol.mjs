@@ -1,6 +1,6 @@
-import { validRequestId } from "./card-room-delivery.mjs?v=submission-audit-20261126-v1";
-import { publicTriviaRound, acceptTriviaAnswer } from "./live-trivia.mjs?v=match-number-20261127-v1";
-import { CARD_GAME_PLAYERS, submitRoundAnswer } from "./card-games.mjs?v=show-stage-20261126-v1";
+import { validRequestId } from "./card-room-delivery.mjs?v=answer-edit-20261128-v1";
+import { publicTriviaRound, acceptTriviaAnswer } from "./live-trivia.mjs?v=answer-edit-20261128-v1";
+import { CARD_GAME_PLAYERS, submitRoundAnswer, answerRevision } from "./card-games.mjs?v=answer-edit-20261128-v1";
 import { validPublicKey } from "./card-room-auth.mjs?v=host-security-20261126-v1";
 export const ROOM_VERSION = 2;
 export const isPlayer = p => CARD_GAME_PLAYERS.includes(p);
@@ -18,6 +18,7 @@ export function playerRound(round, player) {
   return { id: round.id, mode: round.mode, phase: round.phase, prompt: round.prompt,
     submitted: Boolean(round.submissions[player]),
     savedAnswer: round.submissions[player] || null,
+    answerRevision: answerRevision(round, player),
     ...(round.phase === "submissions" && round.mode === "red-handed" ? { hand: [...round.hands[player]] } : {}) };
 }
 export function encodePacket(value) {
@@ -39,8 +40,11 @@ export function acceptSubmission(room, round, message) {
   if (round.mode === "trivia") return acceptTriviaAnswer(round, message.player, message.answer);
   if (!["red-handed", "quiplash"].includes(round.mode)) return { round, status: "closed" };
   if (typeof message.answer !== "string" || !message.answer.trim() || message.answer.length > 800) return { round, status: "invalid-answer" };
-  if (round.submissions[message.player]) return { round, status: round.submissions[message.player] === message.answer.trim() ? "accepted" : "already-submitted" };
+  if (message.baseRevision !== undefined && (!Number.isSafeInteger(message.baseRevision) || message.baseRevision < 0)) return { round, status: "invalid-answer" };
+  if (round.submissions[message.player] === message.answer.trim()) return { round, status: "accepted" };
   if (round.phase !== "submissions") return { round, status: "closed" };
-  const next = submitRoundAnswer(round, message.player, message.answer);
+  if (message.baseRevision === undefined && round.submissions[message.player]) return { round, status: "already-submitted" };
+  if (message.baseRevision !== undefined && message.baseRevision !== answerRevision(round, message.player)) return { round, status: "answer-changed" };
+  const next = submitRoundAnswer(round, message.player, message.answer, undefined, message.baseRevision);
   return { round: next, status: next === round ? "invalid-answer" : "accepted" };
 }

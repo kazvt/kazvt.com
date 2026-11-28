@@ -1,10 +1,10 @@
-import { acceptTriviaDraft, MAX_TRIVIA_ANSWER } from "./live-trivia.mjs?v=match-number-20261127-v1";
-import { validRequestId } from "./card-room-delivery.mjs?v=submission-audit-20261126-v1";
+import { acceptTriviaDraft, MAX_TRIVIA_ANSWER } from "./live-trivia.mjs?v=answer-edit-20261128-v1";
+import { validRequestId } from "./card-room-delivery.mjs?v=answer-edit-20261128-v1";
 import { loadHostIdentity, nonce, validNonce, transcript, channelBinding, signHost, verifySeat } from "./card-room-auth.mjs?v=room-recovery-20261127-v1";
-import { ROOM_VERSION, createRoom, validRoom, playerRound, encodePacket, decodePacket, acceptSubmission, isPlayer, randomToken } from "./card-room-protocol.mjs?v=match-number-20261127-v1";
+import { ROOM_VERSION, createRoom, validRoom, playerRound, encodePacket, decodePacket, acceptSubmission, isPlayer, randomToken } from "./card-room-protocol.mjs?v=answer-edit-20261128-v1";
 import { loadPeer } from "./card-room-peer.mjs?v=room-recovery-20261127-v1";
 import { openLocalHost } from "./card-room-local.mjs?v=room-recovery-20261127-v1";
-import { CARD_GAME_PLAYERS } from "./card-games.mjs?v=show-stage-20261126-v1";
+import { CARD_GAME_PLAYERS } from "./card-games.mjs?v=answer-edit-20261128-v1";
 import { electReader, withRoomSubmissionLock, ROOM_KEY, ENABLED_KEY, STATUS_KEY } from "./card-room-election.mjs";
 
 export function mountCardRoom(root, { getRound, commitRound, commitDraft=commitRound, onStatus, role = '/rg/', env = globalThis, peerLoader = loadPeer, identityLoader = loadHostIdentity }) {
@@ -153,7 +153,7 @@ export function mountCardRoom(root, { getRound, commitRound, commitDraft=commitR
           return;
         }
         if (phase !== 'joined' || message.type !== 'submit' || typeof message.roundId!=='string' || message.roundId.length>160 || (message.requestId!==undefined&&!validRequestId(message.requestId))) { conn.close(); return; }
-        const submission={v:ROOM_VERSION,type:'submit',room:room.id,player:identity,token:seatToken,roundId:message.roundId,answer:message.answer,requestId:message.requestId};
+        const submission={v:ROOM_VERSION,type:'submit',room:room.id,player:identity,token:seatToken,roundId:message.roundId,answer:message.answer,requestId:message.requestId,baseRevision:message.baseRevision};
         let result;
         try { result=await accept(submission,current); } catch { result='storage-error'; }
         if(current()) { try { conn.send({v:ROOM_VERSION,type:'ack',roundId:submission.roundId,...(submission.requestId===undefined?{}:{requestId:submission.requestId}),status:result}); } catch {} sendState(conn,identity,true); }

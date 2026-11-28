@@ -61,6 +61,13 @@ function normalizeShopCards(value) {
   });
 }
 
+// Old saved rounds have no revisions; a previously submitted answer starts at 1.
+export function answerRevision(round, player) {
+  const revision = round?.submissionRevisions?.[player];
+  return Number.isSafeInteger(revision) && revision >= 0 && revision < Number.MAX_SAFE_INTEGER
+    ? Math.max(revision, round?.submissions?.[player] ? 1 : 0) : (round?.submissions?.[player] ? 1 : 0);
+}
+
 function normalizeRound(value) {
   if (!value || typeof value !== "object" || !["red-handed", "quiplash", "shop"].includes(value.mode)) return null;
   const phase = ROUND_PHASES.has(value.phase) ? value.phase : "submissions";
@@ -78,6 +85,7 @@ function normalizeRound(value) {
     votes: {},
     winnerIds: Array.isArray(value.winnerIds) ? value.winnerIds.map(cleanText).filter(Boolean).slice(0, 3) : [],
   };
+  if (value.mode !== "shop") round.submissionRevisions = Object.fromEntries(CARD_GAME_PLAYERS.map(player => [player, answerRevision(value, player)]));
   if (value.mode === "red-handed") {
     round.hands = Object.fromEntries(CARD_GAME_PLAYERS.map((player) => [player, normalizeTextList(value.hands?.[player]).slice(0, 5)]));
   }
@@ -256,13 +264,18 @@ function beginReveal(round, random) {
   return round;
 }
 
-export function submitRoundAnswer(roundValue, player, answer, random = secureRandomUnit) {
+export function submitRoundAnswer(roundValue, player, answer, random = secureRandomUnit, baseRevision) {
   const round = normalizeRound(roundValue);
   if (!round || round.phase !== "submissions" || !CARD_GAME_PLAYERS.includes(player)) return roundValue;
   const text = cleanText(answer);
-  if (!text || round.submissions[player]) return roundValue;
+  if (!text || round.submissions[player] === text) return roundValue;
+  const revision = answerRevision(round, player);
+  // Legacy/manual submissions remain one-shot; revision-aware clients can replace
+  // only the version they actually saw, even after a reconnect or packet import.
+  if (baseRevision === undefined ? !!round.submissions[player] : baseRevision !== revision) return roundValue;
   if (round.mode === "red-handed" && !round.hands[player].includes(text)) return roundValue;
   round.submissions[player] = text;
+  round.submissionRevisions[player] = revision + 1;
   if (CARD_GAME_PLAYERS.every((name) => round.submissions[name])) beginReveal(round, random);
   return round;
 }

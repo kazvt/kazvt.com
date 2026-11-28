@@ -1,6 +1,6 @@
 // A host-only saved snapshot; player projections are explicitly allowlisted.
 import { withRoomSubmissionLock } from './card-room-election.mjs';
-import { readCardGames } from './card-games-store.mjs?v=show-stage-20261126-v1';
+import { readCardGames } from './card-games-store.mjs?v=answer-edit-20261128-v1';
 import { MODE_NAMES } from './trivia-data.js?v=compose-repeat-grid-20261124-v1';
 import { normalizeMatchItem } from "./trivia-match-media.mjs?v=match-number-20261127-v1";
 import { scoreFourDigitGuess, compareNumberGuess, normalizeGuessLimit, resolveNumberTarget, parseTriviaNumber } from './trivia-game.mjs?v=match-number-20261127-v1';

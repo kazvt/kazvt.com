@@ -5,7 +5,7 @@ import { showBurst } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 const foley = globalThis.location?.pathname?.replace(/\/$/, '') === '/rg/console'
  ? {play(){}} : (await import('./game-foley.mjs?v=sky-soot-20261127-v1')).foley;
 import { snapComposePlacement } from './compose-placement.mjs';
-import { CHOICE_MODES, publicMedia, validTriviaAnswer, MAX_TRIVIA_ANSWER, answerSummary, NUMERIC_MODES, numericProgress } from './live-trivia.mjs?v=match-number-20261127-v1';
+import { CHOICE_MODES, publicMedia, validTriviaAnswer, MAX_TRIVIA_ANSWER, answerSummary, NUMERIC_MODES, numericProgress } from './live-trivia.mjs?v=answer-edit-20261128-v1';
 const node=(tag,cls='',text='')=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text)e.textContent=text;return e;};
 const button=(text,fn)=>{const b=node('button','rg-live-button',text);b.type='button';b.addEventListener('click',fn);return b;};
 function image(src,alt='') {const url=publicMedia(src);if(!url)return null;const e=node('img','rg-live-image');e.alt=alt;e.referrerPolicy='no-referrer';e.draggable=false;e.src=url;return e;}

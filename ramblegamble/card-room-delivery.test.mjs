@@ -18,3 +18,11 @@ test('authoritative receipt distinguishes exact numeric attempt, another seat-ta
  assert.equal(pendingReceipt(pending,{...round,phase:'closed'}),'closed');
  assert.equal(pendingReceipt(pending,{...round,id:'old',submitted:true}),null);
 });
+
+test('old saved snapshot cannot resolve an edit; exact replacement, conflict and closure are distinct',()=>{
+ const edit={roundId:'round',requestId:'edit',answer:'new',baseRevision:1};const view={id:'round',mode:'quiplash',phase:'submissions',submitted:true,savedAnswer:'old',answerRevision:1};
+ assert.equal(pendingReceipt(edit,view),null);
+ assert.equal(pendingReceipt(edit,{...view,savedAnswer:'new',answerRevision:2}),'accepted');
+ assert.equal(pendingReceipt(edit,{...view,savedAnswer:'other',answerRevision:2}),'already-submitted');
+ assert.equal(pendingReceipt(edit,{...view,phase:'reveal'}),'closed');
+});

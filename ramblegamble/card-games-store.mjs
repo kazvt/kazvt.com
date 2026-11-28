@@ -1,7 +1,7 @@
 import {
   CARD_GAME_STORAGE_KEY,
   normalizeCardGamesState,
-} from "./card-games.mjs?v=show-stage-20261126-v1";
+} from "./card-games.mjs?v=answer-edit-20261128-v1";
 
 const CHANNEL_NAME = "ramblegamble.card-games.v1";
 let channel = null;

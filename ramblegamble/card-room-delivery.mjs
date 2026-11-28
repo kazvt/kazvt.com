@@ -9,6 +9,12 @@ export function pendingReceipt(pending, round) {
   if (round.mode === 'trivia') {
     try { const answer = JSON.parse(pending.answer); if (answer.id && round.attempts?.some(a => a.id === answer.id && a.guess === answer.guess)) return 'accepted'; } catch {}
   }
+  if (round.mode !== 'trivia' && pending.baseRevision !== undefined && Number.isSafeInteger(round.answerRevision)) {
+    if (round.submitted && round.savedAnswer === pending.answer) return 'accepted';
+    if (round.phase !== 'submissions') return 'closed';
+    // A snapshot of the previous answer is not an acknowledgement of an edit.
+    return round.answerRevision !== pending.baseRevision ? 'already-submitted' : null;
+  }
   if (round.submitted) return round.savedAnswer === undefined || round.savedAnswer === pending.answer ? 'accepted' : 'already-submitted';
   if (round.phase !== 'submissions') return 'closed';
   return null;

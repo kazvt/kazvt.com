@@ -1,10 +1,10 @@
 import { matchMediaSource, normalizeMatchItem } from "./trivia-match-media.mjs?v=match-number-20261127-v1";
 import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { gradeSimpleAnswer, isSimpleGradeMode } from "./trivia-simple-grade.mjs?v=room-recovery-20261127-v1";
-import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, newTriviaId, updateTrivia, activeRoomRound, publicMedia } from "./live-trivia.mjs?v=match-number-20261127-v1";
-import { renderLiveQuestion, renderTriviaResponses, createTriviaSpectator, SPECTATOR_MODES, matchItemView } from "./trivia-live-view.mjs?v=sky-soot-20261127-v1";
+import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, newTriviaId, updateTrivia, activeRoomRound, publicMedia } from "./live-trivia.mjs?v=answer-edit-20261128-v1";
+import { renderLiveQuestion, renderTriviaResponses, createTriviaSpectator, SPECTATOR_MODES, matchItemView } from "./trivia-live-view.mjs?v=answer-edit-20261128-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
-import { readCardGames, subscribeCardGames } from "./card-games-store.mjs?v=show-stage-20261126-v1";
+import { readCardGames, subscribeCardGames } from "./card-games-store.mjs?v=answer-edit-20261128-v1";
 import { removeSlotSymbol } from "./slot-game.mjs?v=host-cell-cards-20261127-v1";
 import { foley } from "./game-foley.mjs?v=sky-soot-20261127-v1";
 import {

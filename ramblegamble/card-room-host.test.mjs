@@ -188,3 +188,14 @@ test('authenticated higher/lower uses repaired imported target and broadcasts al
   assert.ok(h.round.submissions.faroe);
  }finally{h.dispose();await flush();}
 });
+
+test('authenticated answer edits survive the host transport and reject stale packet imports',async()=>{
+ const h=harness();try{
+  h.round=createQuiplashRound(['Question']);const tab=h.tab('/rg/console/');await tab.room.ready;const invites=tab.invites();tab.click('start');await flush();h.peers[0].emit('open');await flush();const kaz=await join(h.peers[0],invites.kaz);
+  const send=async(answer,baseRevision,requestId,status)=>{kaz.emit('data',{v:ROOM_VERSION,type:'submit',roundId:h.round.id,answer,baseRevision,requestId});await until(()=>kaz.sent.some(m=>m.type==='ack'&&m.requestId===requestId));assert.equal(kaz.sent.find(m=>m.type==='ack'&&m.requestId===requestId).status,status);};
+  await send('first',0,'first','accepted');await send('second',1,'second','accepted');assert.equal(h.round.submissions.kaz,'second');
+  await send('first',0,'retry','answer-changed');assert.equal(h.round.submissions.kaz,'second');
+  tab.selectors['[data-room-packet]'].value=encodePacket({...invites.kaz,type:'submit',roundId:h.round.id,answer:'stale',baseRevision:1});await tab.click('import');assert.equal(h.round.submissions.kaz,'second');
+  h.failSave=true;await send('third',2,'failed','storage-error');assert.equal(h.round.submissions.kaz,'second');h.failSave=false;await send('third',2,'failed-retry','accepted');assert.equal(h.round.submissions.kaz,'third');
+ }finally{h.dispose();}
+});

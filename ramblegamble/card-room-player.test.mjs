@@ -48,3 +48,35 @@ test('actual player sends partial sorting drafts, coalesces changes and final su
  fields[1].value='1';root.onchange();h.conn.emit('data',{v:ROOM_VERSION,type:'draft-ack',roundId:round.id,requestId:draft.requestId,status:'accepted'});await until(()=>h.conn.sent.at(-1)?.requestId!==draft.requestId);const next=h.conn.sent.at(-1);assert.equal(next.type,'draft');assert.deepEqual(JSON.parse(next.answer),{groups:[2,1]});
  root.children.at(-2).events.click();const final=h.conn.sent.at(-1);assert.equal(final.type,'submit');assert.equal(final.answer,next.answer);h.conn.emit('data',{v:ROOM_VERSION,type:'draft-ack',roundId:round.id,requestId:next.requestId,status:'accepted'});h.conn.emit('data',{v:ROOM_VERSION,type:'round',round:{...round,submitted:true,savedAnswer:final.answer}});assert.equal(h.get('submission').textContent,'Answer saved.');await new Promise(r=>setTimeout(r,250));assert.equal(h.conn.sent.at(-1),final);
 });
+
+test('BerryBlast saved answer stays editable, duplicate snapshots preserve draft, and reveal locks it',async t=>{
+ const h=await harness(t,'edit-answer');h.conn.emit('data',{v:ROOM_VERSION,type:'challenge',...h.fields,signature:await signHost(h.host,h.text)});await until(()=>h.conn.sent.length===2);
+ let round={id:'editable',mode:'quiplash',phase:'submissions',prompt:'Question',submitted:true,savedAnswer:'first',answerRevision:1};const snapshot=()=>h.conn.emit('data',{v:ROOM_VERSION,type:'round',round});snapshot();
+ assert.equal(h.get('form').hidden,false);assert.equal(h.get('answer').value,'first');assert.equal(h.get('submit').textContent,'UPDATE ANSWER');
+ h.get('answer').value='second';h.get('answer').events.input();snapshot();assert.equal(h.get('answer').value,'second');
+ h.get('form').events.submit({preventDefault(){}});const edit=h.conn.sent.at(-1);assert.equal(edit.baseRevision,1);assert.equal(edit.answer,'second');assert.equal(h.get('form').hidden,true);
+ snapshot();assert.equal(h.get('form').hidden,true);assert.match(h.get('submission').textContent,/Sending/);
+ h.conn.emit('data',{v:ROOM_VERSION,type:'ack',roundId:round.id,requestId:edit.requestId,status:'accepted'});assert.match(h.get('submission').textContent,/confirming/);
+ round={...round,answerRevision:2,savedAnswer:'second'};snapshot();assert.equal(h.get('form').hidden,false);assert.equal(h.get('answer').value,'second');assert.match(h.get('submission').textContent,/Answer saved/);
+ h.get('answer').value='third';h.get('form').events.submit({preventDefault(){}});const last=h.conn.sent.at(-1);assert.equal(last.baseRevision,2);
+ round={...round,phase:'reveal'};snapshot();assert.equal(h.get('form').hidden,true);assert.match(h.get('submission').textContent,/Round closed before your update/);h.get('form').events.submit({preventDefault(){}});assert.equal(h.conn.sent.at(-1),last);
+});
+
+test('Red Handed reopens the original hand with saved card selected, then locks at reveal',async t=>{
+ const h=await harness(t,'edit-hand');h.conn.emit('data',{v:ROOM_VERSION,type:'challenge',...h.fields,signature:await signHost(h.host,h.text)});await until(()=>h.conn.sent.length===2);
+ const round={id:'hand',mode:'red-handed',phase:'submissions',prompt:'Question',submitted:true,savedAnswer:'B',answerRevision:1,hand:['A','B','C','D','E']};h.conn.emit('data',{v:ROOM_VERSION,type:'round',round});
+ assert.equal(h.get('form').hidden,false);assert.equal(h.get('choices').children.length,5);assert.equal(h.get('choices').children[1].children[0].checked,true);
+ const radio=h.get('choices').children[2].children[0];radio.checked=true;radio.events.change();document.querySelector=()=>radio;
+ h.get('form').events.submit({preventDefault(){}});assert.equal(h.conn.sent.at(-1).answer,'C');assert.equal(h.conn.sent.at(-1).baseRevision,1);
+ h.conn.emit('data',{v:ROOM_VERSION,type:'round',round:{...round,savedAnswer:'C',answerRevision:2}});assert.equal(h.get('choices').children[2].children[0].checked,true);assert.equal(h.get('form').hidden,false);
+ h.conn.emit('data',{v:ROOM_VERSION,type:'round',round:{...round,savedAnswer:'C',answerRevision:2,phase:'reveal',hand:undefined}});assert.equal(h.get('form').hidden,true);
+});
+
+test('unconfirmed edit reconnects and resends same revision rather than accepting the old saved answer',async t=>{
+ const h=await harness(t,'edit-reconnect');h.conn.emit('data',{v:ROOM_VERSION,type:'challenge',...h.fields,signature:await signHost(h.host,h.text)});await until(()=>h.conn.sent.length===2);
+ const round={id:'reconnect-edit',mode:'quiplash',phase:'submissions',prompt:'Prompt',submitted:true,savedAnswer:'old',answerRevision:1};h.conn.emit('data',{v:ROOM_VERSION,type:'round',round});
+ t.mock.timers.enable({apis:['setTimeout']});h.get('answer').value='new';h.get('form').events.submit({preventDefault(){}});const edit=h.conn.sent.at(-1);t.mock.timers.tick(8000);assert.equal(h.peer.destroyed,true);assert.equal(h.get('fallback').hidden,false);
+ t.mock.timers.tick(1000);for(let i=0;i<5;i++)await new Promise(r=>setImmediate(r));assert.equal(h.peers.length,2);t.mock.timers.reset();
+ const peer=h.peers[1],c=peer.conn;peer.emit('open');c.emit('open');const hello=c.sent[0];const fields={room:h.invite.room,player:h.invite.player,clientNonce:hello.clientNonce,hostNonce:nonce()};const text=transcript(fields,channelBinding(c,false));c.emit('data',{v:ROOM_VERSION,type:'challenge',...fields,signature:await signHost(h.host,text)});await until(()=>c.sent.length===2);c.emit('data',{v:ROOM_VERSION,type:'round',round});assert.deepEqual(c.sent.at(-1),edit);
+ c.emit('data',{v:ROOM_VERSION,type:'round',round:{...round,savedAnswer:'new',answerRevision:2}});assert.equal(h.get('answer').value,'new');assert.equal(h.get('form').hidden,false);assert.ok(![...h.values.values()].some(v=>v.includes(edit.requestId)));
+});

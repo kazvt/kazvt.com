@@ -1,10 +1,10 @@
 import { createDraftDelivery } from "./trivia-draft-delivery.mjs?v=match-number-20261127-v1";
-import { LIVE_DRAFT_MODES, validTriviaDraft, MAX_TRIVIA_ANSWER } from "./live-trivia.mjs?v=match-number-20261127-v1";
-import { ACK_TIMEOUT_MS, matchesAck, pendingReceipt, validRequestId } from "./card-room-delivery.mjs?v=submission-audit-20261126-v1";
+import { LIVE_DRAFT_MODES, validTriviaDraft, MAX_TRIVIA_ANSWER } from "./live-trivia.mjs?v=answer-edit-20261128-v1";
+import { ACK_TIMEOUT_MS, matchesAck, pendingReceipt, validRequestId } from "./card-room-delivery.mjs?v=answer-edit-20261128-v1";
 import { foley } from "./game-foley.mjs?v=sky-soot-20261127-v1";
-import { renderLiveQuestion } from "./trivia-live-view.mjs?v=sky-soot-20261127-v1";
+import { renderLiveQuestion } from "./trivia-live-view.mjs?v=answer-edit-20261128-v1";
 import { nonce, validNonce, validPublicKey, channelBinding, transcript, verifyHost, proveSeat } from "./card-room-auth.mjs?v=room-recovery-20261127-v1";
-import { ROOM_VERSION, isPlayer, decodePacket, encodePacket } from "./card-room-protocol.mjs?v=match-number-20261127-v1";
+import { ROOM_VERSION, isPlayer, decodePacket, encodePacket } from "./card-room-protocol.mjs?v=answer-edit-20261128-v1";
 import { loadPeer } from "./card-room-peer.mjs?v=room-recovery-20261127-v1";
 import { connectLocal } from "./card-room-local.mjs?v=room-recovery-20261127-v1";
 const $ = id => document.getElementById(id);
@@ -20,9 +20,11 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
   const draftDelivery=createDraftDelivery({ready:()=>online&&!!conn?.open&&!pending&&round?.phase==='submissions'&&!round.submitted,
     send:packet=>{if((conn.dataChannel?.bufferedAmount||0)>65536)return false;conn.send({v:ROOM_VERSION,type:'draft',...packet});return true;}});
   function offerDraft(value){if(round?.mode!=='trivia'||round.liveDrafts!==true||!LIVE_DRAFT_MODES.includes(round.question?.kind)||!validTriviaDraft(round.question,value))return;const raw=JSON.stringify(value);if(raw.length<=MAX_TRIVIA_ANSWER)draftDelivery.offer(round.id,raw);}
+  const editable = r => r && ['quiplash','red-handed'].includes(r.mode) && Number.isSafeInteger(r.answerRevision) && r.answerRevision >= 0;
+  const acceptsAnswer = r => r?.phase === 'submissions' && (!r.submitted || editable(r));
   const draftKey = `rg-player-draft:${invite.room}:${invite.player}`;
-  function saveDraft(value) { if(!round || pending || round.submitted || round.phase!=='submissions')return; try { sessionStorage.setItem(draftKey,JSON.stringify({roundId:round.id,token:invite.token,value})); }catch{} offerDraft(value); }
-  function loadDraft(id) { try {const d=JSON.parse(sessionStorage.getItem(draftKey));return d?.roundId===id&&d.token===invite.token?d.value:null;}catch{return null;} }
+  function saveDraft(value) { if(!round || pending || !acceptsAnswer(round))return; try { sessionStorage.setItem(draftKey,JSON.stringify({roundId:round.id,token:invite.token,value,answerRevision:round.answerRevision})); }catch{} offerDraft(value); }
+  function loadDraft(id, revision = round?.answerRevision) { try {const d=JSON.parse(sessionStorage.getItem(draftKey));return d?.roundId===id&&d.token===invite.token&&d.answerRevision===revision?d.value:null;}catch{return null;} }
   function clearDraft(){try{sessionStorage.removeItem(draftKey);}catch{}}
   function clearPending() { clearTimeout(ackTimer); ackTimer=null; pending=null; remember(null); }
   const isNumeric=()=>round?.mode==='trivia'&&['number-grid','number-stepper','memory-number'].includes(round.question?.kind);
@@ -34,44 +36,47 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
   $('connect').hidden = false;
   function status(text) { $('connection').textContent = text; }
   function sendPending() {
-    if (!online || !conn?.open || !pending || ackTimer || round?.id !== pending.roundId || round.submitted || round.phase !== 'submissions') return;
+    if (!online || !conn?.open || !pending || ackTimer || round?.id !== pending.roundId || !acceptsAnswer(round)) return;
     const id=pending.requestId;
     // Start the timer before sending, including for synchronous test transports.
     ackTimer=setTimeout(()=>{ackTimer=null;if(pending?.requestId===id)disconnect('No confirmation yet.');},ACK_TIMEOUT_MS); ackTimer?.unref?.();
-    try { conn.send({v:ROOM_VERSION,type:'submit',roundId:pending.roundId,requestId:id,answer:pending.answer}); } catch { disconnect('Send failed.'); }
+    try { conn.send({v:ROOM_VERSION,type:'submit',roundId:pending.roundId,requestId:id,answer:pending.answer,...(pending.baseRevision===undefined?{}:{baseRevision:pending.baseRevision})}); } catch { disconnect('Send failed.'); }
   }
   function render(next) {
     if (next && (!['red-handed','quiplash','trivia'].includes(next.mode) || typeof next.id !== 'string' || typeof next.prompt !== 'string')) return;
     const changed = next?.id !== round?.id;
+    const answerChanged = changed || next?.answerRevision !== round?.answerRevision || next?.savedAnswer !== round?.savedAnswer;
     if (changed && next) foley.play("question");
-    if (changed) { clearTimeout(ackTimer); ackTimer=null; pending = next ? recover(next.id) : null; if (next && !pending) remember(null); $('answer').value = next?.mode==='quiplash'?(loadDraft(next.id)?.text||''):''; $('submission').textContent = ''; $('fallback').hidden = true; $('choices').replaceChildren(); }
+    if (changed) { clearTimeout(ackTimer); ackTimer=null; pending = next ? recover(next.id) : null; if (!pending) remember(null); $('answer').value = next?.mode==='quiplash'?(loadDraft(next.id,next.answerRevision)?.text??next.savedAnswer??''):''; $('submission').textContent = ''; $('fallback').hidden = true; $('choices').replaceChildren(); }
     round = next;
     draftDelivery.setRound(next?.id||null);
     if(next?.submitted||next?.phase!=='submissions')draftDelivery.pause();
-    const receipt=resolvePending(next); if(next?.submitted||receipt==='accepted'||(next && next.phase!=='submissions'))clearDraft();
+    const receipt=resolvePending(next); if((next?.submitted&&!editable(next))||receipt==='accepted'||receipt==='already-submitted'||(next && next.phase!=='submissions'))clearDraft();
     $('round').hidden = !round;
     if (!round) { $('trivia-player-content').hidden=true; triviaRenderKey=''; return; }
     if (round.mode === 'trivia') { renderTrivia(round, changed); return; }
     $('trivia-player-content').hidden=true; triviaRenderKey=''; $('mode').hidden=false; $('prompt').hidden=false;
     $('mode').textContent = round.mode === 'quiplash' ? 'BERRYBLAST' : 'RED HANDED'; $('prompt').textContent = round.prompt;
-    const open = round.phase === 'submissions' && !round.submitted;
+    const open = acceptsAnswer(round);
+    if (answerChanged && round.mode==='quiplash' && editable(round) && !pending) $('answer').value=loadDraft(round.id)?.text??round.savedAnswer??'';
+    $('submit').textContent=round.submitted&&open?'UPDATE ANSWER':'SUBMIT';
     $('form').hidden = !open || !!pending;
     $('text-label').hidden = $('answer').hidden = round.mode !== 'quiplash'; $('answer').disabled = round.mode !== 'quiplash';
     $('hand').hidden = round.mode !== 'red-handed'; $('hand').disabled = round.mode !== 'red-handed';
-    if (round.mode === 'red-handed' && open && (changed || !$('choices').children.length)) {
+    if (round.mode === 'red-handed' && open && (answerChanged || !$('choices').children.length)) {
       $('choices').replaceChildren();
-      for (const [i, answer] of (round.hand || []).entries()) { const label = document.createElement('label'); label.className = 'evidence'; const radio = document.createElement('input'); radio.type = 'radio'; radio.name = 'evidence'; radio.value = String(i); radio.required = true; radio.checked=loadDraft(round.id)?.choice===i; radio.addEventListener('change',()=>saveDraft({choice:i})); const copy = document.createElement('span'); copy.textContent = answer; label.append(radio,copy); $('choices').append(label); }
+      for (const [i, answer] of (round.hand || []).entries()) { const label = document.createElement('label'); label.className = 'evidence'; const radio = document.createElement('input'); radio.type = 'radio'; radio.name = 'evidence'; radio.value = String(i); radio.required = true; radio.checked=(loadDraft(round.id)?.choice??round.hand?.indexOf(round.savedAnswer))===i; radio.addEventListener('change',()=>saveDraft({choice:i})); const copy = document.createElement('span'); copy.textContent = answer; label.append(radio,copy); $('choices').append(label); }
     }
-    if (round.submitted) { clearPending(); $('fallback').hidden = true; $('submission').textContent = receipt==='already-submitted'?'Host already saved an answer.':'Answer saved.'; if(round.savedAnswer) $('submission').textContent += ' '+round.savedAnswer; }
+    if (open && pending) { showPending(); sendPending(); }
+    else if (round.submitted) { clearPending(); $('fallback').hidden = true; $('submission').textContent = receipt==='already-submitted'?'Host has a different saved answer.':receipt==='closed'?'Round closed before your update was saved.':'Answer saved.'; if(round.savedAnswer) $('submission').textContent += ' '+round.savedAnswer; if(editable(round)) $('submission').textContent += open?'\nYou can update your answer until submissions close.':'\nAnswers locked.'; }
     else if (!open) { clearPending(); $('fallback').hidden = true; $('submission').textContent = 'This round has closed.'; }
-    else if (pending) { showPending(); sendPending(); }
     else { $('fallback').hidden=true; $('submission').textContent=''; }
   }
   function queueAnswer(answer) {
-    if ((!invite.round && terminal) || !round || round.phase !== 'submissions' || round.submitted || pending) return;
+    if ((!invite.round && terminal) || !round || !acceptsAnswer(round) || pending) return;
     foley.play("submit");
     draftDelivery.pause();
-    pending={...envelope,type:'submit',roundId:round.id,requestId:crypto.randomUUID(),answer}; remember(pending);
+    pending={...envelope,type:'submit',roundId:round.id,requestId:crypto.randomUUID(),answer,...(editable(round)?{baseRevision:round.answerRevision}:{})}; remember(pending);
     if(isNumeric())renderTrivia(round,false);else {showPending();sendPending();}
   }
   function renderTrivia(next, changed) {
@@ -156,7 +161,7 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
             } else {
               const rejected=pending; clearPending(); if(round?.mode==='trivia'){try{saveDraft(JSON.parse(rejected.answer));}catch{}} foley.play('error'); $('fallback').hidden=true;
               triviaRenderKey=''; render(round);draftDelivery.reconnect(); if(round?.mode==='quiplash')$('answer').value=rejected.answer;
-              $('submission').textContent=message.status==='stale-round'?'Question changed.':message.status==='closed'?'Round closed.':'Answer not accepted. Try again.';
+              $('submission').textContent=message.status==='stale-round'?'Question changed.':message.status==='closed'?'Round closed.':message.status==='answer-changed'?'Answer changed elsewhere. Check the saved answer before updating again.':'Answer not accepted. Try again.';
             }
           }
         });
@@ -181,7 +186,7 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
   window.addEventListener('pageshow',event=>{if(event.persisted&&!invite.round&&!terminal)connect();});
   $('answer').addEventListener('input',()=>saveDraft({text:$('answer').value}));
   $('form').addEventListener('submit', event => {
-    event.preventDefault(); if (!round || round.mode === 'trivia' || round.phase !== 'submissions' || round.submitted || pending) return;
+    event.preventDefault(); if (!round || round.mode === 'trivia' || !acceptsAnswer(round) || pending) return;
     const choice = document.querySelector('input[name=evidence]:checked');
     const answer = round.mode === 'quiplash' ? $('answer').value.trim() : round.hand?.[Number(choice?.value)];
     if (!answer || answer.length > 800) { $('submission').textContent = 'Enter an answer or select a card.'; return; }
