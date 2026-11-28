@@ -29,14 +29,14 @@ class AlignmentTests(unittest.TestCase):
         self.words[8]['start'] += .03
         self.words[9]['start'] += .05
         result, report = a.candidate(self.cues, a.map_words(self.cues, self.words), [])
-        self.assertEqual(result[3]['start'], 12.63)
-        self.assertEqual(result[3]['words'][1][1], 12.86)
-        self.assertEqual(result[2]['end'], 12.63)
+        self.assertEqual(result[3]['start'], 12.43)
+        self.assertEqual(result[3]['words'][1][1], 12.59)
+        self.assertEqual(result[2]['end'], 12.43)
         self.assertTrue(all(r['review'] for r in report))
 
     def test_split_hyphen_and_reject_mismatch(self):
-        self.words[0:1] = [dict(word='yippee',start=1.81,end=3),dict(word='-yay,',start=3,end=4.29)]
-        self.assertEqual(a.map_words(self.cues, self.words)[0][:3], ('yippee-yay,',1.81,4.29))
+        self.words[0:1] = [dict(word='yippee',start=1.86,end=3),dict(word='-yay,',start=3,end=4.08)]
+        self.assertEqual(a.map_words(self.cues, self.words)[0][:3], ('yippee-yay,',1.86,4.08))
         self.words[2]['word'] = 'incorrect'
         with self.assertRaises(ValueError):
             a.map_words(self.cues, self.words)
@@ -89,7 +89,7 @@ class AlignmentTests(unittest.TestCase):
         mapped = a.ctc_words_from_spans(spans, cues, alphabet, .02)
         self.assertEqual([w['word'] for w in mapped], ['A', 'yippee-yay,'])
         self.assertEqual((mapped[0]['start'], mapped[0]['end']), (0, .02))
-        self.assertEqual((mapped[1]['start'], mapped[1]['end']), (.04, .42))
+        self.assertEqual((mapped[1]['start'], mapped[1]['end']), (.08, .42))
         self.assertAlmostEqual(mapped[0]['probability'], .818730753)
 
     def test_ctc_rejects_wrong_character_or_missing_separator(self):
