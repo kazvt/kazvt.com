@@ -96,7 +96,7 @@ test('native alpha WebM is selected, both overlay and video have transparent CSS
  assert.match(css,/\.rg-smeemo-stinger video\s*\{[^}]*object-fit:fill;[^}]*background:transparent/);
  assert.doesNotMatch(css,/\.rg-smeemo-stinger video\s*\{[^}]*object-fit:contain/);
  const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
- assert.match(src,/hideCrowd:encounter\.hideCrowd/);assert.match(src,/if\(encounter\.quiet\)silenceCrowd\(\);\s*encounter\.reset/);
+ assert.match(src,/hideCrowd:encounter\.hideCrowd/);assert.match(src,/if\(encounter\.quiet\)silenceCrowd\(\);\s*if\(clearProgress\)encounter\.reset\(\);else encounter\.suspend\(\)/);
  assert.match(src,/function reactCrowd\(emotion\)\{if\(!encounter\.quiet\)/);
 });
 

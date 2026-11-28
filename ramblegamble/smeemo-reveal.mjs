@@ -1,19 +1,31 @@
-// Transient, presentation-only five-click encounter. No game or score writes.
+// Host-tab hit progress is independent of transient encounter presentation and player ledgers.
 export const SMEEMO_RETURN_MS=4400;
 export const SMEEMO_STINGER='/ramblegamble/assets/stingers/smeemo-explosive-alpha.webm';
-export function createSmeemoEncounter(){
+export const SMEEMO_HITS_KEY='ramblegamble.smeemo.hits.v1';
+export function createSmeemoEncounter({persist=false,storage}={}){
  let phase='hidden',count=0;
+ try {
+  if(persist)storage??=globalThis.sessionStorage;
+  const saved=storage?.getItem(SMEEMO_HITS_KEY);
+  if(typeof saved==='string'&&/^[0-5]$/.test(saved))count=Number(saved);
+ } catch {} // Browser storage can be blocked; retain progress in memory anyway.
+ function setCount(next){count=next;try{storage?.setItem(SMEEMO_HITS_KEY,String(count));}catch{}}
  return {
-  focus(){if(phase==='hidden'){phase='focused';count=0;}},
-  click(){if(phase!=='focused')return null;count++;if(count===5)phase='stinger';return count;},
+  focus(){if(phase==='hidden')phase='focused';},
+  // If a five-hit reveal was interrupted before the round started, the next
+  // intentional press retries it rather than silently resetting or exceeding five.
+  click(){if(phase!=='focused')return null;setCount(Math.min(5,count+1));if(count===5)phase='stinger';return count;},
   finish(){if(phase!=='stinger')return false;phase='returning';return true;},
   arrive(){if(phase!=='returning')return false;phase='table';return true;},
-  reset(){phase='hidden';count=0;},
+  suspend(){phase='hidden';},
+  clearProgress(){setCount(0);},
+  reset(){phase='hidden';setCount(0);},
   get phase(){return phase;},get count(){return count;},
   get revealed(){return phase==='focused'&&count>=2||phase==='stinger';},
   // Hide spectators, never the separate Smeemo mesh or its click target.
   get hideCrowd(){return (phase==='focused'&&count>=3)||phase==='stinger';},
-  get quiet(){return phase!=='hidden'&&count>=2;},
+  // A committed round consumes the hits but retains the existing quiet table presentation.
+  get quiet(){return phase==='returning'||phase==='table'||(phase!=='hidden'&&count>=2);},
   get song(){return (phase==='focused'&&count>=1)||phase==='returning'?'smeemo':null;},
  };
 }

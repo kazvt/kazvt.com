@@ -5,12 +5,12 @@ import { createContestantStands } from "./contestant-stands.mjs?v=stand-lift-202
 import { horrorRenderScale, HORROR_FRAME_MS } from "./smeemo-horror.mjs?v=smeemo-arrival-20261128-v1";
 import { readCardGames } from "./card-games-store.mjs?v=answer-edit-20261128-v1";
 import { createSlotMarquee } from "./slot-marquee.mjs?v=slot-marquee-20261128-v1";
-import { createSmeemoEncounter, createSmeemoStinger, createSmeemoTableSession, SMEEMO_RETURN_MS } from "./smeemo-reveal.mjs?v=smeemo-smooth-20261128-v1";
+import { createSmeemoEncounter, createSmeemoStinger, createSmeemoTableSession, SMEEMO_RETURN_MS } from "./smeemo-reveal.mjs?v=smeemo-hits-20261128-v1";
 import { createFloatingSky } from "./floating-sky.mjs?v=sky-solid-lettering-20261128-v1";
 import { createStageDance, createDanceClock, createDanceIntensitySampler, dancePose } from "./stage-dance.mjs?v=music-intensity-20261128-v1";
 import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=freecam-music-20261128-v1";
 import { createVipInteriorTracker, sampleMusicZoneGain } from "./music-zones.mjs?v=music-zone-fade-20261128-v1";
-import { createMenuMarquee } from "./menu-marquee.mjs?v=karaoke-parallel-20261128-v2";
+import { createMenuMarquee } from "./menu-marquee.mjs?v=karaoke-notes-20261128-v1";
 import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=smeemo-reveal-20261127-v1";
 import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcony.mjs?v=hazel-seat-20261128-v1";
 import { createSignGlow } from "./sign-glow.mjs?v=neon-focus-20261127-v1";
@@ -253,7 +253,7 @@ import {
   const vipMusicInterior = createVipInteriorTracker(DICE_DOOR_OPENING);
   const smeemoMusicAnchor = Object.freeze(crowdCatAnchor());
   const spatialAudioState = { insideVip:false, vipMix:{room:1,water:0,cutoff:null}, exteriorMix:{room:1,water:0}, musicGain:1 };
-  const encounter = createSmeemoEncounter();
+  const encounter = createSmeemoEncounter({persist:true});
   const smeemoTable = createSmeemoTableSession();
   let encounterStartPending = null;
   let encounterReturnRevision = null;
@@ -261,22 +261,43 @@ import {
   const stinger=createSmeemoStinger({root:document.getElementById("rg-smeemo-stinger"),video:document.getElementById("rg-smeemo-video"),caption:document.getElementById("rg-smeemo-stinger-caption"),muted:()=>foley.muted,onFinish:()=>{
     if(encounter.finish()){encounterReturnRevision=readCardGames().activityRevision;cardMusicMode="";canvas.focus({preventScroll:true});transitionToView({kind:"card-table"},{encounterReturn:true});}
   }});
-  function resetEncounter(){
+  function resetEncounter({clearProgress=false}={}){
     encounterStartPending=null;encounterReturnRevision=null;
-    if(encounter.phase==="hidden")return;
-    // A cancelled encounter must not resume its old ambience on a later visit.
+    if(encounter.phase==="hidden"){
+      if(clearProgress){encounter.reset();smeemoCount.textContent="0/5";}
+      return;
+    }
+    // Stop transient ambience on departure; a later focus restores only saved hit progress.
     // The post-return table phase is separate and may belong to a live Smeemo game.
     if(encounter.phase!=="table")soundtrack.resetTrackPosition("smeemo");
     if(encounter.quiet)silenceCrowd();
-    encounter.reset();stinger.cancel();smeemoTag.hidden=true;smeemoAura.hidden=true;preview.removeAttribute("data-smeemo-step");
+    if(clearProgress)encounter.reset();else encounter.suspend();
+    smeemoCount.textContent=`${encounter.count}/5`;
+    stinger.cancel();smeemoTag.hidden=true;smeemoAura.hidden=true;preview.removeAttribute("data-smeemo-step");
     for(const channel of ["smeemo-encounter-drum","smeemo-encounter-rumble","smeemo-encounter-scare"])foley.stop(channel);
     stageShow?.dismiss(performance.now());syncMusic();
   }
+  function focusEncounter(){
+    encounter.focus();smeemoCount.textContent=`${encounter.count}/5`;preview.dataset.smeemoStep=String(encounter.count);
+    if(encounter.count>0)stinger.prepare();
+    if(encounter.quiet){foley.setRoomAmbience(false);foley.stopAll();silenceCrowd();}
+    stageShow?.silent(crowdCatAnchor(),performance.now());
+  }
+  function canInteractWithSmeemo(){
+    return gameStarted&&!pauseMenuOpen&&!diceModeOpen&&!document.hidden&&!freecam?.active&&!document.documentElement.hasAttribute("data-rg-host-locked")&&!document.querySelector("dialog[open]");
+  }
+  function resetSmeemoHits(event){
+    if(event.button!==2||!canInteractWithSmeemo())return;
+    event.preventDefault();
+    resetEncounter({clearProgress:true});
+    if(currentView.kind==="smeemo-crowd"&&!cameraDetached){focusEncounter();syncMusic();}
+  }
   function clickSmeemo(){
-    if(!gameStarted||pauseMenuOpen||diceModeOpen||document.hidden||document.documentElement.hasAttribute("data-rg-host-locked")||document.querySelector("dialog[open]"))return;
+    if(!canInteractWithSmeemo())return;
     if(currentView.kind!=="smeemo-crowd"||cameraDetached)transitionToView({kind:"smeemo-crowd"});
     else if(cameraTransition)return;
-    encounter.focus();const count=encounter.click();if(count===null)return;
+    if(encounter.phase==="hidden")focusEncounter();
+    const count=encounter.click();if(count===null)return;
     smeemoCount.textContent=`${count}/5`;preview.dataset.smeemoStep=String(count);
     smeemoTag.classList.remove("rg-smeemo-pulse");void smeemoTag.offsetWidth;smeemoTag.classList.add("rg-smeemo-pulse");
     smeemoAura.classList.remove("rg-smeemo-aura-pulse");void smeemoAura.offsetWidth;smeemoAura.classList.add("rg-smeemo-aura-pulse");
@@ -291,8 +312,10 @@ import {
     if(count===5){smeemoTag.hidden=true;smeemoAura.hidden=true;focusArrow.hide();stinger.start();}
   }
   smeemoTag.addEventListener("click",clickSmeemo);
+  smeemoTag.addEventListener("contextmenu",resetSmeemoHits);
   function updateSmeemoEncounter(time,roomVisible){
     if(!roomVisible||diceModeOpen||cameraDetached||freecam?.active||document.querySelector("dialog[open]")){resetEncounter();return;}
+    if(encounter.phase==="hidden"&&currentView.kind==="smeemo-crowd"&&!cameraTransition){focusEncounter();syncMusic();}
     stinger.step();
     if(encounter.phase==="returning"&&!cameraTransition&&currentView.kind==="card-table"&&encounter.arrive()){
       if(cardTableModel){const b=new THREE.Box3().setFromObject(cardTableModel),center=b.getCenter(new THREE.Vector3());center.y=b.max.y;stageShow?.silent(center,time);}
@@ -1639,7 +1662,7 @@ import {
     }
     if(!encounterReturn&&((nextView.kind!=="smeemo-crowd"&&(nextView.kind!=="card-table"||encounter.phase!=="table"))||(nextView.kind==="smeemo-crowd"&&encounter.phase!=="focused")))resetEncounter();
     if(nextView.kind==="smeemo-crowd"&&encounter.phase==="hidden"){
-      encounter.focus();smeemoCount.textContent="0/5";preview.dataset.smeemoStep="0";stageShow?.silent(crowdCatAnchor(),performance.now());
+      focusEncounter();
     }
     // Keep the whole Smeemo-to-table camera journey unlit; the table spotlight
     // is deliberately re-armed only after updateSmeemoEncounter sees arrival.
@@ -2451,6 +2474,12 @@ import {
 
   window.addEventListener("rg:smeemo-round-state", event => {
     const wasSmeemoActive=smeemoTable.active;
+    // Only a newly opened, committed playing round consumes the counter. Keep
+    // the automatic arrival ticket and table presentation alive through settlement.
+    if(event.detail?.opened&&event.detail.mode==="smeemo"&&event.detail.status==="playing"&&event.detail.id){
+      if(encounter.phase==="table"){encounter.clearProgress();smeemoCount.textContent="0/5";}
+      else resetEncounter({clearProgress:true});
+    }
     smeemoTable.observe(event.detail);
     if(wasSmeemoActive&&!smeemoTable.active)soundtrack.resetTrackPosition("smeemo");
     syncMusic();
@@ -2678,6 +2707,7 @@ import {
     if (freecam.active || !gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen || cameraTransition || document.documentElement.hasAttribute("data-rg-host-locked")) return;
     if(event.button!==2)return;
     const interaction=getSceneInteractionAt(event.clientX,event.clientY);
+    if(interaction?.machine==="smeemo-crowd"){resetSmeemoHits(event);return;}
     const index = resolveSlotContextCell({
       button: event.button, view: cameraDetached ? "overview" : currentView.kind, selected: selectedSlotBerry,
       interaction,
