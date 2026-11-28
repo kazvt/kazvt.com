@@ -37,11 +37,11 @@ test('media-time lookup follows both independent voices through overlap, gaps an
  const badResponse=structuredClone(cues);badResponse[3].responses[0].words[1][1]=badResponse[3].responses[0].words[0][2]-.1;assert.throws(()=>validateKaraokeCues(badResponse),/Invalid response word/);
 });
 
-function fixture(){
+function fixture(cuesOverride){
  const motion={matches:false};
  class El{constructor(){this.hidden=false;this.children=[];this.dataset={};this.textContent='';this.style={setProperty(k,v){this[k]=v;}};}getBoundingClientRect(){return {left:10,top:20,width:50,height:20};}get childElementCount(){return this.children.length;}append(n){this.children.push(n);}replaceChildren(){this.children=[];this.textContent='';}querySelector(sel){return this.map?.[sel];}}
  const root=new El(),menu=new El();root.hidden=true;root.map=Object.fromEntries(['lead','response','particles','ball'].map(k=>['.rg-karaoke-'+k,new El()]));
- const theme={paused:true,ended:false,error:null,readyState:4,currentTime:0};const doc={createElement:()=>new El()},win={matchMedia:()=>motion};const fx=createMenuKaraoke({root,menu,theme,doc,win});return {root,menu,theme,fx,motion,lead:root.map['.rg-karaoke-lead'],back:root.map['.rg-karaoke-response'],particles:root.map['.rg-karaoke-particles']};
+ const theme={paused:true,ended:false,error:null,readyState:4,currentTime:0};const doc={createElement:()=>new El()},win={matchMedia:()=>motion};const fx=createMenuKaraoke({root,menu,theme,doc,win,cues:cuesOverride});return {root,menu,theme,fx,motion,lead:root.map['.rg-karaoke-lead'],back:root.map['.rg-karaoke-response'],particles:root.map['.rg-karaoke-particles']};
 }
 
 test('renderer displays a separate backing row, sweeps each word, and retains the existing audio lifecycle',()=>{
@@ -86,6 +86,12 @@ test('opening break stays lyric-free and both tracks re-enter correctly after ar
  f.theme.currentTime=12.4;f.fx.update();assert.equal(f.lead.children[0].dataset.word,'i');assert.equal(f.lead.children[0].dataset.state,'active');
  f.theme.currentTime=164.9;f.fx.update();assert.equal(f.root.dataset.section,'chorus');assert.equal(f.lead.children.length,8);assert.equal(f.back.children.length,3);
  f.theme.currentTime=9;f.fx.update();assert.equal(f.lead.children.length,0);assert.equal(cues.at(-1).start,192.15);assert.equal(cues.at(-1).end,duration);
+});
+
+test('a gap introduced by local calibration hides the stale lyric and re-enters on the next cue',()=>{
+ const custom=[{section:'verse',start:0,end:1,words:[['one',0,1]],responses:[]},{section:'verse',start:2,end:3,words:[['two',2,3]],responses:[]}],f=fixture(custom);f.theme.paused=false;f.fx.update();assert.equal(f.root.hidden,false);
+ f.theme.currentTime=1.5;f.fx.update();assert.equal(f.root.hidden,true);assert.equal(f.menu.dataset.karaokeActive,'false');
+ f.theme.currentTime=2;f.fx.update();assert.equal(f.root.hidden,false);assert.equal(f.lead.children[0].dataset.word,'two');f.fx.dispose();
 });
 
 test('music-note bursts stay bounded and media seeks update the selected voice without duplicate timers',()=>{
