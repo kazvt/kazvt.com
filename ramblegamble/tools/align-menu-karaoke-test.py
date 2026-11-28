@@ -73,6 +73,39 @@ class AlignmentTests(unittest.TestCase):
         a.load_alignment_model(api, 'medium.en', 'openai')
         self.assertEqual(calls, [('openai', ('medium.en',), {})])
 
+    def test_ctc_spans_restore_word_boundaries_and_punctuation(self):
+        class Span:
+            def __init__(self, token, start, end, score):
+                self.token, self.start, self.end, self.score = token, start, end, score
+
+            def __len__(self):
+                return self.end - self.start
+
+        cues = [{'words': [['A', 0, 1], ['yippee-yay,', 0, 1]]}]
+        alphabet = tuple('-|AEIPY')
+        text = 'A|YIPPEEYAY'
+        spans = [Span(alphabet.index(char), i * 2, i * 2 + 1, -0.2) for i, char in enumerate(text)]
+        mapped = a.ctc_words_from_spans(spans, cues, alphabet, .02)
+        self.assertEqual([w['word'] for w in mapped], ['A', 'yippee-yay,'])
+        self.assertEqual((mapped[0]['start'], mapped[0]['end']), (0, .02))
+        self.assertEqual((mapped[1]['start'], mapped[1]['end']), (.04, .44))
+        self.assertAlmostEqual(mapped[0]['probability'], .818730753)
+
+    def test_ctc_rejects_wrong_character_or_missing_separator(self):
+        class Span:
+            def __init__(self, token, start, end, score=-.1):
+                self.token, self.start, self.end, self.score = token, start, end, score
+
+            def __len__(self):
+                return self.end - self.start
+
+        cues = [{'words': [['A', 0, 1], ['B', 0, 1]]}]
+        labels = ('-', '|', 'A', 'B')
+        with self.assertRaisesRegex(ValueError, 'token mismatch'):
+            a.ctc_words_from_spans([Span(3, 0, 1), Span(1, 2, 3), Span(2, 4, 5)], cues, labels, .02)
+        with self.assertRaisesRegex(ValueError, 'separator'):
+            a.ctc_words_from_spans([Span(2, 0, 1), Span(3, 2, 3)], cues, labels, .02)
+
 
 if __name__ == '__main__':
     unittest.main()
