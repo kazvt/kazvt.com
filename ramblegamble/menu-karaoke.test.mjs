@@ -12,7 +12,7 @@ test('cue sheet validates both voice tracks and retains every lyric token exactl
  const lead=cues.flatMap(wordsOf),backing=cues.flatMap(responsesOf);
  assert.equal(lead.length,190);assert.equal(backing.length,50);assert.equal(lead.length+backing.length,240);
  assert.equal(lead.join(' '),'yippee-yay, the house is gonna win again, today i got chips lets ramble ramble gamble as the cards go shuffling all night long and they shout oh lillie is at the table place your bets and come and sing along oh dealer lillie oh dealer lillie though i thought i know the answer now my confidence is gone oh lucky ace oh lucky ace i walked in with royal swagger now i got a poker face cause i got chips lets ramble ramble gamble as the cards go shuffling all night long and they shout oh lillie is at the table place your bets and come and sing along oh dealer lillie oh dealer lillie though i thought my hand was winning smeemo grinned and took my chips!? well i got chips lets ramble ramble gamble as the cards go shuffling all night long and they shout oh lillie is at the table place your bets and come and sing along burgata babara bargata gatagattara bargata bumbumbumbumbumbumbumbum bargataba tum tagum bargata gata gatibati gatibati gatibati gatibati booom bargata booom bargata bun dum bum bum bum bargata bum bun weird bululub');
- assert.equal(backing.join(' '),'ramble gamble ramble gamble ramble gamble ramble gamble oh dealer lillie oh dealer lillie oh what a scam oh what a scam ramble gamble ramble gamble ramble gamble ramble gamble ramble gamble ramble gamble ramble gamble oh dealer lillie oh dealer lillie oh dealer lillie oh dealer lillie ramble gamble ramble gamble ramble gamble ramble gamble oh dealer lillie oh dealer lillie');
+ assert.equal(backing.join(' '),'(ramble gamble) (ramble gamble) (ramble gamble) (ramble gamble) (oh dealer lillie) (oh dealer lillie) (oh what a scam) (oh what a scam) (ramble gamble) (ramble gamble) (ramble gamble) (ramble gamble) (oh dealer lillie) (oh dealer lillie) (ramble gamble) (ramble gamble) (ramble gamble) (ramble gamble) (oh dealer lillie) (oh dealer lillie)');
 });
 
 test('media-time lookup follows both independent voices through overlap, gaps and seeks',()=>{
@@ -20,9 +20,14 @@ test('media-time lookup follows both independent voices through overlap, gaps an
   const onset=karaokeFrame(w[1]);assert.equal(onset.index,i);assert.equal(onset.word,j);assert.equal(onset.progress,0);
   const middle=karaokeFrame((w[1]+w[2])/2);assert.equal(middle.index,i);assert.equal(middle.word,j);assert.ok(Math.abs(middle.progress-.5)<1e-8);
  }
- for(const [cueIndex,c] of cues.entries())for(const [group,r] of c.responses.entries())for(const [wordIndex,w] of r.words.entries()){
-  const onset=karaokeFrame(w[1]);assert.equal(onset.responseIndex,cueIndex);assert.equal(onset.responseGroup,group);assert.equal(onset.responseWord,wordIndex);assert.equal(onset.responseProgress,0);
-  const middle=karaokeFrame((w[1]+w[2])/2);assert.equal(middle.responseWord,wordIndex);assert.ok(Math.abs(middle.responseProgress-.5)<1e-8);
+ const phrases=cues.flatMap((c,cueIndex)=>c.responses.map((phrase,responseGroup)=>({cueIndex,responseGroup,phrase})));
+ for(const {cueIndex,responseGroup,phrase} of phrases)for(const [wordIndex,w] of phrase.words.entries()){
+  const onset=karaokeFrame(w[1]),active=phrases.filter(p=>p.phrase.start<=w[1]&&w[1]<p.phrase.end).sort((a,b)=>b.phrase.start-a.phrase.start)[0];
+  assert.equal(onset.responseIndex,active.cueIndex);assert.equal(onset.responseGroup,active.responseGroup);
+  const selected=active.phrase.words.findIndex(token=>w[1]>=token[1]&&w[1]<token[2]);assert.equal(onset.responseWord,selected);
+  const middleTime=(w[1]+w[2])/2,middle=karaokeFrame(middleTime),midActive=phrases.filter(p=>p.phrase.start<=middleTime&&middleTime<p.phrase.end).sort((a,b)=>b.phrase.start-a.phrase.start)[0];
+  assert.equal(middle.responseIndex,midActive.cueIndex);assert.equal(middle.responseGroup,midActive.responseGroup);
+  const midWord=midActive.phrase.words.findIndex(token=>middleTime>=token[1]&&middleTime<token[2]);assert.equal(middle.responseWord,midWord);
  }
  // Backing is already active while the next lead lyric is on screen; scat overlap is not serialized.
  assert.equal(karaokeFrame(16.4).word,6);assert.equal(karaokeFrame(16.4).responseWord,0);
@@ -56,7 +61,7 @@ test('optional calibration is recording-scoped and cannot alter words, voice ass
  const revised=structuredClone(cues);revised[1].words[0][2]=4.26;revised[1].words[1][1]=4.26;
  const win={localStorage:{getItem:k=>{assert.equal(k,KARAOKE_CALIBRATION_KEY);return JSON.stringify(revised)}}};
  assert.deepEqual(readKaraokeCalibration(win),revised);assert.equal(validateKaraokeCalibration(revised),revised);
- revised[1].responses[0]?.words[0]&&(revised[1].responses[0].words[0][0]='changed');assert.throws(()=>validateKaraokeCalibration(revised),/preserve/);assert.deepEqual(readKaraokeCalibration(win),cues);
+ revised[3].responses[0].words[0][0]='changed';assert.throws(()=>validateKaraokeCalibration(revised),/preserve/);assert.deepEqual(readKaraokeCalibration(win),cues);
  const moved=structuredClone(cues);moved[3].responses[0].words[0][1]+=.1;assert.equal(validateKaraokeCalibration(moved),moved);
 });
 
