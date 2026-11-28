@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download licensed photographs and a CC0 blood decal; prepare a pixelated atlas.
+"""Download licensed photographs; prepare a clean pixelated atlas.
 
 Offline build step only. Requires Pillow. No generated hand anatomy, no AI art,
 no remote fetch at game runtime. The output is CC BY-SA 3.0 (see SOURCES.md).
@@ -18,7 +18,6 @@ SOURCES = (
     ('5@BackForward.jpg', 'https://upload.wikimedia.org/wikipedia/commons/e/eb/5%40BackForward.jpg', '273e012a5b280b0bdd931427361c0e58b4449d56', (1000,1000), 61, 'red'),
     ('Claw5@UlnarForward.jpg', 'https://upload.wikimedia.org/wikipedia/commons/5/58/Claw5%40UlnarForward.jpg', '94996404e47f9c33bdc7a51b5c79e9a08b4af1ae', (1000,1000), 90, 'red'),
 )
-BLOOD = ('blood_splatter_0.png', 'https://opengameart.org/sites/default/files/blood_splatter_0.png')
 MAX_BYTES = 4*1024*1024
 TILE = (48,96)
 
@@ -87,57 +86,21 @@ def cutout(photo, angle, key):
     return tile
 
 
-def blood_mask(folder):
-    data=read_asset(*BLOOD,folder)
-    with Image.open(BytesIO(data)) as im:
-        if im.format!='PNG' or im.size!=(512,512):
-            raise ValueError('Unexpected blood decal format/dimensions')
-        im=im.convert('RGBA')
-    alpha=im.getchannel('A')
-    if alpha.getextrema()[0]<240:
-        mask=alpha
-    else:
-        gray=ImageOps.grayscale(im); bg=gray.getpixel((0,0))
-        mask=ImageChops.difference(gray,Image.new('L',gray.size,bg))
-        mask=ImageOps.autocontrast(mask)
-    box=mask.getbbox()
-    if not box:raise ValueError('Empty source blood decal')
-    return mask.crop(box)
-
-
-def stain(tile, decal, index):
+def finish(tile, index):
     if index%2: tile=ImageOps.mirror(tile)
-    tile=tile.copy();a=tile.getchannel('A')
-    # Reposition and rotate the real sourced decal, never paint arbitrary blood.
-    mask=Image.new('L',TILE);spot=decal.copy()
-    spot.thumbnail((25+index%3*4,31+index%2*8),Image.Resampling.LANCZOS)
-    spot=spot.rotate(19+index*37,Image.Resampling.BICUBIC,expand=True)
-    # Anchor on an actual opaque skin pixel, including shorter hand poses.
-    left,top,right,bottom=a.getbbox()
-    cx=(left+right)/2;cy=top+(bottom-top)*(.36+.12*(index%3))
-    candidates=[(x,y) for y in range(top,min(bottom,76)) for x in range(left,right) if a.getpixel((x,y))>180]
-    if not candidates:raise ValueError('No visible skin pixels for source decal')
-    x,y=min(candidates,key=lambda q:(q[0]-cx)**2+(q[1]-cy)**2)
-    sx,sy=spot.size;peak=spot.getextrema()[1]
-    if not peak:raise ValueError('Source decal became empty')
-    # Align the strongest source decal pixel with skin to ensure contact.
-    anchor=min(((u,v) for v in range(sy) for u in range(sx) if spot.getpixel((u,v))>=peak*.85),key=lambda q:(q[0]-sx/2)**2+(q[1]-sy/2)**2)
-    mask.paste(spot,(x-anchor[0],y-anchor[1]))
-    mask=ImageChops.multiply(mask,a).point(lambda x:round(x*.68))
-    rgb=Image.composite(Image.new('RGB',TILE,(92,17,29)),tile.convert('RGB'),mask)
-    # Feather only the submerged wrist, leaving the real hand silhouette crisp.
+    tile=tile.copy()
+    # Feather only the submerged wrist; do not add any stain or decal.
     fade=Image.new('L',TILE);fade.putdata([round(255*min(1,max(0,(95-y)/25))) for y in range(96) for _ in range(48)])
-    rgb.putalpha(ImageChops.multiply(a,fade))
-    return rgb
+    tile.putalpha(ImageChops.multiply(tile.getchannel('A'),fade))
+    return tile
 
 
-def build(folder=None,dest=ROOT/'hands-atlas.png'):
-    decal=blood_mask(folder)
+def build(folder=None,dest=ROOT/'hands-clean-v2.png'):
     atlas=Image.new('RGBA',(TILE[0]*6,TILE[1]))
     for i,source in enumerate(SOURCES):
         tile=source_photo(source,folder)
         for j in range(2):
-            index=i*2+j; edited=stain(tile,decal,index)
+            index=i*2+j; edited=finish(tile,index)
             if not edited.getchannel('A').getbbox():raise ValueError('Empty atlas tile')
             atlas.paste(edited,(index*TILE[0],0))
     tmp=dest.with_suffix('.tmp.png');atlas.save(tmp,optimize=True);tmp.replace(dest)

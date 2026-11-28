@@ -56,10 +56,13 @@ export function createExteriorHands(THREE,scene){
   const seeds=handSeeds(),batches=[],pose=new THREE.Object3D(),sample={},color=new THREE.Color();
   let ready=false,disposed=false,lastFrame=null;
   // A single same-origin, offline-prepared photographic atlas. Missing art fails closed.
-  const map=new THREE.TextureLoader().load(new URL('./assets/exterior-hands/hands-atlas.png?v=exterior-hands-20261128-v1',import.meta.url).href,
+  const map=new THREE.TextureLoader().load(new URL('./assets/exterior-hands/hands-clean-v2.png',import.meta.url).href,
     texture=>{if(!disposed){const image=texture.image;ready=image?.width===48*HANDS_VARIANTS&&image?.height===96;if(!ready)console.warn('Exterior hand atlas has incorrect dimensions; reinstall the sourced asset.');}},undefined,()=>{if(disposed)return;ready=false;group.visible=false;console.warn('Exterior hand atlas missing; run assets/exterior-hands/install-hands.py before deployment.');});
   map.magFilter=THREE.NearestFilter;map.minFilter=THREE.NearestFilter;map.generateMipmaps=false;map.colorSpace=THREE.SRGBColorSpace;
-  const material=new THREE.MeshBasicMaterial({map,transparent:true,alphaTest:.055,depthTest:true,depthWrite:false,side:THREE.DoubleSide,forceSinglePass:true,toneMapped:false,fog:false});
+  // Alpha hashing gives 90% coverage on opaque skin, preserves the wrist fade,
+  // and writes real per-fragment depth. Unlike blended instancing, the order of
+  // atlas batches cannot make a distant arm or mist sheet overpaint a near arm.
+  const material=new THREE.MeshBasicMaterial({map,opacity:.9,transparent:false,alphaHash:true,alphaTest:.055,depthTest:true,depthWrite:true,side:THREE.DoubleSide,forceSinglePass:true,toneMapped:false,fog:false});
   for(let variant=0;variant<HANDS_VARIANTS;variant++){
     const members=seeds.filter(seed=>seed.variant===variant),geometry=new THREE.PlaneGeometry(1,1);
     geometry.translate(0,.5,0); // pivot at the submerged wrist, not the center
@@ -67,7 +70,7 @@ export function createExteriorHands(THREE,scene){
     // Atlas = six 48x96 tiles; use half-texel inset to avoid neighboring tile bleed.
     for(let i=0;i<uv.count;i++){uv.setX(i,(variant*48+.5+uv.getX(i)*47)/(48*HANDS_VARIANTS));uv.setY(i,(.5+uv.getY(i)*95)/96);}
     const mesh=new THREE.InstancedMesh(geometry,material,members.length);
-    mesh.name=`rg-exterior-hand-${variant}`;mesh.frustumCulled=false;mesh.visible=false;mesh.raycast=()=>{};mesh.renderOrder=-9994;
+    mesh.name=`rg-exterior-hand-${variant}`;mesh.frustumCulled=false;mesh.visible=false;mesh.raycast=()=>{};
     mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     for(let i=0;i<members.length;i++){const tone=members[i].tone;mesh.setColorAt(i,color.setRGB(tone,tone*.94,tone*.99));}
     mesh.instanceColor.needsUpdate=true;

@@ -1,10 +1,16 @@
 # Exterior fog hands — sourced photographic art
 
-The renderer expects `hands-atlas.png` (288×96 RGBA, six horizontal 48×96 tiles).
-The archive does **not** contain this atlas: this build environment could browse
-source pages but could not download the original image files. No synthetic hand
-art or remote runtime fallback is supplied. The scene fails closed if the atlas
-is absent; the other changes work independently.
+The renderer expects `hands-clean-v2.png` (288×96 RGBA, six horizontal 48×96 tiles).
+The distinct filename prevents stale cached bloody `hands-atlas.png` from being
+loaded by the current renderer. A cleaned compatibility copy is also supplied at
+`hands-atlas.png` for older modules; fresh installer runs target the new filename.
+Deploy both PNGs and the updated module/HTML chain together.
+The archive includes a cleaned atlas. The existing mirrored photographic tiles
+were combined and overlapping stain regions locally interpolated to remove the
+baked-in decal, retaining the original silhouettes and wrist alpha exactly.
+Original photos could not be retrieved in the patch environment. For a fresh
+build directly from the licensed photos, run the installer below; it no longer
+uses any blood decal. No remote runtime fallback is supplied.
 
 From the project root, on a machine with Internet access:
 
@@ -13,22 +19,19 @@ python3 -m pip install Pillow
 python3 ramblegamble/assets/exterior-hands/install-hands.py
 ```
 
-Alternatively download the four originals below and use
+Alternatively download the three originals below and use
 `python3 ramblegamble/assets/exterior-hands/install-hands.py --source-dir /path/to/downloads`.
 Use the filenames shown below. The three photographs are SHA-1 checked against
-Wikimedia Commons metadata; the CC0 decal is checked for PNG format and size.
+Wikimedia Commons metadata.
 The installer performs background keying, source rotation, cropping,
-low-resolution resampling, decal compositing, mirroring and wrist alpha fading.
-Inspect the resulting atlas before deployment; extraction quality on the actual
-files could not be visually tested in this environment. Deploy the generated PNG
-along with the patch. Do not publish the originals unless needed.
+low-resolution resampling, mirroring and wrist alpha fading.
+Inspect any regenerated atlas before deployment. The included cleaned atlas has been visually inspected. Do not publish the originals unless needed.
 
 | Original | Author / license | Direct file |
 |---|---|---|
 | [Forearm.jpg](https://commons.wikimedia.org/wiki/File:Forearm.jpg) | Mikael Häggström, public domain dedication | [Original](https://upload.wikimedia.org/wikipedia/commons/3/32/Forearm.jpg) |
 | [5@BackForward.jpg](https://commons.wikimedia.org/wiki/File:5@BackForward.jpg) | Mario Carneiro (Di gama), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) | [Original](https://upload.wikimedia.org/wikipedia/commons/e/eb/5%40BackForward.jpg) |
 | [Claw5@UlnarForward.jpg](https://commons.wikimedia.org/wiki/File:Claw5@UlnarForward.jpg) | Mario Carneiro (Di gama), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) | [Original](https://upload.wikimedia.org/wikipedia/commons/5/58/Claw5%40UlnarForward.jpg) |
-| [Liquid Splatter Pixel Texture](https://opengameart.org/content/liquid-splatter-pixel-texture) | AlejandroHaibi, [CC0](https://creativecommons.org/publicdomain/zero/1.0/) | [blood_splatter_0.png](https://opengameart.org/sites/default/files/blood_splatter_0.png) |
 
 The edited atlas is distributed under [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
 Preserve this attribution alongside the atlas. The images are used as fictional

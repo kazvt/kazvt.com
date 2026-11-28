@@ -39,7 +39,7 @@ function fake(){
 test('six double-sided batches, no draw before atlas ready, 5fps writes, reduced motion, lifecycle',()=>{
  const f=fake(),h=createExteriorHands(f.THREE,f.scene),eye={x:0,y:3,z:0},meshes=h.group.children;const total=()=>meshes.reduce((n,m)=>n+m.calls,0);
  assert.equal(meshes.length,6);assert.equal(meshes.reduce((n,m)=>n+m.count,0),192);h.update(0,true,false,eye);assert.equal(h.group.visible,false);assert.equal(total(),0);
- f.load();h.update(0,true,false,eye);assert.equal(total(),192);assert.equal(h.group.visible,true);for(const m of meshes){assert.equal(m.material.side,2);assert.equal(m.material.forceSinglePass,true);assert.equal(m.material.depthWrite,false);assert.equal(m.raycast(),undefined);}
+ f.load();h.update(0,true,false,eye);assert.equal(total(),192);assert.equal(h.group.visible,true);for(const m of meshes){assert.equal(m.material.side,2);assert.equal(m.material.forceSinglePass,true);assert.equal(m.material.depthWrite,true);assert.equal(m.material.depthTest,true);assert.equal(m.material.opacity,.9);assert.equal(m.material.alphaHash,true);assert.equal(m.material.transparent,false);assert.equal(m.renderOrder,undefined);assert.equal(m.raycast(),undefined);}
  h.update(199,true,false,eye);assert.equal(total(),192);h.update(200,true,false,eye);assert.equal(total(),384);h.update(1000,true,true,eye);assert.equal(total(),576);h.update(2000,true,true,eye);assert.equal(total(),576);
  h.update(2000,false,false,eye);assert.equal(h.group.visible,false);assert.ok(meshes.every(m=>!m.visible));h.dispose();assert.equal(f.scene.children.length,0);assert.ok(meshes.every(m=>m.disposed&&m.geometry.disposed));f.load();h.update(3000,true,false,eye);assert.equal(h.group.visible,false);
 });
@@ -49,4 +49,19 @@ test('malformed and missing atlas fail closed without generated replacements',()
 test('runtime wiring preserves authored music, combines exterior with VIP ambience, removes skip',()=>{
  const js=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8'),html=readFileSync(new URL('../rg/index.html',import.meta.url),'utf8'),reveal=readFileSync(new URL('./smeemo-reveal.mjs',import.meta.url),'utf8');
  assert.match(js,/Math\.min\(spatialAudioState\.musicGain, spatialAudioState\.exteriorMix\.room\)/);assert.match(js,/Math\.max\(mix\.water,zones\.exteriorMix\.water\)/);assert.match(js,/exteriorHands\?\.update\(crowdClock,roomVisible&&!diceModeOpen/);assert.doesNotMatch(html,/id="[^"]*smeemo[^\"]*skip/);assert.doesNotMatch(reveal,/skipButton/);
+});
+
+// A new pathname, not only a query parameter, prevents reuse of the old atlas.
+test('clean atlas has a distinct deployed pathname and refreshed module chain',()=>{
+ const f=fake(),h=createExteriorHands(f.THREE,f.scene);
+ const url=new URL(h.group.children[0].material.map.url);
+ assert.ok(url.pathname.endsWith('/assets/exterior-hands/hands-clean-v2.png'));
+ const png=readFileSync(url);
+ assert.equal(png.readUInt32BE(16),288);assert.equal(png.readUInt32BE(20),96);
+ const js=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
+ const gate=readFileSync(new URL('./host-access.mjs',import.meta.url),'utf8');
+ assert.match(js,/exterior-hands\.mjs\?v=clean-hands-asset-20261128-v2/);
+ assert.match(gate,/ramblegamble\.js\?v=clean-hands-asset-20261128-v2/);
+ for(const path of ['../rg/index.html','../rg/console/index.html'])assert.match(readFileSync(new URL(path,import.meta.url),'utf8'),/host-access\.mjs\?v=clean-hands-asset-20261128-v2/);
+ h.dispose();
 });

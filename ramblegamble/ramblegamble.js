@@ -28,7 +28,7 @@ import { cameraTravelDuration, isSpookyView, suspenseEase, crowdCloseupPose } fr
 import { CHARACTER_SOURCE_SIZE, CHARACTER_YAW_LIMIT, characterYaw, standingCharacterPose, projectCharacterQuad, pointInCharacterQuad } from "./character-billboards.mjs?v=stage-dance-20261127-v1";
 import { createScoreHud } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 import { createFocusOrbit, orbitPosition, bindFocusDrag, focusLimits } from "./focus-orbit.mjs?v=settlement-hover-20261127-v1";
-import { createExteriorHands, sampleExteriorAmbience } from "./exterior-hands.mjs?v=clean-depth-hands-20261128-v1";
+import { createExteriorHands, sampleExteriorAmbience } from "./exterior-hands.mjs?v=clean-hands-asset-20261128-v2";
 import { createExteriorMist, EXTERIOR_FLOOR } from "./exterior-mist.mjs?v=crowd-mist-20261127-v1";
 import { fitSlotInteractionFrame, fitSlotColumnArrow, rouletteRecessCenter, ROULETTE_RECESS, fitCharacterCloseup } from "./arcade-framing.mjs?v=slot-closeup-20261128-v1";
 import { foley } from "./game-foley.mjs?v=sky-soot-20261127-v1";
