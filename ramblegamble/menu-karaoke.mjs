@@ -121,7 +121,7 @@ export function createMenuKaraoke({root,menu,theme,doc=document,win=window,cues}
   }
   function populateResponse(response){
     back.replaceChildren();backNodes=[];
-    if(response?.phrase?.words)for(const [word] of response.phrase.words)makeWord(word,back,backNodes);
+    if(response?.words)for(const [word] of response.words)makeWord(word,back,backNodes);
     back.hidden=!backNodes.length;dirty=true;
   }
   function hide(){if(visible){root.hidden=true;menu.dataset.karaokeActive='false';visible=false;}leadIndex=-2;responseKey='';last=NaN;dirty=true;clearFX();}
