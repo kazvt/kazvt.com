@@ -48,8 +48,8 @@ function fixture(){
  return {ctrl,root,rows,title,status,video,starVideo,flags,get attempts(){return attempts;},get loads(){return loads;},setPlay:fn=>play=fn,send:totals=>ctrl.enqueue(event(`e${now}`,now,totals)),sendStar:totals=>ctrl.enqueue({...event(`s${now}`,now,totals),type:"star-award"}),advance:ms=>{now+=ms;ctrl.step();},flush:async()=>{for(let i=0;i<6;i++)await Promise.resolve();},scheduled};
 }
 test('preloads once, displays chip before amount, actual ended starts queued batch, and never steals focus',async()=>{
- const f=fixture();f.ctrl.prepare();f.ctrl.prepare();assert.equal(f.video.src,POINT_STINGER_URL);assert.equal(f.loads,1);f.send({erin:12500});await f.flush();assert.equal(f.video.hidden,false);assert.equal(f.title.hidden,true);assert.equal(f.root.hidden,false);assert.match(f.status.textContent,/erin: \+12,500 points/);const row=f.rows.children[0];assert.equal(row.children[0].textContent,'ERIN');assert.match(row.children[1].children[0].src,/points-chip\.png$/);assert.equal(row.children[1].children[1].textContent,'+12,500');
- f.send({kaz:7});f.send({kaz:2,faroe:3});assert.equal(f.attempts,1);f.video.ended=true;f.video.dispatchEvent(new Event('ended'));f.video.ended=false;await f.flush();assert.equal(f.attempts,2);assert.match(f.status.textContent,/faroe: \+3 points; kaz: \+9 points/);f.ctrl.cancel();assert.equal(f.root.hidden,true);assert.equal(f.video.paused,true);assert.equal(f.scheduled.size,0);
+ const f=fixture();f.ctrl.prepare();f.ctrl.prepare();assert.equal(f.video.src,POINT_STINGER_URL);assert.equal(f.loads,1);f.send({erin:12500});await f.flush();assert.equal(f.video.hidden,false);assert.equal(f.title.hidden,true);assert.equal(f.root.hidden,false);assert.match(f.status.textContent,/Erin: \+12,500 points/);const row=f.rows.children[0];assert.equal(row.children[0].textContent,'ERIN');assert.match(row.children[1].children[0].src,/points-chip\.png$/);assert.equal(row.children[1].children[1].textContent,'+12,500');
+ f.send({kaz:7});f.send({kaz:2,faroe:3});assert.equal(f.attempts,1);f.video.ended=true;f.video.dispatchEvent(new Event('ended'));f.video.ended=false;await f.flush();assert.equal(f.attempts,2);assert.match(f.status.textContent,/Faroe: \+3 points; Kaz: \+9 points/);f.ctrl.cancel();assert.equal(f.root.hidden,true);assert.equal(f.video.paused,true);assert.equal(f.scheduled.size,0);
 });
 test('autoplay denied retries muted; user mute changes cannot unmute blocked autoplay',async()=>{
  const f=fixture();f.setPlay(()=>f.attempts===1?Promise.reject(Object.assign(Error(),{name:'NotAllowedError'})):Promise.resolve());f.send({kaz:2});await f.flush();assert.equal(f.attempts,2);assert.equal(f.video.muted,true);f.video.currentTime=.2;f.advance(200);assert.equal(f.video.muted,true);f.ctrl.dispose();
@@ -65,7 +65,7 @@ test('hidden/blocked queues expire; lock and pause cancel immediately, late medi
  let resolve;f.setPlay(()=>new Promise(r=>resolve=r));f.send({faroe:2});f.flags.allowed=false;f.ctrl.step();resolve();await f.flush();assert.equal(f.root.hidden,true);assert.equal(f.video.paused,true);f.ctrl.dispose();
 });
 test('Dice top-layer relocation moves both live region and video without replay; pending awards still display',async()=>{
- const f=fixture(),parent=new Element();f.send({faroe:4});await f.flush();f.flags.blocked=true;f.send({erin:2});f.ctrl.relocate(parent);assert.equal(f.root.parentNode,parent);assert.equal(f.status.parentNode,parent);assert.equal(f.root.hidden,true);f.flags.blocked=false;f.ctrl.step();await f.flush();assert.match(f.status.textContent,/erin: \+2 points/);assert.equal(f.attempts,2);f.ctrl.dispose();
+ const f=fixture(),parent=new Element();f.send({faroe:4});await f.flush();f.flags.blocked=true;f.send({erin:2});f.ctrl.relocate(parent);assert.equal(f.root.parentNode,parent);assert.equal(f.status.parentNode,parent);assert.equal(f.root.hidden,true);f.flags.blocked=false;f.ctrl.step();await f.flush();assert.match(f.status.textContent,/Erin: \+2 points/);assert.equal(f.attempts,2);f.ctrl.dispose();
 });
 
 test('star events use same deduplicated transient transport and never replay',()=>{
@@ -77,16 +77,16 @@ test('star events use same deduplicated transient transport and never replay',()
 });
 test('star and points share ordered playback without mixing currencies or audio',async()=>{
  const f=fixture();f.ctrl.prepare();assert.equal(f.starVideo.src,STAR_STINGER_URL);
- f.sendStar({faroe:1});await f.flush();assert.equal(f.root.dataset.award,'star');assert.equal(f.starVideo.hidden,false);assert.equal(f.video.hidden,true);assert.match(f.status.textContent,/faroe: \+1 stars/);
+ f.sendStar({faroe:1});await f.flush();assert.equal(f.root.dataset.award,'star');assert.equal(f.starVideo.hidden,false);assert.equal(f.video.hidden,true);assert.match(f.status.textContent,/Faroe: \+1 stars/);
  f.send({erin:50});f.sendStar({kaz:2});f.sendStar({kaz:3});
  f.starVideo.ended=true;f.starVideo.dispatchEvent(new Event('ended'));f.starVideo.ended=false;await f.flush();
- assert.equal(f.root.dataset.award,'point');assert.equal(f.starVideo.paused,true);assert.equal(f.starVideo.hidden,true);assert.equal(f.video.hidden,false);assert.match(f.status.textContent,/erin: \+50 points/);
+ assert.equal(f.root.dataset.award,'point');assert.equal(f.starVideo.paused,true);assert.equal(f.starVideo.hidden,true);assert.equal(f.video.hidden,false);assert.match(f.status.textContent,/Erin: \+50 points/);
  f.video.ended=true;f.video.dispatchEvent(new Event('ended'));f.video.ended=false;await f.flush();
- assert.equal(f.root.dataset.award,'star');assert.match(f.status.textContent,/kaz: \+5 stars/);assert.equal(f.video.paused,true);
+ assert.equal(f.root.dataset.award,'star');assert.match(f.status.textContent,/Kaz: \+5 stars/);assert.equal(f.video.paused,true);
  f.flags.muted=true;f.starVideo.currentTime=.5;f.advance(100);assert.equal(f.starVideo.muted,true);
  f.ctrl.cancel();assert.equal(f.starVideo.paused,true);assert.equal(f.root.hidden,true);f.ctrl.dispose();
 });
 test('star reduced motion and decode failure show correct fallback with star sprite',async()=>{
  for(const mode of ['reduced','error']){const f=fixture();if(mode==='reduced')f.flags.reduced=true;else f.setPlay(()=>Promise.reject(Error('decode')));
- f.sendStar({erin:2});await f.flush();assert.equal(f.starVideo.hidden,true);assert.equal(f.title.textContent,'STAR EARNED!');assert.equal(f.title.hidden,false);assert.match(f.rows.children[0].children[1].children[0].src,/star\.png$/);assert.match(f.status.textContent,/erin: \+2 stars/);f.ctrl.dispose();}
+ f.sendStar({erin:2});await f.flush();assert.equal(f.starVideo.hidden,true);assert.equal(f.title.textContent,'STAR EARNED!');assert.equal(f.title.hidden,false);assert.match(f.rows.children[0].children[1].children[0].src,/star\.png$/);assert.match(f.status.textContent,/Erin: \+2 stars/);f.ctrl.dispose();}
 });

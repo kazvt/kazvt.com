@@ -1,3 +1,4 @@
+import { castName } from "./contestant-profiles.mjs?v=cast-editor-20261128-v1";
 import { normalizeMatchItem } from "./trivia-match-media.mjs?v=match-number-20261127-v1";
 import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { showBurst } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
@@ -5,7 +6,7 @@ import { showBurst } from "./show-ui-fx.mjs?v=show-energy-20261127-v1";
 const foley = globalThis.location?.pathname?.replace(/\/$/, '') === '/rg/console'
  ? {play(){}} : (await import('./game-foley.mjs?v=sky-soot-20261127-v1')).foley;
 import { composeLiveCenter, composePieceSize, drawComposeSprite, loadComposeSprite } from './compose-placement.mjs?v=compose-alpha-center-20261128-v1';
-import { CHOICE_MODES, publicMedia, validTriviaAnswer, MAX_TRIVIA_ANSWER, answerSummary, NUMERIC_MODES, numericProgress } from './live-trivia.mjs?v=live-match-20261128-v1';
+import { CHOICE_MODES, publicMedia, validTriviaAnswer, MAX_TRIVIA_ANSWER, answerSummary, NUMERIC_MODES, numericProgress } from './live-trivia.mjs?v=cast-editor-20261128-v1';
 const node=(tag,cls='',text='')=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text)e.textContent=text;return e;};
 const button=(text,fn)=>{const b=node('button','rg-live-button',text);b.type='button';b.addEventListener('click',fn);return b;};
 function image(src,alt='') {const url=publicMedia(src);if(!url)return null;const e=node('img','rg-live-image');e.alt=alt;e.referrerPolicy='no-referrer';e.draggable=false;e.src=url;return e;}
@@ -123,7 +124,7 @@ export function renderTriviaResponses(root,round){
   const row=node('div','rg-live-response');const summary=answerSummary(round,p);
    const raw=round.submissions[p],q=round.question;
    const matching=q.kind==='match-pairs',draft=matching&&!raw?round.drafts?.[p]:null;
-  row.append(node('strong','',p.toUpperCase()));
+  row.append(node('strong','',castName(p).toUpperCase()));
   if(NUMERIC_MODES.includes(q.kind)){
     const progress=numericProgress(round,p);
     row.append(node('span','rg-numeric-status',`${progress.status} · ${progress.attempts.length}/${progress.limit} guesses`));
@@ -166,8 +167,8 @@ function pulse(el,cls){el.classList.remove(cls);void el.offsetWidth;el.classList
 // owned by these views; switching perspective never replays old submissions.
 function createSpectatorPanel(deck,q,p,choose){
  const numeric=NUMERIC_MODES.includes(q.kind),art=['compose-image','draw-over-image'].includes(q.kind);
- const panel=node('section','rg-spectator-panel');panel.dataset.seat=p;panel.style.setProperty('--rg-seat-color',SPECTATOR_COLORS[p]);panel.setAttribute('aria-label',p.toUpperCase());
- const heading=button('',()=>choose(p));heading.className='rg-spectator-panel-heading';heading.setAttribute('aria-label',`Focus ${p.toUpperCase()}`);heading.append(spectatorBerry(p),node('span','',p.toUpperCase()));
+ const panel=node('section','rg-spectator-panel');panel.dataset.seat=p;panel.style.setProperty('--rg-seat-color',SPECTATOR_COLORS[p]);panel.setAttribute('aria-label',castName(p).toUpperCase());
+ const heading=button('',()=>choose(p));heading.className='rg-spectator-panel-heading';heading.setAttribute('data-rg-profile',p);heading.setAttribute('aria-haspopup','dialog');heading.setAttribute('aria-label',`Focus ${castName(p).toUpperCase()}`);heading.append(spectatorBerry(p),node('span','',castName(p).toUpperCase()));
  const content=node('div','rg-spectator-content'),status=node('div','rg-spectator-status');status.setAttribute('role','status');panel.append(heading,content,status);deck.append(panel);
  let drawArt=null,palette=null;
  if(art){drawArt=artboard(content,q,null,false,q.kind==='compose-image'&&p===SPECTATOR_PLAYERS[0]);palette=content.querySelector('.rg-live-compose-palette');}
@@ -226,7 +227,7 @@ function createSpectatorPanel(deck,q,p,choose){
   if(live&&!numeric&&submitted&&!lastSubmitted){pulse(status,'rg-spectator-tile-pop');showBurst(content,{color:SPECTATOR_COLORS[p],count:16});}
   lastAnswer=answer;lastSubmitted=submitted;lastAttempts=attempts;wasSolved=solved;return celebrate;
  }
- return {panel,palette,update};
+ return {panel,palette,update,heading};
 }
 export function createTriviaSpectator(root,q,{seat=q.kind==='match-pairs'?'all':'faroe',manualChoice=false}={}){
  root.replaceChildren();root.classList.remove('rg-live-wrong','rg-live-correct','rg-spectator-all');root.onkeydown=root.oninput=root.onchange=root.onclick=root.onpointerup=null;
@@ -238,7 +239,7 @@ export function createTriviaSpectator(root,q,{seat=q.kind==='match-pairs'?'all':
  let current=null,selected=[...SPECTATOR_PLAYERS,'all'].includes(seat)?seat:'faroe',manual=manualChoice||selected==='all',lastSeat='';
  const seats=new Map();
  function choose(p){manual=true;selected=p;paint();}
- for(const p of SPECTATOR_PLAYERS){const b=button('',()=>choose(p));b.className='rg-spectator-seat';b.setAttribute('aria-label',p.toUpperCase());
+ for(const p of SPECTATOR_PLAYERS){const b=button('',()=>choose(p));b.className='rg-spectator-seat';b.setAttribute('data-rg-profile',p);b.setAttribute('aria-haspopup','dialog');b.setAttribute('aria-label',castName(p).toUpperCase());
   const marker=node('span','rg-spectator-marker');marker.setAttribute('aria-hidden','true');b.append(spectatorBerry(p),marker);nav.append(b);seats.set(p,{b,marker});}
  const all=button('ALL',()=>choose('all'));all.className='rg-spectator-seat rg-spectator-all-button';all.setAttribute('aria-label','ALL');nav.append(all);
  root.append(nav);const body=node('div','rg-live-body rg-spectator-body');root.append(body);
@@ -257,10 +258,10 @@ export function createTriviaSpectator(root,q,{seat=q.kind==='match-pairs'?'all':
   const combined=selected==='all',switched=lastSeat!==selected;lastSeat=selected;
   root.classList.toggle('rg-spectator-all',combined);all.setAttribute('aria-pressed',String(combined));
   for(const [p,{b,marker}] of seats){const progress=numeric?numericProgress(current,p):null;
-   const state=progress?.solved?'solved':current.submissions?.[p]?'done':hasActivity(p)?'working':'waiting';b.dataset.state=state;b.setAttribute('aria-pressed',String(p===selected));b.title=`${p.toUpperCase()} · ${state}`;b.setAttribute('aria-description',state);marker.textContent=state==='solved'||state==='done'?'✓':state==='working'?'●':'';}
+   const state=progress?.solved?'solved':current.submissions?.[p]?'done':hasActivity(p)?'working':'waiting';b.dataset.state=state;b.setAttribute('aria-pressed',String(p===selected));b.title=`${castName(p).toUpperCase()} · ${state}`;b.setAttribute('aria-label',castName(p).toUpperCase());b.setAttribute('aria-description',state);marker.textContent=state==='solved'||state==='done'?'✓':state==='working'?'●':'';}
   const stageVisible=!root.closest('[hidden],.is-freecam')&&!document.hidden&&!document.documentElement.hasAttribute('data-rg-host-locked');
   let celebrated=false;
-  for(const [p,view] of panels){const visible=combined||p===selected;view.panel.hidden=!visible;if(switched&&visible)pulse(view.panel,'rg-spectator-slide');
+  for(const [p,view] of panels){const name=castName(p).toUpperCase();view.panel.setAttribute("aria-label",name);view.heading.setAttribute("aria-label",`Focus ${name}`);view.heading.lastElementChild.textContent=name;const visible=combined||p===selected;view.panel.hidden=!visible;if(switched&&visible)pulse(view.panel,'rg-spectator-slide');
    celebrated=view.update(current,visible,stageVisible)||celebrated;}
   if(celebrated){audienceReact('cheer');foley.play('confirm');}
  }

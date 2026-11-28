@@ -1,4 +1,4 @@
-import { createQuiplashRound, createRedHandedRound, createShopRound, closeCardSubmissions, revealCardAnswers, revealAudienceResults, recordAudienceVote } from "./card-games.mjs?v=side-votes-20261128-v1";
+import { createQuiplashRound, createRedHandedRound, createShopRound, closeCardSubmissions, revealCardAnswers, revealAudienceResults, recordAudienceVote } from "./card-games.mjs?v=cast-editor-20261128-v1";
 
 export function newCardShowRound(decks, mode, prompt = "") {
   if (mode === "quiplash") return createQuiplashRound(prompt ? [prompt] : decks.quiplash);

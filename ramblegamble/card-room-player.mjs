@@ -1,10 +1,11 @@
+import { cleanDisplayName } from "./contestant-profiles.mjs?v=cast-editor-20261128-v1";
 import { createDraftDelivery } from "./trivia-draft-delivery.mjs?v=match-number-20261127-v1";
-import { LIVE_DRAFT_MODES, validTriviaDraft, MAX_TRIVIA_ANSWER } from "./live-trivia.mjs?v=live-match-20261128-v1";
+import { LIVE_DRAFT_MODES, validTriviaDraft, MAX_TRIVIA_ANSWER } from "./live-trivia.mjs?v=cast-editor-20261128-v1";
 import { ACK_TIMEOUT_MS, matchesAck, pendingReceipt, validRequestId } from "./card-room-delivery.mjs?v=answer-edit-20261128-v1";
 import { foley } from "./game-foley.mjs?v=sky-soot-20261127-v1";
-import { renderLiveQuestion } from "./trivia-live-view.mjs?v=compose-alpha-center-20261128-v1";
+import { renderLiveQuestion } from "./trivia-live-view.mjs?v=cast-editor-20261128-v1";
 import { nonce, validNonce, validPublicKey, channelBinding, transcript, verifyHost, proveSeat } from "./card-room-auth.mjs?v=room-recovery-20261127-v1";
-import { ROOM_VERSION, isPlayer, decodePacket, encodePacket } from "./card-room-protocol.mjs?v=live-match-20261128-v1";
+import { ROOM_VERSION, isPlayer, decodePacket, encodePacket } from "./card-room-protocol.mjs?v=cast-editor-20261128-v1";
 import { loadPeer } from "./card-room-peer.mjs?v=room-recovery-20261127-v1";
 import { connectLocal } from "./card-room-local.mjs?v=room-recovery-20261127-v1";
 const $ = id => document.getElementById(id);
@@ -32,7 +33,7 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
   function resolvePending(next) { const receipt=pendingReceipt(pending,next); if(!receipt)return null; clearPending(); if(receipt==='accepted')foley.play('confirm'); return receipt; }
   function showPacket() { if(!pending)return; showPending(); $('fallback').hidden=false; $('submission').textContent='Waiting for host confirmation.'; }
 
-  $('player').textContent = invite.player.toUpperCase(); $('berry').src = `../../ramblegamble/assets/berries/${invite.player}berry.png`; $('berry').hidden = false;
+  $('player').textContent = (cleanDisplayName(invite.displayName)||invite.player).toUpperCase(); $('berry').src = `../../ramblegamble/assets/berries/${invite.player}berry.png`; $('berry').hidden = false;
   $('connect').hidden = false;
   function status(text) { $('connection').textContent = text; }
   function sendPending() {
@@ -149,7 +150,7 @@ if (invite?.v === ROOM_VERSION && isPlayer(invite.player) && /^rg-[a-f0-9]{32}$/
           if (message.type === 'superseded' && online) { disconnect('This seat is open in another window. Reconnect here to take over.',false); return; }
           if (message.type === 'denied' && !online) { clearTimeout(connectionTimer); disconnect('Invitation invalid or revoked. Ask the host for a replacement link.',false); return; }
           if (message.type !== 'round' && !online) { fail('Host did not confirm your seat.'); return; }
-          if (message.type === 'round') { const rejoined=!online; online = true; terminal=false; retryDelay = 1000; clearTimeout(connectionTimer); $('connect').textContent='RECONNECT'; status(message.round ? 'Connected' : 'Connected — waiting for round'); render(message.round); if(rejoined)draftDelivery.reconnect(); }
+          if (message.type === 'round') { $('player').textContent=(cleanDisplayName(message.displayName)||invite.player).toUpperCase(); const rejoined=!online; online = true; terminal=false; retryDelay = 1000; clearTimeout(connectionTimer); $('connect').textContent='RECONNECT'; status(message.round ? 'Connected' : 'Connected — waiting for round'); render(message.round); if(rejoined)draftDelivery.reconnect(); }
           if(message.type==='draft-ack')draftDelivery.ack(message);
           if (message.type === 'ack' && matchesAck(pending,message)) {
             if (message.status === 'accepted' || message.status === 'already-submitted') {

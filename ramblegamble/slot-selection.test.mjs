@@ -27,7 +27,7 @@ test('unselected arrows stay clickable for error feedback, and selection restore
 });
 test('right-click without selection cannot delete or open the staff panel; selected removal works',()=>{
  const {ctx,calls}=fixture();let handler;
- Object.assign(ctx,{canvas:{addEventListener:(_,fn)=>handler=fn},freecam:{active:false},gameStarted:true,pauseMenuOpen:false,camera:{},sceneReady:true,diceModeOpen:false,cameraTransition:null,cameraDetached:false,getSceneInteractionAt:()=>({machine:'slot',part:'slot-reel-display',cellIndex:0}),resolveSlotContextCell,resolveHostContextAction,saveSlotGrid:grid=>{ctx.slotReelGrid=grid;calls.push('save');},syncSlotPlacementControls:()=>{}});
+ Object.assign(ctx,{canvas:{addEventListener:(_,fn)=>handler=fn},freecam:{active:false},gameStarted:true,pauseMenuOpen:false,camera:{},sceneReady:true,diceModeOpen:false,cameraTransition:null,cameraDetached:false,getSceneInteractionAt:()=>({machine:'slot',part:'slot-reel-display',cellIndex:0}),contextCharacter:()=>null,resolveSlotContextCell,resolveHostContextAction,saveSlotGrid:grid=>{ctx.slotReelGrid=grid;calls.push('save');},syncSlotPlacementControls:()=>{}});
  runInNewContext(section('  canvas.addEventListener("contextmenu"', '  canvas.addEventListener("pointerleave"'),ctx);
  let prevented=0;const evt={button:2,preventDefault:()=>prevented++};handler(evt);assert.deepEqual(calls,['error']);assert.equal(ctx.slotReelGrid[0],'kazberry');assert.equal(prevented,1);
  ctx.selectedSlotBerry='star';handler(evt);assert.equal(ctx.slotReelGrid[0],null);assert.deepEqual(calls,['error','save','remove','event']);assert.equal(prevented,2);

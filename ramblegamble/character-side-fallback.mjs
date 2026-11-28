@@ -28,7 +28,7 @@ export function createFugiSpeechBridge(target = window, clock = () => performanc
   }
   target.addEventListener('message',receive);
   function track(entries) {
-    for (const [entry,frame] of frames) if (!entries.includes(entry)) {
+    for (const [entry,frame] of frames) if (!entries.includes(entry)||entry.panel.querySelector('iframe')!==frame) {
       frame.removeEventListener('load',frame.rgSpeechReset);delete frame.rgSpeechReset;frames.delete(entry);states.delete(entry);
     }
     for (const entry of entries) {

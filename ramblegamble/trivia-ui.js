@@ -1,11 +1,12 @@
+import { castName, subscribeCastProfiles } from "./contestant-profiles.mjs?v=cast-editor-20261128-v1";
 import { normalizeAcceptedAnswers } from "./trivia-accepted-answers.mjs?v=accepted-20261128-v1";
 import { matchMediaSource, normalizeMatchItem } from "./trivia-match-media.mjs?v=match-number-20261127-v1";
 import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { gradeSimpleAnswer, isSimpleGradeMode } from "./trivia-simple-grade.mjs?v=accepted-20261128-v1";
-import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, newTriviaId, updateTrivia, activeRoomRound, publicMedia } from "./live-trivia.mjs?v=accepted-20261128-v1";
-import { renderLiveQuestion, renderTriviaResponses, createTriviaSpectator, SPECTATOR_MODES, matchItemView } from "./trivia-live-view.mjs?v=compose-alpha-center-20261128-v1";
+import { publicQuestion, cardStamp, createLiveTrivia, readLiveTrivia, writeLiveTrivia, subscribeLiveTrivia, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, newTriviaId, updateTrivia, activeRoomRound, publicMedia } from "./live-trivia.mjs?v=cast-editor-20261128-v1";
+import { renderLiveQuestion, renderTriviaResponses, createTriviaSpectator, SPECTATOR_MODES, matchItemView } from "./trivia-live-view.mjs?v=cast-editor-20261128-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
-import { readCardGames, subscribeCardGames } from "./card-games-store.mjs?v=answer-edit-20261128-v1";
+import { readCardGames, subscribeCardGames } from "./card-games-store.mjs?v=cast-editor-20261128-v1";
 import { removeSlotSymbol } from "./slot-game.mjs?v=host-cell-cards-20261127-v1";
 import { foley } from "./game-foley.mjs?v=sky-soot-20261127-v1";
 import {
@@ -963,7 +964,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     renderGrid();
     const totals = event.detail?.totals || {};
     const scored = Object.entries(totals).filter(([, amount]) => amount > 0)
-      .map(([name, amount]) => name.toUpperCase() + " +" + Number(amount).toLocaleString());
+      .map(([name, amount]) => castName(name).toUpperCase() + " +" + Number(amount).toLocaleString());
     $("#rg-arcade-status").textContent = scored.length
       ? scored.join(" - ")
       : event.detail?.reason === "save-failed" ? event.detail.message || "Slot award could not be saved."
@@ -2478,7 +2479,7 @@ import { CLIENT_ACTIVITY_ROUTES, CLIENT_PACKET_MAX_BYTES, buildClientActivity, v
     if(activeRoomRound()?.id===round.id&&(fresh||lastRenderedQuestion))renderLive(round,fresh);
   }
   subscribeLiveTrivia(refreshLive);
-  renderTriviaResponses(liveAnswers,readLiveTrivia());
+  subscribeCastProfiles(()=>{const round=readLiveTrivia();renderTriviaResponses(liveAnswers,round);if(round?.id===spectatorRoundId)spectator?.update(round);});
   window.addEventListener("rg:show-latest-trivia",()=>{const r=readLiveTrivia();if(r){if(activeRoomRound()?.id!==r.id)updateTrivia(current=>({...current,cardStamp:cardStamp(readCardGames())})).then(next=>renderLive(next,true)).catch(()=>{});else renderLive(r,true);}else {const e=effectiveNow();if(hasAuthoredTriviaContent(e.content))publishSelectedTrivia().catch(()=>{});}});
   liveLayer.addEventListener("contextmenu",e=>{e.preventDefault();window.dispatchEvent(new CustomEvent("rg:open-host-panel",{detail:{tab:"trivia"}}));});
   $("#rg-live-trivia-back").addEventListener("click",()=>window.dispatchEvent(new Event("rg:hide-trivia-stage")));

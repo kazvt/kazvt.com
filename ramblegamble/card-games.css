@@ -862,3 +862,22 @@ html[data-rg-host-locked] .rg-smeemo-lightning {display:none!important;}
    obscuring card labels, focus outlines or native hit targets. */
 .rg-preview.is-smeemo-cinema .rg-card-games-layer:not([hidden]):not(.is-off-table)::after {content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:url('/ramblegamble/assets/smeemo/fog.png') center / 85% 120% repeat;opacity:.13;}
 .rg-preview.is-smeemo-cinema.is-smeemo-impact .rg-billboard :is(iframe,.rg-billboard-placeholder) {filter:none;}
+
+/* One small turn rail, keyed to committed gameplay. Never label simultaneous
+   submission/voting phases as one contestant's turn. */
+.rg-card-player-progress[data-rg-profile]{pointer-events:auto;cursor:context-menu;}
+.rg-shop-buyer[aria-current=true]{border-bottom:3px solid var(--shop-seat-color,#ffdf75);}
+.rg-shop-buyer-name{min-width:0;max-width:20ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.rg-card-turns{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;margin:6px auto 0;pointer-events:none;}
+.rg-card-turns[hidden]{display:none!important;}
+.rg-card-turns .rg-turn-seat{display:flex;align-items:center;justify-content:center;gap:4px;min-width:0;max-width:min(24vw,145px);padding:2px 6px;background:#2b1b3de6;color:#d5c7e7;border:1px solid #9579b8;box-shadow:2px 2px #211844;font-size:clamp(9px,1.1vw,13px);font-weight:900;cursor:pointer;pointer-events:auto;}
+.rg-turn-seat img{width:clamp(14px,2vw,22px);height:clamp(14px,2vw,22px);object-fit:contain;image-rendering:pixelated;opacity:.7;}
+.rg-turn-seat .rg-turn-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.rg-card-turns .rg-turn-seat[aria-current=true]{border-color:var(--turn-accent);color:#fff5da;box-shadow:0 2px 0 var(--turn-accent),2px 3px #211844;}
+.rg-turn-seat[aria-current=true] img{opacity:1;}
+.rg-turn-seat[aria-current=true]::before{content:"▶";font-size:8px;color:var(--turn-accent);flex:none;}
+.rg-turn-status{font-size:clamp(9px,1.15vw,13px);font-weight:900;color:#fff5da;text-shadow:1px 2px #211844;max-width:100%;overflow-wrap:anywhere;}
+@media(max-height:500px){.rg-card-turns{margin-top:3px;}.rg-card-games-shell:has(.rg-smeemo-board) .rg-smeemo-rail{width:min(100%,calc(max(24px,100dvh - 235px) * 6.0437 + 8 * var(--smeemo-gap)));}}
+
+.rg-shop-buyer[aria-current=true]::before{content:"▶";font-size:9px;flex:none;color:var(--shop-seat-color,#ffe567);}
+.rg-shop-balance-value{max-width:100%;overflow:hidden;text-overflow:ellipsis;}

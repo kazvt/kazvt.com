@@ -1,13 +1,15 @@
+import { castName, subscribeCastProfiles } from "./contestant-profiles.mjs?v=cast-editor-20261128-v1";
+import { markProfileTarget } from "./contestant-profile-editor.mjs?v=cast-editor-20261128-v1";
 import { cardStains, stainUrl, mountSmeemoHorror } from "./smeemo-horror.mjs?v=smeemo-arrival-20261128-v1";
 import { audienceReact } from "./audience-state.mjs?v=show-energy-20261127-v1";
 import { showBurst, voteFlight, purchaseFlight } from "./show-ui-fx.mjs?v=shop-motion-20261127-v1";
 import { createSmeemoImpact, smeemoImpactTransition } from "./smeemo-impact.mjs?v=smeemo-cinema-20261128-v1";
 import { createLightningLayer } from "./smeemo-lightning.mjs?v=smeemo-arrival-20261128-v1";
-import { applyCardShowAction } from "./card-show-actions.mjs?v=side-votes-20261128-v1";
-import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia, writeLiveTriviaDraft } from "./live-trivia.mjs?v=live-match-20261128-v1";
+import { applyCardShowAction } from "./card-show-actions.mjs?v=cast-editor-20261128-v1";
+import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia, writeLiveTriviaDraft } from "./live-trivia.mjs?v=cast-editor-20261128-v1";
 import { activeCardStage, cardStageChange, discardCardRound } from "./card-stage-state.mjs?v=round-exit-20261128-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
-import { mountCardRoom } from "./card-room-host.mjs?v=live-match-20261128-v1";
+import { mountCardRoom } from "./card-room-host.mjs?v=cast-editor-20261128-v1";
 import { foley } from "./game-foley.mjs?v=sky-soot-20261127-v1";
 import {
   CARD_GAME_CATEGORIES,
@@ -19,14 +21,15 @@ import {
   createSmeemoGame,
   advanceSmeemoPhase,
   drawSmeemoCard,
+  smeemoTurn, setSmeemoTurn,
   normalizeTextList,
   parseShopCardList,
   recordAudienceVote,
   visibleCardResponses,
   submitRoundAnswer,
   buyShopCard,
-} from "./card-games.mjs?v=answer-edit-20261128-v1";
-import { readCardGames, writeCardGames, subscribeCardGames } from "./card-games-store.mjs?v=answer-edit-20261128-v1";
+} from "./card-games.mjs?v=cast-editor-20261128-v1";
+import { readCardGames, writeCardGames, subscribeCardGames } from "./card-games-store.mjs?v=cast-editor-20261128-v1";
 import { readPointScores, subscribePointScores, writePointScores, withPointScoresLock } from "./points-store.mjs?v=player-stats-20261127-v1";
 
 (() => {
@@ -72,7 +75,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     erin: "/ramblegamble/assets/berries/erinberry.png",
     kaz: "/ramblegamble/assets/berries/kazberry.png",
   };
-  const playerNames = { faroe: "FAROE", erin: "ERIN", kaz: "KAZ" };
+  const playerNames = Object.fromEntries(CARD_GAME_PLAYERS.map(id=>[id,castName(id).toUpperCase()]));
   const modeNames = { "red-handed": "RED HANDED", quiplash: "BERRYBLAST", shop: "THE SHOP" };
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let state = readCardGames();
@@ -288,6 +291,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     else if (activeSmeemo) {
       const unchanged = !opened && !layer.hidden && previousSmeemo?.id === state.smeemo.id
         && previousSmeemo.phase === state.smeemo.phase && previousSmeemo.status === state.smeemo.status
+        && previousSmeemo.turnStart === state.smeemo.turnStart
         && JSON.stringify(previousSmeemo.draws) === JSON.stringify(state.smeemo.draws);
       if (!unchanged) renderSmeemo(state.smeemo);
       const event = smeemoImpactTransition(previousSmeemo, state.smeemo, opened);
@@ -473,6 +477,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     progress.setAttribute("aria-label", "Player submission status");
     for (const player of CARD_GAME_PLAYERS) {
       const item = element("div", `rg-card-player-progress${round.submissions[player] ? " is-submitted" : ""}`);
+      markProfileTarget(item,player);item.title=playerNames[player];
       {
         const image = element("img");
         image.src = berryImages[player];
@@ -596,20 +601,23 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
   function selectShopBuyer(view, player) {
     selectedBuyer = player;
     view.shell.style.setProperty("--shop-buyer-color", shopColors[player]);
-    for (const [name, node] of view.buyers) node.setAttribute("aria-pressed", String(name === player));
+    for (const [name, node] of view.buyers){
+      const active=name===player;node.setAttribute("aria-pressed",String(active));
+      if(active)node.setAttribute("aria-current","true");else node.removeAttribute("aria-current");
+    }
   }
 
   function refreshShopCard(view, entry, card, animate) {
     const { button, wrap, front, price, owner } = entry;
     // All hidden data stays out of the document until the purchase is committed.
-    const signature = JSON.stringify([card.revealed, card.buyer, card.price, card.revealed ? card.name : null]);
+    const signature = JSON.stringify([card.revealed, card.buyer, card.price, card.revealed ? card.name : null,playerNames[card.buyer]]);
     if (entry.signature === signature) return;
     const newlyRevealed = animate && card.revealed && !entry.revealed;
     entry.signature = signature;
     entry.revealed = Boolean(card.revealed);
     button.disabled = Boolean(card.buyer);
     button.classList.toggle("is-revealed", Boolean(card.revealed));
-    button.setAttribute("aria-label", card.revealed ? `${card.category} card: ${card.name}, purchased by ${card.buyer}` : `${card.category} card, costs ${card.price} points`);
+    button.setAttribute("aria-label", card.revealed ? `${card.category} card: ${card.name}, purchased by ${playerNames[card.buyer]}` : `${card.category} card, costs ${card.price} points`);
     front.replaceChildren();
     price.textContent = `${card.price} POINTS`;
     owner.textContent = card.buyer ? playerNames[card.buyer] : "";
@@ -654,7 +662,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       const image = element("img");
       image.src = berryImages[player];
       image.alt = "";
-      button.append(image, element("span", "", playerNames[player]));
+      markProfileTarget(button,player);button.append(image, element("span", "rg-shop-buyer-name", playerNames[player]));
       button.addEventListener("click", () => {
         if (shopPresentation !== view || layer.hidden || selectedBuyer === player) return;
         foley.play("select");
@@ -772,7 +780,21 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       progress.setAttribute("aria-hidden", "true");
       const ticks = Array.from({length:9}, () => element("span", "rg-smeemo-progress-tick"));
       progress.append(...ticks);
-      view = { id: game.id, board, rail, status, ticks, cards: new Map(), order: order.map(c => c.id), pulse: 0 };
+      const turns=element("div","rg-card-turns");turns.hidden=true;turns.setAttribute("aria-label","Turn order");
+      const turnNodes=new Map();const turnStatus=element("span","rg-turn-status");turnStatus.setAttribute("aria-live","polite");
+      for(const player of CARD_GAME_PLAYERS){
+        const button=element("button","rg-turn-seat");button.type="button";markProfileTarget(button,player);
+        button.style.setProperty("--turn-accent",shopColors[player]);
+        const image=element("img");image.src=berryImages[player];image.alt="";
+        button.append(image,element("span","rg-turn-name",playerNames[player]));
+        button.addEventListener("click",()=>runRoomMutation(()=>{
+          const latest=readCardGames();if(dismissedActive||menuOpen||layer.hidden||layer.classList.contains("is-off-table")||latest.smeemo?.id!==game.id)return;
+          const next=setSmeemoTurn(latest.smeemo,player);if(next!==latest.smeemo)sync({...latest,smeemo:next});
+        }));
+        turns.append(button);turnNodes.set(player,button);
+      }
+      turns.append(turnStatus);
+      view = { id: game.id, board, rail, status, ticks, turns, turnNodes,turnStatus,cards: new Map(), order: order.map(c => c.id), pulse: 0 };
       const stains = cardStains(game.id, game.cards.map(c=>c.id));
       for (const [index, card] of order.entries()) {
         const button = element("button", "rg-smeemo-card");
@@ -825,13 +847,19 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
         view.cards.set(card.id, {button, front, index, revealed: null});
       }
       railViewport.append(rail); board.append(railViewport);
-      content.append(board, status, progress);
+      content.append(board, status, progress, turns);
     }
     if (view.phase !== game.phase) {
       if (view.phase) view.board.classList.remove(`is-${view.phase}`);
       view.board.classList.add(`is-${game.phase}`);
       view.phase = game.phase;
     }
+    const turn=smeemoTurn(game);view.turns.hidden=!turn;
+    for(const [id,button] of view.turnNodes){
+      if(id===turn)button.setAttribute("aria-current","true");else button.removeAttribute("aria-current");
+      button.setAttribute("aria-label",`${playerNames[id]}${id===turn?" — current turn":" — set turn"}`);
+    }
+    view.turnStatus.textContent=turn?`${playerNames[turn]}'S TURN`:"";
     view.draws = game.draws.map(d => d.id);
     view.revealed = revealIds;
     smeemoPresentation = view;
@@ -1078,6 +1106,21 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
   loadDeckInputs(state.decks);
   setDeckVisibility();
   subscribeCardGames(updateFromState);
+  subscribeCastProfiles(profiles=>{
+    for(const player of CARD_GAME_PLAYERS){
+      playerNames[player]=profiles[player].name.toUpperCase();
+      const option=[...playerSelect.options].find(o=>o.value===player);if(option)option.textContent=playerNames[player];
+      const buyer=shopPresentation.buyers?.get(player);if(buyer)buyer.querySelector(".rg-shop-buyer-name").textContent=playerNames[player];
+      const balance=shopBalanceNodes.get(player);if(balance)balance.textContent=`${playerNames[player]} ${pointScores[player]}`;
+      const seat=smeemoPresentation.turnNodes?.get(player);if(seat){seat.querySelector(".rg-turn-name").textContent=playerNames[player];seat.setAttribute("aria-label",`${playerNames[player]}${player===smeemoTurn(state.smeemo)?" — current turn":" — set turn"}`);}
+    }
+    for(const item of content.querySelectorAll(".rg-card-player-progress[data-rg-profile]")){
+      const id=item.getAttribute("data-rg-profile");item.title=playerNames[id];item.querySelector("img").alt=`${playerNames[id]} ${state.round?.submissions[id]?"submitted":"waiting"}`;
+    }
+    if(state.smeemo&&smeemoPresentation.turnStatus){const turn=smeemoTurn(state.smeemo);smeemoPresentation.turnStatus.textContent=turn?`${playerNames[turn]}'S TURN`:"";}
+    if(state.round?.mode==="shop"&&shopPresentation.id===state.round.id)for(const card of state.round.cards){const entry=shopPresentation.cards.get(card.id);if(entry)refreshShopCard(shopPresentation,entry,card,false);}
+    network?.publish();
+  });
   subscribeLiveTrivia(()=>network.publish(),{drafts:false});
   window.addEventListener("rg:trivia-stage-open",()=>{ impact.stop(); foley.stop("card-menu-hover"); menuOpen=false; dismissedActive=Boolean(activeCardStage(state)); window.clearTimeout(smeemoPhaseTimer); smeemoPhaseTimer=0; window.clearTimeout(menuTimer); menuTimer=0; layer.hidden=true; });
   subscribePointScores((scores) => {

@@ -1,10 +1,11 @@
-import { acceptTriviaDraft, MAX_TRIVIA_ANSWER } from "./live-trivia.mjs?v=live-match-20261128-v1";
+import { castName, subscribeCastProfiles } from "./contestant-profiles.mjs?v=cast-editor-20261128-v1";
+import { acceptTriviaDraft, MAX_TRIVIA_ANSWER } from "./live-trivia.mjs?v=cast-editor-20261128-v1";
 import { validRequestId } from "./card-room-delivery.mjs?v=answer-edit-20261128-v1";
 import { loadHostIdentity, nonce, validNonce, transcript, channelBinding, signHost, verifySeat } from "./card-room-auth.mjs?v=room-recovery-20261127-v1";
-import { ROOM_VERSION, createRoom, validRoom, playerRound, encodePacket, decodePacket, acceptSubmission, isPlayer, randomToken } from "./card-room-protocol.mjs?v=live-match-20261128-v1";
+import { ROOM_VERSION, createRoom, validRoom, playerRound, encodePacket, decodePacket, acceptSubmission, isPlayer, randomToken } from "./card-room-protocol.mjs?v=cast-editor-20261128-v1";
 import { loadPeer } from "./card-room-peer.mjs?v=room-recovery-20261127-v1";
 import { openLocalHost } from "./card-room-local.mjs?v=room-recovery-20261127-v1";
-import { CARD_GAME_PLAYERS } from "./card-games.mjs?v=answer-edit-20261128-v1";
+import { CARD_GAME_PLAYERS } from "./card-games.mjs?v=cast-editor-20261128-v1";
 import { electReader, withRoomSubmissionLock, ROOM_KEY, ENABLED_KEY, STATUS_KEY } from "./card-room-election.mjs";
 
 export function mountCardRoom(root, { getRound, commitRound, commitDraft=commitRound, onStatus, role = '/rg/', env = globalThis, peerLoader = loadPeer, identityLoader = loadHostIdentity }) {
@@ -25,12 +26,13 @@ export function mountCardRoom(root, { getRound, commitRound, commitDraft=commitR
   const importButton = root.querySelector('[data-room-import]');
   const rotate = root.querySelector('[data-room-rotate]');
   const enabled = () => read(ENABLED_KEY) === true;
+  const displayName=player=>castName(player,storage);
   function refreshLinks() {
     if (!room) {linksKey=null;links.replaceChildren();return;}
     const current = leader ? { connected: [...clients.keys()] } : read(STATUS_KEY);
     const activeRound = getRound(), active=enabled();
     const projections = CARD_GAME_PLAYERS.map(player=>playerRound(activeRound,player));
-    const key=JSON.stringify([room.id,room.tokens,active,current?.connected||[],projections.map(r=>r?{...r,savedDraft:undefined}:r)]);
+    const key=JSON.stringify([room.id,room.tokens,active,current?.connected||[],CARD_GAME_PLAYERS.map(displayName),projections.map(r=>r?{...r,savedDraft:undefined}:r)]);
     if(key===linksKey)return;linksKey=key;
     links.replaceChildren();
     for (const player of CARD_GAME_PLAYERS) {
@@ -38,11 +40,11 @@ export function mountCardRoom(root, { getRound, commitRound, commitDraft=commitR
       const envelope = { v: ROOM_VERSION, room: room.id, player, token: room.tokens[player], hostKey: room.hostKey };
       url.hash = encodePacket(envelope);
       const round = projections[CARD_GAME_PLAYERS.indexOf(player)];
-      const offline = new URL(url); const offlineFits = JSON.stringify(round).length < 40000; if (offlineFits) offline.hash = encodePacket({ ...envelope, round });
+      const offline = new URL(url); const offlineFits = JSON.stringify(round).length < 40000; if (offlineFits) offline.hash = encodePacket({ ...envelope, round, displayName:displayName(player) });
       const row = doc.createElement('div');
       row.className = active && current?.connected?.includes(player) ? 'rg-room-seat is-connected' : 'rg-room-seat';
       const link = doc.createElement('a'); link.href = url.href; link.target = '_blank'; link.rel = 'noopener noreferrer';
-      link.textContent = `${player.toUpperCase()} — ${active && current?.connected?.includes(player) ? 'connected' : active ? 'not connected' : 'offline'}${round?.submitted ? ' · saved' : round?.phase === 'submissions' ? round.attempts?.length ? ` · ${round.attempts.length} guesses` : ' · waiting' : ''}`;
+      link.textContent = `${displayName(player).toUpperCase()} — ${active && current?.connected?.includes(player) ? 'connected' : active ? 'not connected' : 'offline'}${round?.submitted ? ' · saved' : round?.phase === 'submissions' ? round.attempts?.length ? ` · ${round.attempts.length} guesses` : ' · waiting' : ''}`;
       function copyButton(label, value, message) {
         const copy = doc.createElement('button'); copy.type = 'button'; copy.textContent = label;
         copy.addEventListener('click', async () => {
@@ -51,10 +53,10 @@ export function mountCardRoom(root, { getRound, commitRound, commitDraft=commitR
         });
         return copy;
       }
-      row.append(link, copyButton('COPY LINK', url.href, `Copied ${player.toUpperCase()} live invite.`));
+      row.append(link, copyButton('COPY LINK', url.href, `Copied ${displayName(player).toUpperCase()} live invite.`));
       const revoke = doc.createElement('button'); revoke.type='button'; revoke.textContent='REVOKE / REISSUE';
-      revoke.addEventListener('click', () => { if (env.confirm?.(`Revoke ${player.toUpperCase()}’s invitation? Send the replacement privately. Saved answers stay.`)) return changeCredentials(player); }); row.append(revoke);
-      if (round?.phase === 'submissions' && !round.submitted && offlineFits && offline.hash.length <= 60001) row.append(copyButton('OFFLINE ROUND', offline.href, `Copied ${player.toUpperCase()} offline round link.`));
+      revoke.addEventListener('click', () => { if (env.confirm?.(`Revoke ${displayName(player).toUpperCase()}’s invitation? Send the replacement privately. Saved answers stay.`)) return changeCredentials(player); }); row.append(revoke);
+      if (round?.phase === 'submissions' && !round.submitted && offlineFits && offline.hash.length <= 60001) row.append(copyButton('OFFLINE ROUND', offline.href, `Copied ${displayName(player).toUpperCase()} offline round link.`));
       links.append(row);
     }
   }
@@ -76,7 +78,7 @@ export function mountCardRoom(root, { getRound, commitRound, commitDraft=commitR
     refreshStatus();
   }
   function sendState(conn, player, force=false) {
-    if (leader && enabled() && conn.open && room && read(ROOM_KEY)?.id === room.id && read(ROOM_KEY)?.tokens?.[player] === room.tokens[player]) { try { const payload={v:ROOM_VERSION,type:"round",round:playerRound(getRound(),player)};const key=JSON.stringify({...payload,round:payload.round?{...payload.round,savedDraft:undefined}:null});if(force||sentStates.get(conn)!==key){conn.send(payload);sentStates.set(conn,key);} } catch { try { conn.close(); } catch {} } }
+    if (leader && enabled() && conn.open && room && read(ROOM_KEY)?.id === room.id && read(ROOM_KEY)?.tokens?.[player] === room.tokens[player]) { try { const payload={v:ROOM_VERSION,type:"round",displayName:displayName(player),round:playerRound(getRound(),player)};const key=JSON.stringify({...payload,round:payload.round?{...payload.round,savedDraft:undefined}:null});if(force||sentStates.get(conn)!==key){conn.send(payload);sentStates.set(conn,key);} } catch { try { conn.close(); } catch {} } }
   }
   function publish() {
     refreshLinks();
@@ -214,7 +216,7 @@ export function mountCardRoom(root, { getRound, commitRound, commitDraft=commitR
       const current=read(ROOM_KEY); if(!validRoom(current) || current.hostKey!==hostIdentity?.publicKey) throw new Error('Room unavailable');
       const next=player ? {...current,tokens:{...current.tokens,[player]:randomToken()}} : createRoom(hostIdentity.publicKey);
       if(!write(ROOM_KEY,next)) throw new Error('Storage error'); syncRoom(); reconcile();
-    },locks); onStatus?.(player ? `${player.toUpperCase()} invitation replaced. Send new link privately.` : 'Room credentials replaced. Send all three new links.'); }
+    },locks); onStatus?.(player ? `${displayName(player).toUpperCase()} invitation replaced. Send new link privately.` : 'Room credentials replaced. Send all three new links.'); }
     catch { onStatus?.('Could not replace credentials. No change confirmed.'); }
   }
   function storageChanged(event) { if ([ENABLED_KEY, STATUS_KEY, ROOM_KEY, null].includes(event.key)) { if ((event.key===ROOM_KEY || event.key===null) && hostIdentity) syncRoom(); reconcile(); } }
@@ -243,5 +245,6 @@ export function mountCardRoom(root, { getRound, commitRound, commitDraft=commitR
     if(!disposed) reconcile();
   })();
   refreshStatus();
-  return { ready, publish, dispose() { disposed = true; pageHide(); env.removeEventListener?.('storage', storageChanged); env.removeEventListener?.('pagehide', pageHide); env.removeEventListener?.('pageshow', pageShow); } };
+  const stopProfiles=subscribeCastProfiles(publish,env);
+  return { ready, publish, dispose() { stopProfiles();disposed = true; pageHide(); env.removeEventListener?.('storage', storageChanged); env.removeEventListener?.('pagehide', pageHide); env.removeEventListener?.('pageshow', pageShow); } };
 }

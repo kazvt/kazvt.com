@@ -25,6 +25,7 @@ const assetPath='/ramblegamble/assets/berries/';
 
 function makeTag(layer,id){
   const tag=document.createElement('div');tag.className='rg-character-tag';tag.hidden=true;
+  tag.setAttribute?.('data-rg-profile',id);tag.setAttribute?.('role','button');tag.setAttribute?.('aria-haspopup','dialog');tag.tabIndex=0;
   tag.style.setProperty('--character-accent','#'+colors[id].toString(16).padStart(6,'0'));
   const title=document.createElement('div');title.className='rg-character-name';title.textContent=names[id];tag.append(title);
   const values={};
@@ -172,5 +173,5 @@ export function createCharacterSelection(THREE,scene,layer,{subscribePoints,subs
     layer.classList.toggle('rg-group-stats-visible',groupEntries.length>0&&shown.size===contestants.length);
     layer.classList.toggle('rg-group-stats-partial',groupEntries.length>0&&shown.size>0&&shown.size<contestants.length);
   }
-  return {group,hide,update,reaction(id,time){const s=tags.get(id);return {reactAge:time-(s?.reactAt??-Infinity),delta:s?.delta??0};},dispose(){hide();for(const stop of unsubscribe)stop?.();for(const {tag} of tags.values())tag.remove();layer.classList.remove('rg-group-stats-visible','rg-group-stats-partial');scene.remove(group);for(const m of group.children){m.geometry.dispose();m.material.dispose();}}};
+  return {group,hide,update,setNames(profiles){for(const [id,state] of tags){const name=profiles[id]?.name;if(!name)continue;state.tag.children[0].textContent=name.toUpperCase();state.tag.title=name;state.dirty=true;}},reaction(id,time){const s=tags.get(id);return {reactAge:time-(s?.reactAt??-Infinity),delta:s?.delta??0};},dispose(){hide();for(const stop of unsubscribe)stop?.();for(const {tag} of tags.values())tag.remove();layer.classList.remove('rg-group-stats-visible','rg-group-stats-partial');scene.remove(group);for(const m of group.children){m.geometry.dispose();m.material.dispose();}}};
 }

@@ -1,11 +1,12 @@
+import { castName, subscribeCastProfiles } from "/ramblegamble/contestant-profiles.mjs?v=cast-editor-20261128-v1";
 import { publishPointAward, publishStarAward } from "/ramblegamble/point-award-events.mjs?v=star-stinger-20261128-v1";
 import { AUDIENCE_KEY, AUDIENCE_MODES, readAudienceMode, writeAudienceMode } from "/ramblegamble/audience-state.mjs?v=show-energy-20261127-v1";
 import { mountCommandCompletion } from "/ramblegamble/console-completion.mjs?v=player-stats-20261127-v1";
-import { applyCardShowAction } from "/ramblegamble/card-show-actions.mjs?v=side-votes-20261128-v1";
-import { renderTriviaResponses } from "/ramblegamble/trivia-live-view.mjs?v=compose-alpha-center-20261128-v1";
-import { activeRoomRound, readLiveTrivia, writeLiveTrivia, writeLiveTriviaDraft, subscribeLiveTrivia, newTriviaId, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, updateTrivia, answerSummary } from "/ramblegamble/live-trivia.mjs?v=live-match-20261128-v1";
+import { applyCardShowAction } from "/ramblegamble/card-show-actions.mjs?v=cast-editor-20261128-v1";
+import { renderTriviaResponses } from "/ramblegamble/trivia-live-view.mjs?v=cast-editor-20261128-v1";
+import { activeRoomRound, readLiveTrivia, writeLiveTrivia, writeLiveTriviaDraft, subscribeLiveTrivia, newTriviaId, TRIVIA_REQUEST_KEY, TRIVIA_REPLY_KEY, updateTrivia, answerSummary } from "/ramblegamble/live-trivia.mjs?v=cast-editor-20261128-v1";
 import { withRoomSubmissionLock } from "/ramblegamble/card-room-election.mjs";
-import { mountCardRoom } from "/ramblegamble/card-room-host.mjs?v=live-match-20261128-v1";
+import { mountCardRoom } from "/ramblegamble/card-room-host.mjs?v=cast-editor-20261128-v1";
 import {
   RG_CONTESTANTS,
   readPointScores,
@@ -16,8 +17,8 @@ import {
   withStarScoresLock,
 } from "/ramblegamble/points-store.mjs?v=player-stats-20261127-v1";
 import { parsePointsCommand, POINTS_HELP } from "/ramblegamble/points-commands.mjs?v=player-stats-20261127-v1";
-import { createSmeemoGame } from "/ramblegamble/card-games.mjs?v=answer-edit-20261128-v1";
-import { readCardGames, writeCardGames, subscribeCardGames } from "/ramblegamble/card-games-store.mjs?v=answer-edit-20261128-v1";
+import { createSmeemoGame } from "/ramblegamble/card-games.mjs?v=cast-editor-20261128-v1";
+import { readCardGames, writeCardGames, subscribeCardGames } from "/ramblegamble/card-games-store.mjs?v=cast-editor-20261128-v1";
 
 const output = document.getElementById("terminal-output");
 const form = document.getElementById("terminal-form");
@@ -36,7 +37,7 @@ function addLine(text, className = "") {
 }
 
 function formatScores(scores) {
-  return RG_CONTESTANTS.map((name) => `${name}: ${scores[name]}`).join("  ");
+  return RG_CONTESTANTS.map((name) => `${castName(name)}: ${scores[name]}`).join("  ");
 }
 
 const answersPanel=document.getElementById('console-answers'), answersContent=document.getElementById('console-answer-content');
@@ -49,7 +50,7 @@ function refreshAnswers(){
   const heading=document.createElement('p');heading.textContent=round.prompt||round.mode;answersContent.append(heading);
   const body=document.createElement('div');answersContent.append(body);
   if(round.mode==='trivia'){renderTriviaResponses(body,round);return;}
-  for(const name of RG_CONTESTANTS){const row=document.createElement('p');row.textContent=`${name.toUpperCase()}: ${round.submissions?.[name]||'Waiting'}`;body.append(row);}
+  for(const name of RG_CONTESTANTS){const row=document.createElement('p');row.textContent=`${castName(name).toUpperCase()}: ${round.submissions?.[name]||'Waiting'}`;body.append(row);}
 }
 answersPanel.addEventListener('toggle',refreshAnswers);
 const crowdControls=document.getElementById("terminal-audience");
@@ -204,4 +205,5 @@ subscribeCardGames(() => {cardRoom.publish();refreshAnswers();});
 
 subscribeLiveTrivia(()=>cardRoom.publish(),{drafts:false});
 subscribeLiveTrivia(refreshAnswers);
+subscribeCastProfiles(refreshAnswers);
 window.addEventListener("storage",event=>{if(event.key!==TRIVIA_REPLY_KEY)return;try{const reply=JSON.parse(event.newValue);if(reply?.message)addLine(reply.message,reply.ok?"":"terminal-error");}catch{}});

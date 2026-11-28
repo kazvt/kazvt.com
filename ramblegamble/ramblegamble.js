@@ -1,9 +1,11 @@
+import { readCastProfiles, subscribeCastProfiles } from "./contestant-profiles.mjs?v=cast-editor-20261128-v1";
+import { mountProfileEditor, markProfileTarget } from "./contestant-profile-editor.mjs?v=cast-editor-20261128-v1";
 import { publishPointAward, subscribePointAwards } from "./point-award-events.mjs?v=star-stinger-20261128-v1";
-import { createPointAwardStinger } from "./point-award-stinger.mjs?v=star-stinger-20261128-v1";
+import { createPointAwardStinger } from "./point-award-stinger.mjs?v=cast-editor-20261128-v1";
 import { createShowCredits } from "./show-credits.mjs?v=credits-clean-20261128-v1";
 import { createContestantStands } from "./contestant-stands.mjs?v=stand-lift-20261128-v1";
 import { horrorRenderScale, HORROR_FRAME_MS } from "./smeemo-horror.mjs?v=smeemo-arrival-20261128-v1";
-import { readCardGames } from "./card-games-store.mjs?v=answer-edit-20261128-v1";
+import { readCardGames } from "./card-games-store.mjs?v=cast-editor-20261128-v1";
 import { createSlotMarquee } from "./slot-marquee.mjs?v=slot-marquee-20261128-v1";
 import { createSmeemoEncounter, createSmeemoStinger, createSmeemoTableSession, SMEEMO_RETURN_MS } from "./smeemo-reveal.mjs?v=smeemo-hits-20261128-v1";
 import { createFloatingSky } from "./floating-sky.mjs?v=sky-solid-lettering-20261128-v1";
@@ -14,12 +16,12 @@ import { createMenuMarquee } from "./menu-marquee.mjs?v=karaoke-notes-20261128-v
 import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=smeemo-reveal-20261127-v1";
 import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcony.mjs?v=hazel-seat-20261128-v1";
 import { createSignGlow } from "./sign-glow.mjs?v=neon-focus-20261127-v1";
-import { selectedCharacterId, characterRenderPose, createCharacterSelection } from "./character-selection.mjs?v=stage-dance-20261127-v1";
+import { selectedCharacterId, characterRenderPose, createCharacterSelection } from "./character-selection.mjs?v=cast-editor-20261128-v1";
 import { sampleVipAmbience } from "./vip-atmosphere.mjs?v=sky-soot-20261127-v1";
 import { createStageShow } from "./stage-show.mjs?v=curtain-karaoke-20261128-v1";
 import { REVEAL_MS, RETRACT_MS, smooth as theatreEase } from "./stage-show-state.mjs?v=all-curtain-20261127-v1";
 import { createCharacterOcclusion } from "./character-occlusion.mjs?v=side-fugis-20261128-v1";
-import { createSidePortraits, createFugiSpeechBridge } from "./character-side-fallback.mjs?v=speech-peeks-20261128-v1";
+import { createSidePortraits, createFugiSpeechBridge } from "./character-side-fallback.mjs?v=cast-editor-20261128-v1";
 import { bindHoldFreecam } from "./hold-freecam.mjs?v=hold-freecam-20261127-v1";
 import { AUDIENCE_MODES, AUDIENCE_KEY, readAudienceMode, writeAudienceMode, createAudienceState } from "./audience-state.mjs?v=smeemo-alpha-20261128-v1";
 import { createAudienceRenderer, crowdCatAnchor, CROWD_CAT } from "./audience-render.mjs?v=exterior-hands-20261128-v1";
@@ -2009,6 +2011,21 @@ import {
     diceDoorTargets.push(target);
   }
 
+  function createBillboardFrame(source) {
+    const iframe = document.createElement("iframe");
+    iframe.src = source.source;
+    iframe.title = `${source.label} live browser source`;
+    iframe.loading = "eager";
+    iframe.width = iframe.height = String(CHARACTER_SOURCE_SIZE);
+    iframe.referrerPolicy = "strict-origin-when-cross-origin";
+    iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
+    iframe.tabIndex = -1;
+    return iframe;
+  }
+  function withSavedProfile(source) {
+    const saved=readCastProfiles()[source.id];
+    return saved?{...source,label:saved.name,source:saved.source}:source;
+  }
   function createBillboardPanel(source, kind) {
     const panel = document.createElement("div");
     panel.className = source.source ? "rg-billboard rg-billboard-live" : "rg-billboard";
@@ -2018,15 +2035,7 @@ import {
     panel.setAttribute("aria-label", `${source.label} browser-source billboard`);
 
     if (source.source) {
-      const iframe = document.createElement("iframe");
-      iframe.src = source.source;
-      iframe.title = `${source.label} live browser source`;
-      iframe.loading = "eager";
-      iframe.width = iframe.height = String(CHARACTER_SOURCE_SIZE);
-      iframe.referrerPolicy = "strict-origin-when-cross-origin";
-      iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
-      iframe.tabIndex = -1;
-      panel.append(iframe);
+      panel.append(createBillboardFrame(source));
     } else {
       const placeholder = document.createElement("div");
       placeholder.className = "rg-billboard-placeholder";
@@ -2056,7 +2065,8 @@ import {
       const bPosition = b.getWorldPosition(new THREE.Vector3());
       return aPosition.x - bPosition.x;
     });
-    contestants = BILLBOARD_SOURCES.map((source, index) => {
+    contestants = BILLBOARD_SOURCES.map((definition, index) => {
+      const source=withSavedProfile(definition);
       // The supplied stage's seating row is authored left-to-right as Faroe,
       // Erin, Kaz. Use its world-space order so browser panels cannot drift to
       // another chair if decorative nameplate transforms are edited later.
@@ -2141,9 +2151,10 @@ import {
     hostTargets.push(hitProxy);
 
     const anchor = new THREE.Vector3(pose.anchor.x, pose.anchor.y, pose.anchor.z);
-    const panel = createBillboardPanel(HOST_BILLBOARD_SOURCE, "host");
+    const source=withSavedProfile(HOST_BILLBOARD_SOURCE);
+    const panel = createBillboardPanel(source, "host");
     hostBillboard = {
-      ...HOST_BILLBOARD_SOURCE,
+      ...source,
       chair,
       hitProxy,
       anchor,
@@ -2157,8 +2168,9 @@ import {
   function setupHazelBillboard() {
     const pose=hazelBalconyPose();
     try {
-      hazelBillboard={...HAZEL_SOURCE,...pose,anchor:new THREE.Vector3().copy(pose.anchor),
-        panel:createBillboardPanel(HAZEL_SOURCE,"guest"), seated:true};
+      const source=withSavedProfile(HAZEL_SOURCE);
+      hazelBillboard={...source,...pose,anchor:new THREE.Vector3().copy(pose.anchor),
+        panel:createBillboardPanel(source,"guest"), seated:true};
     } catch (error) {
       hazelBillboard=null;
       console.warn("Hazel billboard unavailable; balcony camera remains available",error);
@@ -2280,8 +2292,8 @@ import {
     };
   }
 
-  function getBillboardAtScreen(clientX, clientY) {
-    if (diceModeOpen || pauseMenuOpen || (!cameraDetached && !["overview","host","contestant","contestants","hazel"].includes(currentView.kind))
+  function getBillboardAtScreen(clientX, clientY, context=false) {
+    if (diceModeOpen || pauseMenuOpen || (!context && !cameraDetached && !["overview","host","contestant","contestants","hazel"].includes(currentView.kind))
       || billboardLayer.classList.contains("rg-billboards-fading")) return null;
     const rect = billboardLayer.getBoundingClientRect();
     if (!rect.width || !rect.height) return null;
@@ -2723,11 +2735,46 @@ import {
     if(event.shiftKey){event.preventDefault();spotlightAt(event.clientX,event.clientY);return;}
     pointClickAt(event.clientX, event.clientY);
   });
+  const profileEditor=mountProfileEditor({allowed:()=>gameStarted&&!pauseMenuOpen&&!freecam?.active&&!cameraTransition&&encounter.phase!=="stinger"});
+  function refreshCast(profiles){
+    for(const entry of billboards){
+      const next=profiles[entry.id];if(!next)continue;
+      entry.label=next.name;
+      entry.panel.setAttribute("aria-label",`${next.name} browser-source billboard`);
+      if(entry.source!==next.source){
+        entry.source=next.source;
+        entry.panel.replaceChildren(createBillboardFrame(entry));
+      }else{const frame=entry.panel.querySelector("iframe");if(frame)frame.title=`${next.name} live browser source`;}
+    }
+    characterSelection?.setNames(profiles);
+    if(pointsHud)for(const [i,id] of ["faroe","erin","kaz"].entries()){
+      const node=pointsHud.querySelectorAll(".rg-points-entry")[i];if(!node)continue;
+      markProfileTarget(node,id);node.removeAttribute("aria-hidden");node.title=profiles[id].name;
+      const image=node.querySelector("img");if(image)image.title=image.alt=profiles[id].name;
+    }
+  }
+  subscribeCastProfiles(refreshCast);
+  function contextCharacter(clientX,clientY,interaction){
+    // Side peeks are rotated square panels. Test the diamond, not its much
+    // larger axis-aligned bounding box; keep normal left-click passthrough.
+    if(!billboardLayer.classList.contains("rg-billboards-fading"))for(const entry of billboards){
+      if(!entry.sidePortrait||entry.panel.parentElement.classList.contains("rg-side-exiting"))continue;
+      const r=entry.panel.getBoundingClientRect();
+      if(r.width>0&&r.height>0&&Math.abs((clientX-r.left)/r.width-.5)+Math.abs((clientY-r.top)/r.height-.5)<=.5)return entry.id;
+    }
+    const character=getBillboardAtScreen(clientX,clientY,true)||interaction;
+    if(character?.machine==="hazel")return "hazel";
+    if(character?.machine==="host")return "lillie-host";
+    if(["contestant","contestant-stand"].includes(character?.machine))return character.contestantId;
+    return null;
+  }
   canvas.addEventListener("contextmenu", (event) => {
     if (freecam.active || !gameStarted || pauseMenuOpen || !camera || !sceneReady || diceModeOpen || cameraTransition || document.documentElement.hasAttribute("data-rg-host-locked")) return;
     if(event.button!==2)return;
     const interaction=getSceneInteractionAt(event.clientX,event.clientY);
     if(interaction?.machine==="smeemo-crowd"){resetSmeemoHits(event);return;}
+    const characterId=contextCharacter(event.clientX,event.clientY,interaction);
+    if(characterId&&profileEditor.open(characterId,canvas)){event.preventDefault();return;}
     const index = resolveSlotContextCell({
       button: event.button, view: cameraDetached ? "overview" : currentView.kind, selected: selectedSlotBerry,
       interaction,
@@ -3364,6 +3411,7 @@ import {
       try { stageShow=createStageShow(THREE,scene,{slotRig,slotsModel,roots:[stageModel,rouletteModel,slotsModel,audience?.group],foley,onEmotion:reactCrowd,reduced:()=>reducedMotion.matches});stageShow.group.visible=!pauseMenuOpen; }
       catch(error){scene.getObjectByName("rg-stage-theatre")?.removeFromParent();slotsModel.visible=true;console.warn("Stage theatre unavailable",error);}
       characterSelection=createCharacterSelection(THREE,scene,billboardLayer,{subscribePoints:subscribePointScores,subscribeStars:subscribeStarScores});
+      characterSelection.setNames(readCastProfiles());
       try {characterOcclusion=createCharacterOcclusion(THREE,renderer,[stageModel,rouletteModel,slotsModel,stageShow?.group],billboards);}
       catch(error){console.warn("Character depth pass unavailable",error);}
       fitCamera();

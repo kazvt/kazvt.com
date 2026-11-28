@@ -1,3 +1,4 @@
+import { castName } from "./contestant-profiles.mjs?v=cast-editor-20261128-v1";
 import {AWARD_NAMES, POINT_AWARD_TTL, normalizeAwardTotals} from './point-award-events.mjs?v=star-stinger-20261128-v1';
 export const POINT_STINGER_URL='/ramblegamble/assets/stingers/points-earned.webm?v=points-stinger-20261128-v1';
 export const STAR_STINGER_URL='/ramblegamble/assets/stingers/star-earned.webm?v=star-stinger-20261128-v1';
@@ -30,7 +31,7 @@ export function createPointAwardStinger({root,video:pointVideo,starVideo,rows,ti
     root.dataset.award=isStar?'star':'point';
     const elements=data.map(({name,formatted})=>{
       const row=doc.createElement('div');row.className='rg-award-row';row.dataset.berry=name;
-      const label=doc.createElement('span');label.className='rg-award-name';label.textContent=name.toUpperCase();
+      const label=doc.createElement('span');label.className='rg-award-name';label.textContent=castName(name).toUpperCase();
       const value=doc.createElement('span');value.className='rg-award-value';
       const chip=doc.createElement('img');chip.src=isStar?STAR:CHIP;chip.alt='';chip.draggable=false;
       const number=doc.createElement('span');number.className='rg-award-number';number.textContent=formatted;
@@ -38,7 +39,7 @@ export function createPointAwardStinger({root,video:pointVideo,starVideo,rows,ti
       value.append(chip,number);row.append(label,value);return row;
     });
     rows.replaceChildren(...elements);root.dataset.count=String(elements.length);
-    status.textContent=`${isStar?'Star':'Points'} earned! ${data.map(({name,formatted})=>`${name}: ${formatted} ${unit}`).join('; ')}.`;
+    status.textContent=`${isStar?'Star':'Points'} earned! ${data.map(({name,formatted})=>`${castName(name)}: ${formatted} ${unit}`).join('; ')}.`;
   }
   function start(events){
     const data=combinePointAwards(events);if(!data.length)return;

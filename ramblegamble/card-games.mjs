@@ -164,6 +164,7 @@ function normalizeSmeemo(value) {
     cards,
     previewOrder: normalizedPreviewOrder,
     draws,
+    ...(CARD_GAME_PLAYERS.includes(value.turnStart)?{turnStart:value.turnStart}:{}),
   };
 }
 
@@ -391,4 +392,17 @@ export function drawSmeemoCard(value, cardId) {
     game.status = "complete";
   }
   return { game, draw, error: "" };
+}
+
+// The optional starting seat belongs to the round, never to the player ledger.
+// Legacy games use the authored Faroe → Erin → Kaz seat order.
+export function smeemoTurn(game) {
+  if(game?.phase!=="ready"||game.status!=="playing"||!Array.isArray(game.draws))return null;
+  const start=Math.max(0,CARD_GAME_PLAYERS.indexOf(game.turnStart));
+  return CARD_GAME_PLAYERS[(start+game.draws.length)%CARD_GAME_PLAYERS.length];
+}
+export function setSmeemoTurn(game,player){
+  if(!smeemoTurn(game)||!CARD_GAME_PLAYERS.includes(player)||smeemoTurn(game)===player)return game;
+  const start=(CARD_GAME_PLAYERS.indexOf(player)-game.draws.length%CARD_GAME_PLAYERS.length+CARD_GAME_PLAYERS.length)%CARD_GAME_PLAYERS.length;
+  return {...game,turnStart:CARD_GAME_PLAYERS[start]};
 }
