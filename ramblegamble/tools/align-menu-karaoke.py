@@ -128,12 +128,12 @@ def ctc_words_from_spans(spans, cues, labels, frame_seconds):
             raise ValueError(f'CTC token mismatch at {original!r}')
         start = float(chars[0].start) * frame_seconds
         end = float(chars[-1].end) * frame_seconds
-        frame_count = sum(int(span.length) for span in chars)
+        frame_count = sum(len(span) for span in chars)
         if frame_count <= 0:
             raise ValueError(f'CTC alignment has no acoustic frames for {original!r}')
         # TorchAudio reports mean log posterior per character span. Geometric
         # averaging retains a useful 0..1 diagnostic without calling it truth.
-        log_score = sum(float(span.score) * int(span.length) for span in chars) / frame_count
+        log_score = sum(float(span.score) * len(span) for span in chars) / frame_count
         score = math.exp(min(0.0, log_score))
         if not (math.isfinite(start) and math.isfinite(end) and 0 <= start < end <= DURATION + .05):
             raise ValueError(f'Invalid CTC interval for {original!r}: {start}–{end}')
