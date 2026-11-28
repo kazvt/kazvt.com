@@ -16,13 +16,14 @@ class AlignmentTests(unittest.TestCase):
     def test_exact_lyrics_and_bounds(self):
         mapped = a.map_words(self.cues, self.words)
         result, report = a.candidate(self.cues, mapped, self.words)
-        self.assertEqual(len(mapped), 240)
+        self.assertEqual(len(mapped), 190)
         self.assertEqual(len(result), 35)
         self.assertEqual([w[0] for c in result for w in c['words']], [w['word'] for w in self.words])
+        self.assertEqual([c['responses'] for c in result], [c['responses'] for c in self.cues])
         self.assertEqual(result[2]['start'], result[1]['end'])
         self.assertEqual(result[2]['end'], result[3]['start'])
         self.assertEqual(result[-1]['end'], a.DURATION)
-        self.assertEqual(sum(r['independentlyMatched'] for r in report), 240)
+        self.assertEqual(sum(r['independentlyMatched'] for r in report), 190)
 
     def test_per_word_updates_not_global_offset(self):
         self.words[8]['start'] += .03
