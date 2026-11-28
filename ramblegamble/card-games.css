@@ -374,8 +374,12 @@
 .is-berryblast .rg-card-prompt.is-quiplash { min-height:0; padding:18px 20px; border:3px solid #49db91; box-shadow:4px 4px #1e0b01; }
 .is-berryblast .rg-card-prompt-copy { max-width:none; font-size:clamp(16px,2.5vw,25px); }
 .is-berryblast .rg-card-answer-grid { width:100%; grid-template-columns:minmax(0,1fr); gap:8px; }
-.is-berryblast .rg-card-answer { width:100%; min-height:48px; aspect-ratio:auto; display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; justify-items:start; padding:12px 15px; border:2px solid #b77beb; background:#f2f2da; filter:none; box-shadow:3px 3px #1e0b01; text-align:left; }
-.is-berryblast .rg-card-answer-copy { max-width:none; white-space:pre-wrap; font-size:clamp(14px,2vw,20px); }
+/* BerryBlast is a full-width list, not a stack of narrow evidence-card labels.
+   Explicit track placement also keeps decorative children out of text sizing. */
+.is-berryblast .rg-card-answer { box-sizing:border-box; width:100%; min-width:0; max-width:none; min-height:48px; aspect-ratio:auto; display:grid; grid-template-columns:minmax(0,1fr); align-items:center; justify-items:stretch; padding:12px 15px; border:2px solid #b77beb; background:#f2f2da; filter:none; box-shadow:3px 3px #1e0b01; text-align:left; }
+.is-berryblast .rg-card-answer:has(> .rg-card-vote-count) { grid-template-columns:minmax(0,1fr) fit-content(40%); }
+.is-berryblast .rg-card-answer > .rg-card-answer-copy { grid-column:1; grid-row:1; display:block; box-sizing:border-box; width:100%; min-width:0; max-width:none; min-height:0; max-height:none; justify-self:stretch; overflow:visible; overflow-wrap:anywhere; white-space:pre-wrap; text-align:left; font-size:clamp(14px,2vw,20px); }
+.is-berryblast .rg-card-answer > .rg-card-vote-count { grid-column:2; grid-row:1; justify-self:end; width:auto; min-width:0; max-width:100%; white-space:normal; overflow-wrap:anywhere; text-align:center; }
 .is-berryblast button.rg-card-answer:hover { transform:translateY(-2px); border-color:#49db91; }
 .is-berryblast .rg-card-answer.is-winner { outline:3px solid #ffdf00; outline-offset:0; transform:none; }
 .rg-card-network { padding:10px; margin:10px 0; border:1px solid #8b2626; background:#f2f2da; color:#1e0b01; }
@@ -390,7 +394,6 @@
 /* Give overflowing long responses their own accessible scroll surface without
    letting the empty overlay intercept room clicks. */
 .rg-card-answer-copy, .rg-card-prompt-copy { max-height:35dvh; overflow:auto; scrollbar-width:thin; }
-.is-berryblast .rg-card-answer-copy { max-height:24dvh; }
 .rg-card-prompt-copy { pointer-events:auto; }
 .rg-card-games-shell.is-scrollable { pointer-events:auto; }
 @media(max-height:500px) { .rg-card-games-shell { max-height:94dvh; } }
