@@ -5,7 +5,7 @@ import { createSmeemoImpact, smeemoImpactTransition } from "./smeemo-impact.mjs?
 import { createLightningLayer } from "./smeemo-lightning.mjs?v=smeemo-arrival-20261128-v1";
 import { applyCardShowAction } from "./card-show-actions.mjs?v=card-polish-20261127-v1";
 import { activeRoomRound, subscribeLiveTrivia, writeLiveTrivia, writeLiveTriviaDraft } from "./live-trivia.mjs?v=match-number-20261127-v1";
-import { activeCardStage, cardStageChange } from "./card-stage-state.mjs?v=wildcard-shared-20261126-v1";
+import { activeCardStage, cardStageChange, discardCardRound } from "./card-stage-state.mjs?v=round-exit-20261128-v1";
 import { withRoomSubmissionLock } from "./card-room-election.mjs";
 import { mountCardRoom } from "./card-room-host.mjs?v=match-number-20261127-v1";
 import { foley } from "./game-foley.mjs?v=sky-soot-20261127-v1";
@@ -90,6 +90,9 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
   let menuTimer = 0;
   let menuSelection = "";
   let menuGeneration = 0;
+  let pendingExit = null;
+  let pendingExitKey = null;
+  let failedExitKey = null;
   let lastPresentation = { id: null, visible: [], phase: null };
   let shopPresentation = { id: null, revealed: new Set() };
   let smeemoPresentation = { id: null, revealed: new Set() };
@@ -149,6 +152,10 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
 
   function setStageTitle(value, mode = "") {
     title.textContent = value;
+    const endsRound = ["red-handed", "quiplash", "smeemo"].includes(mode);
+    roomButton.textContent = endsRound ? "END ROUND" : "ROOM";
+    roomButton.setAttribute("aria-label", endsRound ? "End round and return to room; points and stars are kept" : "Return to room");
+    roomButton.title = endsRound ? "End this round. Player points and stars stay unchanged." : "Return to room";
     title.classList.toggle("rg-visually-hidden", mode === "menu");
     if (mode) header.dataset.cardMode = mode;
     else delete header.dataset.cardMode;
@@ -233,6 +240,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
 
   function updateFromState(next) {
     const before = state?.round, after = next?.round;
+    if (before?.id !== after?.id) answerText.value = "";
     const previousSmeemo = state?.smeemo;
     if (!dismissedActive && !menuOpen && before?.id && before.id === after?.id && !layer.hidden) {
       const prior = Object.values(before.submissions || {}).filter(Boolean).length;
@@ -250,6 +258,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
 
     const { active, opened, ended } = cardStageChange(lastActiveStage, state);
     lastActiveStage = active;
+    if (failedExitKey && active?.key !== failedExitKey) failedExitKey = null;
     const activeSmeemo = active?.mode === "smeemo";
     if (!activeSmeemo || dismissedActive || menuOpen) {
       impact.stop();
@@ -420,10 +429,19 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
       makeModeChoice("shop", "menu-shop-face.png", "Shop"),
     );
     content.append(grid);
+    if (pendingExit) {
+      for (const button of grid.children) button.disabled = true;
+      liveStatus.textContent = "Ending previous round…";
+      pendingExit.then(() => {
+        if (!menuOpen || content.children[0] !== grid) return;
+        for (const button of grid.children) button.disabled = Boolean(failedExitKey);
+        liveStatus.textContent = failedExitKey ? "Could not end round. Return to room and retry." : "Choose a card game.";
+      });
+    }
   }
 
   function chooseMode(mode, choice) {
-    if (!menuOpen || menuTimer || menuSelection) return;
+    if (!menuOpen || menuTimer || menuSelection || pendingExit || failedExitKey) return;
     const generation = menuGeneration;
     const expectedStage = activeCardStage(state)?.key;
     foley.stop("card-menu-hover");
@@ -477,6 +495,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
 
   function showAction(action, roundId, responseId) {
     return runRoomMutation(() => {
+      if (dismissedActive || menuOpen) return;
       const latest = readCardGames();
       if (activeRoomRound()?.id !== roundId) throw Error("Round changed.");
       const next = applyCardShowAction(latest, action, { roundId, responseId });
@@ -899,6 +918,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     runRoomMutation(() => {
     const latest = readCardGames();
     const round = latest.round;
+    if (pendingExit || failedExitKey) return;
     if (!expectedId || round?.id !== expectedId) { adminStatus.textContent = "Round changed; choose the answer again."; return; }
     const updated = submitRoundAnswer(round, player, answer);
     if (updated === round) {
@@ -913,6 +933,8 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
   }
 
   function openCardMenu() {
+    if (!dismissedActive && activeCardStage(state)) dismissCardStage();
+    else if (failedExitKey) persistRoundExit(failedExitKey);
     foley.play("cardFan");
     menuOpen = true;
     dismissedActive = Boolean(activeCardStage(state));
@@ -955,7 +977,31 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     sync({ ...latest, round, smeemo:null });
     closeHostPanel();
   }));
-  roomButton.addEventListener("click", () => {
+  // Persist the abandonment under the very same lock as submissions/votes.
+  // A newer explicitly started round (or a superseding trivia question) wins.
+  function persistRoundExit(key) {
+    if (!key || pendingExitKey === key) return pendingExit;
+    failedExitKey = null;
+    pendingExitKey = key;
+    const task = withRoomSubmissionLock(() => {
+      const latest = readCardGames();
+      if (activeRoomRound()?.mode === "trivia") return;
+      const next = discardCardRound(latest, key);
+      if (next !== latest) sync(next);
+    }).catch(error => {
+      if (activeCardStage(readCardGames())?.key !== key) return;
+      failedExitKey = key;
+      const message = `Could not end the round: ${error.message || "storage unavailable"} Return to the table to retry.`;
+      adminStatus.textContent = liveStatus.textContent = message;
+      window.alert?.(message);
+    }).finally(() => { if (pendingExit === task) { pendingExit = null; pendingExitKey = null; } });
+    pendingExit = task;
+    return task;
+  }
+
+  function dismissCardStage() {
+    const active = !dismissedActive && activeCardStage(state);
+    const key = active && discardCardRound(state, active.key) !== state ? active.key : failedExitKey;
     impact.stop();
     foley.stop("card-menu-hover");
     foley.stop("cards-motion");
@@ -966,8 +1012,28 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
     smeemoScheduledSignal = "";
     window.clearTimeout(menuTimer);
     menuTimer = 0;
+    menuGeneration++;
+    menuSelection = "";
     layer.hidden = true;
+    content.replaceChildren();
+    answerText.value = "";
+    lastPresentation = { id: null, visible: [], phase: null };
+    shopPresentation = { id: null, revealed: new Set() };
+    smeemoPresentation = { id: null, revealed: new Set() };
+    shopBalanceNodes.clear();
+    return persistRoundExit(key);
+  }
+
+  roomButton.addEventListener("click", () => {
+    const pending = dismissCardStage();
     window.dispatchEvent(new Event("rg:close-card-games"));
+    return pending;
+  });
+  // Physical back/keyboard navigation leaves the camera without clicking ROOM.
+  // Do not discard a shop display or a background round never opened here.
+  window.addEventListener("rg:leave-card-table", () => {
+    const active = !dismissedActive && activeCardStage(state);
+    if (menuOpen || (active && discardCardRound(state, active.key) !== state)) return dismissCardStage();
   });
   window.addEventListener("rg:start-smeemo-after-arrival", ({detail}) => {
     if(!detail?.isCurrent?.())return;
@@ -984,6 +1050,7 @@ import { readPointScores, subscribePointScores, writePointScores, withPointScore
   window.addEventListener("rg:show-card-menu", () => {
     // Repeated table clicks are not permission to interrupt a running game.
     if (!layer.hidden || menuOpen) return;
+    if (failedExitKey) persistRoundExit(failedExitKey);
     menuOpen = true;
     dismissedActive = Boolean(activeCardStage(state));
     renderMenu();

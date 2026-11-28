@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { activeCardStage, cardStageChange } from './card-stage-state.mjs';
+import { activeCardStage, cardStageChange, discardCardRound } from './card-stage-state.mjs';
 import { createShopRound, createQuiplashRound, createSmeemoGame, normalizeCardGamesState, buyShopCard } from './card-games.mjs';
 const decks = { penalty:[{name:'P',price:0}],challenge:[{name:'C',price:0}],instant:[{name:'I',price:0}] };
 test('persisted game is baseline on reload, not a newly started game',()=>{
@@ -54,15 +54,15 @@ function mountUI(saved, initialPoints = {kaz:0,faroe:0,erin:0}) {
   get('#rg-card-games-layer').hidden=true;
   get('#rg-card-games-layer').querySelector=get;
   get('#rg-card-mode').value='shop'; get('#rg-card-player').value='kaz';
-  let data=normalizeCardGamesState(saved), subscriber, pointsSubscriber, balances={...initialPoints}, failPoints=false, failCards=false, deferPoints=false, releasePoints=null;
+  let data=normalizeCardGamesState(saved), subscriber, pointsSubscriber, balances={...initialPoints}, failPoints=false, failCards=false, deferPoints=false, releasePoints=null, deferRoom=false, releaseRoom=null;
   const calls=[], sounds=[], impacts=[], purchases=[], stoppedSounds=[];let impactOptions;
   const listeners=new Map();
   const timers=new Map();let timerId=0;
-  const window={queueMicrotask:fn=>fn(),matchMedia:()=>({matches:true}), clearTimeout(id){timers.delete(id);},setTimeout(fn){timers.set(++timerId,fn);return timerId;},addEventListener:(type,fn)=>listeners.set(type,fn),dispatchEvent(event){calls.push(event.type);listeners.get(event.type)?.(event);}};
+  const window={queueMicrotask:fn=>fn(),matchMedia:()=>({matches:true}), clearTimeout(id){timers.delete(id);},setTimeout(fn){timers.set(++timerId,fn);return timerId;},addEventListener:(type,fn)=>listeners.set(type,fn),dispatchEvent(event){calls.push(event.type);return listeners.get(event.type)?.(event);}};
   class FakeEvent {constructor(type,opts={}){this.type=type;this.detail=opts.detail;}}
   const code=readFileSync(new URL('./card-games-ui.js',import.meta.url),'utf8').replace(/^import\s+[\s\S]*?;\n/gm,'');
-  vm.runInNewContext(code,{audienceReact(){},showBurst(){},voteFlight(){},purchaseFlight(target,buyer,price){purchases.push({target,buyer,price});},requestAnimationFrame:fn=>fn(),...games,applyCardShowAction,activeCardStage,cardStageChange,smeemoImpactTransition,cardStains,stainUrl,mountSmeemoHorror(){},createLightningLayer:()=>({paint(){},clear(){}}),createSmeemoImpact:options=>{impactOptions=options;return {trigger:event=>impacts.push(event),stop(){}}},window,document:{querySelector:get,querySelectorAll:()=>[],createElement:()=>new FakeElement(),addEventListener(){}},CustomEvent:FakeEvent,Event:FakeEvent,readCardGames:()=>data,writeCardGames:value=>failCards?{state:data,persisted:false}:({state:data=normalizeCardGamesState(value),persisted:true}),subscribeLiveTrivia:()=>{},writeLiveTriviaDraft:()=>true,activeRoomRound:()=>data.round,subscribeCardGames:fn=>{subscriber=fn;fn(data);},readPointScores:()=>({...balances}),writePointScores:value=>{if(failPoints)return {scores:{...balances},persisted:false};balances={...value};pointsSubscriber?.({...balances});return {scores:{...balances},persisted:true};},subscribePointScores:fn=>{pointsSubscriber=fn;fn({...balances});},withPointScoresLock:async fn=>{if(deferPoints){deferPoints=false;await new Promise(resolve=>{releasePoints=resolve;});}return fn();},mountCardRoom:()=>({publish(){}}),foley:{start(channel,cue){sounds.push(cue);},stop(channel){stoppedSounds.push(channel);},play(cue){sounds.push(cue);}},withRoomSubmissionLock:async fn=>fn()});
-  return {get,calls,sounds,impacts,purchases,stoppedSounds,impactOptions,window,get state(){return data;},get balances(){return balances;},setPoints(next){balances={...next};pointsSubscriber({...balances});},blockPoints(value){failPoints=value;},deferPointLock(){deferPoints=true;},releasePointLock(){releasePoints?.();},blockCards(value){failCards=value;},update(next){data=normalizeCardGamesState(next);subscriber(data);},flushTimers(){for(const [id,fn] of [...timers]){timers.delete(id);fn();}}};
+  vm.runInNewContext(code,{audienceReact(){},showBurst(){},voteFlight(){},purchaseFlight(target,buyer,price){purchases.push({target,buyer,price});},requestAnimationFrame:fn=>fn(),...games,applyCardShowAction,activeCardStage,cardStageChange,discardCardRound,smeemoImpactTransition,cardStains,stainUrl,mountSmeemoHorror(){},createLightningLayer:()=>({paint(){},clear(){}}),createSmeemoImpact:options=>{impactOptions=options;return {trigger:event=>impacts.push(event),stop(){}}},window,document:{querySelector:get,querySelectorAll:()=>[],createElement:()=>new FakeElement(),addEventListener(){}},CustomEvent:FakeEvent,Event:FakeEvent,readCardGames:()=>data,writeCardGames:value=>failCards?{state:data,persisted:false}:({state:data=normalizeCardGamesState(value),persisted:true}),subscribeLiveTrivia:()=>{},writeLiveTriviaDraft:()=>true,activeRoomRound:()=>data.round,subscribeCardGames:fn=>{subscriber=fn;fn(data);},readPointScores:()=>({...balances}),writePointScores:value=>{if(failPoints)return {scores:{...balances},persisted:false};balances={...value};pointsSubscriber?.({...balances});return {scores:{...balances},persisted:true};},subscribePointScores:fn=>{pointsSubscriber=fn;fn({...balances});},withPointScoresLock:async fn=>{if(deferPoints){deferPoints=false;await new Promise(resolve=>{releasePoints=resolve;});}return fn();},mountCardRoom:()=>({publish(){}}),foley:{start(channel,cue){sounds.push(cue);},stop(channel){stoppedSounds.push(channel);},play(cue){sounds.push(cue);}},withRoomSubmissionLock:async fn=>{if(deferRoom){deferRoom=false;await new Promise(resolve=>{releaseRoom=resolve;});}return fn();}});
+  return {get,calls,sounds,impacts,purchases,stoppedSounds,impactOptions,window,get state(){return data;},get balances(){return balances;},setPoints(next){balances={...next};pointsSubscriber({...balances});},blockPoints(value){failPoints=value;},deferPointLock(){deferPoints=true;},releasePointLock(){releasePoints?.();},blockCards(value){failCards=value;},deferRoomLock(){deferRoom=true;},releaseRoomLock(){releaseRoom?.();},update(next){data=normalizeCardGamesState(next);subscriber(data);},flushTimers(){for(const [id,fn] of [...timers]){timers.delete(id);fn();}}};
 }
 test('restored shop stays hidden, menu has only three choices, and choosing Shop starts fresh',async()=>{
   const round=createShopRound(decks);
@@ -226,7 +226,7 @@ test('Smeemo image is present only for the revealed winning card',()=>{
   assert.ok(findClass(content,'rg-smeemo-berry-mark').src.endsWith('/smeemo-card-mark.png'));
 });
 
-test('Smeemo impacts follow committed starts and reveals, not phase changes, echoes or dismissed updates',()=>{
+test('Smeemo impacts follow committed starts and reveals, not phase changes, echoes or dismissed updates',async()=>{
   let game=createSmeemoGame();const ui=mountUI({});ui.update({smeemo:game});
   assert.deepEqual(ui.impacts,[{kind:'start',count:0}]);
   for(const phase of ['preview','stacking','stacked','dealing']) {game=games.advanceSmeemoPhase(game,phase);ui.update({smeemo:game});}
@@ -235,7 +235,7 @@ test('Smeemo impacts follow committed starts and reveals, not phase changes, ech
   assert.deepEqual(ui.impacts.at(-1),{kind:'reveal',count:1});
   const board=ui.get('#rg-card-games-content').children[0];ui.update({smeemo:game});
   assert.equal(ui.get('#rg-card-games-content').children[0],board);assert.equal(ui.impacts.length,2);
-  ui.get('#rg-card-room').click();ui.update({smeemo:games.drawSmeemoCard(game,game.cards.find(c=>c.smeemo).id).game});assert.equal(ui.impacts.length,2);
+  await ui.get('#rg-card-room').click();assert.equal(ui.state.smeemo,null);assert.equal(ui.impacts.length,2);
   const restored=mountUI({smeemo:game});assert.equal(restored.impacts.length,0);
 });
 
@@ -313,4 +313,63 @@ test('Smeemo presentation does not animate a failed write or remote rollback, an
  ui.blockCards(false);ui.get('.rg-preview').classList.add('is-freecam');await button.click();assert.equal(ui.state.smeemo.draws.length,0);
  ui.get('.rg-preview').classList.remove('is-freecam');await button.click();assert.equal(ui.state.smeemo.draws.length,1);
  ui.flushTimers();ui.update({smeemo:game});assert.equal(board.dataset.pulse,undefined);assert.equal(button.disabled,false);assert.equal(button.classList.contains('is-newly-revealed'),false);
+});
+
+test('leaving either competitive card game discards every phase, keeps decks and points, and starts a new ID on return', async()=>{
+ for (const mode of ['red-handed','quiplash']) for (const phase of ['submissions','reveal','voting','results']) {
+  const decks={evidence:Array.from({length:15},(_,i)=>`Evidence ${i}`),suspects:['Suspect'],quiplash:['Prompt']};
+  const points={faroe:115,erin:207,kaz:93};
+  const ui=mountUI({decks},points);
+  let round=mode==='red-handed'?games.createRedHandedRound(decks.evidence,decks.suspects):createQuiplashRound(decks.quiplash);
+  const players=phase==='submissions'?['faroe']:games.CARD_GAME_PLAYERS;
+  for(const p of players)round=games.submitRoundAnswer(round,p,mode==='red-handed'?round.hands[p][0]:`answer-${p}`);
+  if(phase==='voting'||phase==='results')round=games.revealCardAnswers(round,true);
+  if(phase==='results')round=games.revealAudienceResults(games.recordAudienceVote(round,round.responses[0].id));
+  assert.equal(round.phase,phase);ui.update({round,decks});
+  const before=JSON.stringify(ui.state.decks);
+  const exit=phase==='submissions'?ui.get('#rg-card-room').click():ui.window.dispatchEvent({type:'rg:leave-card-table'});
+  assert.equal(ui.get('#rg-card-games-layer').hidden,true);
+  assert.equal(ui.get('#rg-card-games-content').children.length,0);
+  await exit;
+  assert.equal(ui.state.round,null);assert.equal(JSON.stringify(ui.state.decks),before);assert.deepEqual(ui.balances,points);
+  ui.window.dispatchEvent({type:'rg:show-card-menu'});
+  const grid=ui.get('#rg-card-games-content').children[0];grid.children[mode==='red-handed'?0:1].click();ui.flushTimers();await Promise.resolve();
+  assert.equal(ui.state.round.mode,mode);assert.notEqual(ui.state.round.id,round.id);
+  assert.equal(ui.state.round.phase,'submissions');assert.ok(Object.values(ui.state.round.submissions).every(v=>v===null));
+  assert.equal(ui.state.round.responses.length,0);assert.deepEqual(ui.balances,points);
+ }
+});
+
+test('a queued exit cannot delete a newer explicit console round',async()=>{
+ const ui=mountUI({});const old=createQuiplashRound(['Old']);ui.update({round:old});
+ ui.deferRoomLock();const exit=ui.window.dispatchEvent({type:'rg:leave-card-table'});
+ const fresh=createQuiplashRound(['New']);ui.update({round:fresh});ui.releaseRoomLock();await exit;
+ assert.equal(ui.state.round.id,fresh.id);assert.equal(ui.get('#rg-card-games-layer').hidden,false);
+});
+
+test('leaving the menu cancels a pending card selection; existing shop purchases are not discarded',async()=>{
+ const ui=mountUI({decks:{quiplash:['Prompt']}});ui.window.dispatchEvent({type:'rg:show-card-menu'});
+ ui.get('#rg-card-games-content').children[0].children[1].click();ui.window.dispatchEvent({type:'rg:leave-card-table'});ui.flushTimers();await Promise.resolve();assert.equal(ui.state.round,null);
+ const shop=createShopRound(decks);ui.update({round:shop});ui.window.dispatchEvent({type:'rg:leave-card-table'});assert.equal(ui.state.round.id,shop.id);
+});
+
+test('failed exit is retried before the menu permits a fresh selection',async()=>{
+ const ui=mountUI({});const round=createQuiplashRound(['Old']);ui.update({round,decks:{quiplash:['New']}});ui.blockCards(true);
+ await ui.get('#rg-card-room').click();assert.equal(ui.state.round.id,round.id);assert.match(ui.get('#rg-card-live-status').textContent,/Could not end/);
+ ui.blockCards(false);ui.window.dispatchEvent({type:'rg:show-card-menu'});const grid=ui.get('#rg-card-games-content').children[0];
+ for(let i=0;i<8;i++)await Promise.resolve();assert.equal(ui.state.round,null);assert.ok(grid.children.every(b=>!b.disabled));
+ grid.children[1].click();ui.flushTimers();await Promise.resolve();assert.notEqual(ui.state.round.id,round.id);
+});
+
+test('production exit wiring includes navigation, pause and Dice, not temporary orbit or a same-table transition',()=>{
+ const src=readFileSync(new URL('./ramblegamble.js',import.meta.url),'utf8');
+ assert.match(src,/if \(currentView.kind === "card-table" && nextView.kind !== "card-table"\) \{\s*window.dispatchEvent\(new Event\("rg:leave-card-table"\)\)/);
+ assert.match(src,/function showPauseMenu\(\) \{[\s\S]{0,240}rg:leave-card-table/);
+ assert.match(src,/if \(open && currentView.kind === "card-table"\) window.dispatchEvent\(new Event\("rg:leave-card-table"\)\)/);
+});
+
+test('the exit control clearly describes round abandonment and score preservation',()=>{
+ const ui=mountUI({});ui.update({round:createQuiplashRound(['Prompt'])});
+ const button=ui.get('#rg-card-room');assert.equal(button.textContent,'END ROUND');assert.match(button.attributes['aria-label'],/points and stars are kept/);
+ ui.update({round:createShopRound(decks)});assert.equal(button.textContent,'ROOM');
 });

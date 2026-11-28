@@ -10,7 +10,7 @@ import { createFloatingSky } from "./floating-sky.mjs?v=sky-solid-lettering-2026
 import { createStageDance, createDanceClock, createDanceIntensitySampler, dancePose } from "./stage-dance.mjs?v=music-intensity-20261128-v1";
 import { createSoundtrack, soundtrackFor } from "./soundtrack.mjs?v=freecam-music-20261128-v1";
 import { createVipInteriorTracker, sampleMusicZoneGain } from "./music-zones.mjs?v=music-zone-fade-20261128-v1";
-import { createMenuMarquee } from "./menu-marquee.mjs?v=karaoke-parallel-20261128-v2";
+import { createMenuMarquee } from "./menu-marquee.mjs?v=karaoke-notes-20261128-v1";
 import { createFocusArrow, focusArrowKey, projectedArrowTarget, characterArrowTarget } from "./focus-arrow.mjs?v=smeemo-reveal-20261127-v1";
 import { HAZEL_SOURCE, hazelBalconyPose, hazelCameraFrame } from "./hazel-balcony.mjs?v=hazel-seat-20261128-v1";
 import { createSignGlow } from "./sign-glow.mjs?v=neon-focus-20261127-v1";
@@ -1633,6 +1633,10 @@ import {
     hideGameCursor(); lastScenePointer = null;
     const fromExterior = cameraDetached || !!freecam?.active || !!cameraTransition?.fromExterior;
     freecam?.stop();
+    if (currentView.kind === "card-table" && nextView.kind !== "card-table") {
+      window.dispatchEvent(new Event("rg:leave-card-table"));
+      cardMusicMode = "";
+    }
     if(!encounterReturn&&((nextView.kind!=="smeemo-crowd"&&(nextView.kind!=="card-table"||encounter.phase!=="table"))||(nextView.kind==="smeemo-crowd"&&encounter.phase!=="focused")))resetEncounter();
     if(nextView.kind==="smeemo-crowd"&&encounter.phase==="hidden"){
       encounter.focus();smeemoCount.textContent="0/5";preview.dataset.smeemoStep="0";stageShow?.silent(crowdCatAnchor(),performance.now());
@@ -2362,6 +2366,7 @@ import {
   function showPauseMenu() {
     if (pauseMenuOpen) return;
     freecam?.stop();
+    if (currentView.kind === "card-table") window.dispatchEvent(new Event("rg:leave-card-table"));
     pointAwardStinger.cancel();
     resetEncounter();
     stageShow?.reset(currentView.kind==="slot");
@@ -2710,6 +2715,7 @@ import {
   window.addEventListener("rg:dice-mode-state", (event) => {
     const open = Boolean(event.detail?.open);
     if (open === diceModeOpen) return;
+    if (open && currentView.kind === "card-table") window.dispatchEvent(new Event("rg:leave-card-table"));
     if (open) { freecam?.stop(); resetEncounter(); stageShow?.reset(currentView.kind==="slot"); }
     diceModeOpen = open;
     if (open) syncMusic();

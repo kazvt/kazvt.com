@@ -10,6 +10,14 @@ The existing `/rg/` arcade is the host/audience display. Its Card Games host tab
 
 See [PLAYER-SUBMISSIONS.md](PLAYER-SUBMISSIONS.md) for the current all-format submission workflow and private console answer viewer.
 
+## Ending a table round
+
+For Red-Handed, BerryBlast and Smeemo Scramble, **END ROUND** returns to the room and discards the round, including answers, cards, reveal progress and votes. Back navigation, switching to another machine, entering Dice or opening the pause menu from the table do the same. The table menu starts a new round with a fresh ID. Merely orbiting, using freecam, locking the host controls, losing a connection or closing a browser tab is not an explicit round exit. A superseding live trivia question keeps its existing lifecycle; leaving a shop display does not reverse purchases.
+
+The reset uses the existing submission lock and verifies the abandoned round ID against current storage. It never writes the points or stars keys, alters authored decks, reissues invitations or cancels a newly started console round. Connected contestants receive the normal no-active-round snapshot and old submissions are rejected as stale. If persistence fails, the host receives an error and the menu retries before enabling a new selection.
+
+Design references: [Phaser scene shutdown and restart](https://docs.phaser.io/phaser/concepts/scenes), [Unity data persistence between scenes](https://learn.unity.com/tutorial/implement-data-persistence-between-scenes?uv=2021.3), [Nakama authoritative match lifecycle](https://heroiclabs.com/docs/nakama/concepts/multiplayer/authoritative/), [MDN Web Locks](https://developer.mozilla.org/en-US/docs/Web/API/Web_Locks_API), [NN/g user control and freedom](https://www.nngroup.com/articles/user-control-and-freedom/). These are design references, not added dependencies.
+
 ## If live networking fails
 
 Same-origin windows in the same browser profile/storage partition first try a SharedWorker rendezvous with a dedicated MessagePort per connection. This needs no signaling service or ICE and keeps payloads off the rendezvous worker. The existing signed host challenge and per-seat proof still apply, bound to a fresh local channel ID. Different devices/profiles use the pinned PeerJS 1.5.5 browser bundle (jsDelivr with cdnjs fallback) and the public PeerJS Cloud signaling service with WebRTC data channels. These are third-party services; direct peer-to-peer connectivity depends on network/firewall/NAT conditions. No guarantee of availability or relay coverage is made. There is no self-hosted signaling or TURN server and no hidden VPS requirement.
