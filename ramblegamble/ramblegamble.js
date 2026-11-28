@@ -1,5 +1,5 @@
-import { publishPointAward, subscribePointAwards } from "./point-award-events.mjs?v=points-stinger-20261128-v1";
-import { createPointAwardStinger } from "./point-award-stinger.mjs?v=points-stinger-20261128-v1";
+import { publishPointAward, subscribePointAwards } from "./point-award-events.mjs?v=star-stinger-20261128-v1";
+import { createPointAwardStinger } from "./point-award-stinger.mjs?v=star-stinger-20261128-v1";
 import { createShowCredits } from "./show-credits.mjs?v=show-finale-20261128-v1";
 import { createContestantStands } from "./contestant-stands.mjs?v=stand-lift-20261128-v1";
 import { horrorRenderScale, HORROR_FRAME_MS } from "./smeemo-horror.mjs?v=smeemo-arrival-20261128-v1";
@@ -2485,7 +2485,7 @@ import {
   }
 
   const pointAwardStinger=createPointAwardStinger({
-    root:document.getElementById("rg-point-award"),video:document.getElementById("rg-award-video"),
+    root:document.getElementById("rg-point-award"),video:document.getElementById("rg-award-video"),starVideo:document.getElementById("rg-star-award-video"),
     rows:document.getElementById("rg-award-rows"),title:document.getElementById("rg-award-title"),
     status:document.getElementById("rg-award-status"),
     allowed:()=>gameStarted&&!pauseMenuOpen&&!document.documentElement.hasAttribute("data-rg-host-locked"),

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createPointAwardBus,normalizeAwardTotals,POINT_AWARD_KEY,POINT_AWARD_TTL} from './point-award-events.mjs';
-import {createPointAwardStinger,combinePointAwards,POINT_STINGER_URL} from './point-award-stinger.mjs';
+import {createPointAwardStinger,combinePointAwards,POINT_STINGER_URL,STAR_STINGER_URL} from './point-award-stinger.mjs';
 const event=(id,at,totals)=>({type:'point-award',id,at,totals});
 function transport(){
   let time=100000,id=0;const channels=[],targets=[],storage=new Map();
@@ -41,10 +41,11 @@ class Element extends EventTarget{
 }
 function fixture(){
  let now=1000,timers=0;const scheduled=new Map(),flags={allowed:true,blocked:false,muted:false,reduced:false};
- const root=new Element(),rows=new Element(),title=new Element(),status=new Element(),video=new Element();let attempts=0,loads=0,play=()=>Promise.resolve();
+ const root=new Element(),rows=new Element(),title=new Element(),status=new Element(),video=new Element(),starVideo=new Element();let attempts=0,loads=0,play=()=>Promise.resolve();
  Object.assign(video,{currentTime:0,ended:false,paused:true,muted:false,load(){loads++;},pause(){this.paused=true;},play(){attempts++;this.paused=false;return play();}});
- const ctrl=createPointAwardStinger({root,video,rows,title,status,...Object.fromEntries(Object.keys(flags).map(key=>[key,()=>flags[key]])),doc:{createElement:()=>new Element()},clock:()=>now,wall:()=>now,setTimer:fn=>{scheduled.set(++timers,fn);return timers;},clearTimer:id=>scheduled.delete(id)});
- return {ctrl,root,rows,title,status,video,flags,get attempts(){return attempts;},get loads(){return loads;},setPlay:fn=>play=fn,send:totals=>ctrl.enqueue(event(`e${now}`,now,totals)),advance:ms=>{now+=ms;ctrl.step();},flush:async()=>{for(let i=0;i<6;i++)await Promise.resolve();},scheduled};
+ Object.assign(starVideo,{currentTime:0,ended:false,paused:true,muted:false,load(){},pause(){this.paused=true;},play(){this.paused=false;return play();}});
+ const ctrl=createPointAwardStinger({root,video,starVideo,rows,title,status,...Object.fromEntries(Object.keys(flags).map(key=>[key,()=>flags[key]])),doc:{createElement:()=>new Element()},clock:()=>now,wall:()=>now,setTimer:fn=>{scheduled.set(++timers,fn);return timers;},clearTimer:id=>scheduled.delete(id)});
+ return {ctrl,root,rows,title,status,video,starVideo,flags,get attempts(){return attempts;},get loads(){return loads;},setPlay:fn=>play=fn,send:totals=>ctrl.enqueue(event(`e${now}`,now,totals)),sendStar:totals=>ctrl.enqueue({...event(`s${now}`,now,totals),type:"star-award"}),advance:ms=>{now+=ms;ctrl.step();},flush:async()=>{for(let i=0;i<6;i++)await Promise.resolve();},scheduled};
 }
 test('preloads once, displays chip before amount, actual ended starts queued batch, and never steals focus',async()=>{
  const f=fixture();f.ctrl.prepare();f.ctrl.prepare();assert.equal(f.video.src,POINT_STINGER_URL);assert.equal(f.loads,1);f.send({erin:12500});await f.flush();assert.equal(f.video.hidden,false);assert.equal(f.title.hidden,true);assert.equal(f.root.hidden,false);assert.match(f.status.textContent,/erin: \+12,500 points/);const row=f.rows.children[0];assert.equal(row.children[0].textContent,'ERIN');assert.match(row.children[1].children[0].src,/points-chip\.png$/);assert.equal(row.children[1].children[1].textContent,'+12,500');
@@ -65,4 +66,27 @@ test('hidden/blocked queues expire; lock and pause cancel immediately, late medi
 });
 test('Dice top-layer relocation moves both live region and video without replay; pending awards still display',async()=>{
  const f=fixture(),parent=new Element();f.send({faroe:4});await f.flush();f.flags.blocked=true;f.send({erin:2});f.ctrl.relocate(parent);assert.equal(f.root.parentNode,parent);assert.equal(f.status.parentNode,parent);assert.equal(f.root.hidden,true);f.flags.blocked=false;f.ctrl.step();await f.flush();assert.match(f.status.textContent,/erin: \+2 points/);assert.equal(f.attempts,2);f.ctrl.dispose();
+});
+
+test('star events use same deduplicated transient transport and never replay',()=>{
+ const t=transport(),a=t.make(),b=t.make(),seen=[];b.bus.subscribe(e=>seen.push(e));
+ a.bus.publish({faroe:1},'star-award');a.bus.publish({erin:5});
+ assert.deepEqual(seen.map(e=>e.type),['star-award','point-award']);
+ b.receive(JSON.parse(t.storage.get(POINT_AWARD_KEY)));assert.equal(seen.length,2);
+ a.bus.dispose();b.bus.dispose();
+});
+test('star and points share ordered playback without mixing currencies or audio',async()=>{
+ const f=fixture();f.ctrl.prepare();assert.equal(f.starVideo.src,STAR_STINGER_URL);
+ f.sendStar({faroe:1});await f.flush();assert.equal(f.root.dataset.award,'star');assert.equal(f.starVideo.hidden,false);assert.equal(f.video.hidden,true);assert.match(f.status.textContent,/faroe: \+1 stars/);
+ f.send({erin:50});f.sendStar({kaz:2});f.sendStar({kaz:3});
+ f.starVideo.ended=true;f.starVideo.dispatchEvent(new Event('ended'));f.starVideo.ended=false;await f.flush();
+ assert.equal(f.root.dataset.award,'point');assert.equal(f.starVideo.paused,true);assert.equal(f.starVideo.hidden,true);assert.equal(f.video.hidden,false);assert.match(f.status.textContent,/erin: \+50 points/);
+ f.video.ended=true;f.video.dispatchEvent(new Event('ended'));f.video.ended=false;await f.flush();
+ assert.equal(f.root.dataset.award,'star');assert.match(f.status.textContent,/kaz: \+5 stars/);assert.equal(f.video.paused,true);
+ f.flags.muted=true;f.starVideo.currentTime=.5;f.advance(100);assert.equal(f.starVideo.muted,true);
+ f.ctrl.cancel();assert.equal(f.starVideo.paused,true);assert.equal(f.root.hidden,true);f.ctrl.dispose();
+});
+test('star reduced motion and decode failure show correct fallback with star sprite',async()=>{
+ for(const mode of ['reduced','error']){const f=fixture();if(mode==='reduced')f.flags.reduced=true;else f.setPlay(()=>Promise.reject(Error('decode')));
+ f.sendStar({erin:2});await f.flush();assert.equal(f.starVideo.hidden,true);assert.equal(f.title.textContent,'STAR EARNED!');assert.equal(f.title.hidden,false);assert.match(f.rows.children[0].children[1].children[0].src,/star\.png$/);assert.match(f.status.textContent,/erin: \+2 stars/);f.ctrl.dispose();}
 });

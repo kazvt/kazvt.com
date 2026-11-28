@@ -1,4 +1,4 @@
-import { publishPointAward } from "/ramblegamble/point-award-events.mjs?v=points-stinger-20261128-v1";
+import { publishPointAward, publishStarAward } from "/ramblegamble/point-award-events.mjs?v=star-stinger-20261128-v1";
 import { AUDIENCE_KEY, AUDIENCE_MODES, readAudienceMode, writeAudienceMode } from "/ramblegamble/audience-state.mjs?v=show-energy-20261127-v1";
 import { mountCommandCompletion } from "/ramblegamble/console-completion.mjs?v=player-stats-20261127-v1";
 import { applyCardShowAction } from "/ramblegamble/card-show-actions.mjs?v=card-polish-20261127-v1";
@@ -151,7 +151,7 @@ async function execute(rawCommand) {
       } else return;
       const result = write(latest);
       if (!result.persisted) throw Error(`Could not save ${unit}; no update committed.`);
-      if (!isStars && parsed.action === "add") publishPointAward({[parsed.name]:parsed.amount});
+      if (parsed.action === "add") (isStars ? publishStarAward : publishPointAward)({[parsed.name]:parsed.amount});
       addLine(parsed.name ? `${parsed.name}: ${result.scores[parsed.name]}${suffix}${parsed.action === "add" ? ` (+${parsed.amount})` : parsed.action === "remove" ? ` (-${removed})` : ""}` : `${isStars ? "Stars" : "Scores"} reset - ${formatScores(result.scores)}`);
     });
   } catch (error) { addLine(error.message, "terminal-error"); }

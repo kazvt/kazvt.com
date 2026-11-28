@@ -18,14 +18,14 @@ export function createPointAwardBus({target=globalThis.window, getStorage=()=>gl
   const subscribers=new Set(), seen=new Map();
   function receive(value) {
     const time=now();
-    if (value?.type !== 'point-award' || typeof value.id !== 'string' || !value.id || value.id.length>128 ||
+    if (!['point-award','star-award'].includes(value?.type) || typeof value.id !== 'string' || !value.id || value.id.length>128 ||
         !Number.isFinite(value.at) || value.at<time-POINT_AWARD_TTL || value.at>time+5000) return;
     for (const [id,at] of seen) if (at<time-POINT_AWARD_TTL-5000) seen.delete(id);
     if(seen.has(value.id)) return;
     const totals=normalizeAwardTotals(value.totals);
     if(!Object.keys(totals).length) return;
     seen.set(value.id,time);
-    for(const fn of [...subscribers]) { try{fn({id:value.id,at:value.at,totals:{...totals}});}catch(error){console.error('Point award presentation failed:',error);} }
+    for(const fn of [...subscribers]) { try{fn({type:value.type,id:value.id,at:value.at,totals:{...totals}});}catch(error){console.error('Point award presentation failed:',error);} }
   }
   function onMessage(event){receive(event.data);}
   function onStorage(event){if(event.key===POINT_AWARD_KEY&&event.newValue){try{receive(JSON.parse(event.newValue));}catch{}}}
@@ -35,11 +35,11 @@ export function createPointAwardBus({target=globalThis.window, getStorage=()=>gl
     try{channel=makeChannel(POINT_AWARD_KEY);channel?.addEventListener('message',onMessage);}catch{}
     target?.addEventListener('storage',onStorage);
   }
-  function publish(value){
+  function publish(value,type='point-award'){
     try {
       const totals=normalizeAwardTotals(value);
       if(!Object.keys(totals).length)return;
-      const event={type:'point-award',id:makeId(),at:now(),totals};
+      const event={type,id:makeId(),at:now(),totals};
       connect();receive(event);
       // Both transports are used for resilience; the ID deduplicates delivery.
       try{getStorage().setItem(POINT_AWARD_KEY,JSON.stringify(event));}catch{}
@@ -52,4 +52,5 @@ export function createPointAwardBus({target=globalThis.window, getStorage=()=>gl
 }
 const bus=createPointAwardBus();
 export const publishPointAward=bus.publish;
+export const publishStarAward=totals=>bus.publish(totals,'star-award');
 export const subscribePointAwards=bus.subscribe;

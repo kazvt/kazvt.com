@@ -48,3 +48,10 @@
  .rg-point-award:not(.is-video) .rg-award-row.is-long .rg-award-value{font-size:12px;}
  .rg-point-award:not(.is-video) .rg-award-value img{width:17px;}
 }
+
+/* Star artwork is a full-screen transparent stinger, not a points card.
+   Stretch to the entire active scene (including the Dice top layer). */
+.rg-point-award.is-video[data-award="star"] .rg-award-frame {width:100%;height:100%;aspect-ratio:auto;transform:none;}
+.rg-point-award.is-video[data-award="star"] .rg-award-video {object-fit:fill;}
+.rg-point-award.is-video[data-award="star"] .rg-award-panel {display:none;}
+.rg-point-award[data-award="star"] .rg-award-value img {clip-path:none;}

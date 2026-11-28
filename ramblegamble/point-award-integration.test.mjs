@@ -89,10 +89,10 @@ test('manual placement payout cancels stale board and preserves pre-placement bo
 import {createStarStore} from './points-store.mjs';
 const STARS='ramblegamble.stars.v1';
 test('real console star commands save independently, serialize, floor at zero, reject overflow and respect lock',async()=>{
-  const f=storageFixture(),lines=[],tasks=[];let locked=false;
+  const f=storageFixture(),lines=[],tasks=[],starAwards=[];let locked=false;
   const starStore=createStarStore({getStorage:()=>f.storage,makeChannel:()=>null,locks:{request(name,fn){assert.equal(name,'ramblegamble.stars.mutation.v1');const next=(tasks.at(-1)||Promise.resolve()).catch(()=>{}).then(fn);tasks.push(next);return next;}}});
   const source=consoleJs.slice(consoleJs.indexOf('async function execute('),consoleJs.indexOf('\nform.addEventListener'));
-  const context={...f,publishPointAward:()=>{},RG_CONTESTANTS,parsePointsCommand,readStarScores:starStore.read,writeStarScores:starStore.write,withStarScoresLock:starStore.withLock,document:{documentElement:{hasAttribute:()=>locked}},addLine:(text,style)=>lines.push({text,style}),formatScores:s=>JSON.stringify(s)};
+  const context={...f,publishPointAward:()=>{},publishStarAward:totals=>starAwards.push(JSON.stringify(totals)),RG_CONTESTANTS,parsePointsCommand,readStarScores:starStore.read,writeStarScores:starStore.write,withStarScoresLock:starStore.withLock,document:{documentElement:{hasAttribute:()=>locked}},addLine:(text,style)=>lines.push({text,style}),formatScores:s=>JSON.stringify(s)};
   runInNewContext(`${source}\nthis.execute=execute`,context);
   assert.deepEqual(starStore.read(),{faroe:0,erin:0,kaz:0});assert.equal(f.storage.getItem(STARS),null);
   await Promise.all([context.execute('star give faroe'),context.execute('stars add faroe 4'),context.execute('stars set erin 2'),context.execute('points add kaz 6')]);
@@ -105,4 +105,5 @@ test('real console star commands save independently, serialize, floor at zero, r
   await context.execute('stars');assert.match(lines.at(-1).text,/Stars - .*"erin":2/);
   await context.execute('stars reset');assert.deepEqual(starStore.read(),{faroe:0,erin:0,kaz:0});assert.deepEqual(f.store.read(),{faroe:100,erin:200,kaz:306});
   await context.execute('stars give erin 4');await context.execute('points reset');assert.equal(starStore.read().erin,4);assert.deepEqual(f.store.read(),{faroe:0,erin:0,kaz:0});
+  assert.deepEqual(starAwards,['{"faroe":1}','{"faroe":4}','{"erin":4}']);
 });
