@@ -99,9 +99,22 @@ def write_json(path, value):
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
 
 
+def load_alignment_model(stable_whisper, model_name, backend, device=None):
+    """Load either Whisper backend through stable-ts without changing the model choice."""
+    options = {'device': device} if device else {}
+    if backend == 'faster-whisper':
+        loader = getattr(stable_whisper, 'load_faster_whisper', None)
+        if loader is None:
+            raise RuntimeError('This stable-ts install lacks Faster-Whisper support; install stable-ts[fw].')
+    else:
+        loader = stable_whisper.load_model
+    return loader(model_name, **options)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--model', default='medium.en', help='Whisper model (small.en for lower-memory CPU, large-v3 for higher accuracy)')
+    parser.add_argument('--backend', choices=('openai', 'faster-whisper'), default='openai', help='Whisper implementation; faster-whisper reuses its Hugging Face model cache')
     parser.add_argument('--device', default=None, help='cpu or cuda; default auto')
     parser.add_argument('--vocals', type=Path, help='Optional untrimmed vocal stem separated from the exact bundled MP3')
     parser.add_argument('--output', type=Path, default=Path('karaoke-alignment'), help='Output directory (does not change game files)')
@@ -121,7 +134,7 @@ def main():
     for filename in ('candidate.json','review.json'):
         (out/filename).unlink(missing_ok=True)
     import stable_whisper
-    model = stable_whisper.load_model(args.model, **({'device':args.device} if args.device else {}))
+    model = load_alignment_model(stable_whisper, args.model, args.backend, args.device)
     print('Independent transcription (no lyric prompt)...', flush=True)
     transcribed = model.transcribe(str(source), language='en', word_timestamps=True, regroup=False).to_dict()
     write_json(out/'transcription.json', transcribed)

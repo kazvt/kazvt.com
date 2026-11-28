@@ -1,5 +1,6 @@
 import importlib.util
 from pathlib import Path
+from types import SimpleNamespace
 import unittest
 
 spec = importlib.util.spec_from_file_location('aligner', Path(__file__).with_name('align-menu-karaoke.py'))
@@ -53,6 +54,24 @@ class AlignmentTests(unittest.TestCase):
         mapped[8] = (token, 8.54, end, prob)
         with self.assertRaises(ValueError):
             a.candidate(self.cues, mapped, self.words)
+
+    def test_uses_cached_faster_whisper_backend(self):
+        calls = []
+        api = SimpleNamespace(
+            load_model=lambda *args, **kwargs: calls.append(('openai', args, kwargs)),
+            load_faster_whisper=lambda *args, **kwargs: calls.append(('faster', args, kwargs)),
+        )
+        a.load_alignment_model(api, 'small.en', 'faster-whisper', 'cuda')
+        self.assertEqual(calls, [('faster', ('small.en',), {'device': 'cuda'})])
+
+    def test_openai_backend_preserves_auto_device_default(self):
+        calls = []
+        api = SimpleNamespace(
+            load_model=lambda *args, **kwargs: calls.append(('openai', args, kwargs)),
+            load_faster_whisper=lambda *args, **kwargs: calls.append(('faster', args, kwargs)),
+        )
+        a.load_alignment_model(api, 'medium.en', 'openai')
+        self.assertEqual(calls, [('openai', ('medium.en',), {})])
 
 
 if __name__ == '__main__':

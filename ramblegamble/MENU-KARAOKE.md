@@ -12,7 +12,15 @@ The cue module is **revised but provisional**, not a verified vocal transcriptio
 
 The latest delay was not a verified word-by-word alignment. A fresh PocketSphinx run on the actual final MP3 (including a center-filtered version) did not recover reliable chorus anchors, and network/model downloads are unavailable in the analysis environment. The existing cue sheet is therefore deliberately left unchanged in this tooling patch. Do not treat an unverified timing estimate as a correction.
 
-Run on an Internet-connected machine with Python 3.10–3.12, FFmpeg and sufficient RAM, from the project root. This installs only an isolated authoring environment, not a website dependency. On Debian/Ubuntu, install `ffmpeg` and `python3-venv` if needed:
+Run on an Internet-connected machine with Python 3.10–3.12, FFmpeg and sufficient RAM, from the project root. This installs only an isolated authoring environment, not a website dependency. On Windows, the Faster-Whisper Python package and its `small.en` model are already available in this machine's Python 3.10/Hugging Face cache, so use a virtual environment that can reuse those installed packages:
+
+```powershell
+py -3.10 -m venv --system-site-packages "$env:LOCALAPPDATA\RambleGambleKaraoke\venv"
+& "$env:LOCALAPPDATA\RambleGambleKaraoke\venv\Scripts\python.exe" -m pip install "stable-ts[fw]"
+& "$env:LOCALAPPDATA\RambleGambleKaraoke\venv\Scripts\python.exe" ramblegamble\tools\align-menu-karaoke.py --backend faster-whisper --model small.en --device cuda --output "$env:LOCALAPPDATA\RambleGambleKaraoke\alignment"
+```
+
+For other environments, install `ffmpeg` and `python3-venv` if needed on Debian/Ubuntu, then:
 
 ```sh
 python3 -m venv .karaoke-venv
@@ -22,9 +30,9 @@ python3 -m venv .karaoke-venv
 
 If memory is limited, use `--model small.en`; for a compatible GPU, `--model large-v3 --device cuda`. The model downloads on first run. If the mix masks the voices, optionally separate the original MP3 with Demucs in a compatible environment and pass the untrimmed, time-aligned vocal stem with `--vocals /path/to/vocals.wav`. Do not use a differently edited mix; the tool verifies the bundled MP3 hash and checks stem duration, but duration alone cannot establish the stem's sample origin.
 
-The tool runs unprompted speech-to-text and then forced word alignment of the exact 240 lyric tokens, preserves their original spelling, reconstructs the instrumental intervals from the aligned words, and writes raw `transcription.json`, `forced-alignment.json`, `review.json`, and (only if structural validation passes) `candidate.json` under `karaoke-alignment/`. It rejects collapsed known instrumental breaks, missing/overlapping words and a mismatched source recording. `review.json` lists independently recognized words within 0.6 s, low probabilities and unusually long words for each phrase. These are diagnostics, not proof of synchronization; sung backing vocals, repeated phrases and the scat ending can confuse Whisper. If validation fails, retain the raw JSON for diagnosis; no live cue changes are made.
+The tool runs unprompted speech-to-text and then forced word alignment of the exact 240 lyric tokens, preserves their original spelling, reconstructs the instrumental intervals from the aligned words, and writes raw `transcription.json`, `forced-alignment.json`, `review.json`, and (only if structural validation passes) `candidate.json` under the requested output directory. `--backend faster-whisper` reuses an existing Faster-Whisper model cache; `--backend openai` uses the standard Whisper backend. It rejects collapsed known instrumental breaks, missing/overlapping words and a mismatched source recording. `review.json` lists independently recognized words within 0.6 s, low probabilities and unusually long words for each phrase. These are diagnostics, not proof of synchronization; sung backing vocals, repeated phrases and the scat ending can confuse Whisper. If validation fails, retain the raw JSON for diagnosis; no live cue changes are made.
 
-Open `/ramblegamble/tools/menu-karaoke-timing.html`, choose **Import Whisper candidate**, select `candidate.json`, listen and verify flagged phrases, then **Apply timing to this browser** and reload the game. Use the editor export button for distributing the verified timings. The import checks the recording identity and the exact lyrics/sections; it never applies automatically. Source: https://github.com/jianfch/stable-ts (documented `load_model`, `transcribe`, `align`). The conversion and validation logic was tested locally against synthetic word timestamps, but the neural model itself could not be run here.
+Open `/ramblegamble/tools/menu-karaoke-timing.html`, choose **Import Whisper candidate**, select `candidate.json`, listen and verify flagged phrases, then **Apply timing to this browser** and reload the game. Use the editor export button for distributing the verified timings. The import checks the recording identity and the exact lyrics/sections; it never applies automatically. Source: https://github.com/jianfch/stable-ts (documented `load_model`, `load_faster_whisper`, `transcribe`, and `align`). The conversion and validation logic was tested locally against synthetic word timestamps; an alignment candidate must still be reviewed by listening before use.
 
 ## Calibrate without changing gameplay
 
