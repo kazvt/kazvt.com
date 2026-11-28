@@ -110,7 +110,8 @@ export function createMenuKaraoke({root,menu,theme,doc=document,win=window,cues}
   }
   function makeWord(word,row,nodes){
     const n=doc.createElement('span'),ink=doc.createElement('span');n.className='rg-karaoke-word';n.dataset.word=word;
-    ink.className='rg-karaoke-ink';ink.textContent=word;ink.dataset.word=word;n.append(ink);n.style.setProperty('--sweep','0%');row.append(n);nodes.push(n);
+    const display=word.replace(/^[([{]+/,'').replace(/[)\]}]+$/,'');
+    ink.className='rg-karaoke-ink';ink.textContent=display;ink.dataset.word=display;n.append(ink);n.style.setProperty('--sweep','0%');row.append(n);nodes.push(n);
   }
   function populateLead(cue){
     lead.replaceChildren();leadNodes=[];
@@ -131,7 +132,7 @@ export function createMenuKaraoke({root,menu,theme,doc=document,win=window,cues}
       n.style.setProperty('--sweep',active?`${(progress*100).toFixed(1)}%`:t>=w[2]?'100%':'0%');
       n.style.setProperty('--sx','1');n.style.setProperty('--sy','1');
     }
-    if(wordIndex<0)return null;
+    if(wordIndex<0||wordIndex>=words.length||wordIndex>=nodes.length)return null;
     const n=nodes[wordIndex],a=anchors[wordIndex],b=anchors[wordIndex+1],pose=reduced?{sx:1,sy:1}:karaokeWordPose(progress);
     if(a?.w>0)pose.sx=Math.min(pose.sx,1+a.h*.14/a.w);
     n.style.setProperty('--sx',pose.sx.toFixed(4));n.style.setProperty('--sy',pose.sy.toFixed(4));
